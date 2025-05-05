@@ -1,0 +1,40 @@
+export const majors = [
+  { value: "Computer Science", label: "វិទ្យាសាស្ត្រកុំព្យូទ័រ" },
+  { value: "Food Technology", label: "បច្ចេកវិទ្យាអាហារ" },
+  { value: "Crop Science", label: "វិទ្យាសាស្រ្តដំណាំ" },
+  { value: "Electrical Technology", label: "បច្ចេកវិទ្យាអគ្គិសនី" },
+  { value: "Animal Science", label: "វិទ្យាសាស្រ្តសត្វ" },
+  {
+    value: "Animal Science (General)",
+    label: "វិទ្យាសាស្រ្តសត្វ​​ (អប់រំបច្ចេកទេស)",
+  },
+  { value: "Mechanical Technology", label: "បច្ចេកវិទ្យយានកម្ម" },
+  { value: "Business Computer", label: "កុំព្យូទ័រសម្រាប់អាជីវកម្ម" },
+  {
+    value: "Business Technology and Innovation",
+    label: "បច្ចេកវិទ្យា និងនវានុវត្តន៍ក្នុងអាជីវកម្ម",
+  },
+];
+
+export const degrees = [
+  { value: "Bachelor's Degree", label: "Bachelor's Degree" },
+  { value: "Associate Degree", label: "Associate's Degree" },
+];
+
+export const years = [
+  { value: "2023", label: "2023" },
+  { value: "2024", label: "2024" },
+  { value: "2025", label: "2025" },
+  { value: "2026", label: "2026" },
+  { value: "2027", label: "2027" },
+  { value: "2028", label: "2028" },
+  { value: "2029", label: "2029" },
+  { value: "2030", label: "2030" },
+];
+
+export const yearLevels = [
+  { value: 1, label: "ឆ្នាំទី 1" },
+  { value: 2, label: "ឆ្នាំទី 2" },
+  { value: 3, label: "ឆ្នាំទី 3" },
+  { value: 4, label: "ឆ្នាំទី 4" },
+];
