@@ -1,3 +1,4 @@
+//Major 
 export const majors = [
   { value: "Computer Science", label: "វិទ្យាសាស្ត្រកុំព្យូទ័រ" },
   { value: "Food Technology", label: "បច្ចេកវិទ្យាអាហារ" },
@@ -38,3 +39,9 @@ export const yearLevels = [
   { value: 3, label: "ឆ្នាំទី 3" },
   { value: 4, label: "ឆ្នាំទី 4" },
 ];
+
+export const status = [
+  { value: "ACTIVE", label: "Active" },
+  { value: "INACTIVE", label: "Inactive" },
+]
+

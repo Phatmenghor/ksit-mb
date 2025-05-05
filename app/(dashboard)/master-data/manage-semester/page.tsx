@@ -6,7 +6,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import ManageSemster from "@/components/dashboard/master-data/semester-table";
+import ManageSemster from "@/components/dashboard/master-data/manage-semester/semester-table";
 
 export default function ManageSemesterPage() {
   return (

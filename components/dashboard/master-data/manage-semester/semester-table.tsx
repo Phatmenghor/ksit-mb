@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -17,50 +19,79 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
+import { SemesterFormData } from "@/model/semester/semester-model";
+import { SemesterModal } from "./semester-form-modal";
 
 export default function ManageSemster() {
-  const classes = [
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [initialData, setInitialData] = useState<SemesterFormData | undefined>(
+    undefined
+  );
+
+  const [semsters, setSemesters] = useState<SemesterFormData[]>([
     {
       id: 1,
-      classCode: "25401",
-      major: "បរិញ្ញាបត្រ",
-      degree: "Associate Degree",
-      yearLevel: "3532",
-      academyYear: "2025",
+      Semester: 1,
+      startSemester: "2025-01-01",
+      endSemester: "2025-06-01",
+      academicYear: "2025",
+      status: "active",
     },
     {
       id: 2,
-      classCode: "25403",
-      major: "បរិញ្ញាបត្រ",
-      degree: "Bachelor's Degree",
-      yearLevel: "3532",
-      academyYear: "2025",
+      Semester: 2,
+      startSemester: "2025-07-01",
+      endSemester: "2025-12-01",
+      academicYear: "2025",
+      status: "active",
     },
     {
       id: 3,
-      classCode: "252401",
-      major: "បរិញ្ញាទូទៅ",
-      degree: "Associate Degree",
-      yearLevel: "3532",
-      academyYear: "2025",
+      Semester: 1,
+      startSemester: "2025-01-01",
+      endSemester: "2025-06-01",
+      academicYear: "2025",
+      status: "inactive",
     },
     {
       id: 4,
-      classCode: "252403",
-      major: "បរិញ្ញាទូទៅ",
-      degree: "Bachelor's Degree",
-      yearLevel: "3532",
-      academyYear: "2025",
+      Semester: 2,
+      startSemester: "2025-07-01",
+      endSemester: "2025-12-01",
+      academicYear: "2025",
+      status: "inactive",
     },
     {
       id: 5,
-      classCode: "254010",
-      major: "បរិញ្ញាបត្រ",
-      degree: "Associate Degree",
-      yearLevel: "3532",
-      academyYear: "2025",
+      Semester: 1,
+      startSemester: "2025-01-01",
+      endSemester: "2025-06-01",
+      academicYear: "2025",
+      status: "active",
     },
-  ];
+  ]);
+
+  const handleOpenAddModal = () => {
+    setModalMode("add");
+    setInitialData(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (semesterData: SemesterFormData) => {
+    setModalMode("edit");
+    setInitialData(semesterData);
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = (data: SemesterFormData) => {
+    if (modalMode === "add") {
+      setSemesters([...semsters, data]);
+    } else {
+      setSemesters(semsters.map((c) => (c.id === initialData?.id ? data : c)));
+    }
+  };
 
   return (
     <Card>
@@ -69,7 +100,10 @@ export default function ManageSemster() {
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-medium">Manage Semester</h3>
           </div>
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button
+            onClick={handleOpenAddModal}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
             <Plus className="mr-2 h-4 w-4" />
             ADD NEW
           </Button>
@@ -104,21 +138,22 @@ export default function ManageSemster() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {classes.map((classItem) => (
-              <TableRow key={classItem.id}>
-                <TableCell>{classItem.id}</TableCell>
+            {semsters.map((semesterItem) => (
+              <TableRow key={semesterItem.id}>
+                <TableCell>{semesterItem.id}</TableCell>
                 <TableCell>
                   <span className="rounded bg-amber-100 px-2 py-1 text-amber-800">
-                    {classItem.classCode}
+                    {semesterItem.Semester}
                   </span>
                 </TableCell>
-                <TableCell>{classItem.major}</TableCell>
-                <TableCell>{classItem.degree}</TableCell>
-                <TableCell>{classItem.yearLevel}</TableCell>
-                <TableCell>{classItem.academyYear}</TableCell>
+                <TableCell>{semesterItem.startSemester}</TableCell>
+                <TableCell>{semesterItem.endSemester}</TableCell>
+                <TableCell>{semesterItem.academicYear}</TableCell>
+                <TableCell>{semesterItem.status}</TableCell>
                 <TableCell>
                   <div className="flex justify-center gap-2">
                     <Button
+                      onClick={() => handleOpenEditModal(semesterItem)}
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 bg-gray-200"
@@ -138,6 +173,13 @@ export default function ManageSemster() {
             ))}
           </TableBody>
         </Table>
+        <SemesterModal
+          isOpen={isModalOpen}
+          mode={modalMode}
+          initialData={initialData}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleSubmit}
+        />
       </CardContent>
     </Card>
   );
