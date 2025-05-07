@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import PaginationPage from "@/components/shared/pagination";
-import { AllPaginationStudentResponse } from "@/model/student/student.model";
+import { AllPaginationStudentResponse } from "@/model/student.model";
 import { getStudents } from "@/service/dashboard/student.service";
 
 export default function StudentsListPage() {

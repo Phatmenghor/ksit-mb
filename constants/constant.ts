@@ -1,4 +1,4 @@
-//Major 
+//Major
 export const majors = [
   { value: "Computer Science", label: "វិទ្យាសាស្ត្រកុំព្យូទ័រ" },
   { value: "Food Technology", label: "បច្ចេកវិទ្យាអាហារ" },
@@ -15,6 +15,29 @@ export const majors = [
     value: "Business Technology and Innovation",
     label: "បច្ចេកវិទ្យា និងនវានុវត្តន៍ក្នុងអាជីវកម្ម",
   },
+];
+
+export const departments = [
+  { label: "Computer Science", value: "Computer Science" },
+  { label: "Food Technology", value: "Food Technology" },
+  { label: "Animal Science", value: "Animal Science" },
+  { label: "Plant Science", value: "Plant Science" },
+  { label: "Electrical Technology", value: "Electrical Technology" },
+  { label: "Mechanical Technology", value: "Mechanical Technology" },
+  { label: "បច្ចេកវិទ្យាព័ត៌មាន", value: "បច្ចេកវិទ្យាព័ត៌មាន" },
+  {
+    label: "សេដ្ឋកិច្ច និងរដ្ឋបាលសាធារណៈ",
+    value: "សេដ្ឋកិច្ច និងរដ្ឋបាលសាធារណៈ",
+  },
+  { label: "ទេសចរណ៍ និងអភិវឌ្ឍន៍", value: "ទេសចរណ៍ និងអភិវឌ្ឍន៍" },
+  { label: "សាធារណការនិងសំណង់ស៊ីវិល", value: "សាធារណការនិងសំណង់ស៊ីវិល" },
+  { label: "បច្ចេកវិទ្យាសំណង់", value: "បច្ចេកវិទ្យាសំណង់" },
+  { label: "វិទ្យាសាស្ត្រកសិកម្ម", value: "វិទ្យាសាស្ត្រកសិកម្ម" },
+  {
+    label: "បច្ចេកវិទ្យាព័ត៌មានគ្រប់គ្រង",
+    value: "បច្ចេកវិទ្យាព័ត៌មានគ្រប់គ្រង",
+  },
+  { label: "ហិរញ្ញវត្ថុ និងគណនេយ្យ", value: "ហិរញ្ញវត្ថុ និងគណនេយ្យ" },
 ];
 
 export const degrees = [
@@ -43,5 +66,4 @@ export const yearLevels = [
 export const status = [
   { value: "ACTIVE", label: "Active" },
   { value: "INACTIVE", label: "Inactive" },
-]
-
+];

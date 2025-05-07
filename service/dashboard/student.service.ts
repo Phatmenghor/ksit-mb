@@ -1,4 +1,4 @@
-import { AllPaginationStudentResponse } from "./../../model/student/student.model";
+import { AllPaginationStudentResponse } from "../../model/student.model";
 const students = [
   {
     id: "234012001",

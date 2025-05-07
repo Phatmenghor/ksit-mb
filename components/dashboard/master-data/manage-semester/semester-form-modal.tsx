@@ -19,7 +19,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { SemesterFormData } from "@/model/semester/semester-model";
+import { SemesterFormData } from "@/model/semester-model";
 import { years } from "@/constants/constant";
 
 interface SemesterModalProps {
@@ -102,17 +102,19 @@ export function SemesterModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-full max-w-2xl rounded-md px-8 py-6">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-xl font-semibold">
             {mode === "add" ? "Add Semester" : "Edit Semester"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-4 mt-4">
           {/* Semester Number */}
-          <div className="grid gap-2">
-            <Label htmlFor="semester">Semester Number</Label>
+          <div className="grid gap-1">
+            <Label htmlFor="semester">
+              Semester Number <span className="text-red-500">*</span>
+            </Label>
             <Select
               value={formData.Semester.toString()}
               onValueChange={(value) =>
@@ -130,14 +132,17 @@ export function SemesterModal({
           </div>
 
           {/* Start Date */}
-          <div className="grid gap-2">
-            <Label htmlFor="startSemester">Start Date</Label>
+          <div className="grid gap-1">
+            <Label htmlFor="startSemester">
+              Start Date <span className="text-red-500">*</span>
+            </Label>
             <Input
               type="date"
               id="startSemester"
               value={formData.startSemester}
               onChange={(e) => handleChange("startSemester", e.target.value)}
               className={errors.startSemester ? "border-red-500" : ""}
+              placeholder="Select start date"
             />
             {errors.startSemester && (
               <p className="text-sm text-red-500">{errors.startSemester}</p>
@@ -145,14 +150,17 @@ export function SemesterModal({
           </div>
 
           {/* End Date */}
-          <div className="grid gap-2">
-            <Label htmlFor="endSemester">End Date</Label>
+          <div className="grid gap-1">
+            <Label htmlFor="endSemester">
+              End Date <span className="text-red-500">*</span>
+            </Label>
             <Input
               type="date"
               id="endSemester"
               value={formData.endSemester}
               onChange={(e) => handleChange("endSemester", e.target.value)}
               className={errors.endSemester ? "border-red-500" : ""}
+              placeholder="Select end date"
             />
             {errors.endSemester && (
               <p className="text-sm text-red-500">{errors.endSemester}</p>
@@ -160,8 +168,10 @@ export function SemesterModal({
           </div>
 
           {/* Academic Year */}
-          <div className="grid gap-2">
-            <Label htmlFor="academicYear">Academic Year</Label>
+          <div className="grid gap-1">
+            <Label htmlFor="academicYear">
+              Academic Year <span className="text-red-500">*</span>
+            </Label>
             <Select
               value={formData.academicYear}
               onValueChange={(value) => handleChange("academicYear", value)}
@@ -185,8 +195,10 @@ export function SemesterModal({
           </div>
 
           {/* Status */}
-          <div className="grid gap-2">
-            <Label htmlFor="status">Status</Label>
+          <div className="grid gap-1">
+            <Label htmlFor="status">
+              Status <span className="text-red-500">*</span>
+            </Label>
             <Select
               value={formData.status}
               onValueChange={(value) => handleChange("status", value)}
@@ -202,12 +214,12 @@ export function SemesterModal({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="mt-6">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            Discard
           </Button>
           <Button onClick={handleSubmit}>
-            {mode === "add" ? "Add Semester" : "Save Changes"}
+            {mode === "add" ? "Save" : "Update"}
           </Button>
         </DialogFooter>
       </DialogContent>

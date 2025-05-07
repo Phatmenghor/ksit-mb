@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
-import type { SubjectType } from "@/model/student/score-types";
+import type { SubjectType } from "@/model/score-types";
 
 interface ScoreSearchPageProps {
   selectedYear: string;

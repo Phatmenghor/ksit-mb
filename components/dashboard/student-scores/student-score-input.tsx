@@ -26,7 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
-import type { SubjectType, StudentType } from "@/model/student/score-types";
+import type { SubjectType, StudentType } from "@/model/score-types";
 
 interface StudentScoreInputProps {
   subject: SubjectType;

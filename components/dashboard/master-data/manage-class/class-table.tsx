@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClassFormData } from "@/model/class/class-model";
+import { ClassFormData } from "@/model/class-model";
 import { useState } from "react";
 import { ClassModal } from "./class-form-modal";
 

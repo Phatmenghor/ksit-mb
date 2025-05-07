@@ -1,10 +1,5 @@
-import MajorTable from "@/components/dashboard/master-data/major-table";
+import MajorTable from "@/components/dashboard/master-data/manage-major/major-table";
 
 export default function ManageMajorPage() {
-  return (
-    <section className="p-6">
-      <h1 className="mb-6 text-2xl font-semibold">Manage Majors</h1>
-      <MajorTable />
-    </section>
-  );
+  return <MajorTable />;
 }
