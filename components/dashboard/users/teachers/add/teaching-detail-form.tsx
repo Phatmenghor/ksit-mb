@@ -7,151 +7,199 @@ export default function TeachingDetailForm() {
         <div>
           <label
             htmlFor="rankings-and-ratings"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             ឋាននន្តរស័ក្តិ និងថ្នាក់
           </label>
           <Input
             id="rankings-and-ratings"
             placeholder="ឋាននន្តរស័ក្តិ និងថ្នាក់..."
+            className="bg-gray-100"
           />
         </div>
         <div>
           <label
             htmlFor="teaching-english"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             បង្រៀនភាសាអង់គ្លេស
           </label>
-          <Input id="teaching-english" placeholder="បង្រៀនភាសាអង់គ្លេស..." />
+          <Input
+            id="teaching-english"
+            placeholder="បង្រៀនភាសាអង់គ្លេស..."
+            className="bg-gray-100"
+          />
         </div>
         <div>
-          <label
-            htmlFor="class-level"
-            className="mb-2 block text-sm font-medium"
-          >
+          <label htmlFor="class-level" className="mb-1 block text-sm font-bold">
             ថ្នាក់គួបបីកម្រិត
           </label>
-          <Input id="class-level" placeholder="ថ្នាក់គួបបីកម្រិត..." />
+          <Input
+            id="class-level"
+            placeholder="ថ្នាក់គួបបីកម្រិត..."
+            className="bg-gray-100"
+          />
         </div>
         <div>
-          <label htmlFor="reference" className="mb-2 block text-sm font-medium">
+          <label htmlFor="reference" className="mb-1 block text-sm font-bold">
             យោង
           </label>
-          <Input id="reference" placeholder="យោង..." />
+          <Input id="reference" placeholder="យោង..." className="bg-gray-100" />
         </div>
         <div>
           <label
             htmlFor="technical-team-lead"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             ប្រធានក្រុមបច្ចេកទេស
           </label>
           <Input
             id="technical-team-lead"
             placeholder="ប្រធានក្រុមបច្ចេកទេស..."
+            className="bg-gray-100"
           />
         </div>
         <div>
           <label
             htmlFor="teaching-assistant"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             ជួយបង្រៀន
           </label>
-          <Input id="teaching-assistant" placeholder="ជួយបង្រៀន..." />
+          <Input
+            id="teaching-assistant"
+            placeholder="ជួយបង្រៀន..."
+            className="bg-gray-100"
+          />
         </div>
         <div>
           <label
             htmlFor="serial-number"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             លេខរៀង
           </label>
-          <Input id="serial-number" placeholder="លេខរៀង..." />
+          <Input
+            id="serial-number"
+            placeholder="លេខរៀង..."
+            className="bg-gray-100"
+          />
         </div>
         <div>
           <label
             htmlFor="two-level-class"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             ពីរថ្នាក់ណីរពេល
           </label>
-          <Input id="two-level-class" placeholder="ពីរថ្នាក់ណីរពេល..." />
+          <Input
+            id="two-level-class"
+            placeholder="ពីរថ្នាក់ណីរពេល..."
+            className="bg-gray-100"
+          />
         </div>
         <div>
           <label
             htmlFor="class-responsibility"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             ទទួលបន្ទុកថ្នាក់
           </label>
-          <Input id="class-responsibility" placeholder="ទទួលបន្ទុកថ្នាក់..." />
+          <Input
+            id="class-responsibility"
+            placeholder="ទទួលបន្ទុកថ្នាក់..."
+            className="bg-gray-100"
+          />
         </div>
         <div>
           <label
             htmlFor="last-salary-increase"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             ថ្ងៃខែឡើងការប្រាក់ចុងក្រោយ
           </label>
-          <Input id="last-salary-increase" placeholder="លេខរៀង..." />
+          <Input
+            id="last-salary-increase"
+            placeholder="លេខរៀង..."
+            className="bg-gray-100"
+          />
         </div>
         <div>
           <label
             htmlFor="cross-school-teaching"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             បង្រៀនឆ្លងសាលា
           </label>
-          <Input id="cross-school-teaching" placeholder="បង្រៀនឆ្លងសាលា..." />
+          <Input
+            id="cross-school-teaching"
+            placeholder="បង្រៀនឆ្លងសាលា..."
+            className="bg-gray-100"
+          />
         </div>
         <div>
           <label
             htmlFor="overtime-hours"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             ម៉ោងលើស
           </label>
-          <Input id="overtime-hours" placeholder="ម៉ោងលើស..." />
+          <Input
+            id="overtime-hours"
+            placeholder="ម៉ោងលើស..."
+            className="bg-gray-100"
+          />
         </div>
         <div>
           <label
             htmlFor="date-of-signature"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             ចុះថ្ងៃទី
           </label>
-          <Input id="date-of-signature" placeholder="លេខរៀង..." />
+          <Input
+            id="date-of-signature"
+            placeholder="លេខរៀង..."
+            className="bg-gray-100"
+          />
         </div>
         <div>
           <label
             htmlFor="class-level-2"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             ថ្នាក់គួប
           </label>
-          <Input id="class-level-2" placeholder="ថ្នាក់គួប..." />
+          <Input
+            id="class-level-2"
+            placeholder="ថ្នាក់គួប..."
+            className="bg-gray-100"
+          />
         </div>
         <div>
           <label
             htmlFor="two-languages"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             ពីរភាសា
           </label>
-          <Input id="two-languages" placeholder="ពីរភាសា..." />
+          <Input
+            id="two-languages"
+            placeholder="ពីរភាសា..."
+            className="bg-gray-100"
+          />
         </div>
         <div>
           <label
             htmlFor="teaching-in-academic-year"
-            className="mb-2 block text-sm font-medium"
+            className="mb-1 block text-sm font-bold"
           >
             បង្រៀននៅឆ្នាំសិក្សា
           </label>
           <Input
             id="teaching-in-academic-year"
             placeholder="បង្រៀននៅឆ្នាំសិក្សា..."
+            className="bg-gray-100"
           />
         </div>
       </div>

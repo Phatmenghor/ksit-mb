@@ -1,9 +1,8 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Inter, Noto_Sans_TC, Nokora, Noto_Sans_Khmer } from "next/font/google";
+import { Inter, Noto_Sans_TC, Noto_Sans_Khmer } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import { Sidebar } from "@/components/sidebar";
 
 // Font definitions
 const inter = Inter({
@@ -38,12 +37,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="h-full">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body
-        className={`${inter.variable} ${notoSansKhmer.variable} ${notoSansTC.variable} antialiased flex min-h-screen w-full`}
+        className={`${inter.variable} ${notoSansKhmer.variable} ${notoSansTC.variable} antialiased h-full overflow-hidden`}
       >
         {children}
         <Toaster />
