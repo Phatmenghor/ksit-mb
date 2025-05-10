@@ -18,6 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
+import { ROUTE } from "@/constants/routes";
 
 export default function TeachersList() {
   const teachers = [
@@ -79,7 +80,7 @@ export default function TeachersList() {
               className="w-64 pl-8"
             />
           </div>
-          <Link href="/users/teachers/add">
+          <Link href={ROUTE.USERS.ADD_TEACHER}>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
               Add Teacher

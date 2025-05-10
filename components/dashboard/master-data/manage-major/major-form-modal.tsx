@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
-import { MajorFormData } from "@/model/major-model";
+import { MajorFormData } from "@/model/major/major-model";
 import {
   Select,
   SelectContent,

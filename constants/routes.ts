@@ -11,21 +11,59 @@ import {
 } from "lucide-react";
 
 export const ROUTE = {
-  DASHBOARD: "/dashboard",
-};
+  DASHBOARD: "/",
+  AUTH: {
+    LOGIN: "/login",
+  },
+  MASTER_DATA: {
+    MANAGE_CLASS: "/manage-class",
+    MANAGE_SEMESTER: "/manage-semester",
+    MANAGE_MAJOR: "/manage-major",
+    MANAGE_DEPARTMENT: "/manage-department",
+    MANAGE_ROOM: "/manage-room",
+  },
 
-export const ROUTE_COURSES = {
-  COURSES_ADD: "/courses/add",
-};
+  USERS: {
+    MEMBERS: "/members",
+    TEACHERS: "/teachers",
+    ADD_TEACHER: "/teachers/add",
+  },
 
-export const ROUTE_DEPARTMENT = {
-  COURSES_ADD: "/courses/add",
+  STUDENTS: {
+    ADD_MULTIPLE: "/add-multiple",
+    ADD_SINGLE: "/add-single",
+    LIST: "/list",
+    DROPOUT: "/dropout",
+  },
+
+  SCHEDULE: {
+    MANAGE: "/schedule/manage",
+    ROOT: "/schedule",
+  },
+
+  COURSES: {
+    INDEX: "/courses",
+    ADD: "/courses/add",
+  },
+
+  SCORES: {
+    STUDENT_SCORE: "/student-score",
+    SUBMITTED: "/scores-submitted",
+  },
+
+  REQUESTS: "/requests",
+
+  SETTINGS: {
+    THEME: "/settings/theme",
+  },
+
+  PERMISSIONS: "/permissions",
 };
 
 export const sidebarRoutes = [
   {
     title: "Dashboard",
-    href: "/dashboard",
+    href: "/",
     icon: Home,
   },
   {
@@ -33,11 +71,12 @@ export const sidebarRoutes = [
     icon: Database,
     section: "masterData",
     subroutes: [
-      { title: "Manage class", href: "/master-data/manage-class" },
-      { title: "Manage semester", href: "/master-data/manage-semester" },
-      { title: "Manage major", href: "/master-data/manage-major" },
-      { title: "Manage department", href: "/master-data/manage-department" },
-      { title: "Manage room", href: "/master-data/manage-room" },
+      { title: "Manage class", href: "/manage-class" },
+      { title: "Manage semester", href: "/manage-semester" },
+      { title: "Manage major", href: "/manage-major" },
+      { title: "Manage department", href: "/manage-department" },
+      { title: "Manage room", href: "/manage-room" },
+      { title: "Manage Course", href: "/courses" },
     ],
   },
   {
@@ -45,8 +84,8 @@ export const sidebarRoutes = [
     icon: Users,
     section: "users",
     subroutes: [
-      { title: "Members", href: "/users/members" },
-      { title: "Teachers", href: "/users/teachers" },
+      { title: "Members", href: "/members" },
+      { title: "Teachers", href: "/teachers" },
     ],
   },
   {
@@ -54,21 +93,16 @@ export const sidebarRoutes = [
     icon: Users,
     section: "students",
     subroutes: [
-      { title: "Add multiple users", href: "/students/add-multiple" },
-      { title: "Add single user", href: "/students/add-single" },
-      { title: "Students list", href: "/students/list" },
-      { title: "Dropout students", href: "/students/dropout" },
+      { title: "Add multiple users", href: "/add-multiple" },
+      { title: "Add single user", href: "/add-single" },
+      { title: "Students list", href: "/list" },
+      { title: "Dropout students", href: "/dropout" },
     ],
   },
   {
     title: "Manage schedule",
-    href: "/schedule/manage",
+    href: "/manage-schedule",
     icon: Calendar,
-  },
-  {
-    title: "Courses",
-    href: "/courses",
-    icon: BookOpen,
   },
   {
     title: "Student score",

@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
-import { ClassFormData } from "@/model/class-model";
+import { ClassFormData } from "@/model/class/class-model";
 import { majors, degrees, years, yearLevels } from "@/constants/constant";
 
 interface ClassModalProps {

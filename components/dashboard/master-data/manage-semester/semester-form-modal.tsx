@@ -19,7 +19,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { SemesterFormData } from "@/model/semester-model";
+import { SemesterFormData } from "@/model/semester/semester-model";
 import { years } from "@/constants/constant";
 
 interface SemesterModalProps {

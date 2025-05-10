@@ -5,22 +5,6 @@
 /* Include Khmer font from Google Fonts */
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer&display=swap");
 
-/* Default font family for body (for English text) */
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Apply Noto Sans Khmer for Khmer text */
-html[lang="km"],
-body[lang="km"] {
-  font-family: var(--font-khmer), sans-serif;
-}
-
-/* Specific Khmer Text styling */
-.khmer-text {
-  font-family: var(--font-khmer), sans-serif;
-}
-
 /* Text balance utility */
 @layer utilities {
   .text-balance {
@@ -72,6 +56,78 @@ body[lang="km"] {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-['Noto_Sans_Khmer',sans-serif];
+  }
+}
+
+@layer components {
+  /* Enhanced table styling */
+  table {
+    @apply w-full table-auto border-collapse text-sm;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Table header */
+  thead {
+    @apply sticky top-0;
+  }
+
+  /* Table header cells */
+  th {
+    @apply bg-black text-white font-semibold px-4 py-3 text-left;
+    white-space: nowrap;
+  }
+
+  /* First column header (top-left corner) */
+  th:first-child {
+    @apply rounded-tl-md;
+  }
+
+  /* Last column header (top-right corner) */
+  th:last-child {
+    @apply rounded-tr-md;
+  }
+
+  /* Table rows */
+  tr {
+    @apply border-b border-gray-300;
+  }
+
+  /* Table cells */
+  td {
+    @apply px-1 py-1 border-x border-gray-300;
+  }
+
+  /* Hover effect on rows */
+  tbody tr:hover {
+    @apply bg-gray-200 transition-colors duration-150;
+  }
+
+  tr:last-child {
+    @apply border-b border-gray-300;
+  }
+
+  /* Pagination controls */
+  .pagination {
+    @apply flex items-center justify-between mt-4 px-4 py-3 bg-white border border-gray-300 rounded-md;
+  }
+
+  /* Responsive table container */
+  .table-container {
+    @apply w-full overflow-x-auto rounded-md;
+    scrollbar-width: thin;
+  }
+
+  /* Custom scrollbar for the table container */
+  .table-container::-webkit-scrollbar {
+    @apply h-1.5 w-1.5;
+  }
+
+  .table-container::-webkit-scrollbar-track {
+    @apply bg-gray-100 rounded-full;
+  }
+
+  .table-container::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 rounded-full hover:bg-gray-500;
   }
 }

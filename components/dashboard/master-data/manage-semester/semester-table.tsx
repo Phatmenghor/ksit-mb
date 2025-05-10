@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
-import { SemesterFormData } from "@/model/semester-model";
+import { SemesterFormData } from "@/model/semester/semester-model";
 import { SemesterModal } from "./semester-form-modal";
 
 export default function ManageSemster() {

@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MajorFormData } from "@/model/major-model";
+import { MajorFormData } from "@/model/major/major-model";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { useState } from "react";
 import { MajorModal } from "./major-form-modal";

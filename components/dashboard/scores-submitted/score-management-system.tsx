@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ScoreSearchPage } from "../student-scores/score-search-page";
 import { StudentScoreInput } from "../student-scores/student-score-input";
-import type { SubjectType, StudentType } from "@/model/score-types";
+import type { SubjectType, StudentType } from "@/model/student/score-types";
 
 interface ScoreManagementSystemProps {
   onSubmissionComplete?: () => void;

@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ROUTE_COURSES } from "@/constants/routes";
+import { ROUTE } from "@/constants/routes";
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 
@@ -74,7 +74,7 @@ export default function Courses() {
               className="w-64 pl-8"
             />
           </div>
-          <Link href={ROUTE_COURSES.COURSES_ADD}>
+          <Link href={ROUTE.COURSES.ADD}>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
               Add Course

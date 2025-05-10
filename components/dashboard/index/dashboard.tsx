@@ -1,4 +1,4 @@
-import { DepartmentCard } from "@/components/department-card";
+import { DepartmentCard } from "@/components/dashboard/master-data/manage-department/department-card";
 
 import Link from "next/link";
 
