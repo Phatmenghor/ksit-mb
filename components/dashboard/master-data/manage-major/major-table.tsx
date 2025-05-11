@@ -138,13 +138,13 @@ export default function MajorTable() {
 
       <div className="overflow-hidden mt-6 rounded-lg border">
         <Table>
-          <TableHeader className="bg-black">
+          <TableHeader>
             <TableRow className="divide-x divide-gray-200 hover:bg-transparent">
-              <TableHead className="text-white">#</TableHead>
-              <TableHead className="text-white">Major Code</TableHead>
-              <TableHead className="text-white">Major</TableHead>
-              <TableHead className="text-white">Department</TableHead>
-              <TableHead className="text-white">Actions</TableHead>
+              <TableHead>#</TableHead>
+              <TableHead>Major Code</TableHead>
+              <TableHead>Major</TableHead>
+              <TableHead>Department</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -152,7 +152,7 @@ export default function MajorTable() {
               <TableRow key={major.id} className="divide-x divide-gray-200">
                 <TableCell>{major.id}</TableCell>
                 <TableCell>
-                  <span className="rounded bg-gray-100 px-2 py-1 text-gray-800">
+                  <span className="rounded bg-gray-100 px-2 py-1">
                     {major.majorCode}
                   </span>
                 </TableCell>

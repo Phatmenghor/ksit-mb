@@ -43,13 +43,6 @@ export default function LoginForm() {
     },
   });
 
-  useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      router.replace("/login");
-    }
-  });
-
   const Submit = async (data: FormData) => {
     setIsLoading(true);
     try {
