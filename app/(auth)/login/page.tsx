@@ -37,8 +37,8 @@ export default function LoginPage() {
   } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      username: "",
-      password: "",
+      username: "developer@ksit.com",
+      password: "developer123",
     },
   });
 
