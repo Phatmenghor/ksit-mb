@@ -130,8 +130,8 @@ export default function ManageDepartmentPage() {
 
     try {
       const departmentData = {
-        code: formData.code,
-        name: formData.name,
+        code: formData.code.trim(),
+        name: formData.name.trim(),
         urlLogo: formData.urlLogo || "",
         status: formData.status,
       };
