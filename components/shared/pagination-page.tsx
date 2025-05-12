@@ -73,7 +73,7 @@ export default function PaginationPage({
   }
 
   return (
-    <div className={`border-t p-4 ${className}`}>
+    <div className={`p-4 ${className}`}>
       <Pagination>
         <PaginationContent>
           <PaginationItem>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -12,13 +12,32 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Upload, X, ImageIcon } from "lucide-react";
+import { Constants } from "@/constants/text-string";
 
-export interface DepartmentFormData {
-  departmentCode: string;
-  department: string;
-  logo: File | null;
-  status: string;
-}
+// Define Zod schema for department form validation
+const departmentFormSchema = z.object({
+  code: z.string().min(1, { message: "Department code is required" }),
+  name: z.string().min(1, { message: "Department name is required" }),
+  urlLogo: z.string().optional(),
+  status: z.literal(Constants.ACTIVE),
+});
+
+// Type for the form data based on the Zod schema
+export type DepartmentFormData = z.infer<typeof departmentFormSchema> & {
+  id?: number;
+};
 
 interface DepartmentModalProps {
   isOpen: boolean;
@@ -26,6 +45,7 @@ interface DepartmentModalProps {
   onSubmit: (data: DepartmentFormData) => void;
   initialData?: DepartmentFormData;
   mode: "add" | "edit";
+  isSubmitting?: boolean; // Add this line
 }
 
 export function DepartmentModal({
@@ -34,71 +54,115 @@ export function DepartmentModal({
   onSubmit,
   initialData,
   mode,
+  isSubmitting = false,
 }: DepartmentModalProps) {
-  const [formData, setFormData] = useState<DepartmentFormData>({
-    departmentCode: "",
-    department: "",
-    logo: null,
-    status: "active",
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Fixed image URL as requested
+  const fixedImageUrl =
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToIBhiJevC0oBF4f-zvmpQSWkubyRTHVXwxA&s";
+
+  // Initialize the form with react-hook-form and zod validation
+  const form = useForm<DepartmentFormData>({
+    resolver: zodResolver(departmentFormSchema),
+    defaultValues: {
+      code: "",
+      name: "",
+      urlLogo: fixedImageUrl, // Set default to fixed image URL
+      status: Constants.ACTIVE,
+    },
   });
 
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof DepartmentFormData, string>>
-  >({});
-
+  // Reset form when modal opens/closes or initialData changes
   useEffect(() => {
-    if (initialData && mode === "edit") {
-      setFormData(initialData);
-    } else {
-      setFormData({
-        departmentCode: "",
-        department: "",
-        logo: null,
-        status: "active",
-      });
+    if (isOpen) {
+      if (initialData && mode === "edit") {
+        form.reset({
+          code: initialData.code || "",
+          name: initialData.name || "",
+          urlLogo: fixedImageUrl,
+          status: Constants.ACTIVE,
+        });
+
+        // Always use the fixed image for preview
+        setLogoPreview(fixedImageUrl);
+      } else {
+        form.reset({
+          code: "",
+          name: "",
+          urlLogo: fixedImageUrl,
+          status: Constants.ACTIVE,
+        });
+        setLogoPreview(fixedImageUrl);
+      }
+      setLogoFile(null);
     }
-    setErrors({});
-  }, [initialData, isOpen, mode]);
+  }, [isOpen, initialData, mode, form]);
 
-  const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof DepartmentFormData, string>> = {};
+  // Handle file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    if (!formData.departmentCode.trim())
-      newErrors.departmentCode = "Department code is required";
-    if (!formData.department.trim())
-      newErrors.department = "Department name is required";
-    if (!formData.status) newErrors.status = "Status is required";
+    // Check file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("File size must be less than 2MB");
+      return;
+    }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // Check file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("File must be an image");
+      return;
+    }
+
+    setLogoFile(file);
+
+    // For now, always use the fixed image
+    setLogoPreview(fixedImageUrl);
   };
 
-  const handleChange = (
-    field: keyof DepartmentFormData,
-    value: string | File | null
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
+  // Handle form submission
+  const handleSubmit = async (data: DepartmentFormData) => {
+    setIsUploading(true);
+
+    try {
+      // Always use the fixed image URL for now
+      const logoUrl = fixedImageUrl;
+
+      // Submit the form data with the logo URL
+      const submitData: DepartmentFormData = {
+        ...data,
+        urlLogo: logoUrl,
+        status: Constants.ACTIVE,
+      };
+
+      // If in edit mode, include the ID
+      if (mode === "edit" && initialData?.id) {
+        submitData.id = initialData.id;
+      }
+
+      onSubmit(submitData);
+    } catch (error) {
+      toast.error("An error occurred while saving department");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  const handleSubmit = () => {
-    if (validateForm()) {
-      onSubmit(formData);
-      toast({
-        title: `Department ${
-          mode === "add" ? "added" : "updated"
-        } successfully`,
-        description: `Department ${formData.department} has been ${
-          mode === "add" ? "added" : "updated"
-        }.`,
-      });
-      onClose();
-    }
+  // Handle removing the logo
+  const handleRemoveLogo = () => {
+    // For now, even when "removing", we'll still use the fixed image
+    setLogoFile(null);
+    setLogoPreview(fixedImageUrl);
+    form.setValue("urlLogo", fixedImageUrl);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {mode === "add" ? "Add Department" : "Edit Department"}
@@ -109,117 +173,117 @@ export function DepartmentModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 mt-4">
-          {/* Department Code */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Department code<span className="text-red-500">*</span>
-            </label>
-            <Input
-              value={formData.departmentCode}
-              onChange={(e) => handleChange("departmentCode", e.target.value)}
-              className={errors.departmentCode ? "border-red-500" : ""}
-              placeholder="Department code..."
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4 mt-4"
+          >
+            {/* Department Code */}
+            <FormField
+              control={form.control}
+              name="code"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Department Code <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter department code" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.departmentCode && (
-              <p className="text-sm text-red-500">{errors.departmentCode}</p>
-            )}
-          </div>
 
-          {/* Department Name */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Department<span className="text-red-500">*</span>
-            </label>
-            <Input
-              value={formData.department}
-              onChange={(e) => handleChange("department", e.target.value)}
-              className={errors.department ? "border-red-500" : ""}
-              placeholder="Department..."
+            {/* Department Name */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Department Name <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter department name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.department && (
-              <p className="text-sm text-red-500">{errors.department}</p>
-            )}
-          </div>
 
-          {/* Logo Upload */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Logo department<span className="text-red-500">*</span>
-            </label>
-            <div className="border border-dashed border-gray-300 rounded-md p-4 flex items-center justify-center">
-              <div className="text-center">
-                {formData.logo ? (
-                  <div className="relative w-24 h-24 mx-auto">
+            {/* Logo Upload */}
+            <div className="space-y-2">
+              <FormLabel>Department Logo</FormLabel>
+              <div className="border border-dashed border-gray-300 rounded-md p-4">
+                <div className="flex flex-col items-center justify-center space-y-2">
+                  <div className="relative w-24 h-24">
                     <img
-                      src={URL.createObjectURL(formData.logo)}
+                      src={fixedImageUrl}
                       alt="Department logo"
                       className="w-full h-full object-cover rounded-full"
                     />
-                    <button
-                      onClick={() => handleChange("logo", null)}
-                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 text-xs"
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={handleRemoveLogo}
                     >
-                      ✕
-                    </button>
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
-                ) : (
-                  <div className="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center">
-                    <svg
-                      className="w-10 h-10 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
+
+                  <div className="flex items-center justify-center">
+                    <label
+                      htmlFor="logo-upload"
+                      className="cursor-pointer px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 flex items-center"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                      ></path>
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                      ></path>
-                    </svg>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload Logo
+                      <input
+                        id="logo-upload"
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        onChange={handleFileChange}
+                      />
+                    </label>
                   </div>
-                )}
-                <input
-                  type="file"
-                  id="logo"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      handleChange("logo", e.target.files[0]);
-                    }
-                  }}
-                />
-                <label
-                  htmlFor="logo"
-                  className="mt-2 cursor-pointer text-blue-500 text-sm block"
-                >
-                  Click to upload
-                </label>
+
+                  <p className="text-xs text-gray-500 text-center">
+                    PNG, JPG or GIF up to 2MB
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <DialogFooter className="mt-6 flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
-            Discard
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            className="bg-blue-500 hover:bg-blue-600"
-          >
-            Save
-          </Button>
-        </DialogFooter>
+            <DialogFooter className="mt-6 sticky -bottom-8 z-10 bg-white py-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isUploading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isUploading || isSubmitting}
+                className="bg-green-900 text-white hover:bg-green-950"
+              >
+                {isUploading || isSubmitting ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    Saving...
+                  </>
+                ) : (
+                  "Save Department"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
