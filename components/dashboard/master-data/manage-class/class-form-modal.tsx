@@ -236,7 +236,7 @@ export function ClassModal({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>
+          <Button className="bg-green-900 text-white" onClick={handleSubmit}>
             {mode === "add" ? "Add Class" : "Save Changes"}
           </Button>
         </DialogFooter>

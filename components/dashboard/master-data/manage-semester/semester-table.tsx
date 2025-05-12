@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Filter, Pencil, Plus, Trash2 } from "lucide-react";
+import { Filter, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -20,8 +20,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { SemesterFormData } from "@/model/semester/semester-model";
 import { SemesterModal } from "./semester-form-modal";
+import { Input } from "@/components/ui/input";
+import { ROUTE } from "@/constants/routes";
 
 export default function ManageSemster() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -94,37 +104,57 @@ export default function ManageSemster() {
   };
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-medium">Manage Semester</h3>
+    <div>
+      <Card>
+        <CardContent className="p-6 space-y-2">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href={ROUTE.DASHBOARD}>Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Manage semester</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <h3 className="text-xl font-bold">Manage Semster</h3>
+          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="relative w-full md:flex-1">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search major..."
+                className="pl-8 w-full"
+              />
+            </div>
+            <Button
+              onClick={handleOpenAddModal}
+              className="bg-green-900 text-white hover:bg-green-950"
+            >
+              <Plus className="mr-2 h-2 w-2" />
+              Add New
+            </Button>
           </div>
-          <Button
-            onClick={handleOpenAddModal}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            ADD NEW
-          </Button>
-        </div>
+          <div className="mb-4 flex items-center gap-2">
+            <Filter className="h-5 w-5 text-muted-foreground" />
+            <span className="text-sm font-medium">Filter by Academy year:</span>
+            <Select defaultValue="2025">
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Academy Year" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2023">2023</SelectItem>
+                <SelectItem value="2024">2024</SelectItem>
+                <SelectItem value="2025">2025</SelectItem>
+                <SelectItem value="2026">2026</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
-        <div className="mb-4 flex items-center gap-2">
-          <Filter className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm font-medium">Filter by Academy year:</span>
-          <Select defaultValue="2025">
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Academy Year" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="2023">2023</SelectItem>
-              <SelectItem value="2024">2024</SelectItem>
-              <SelectItem value="2025">2025</SelectItem>
-              <SelectItem value="2026">2026</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
+      <div className="overflow-hidden mt-4">
         <Table>
           <TableHeader>
             <TableRow>
@@ -134,7 +164,7 @@ export default function ManageSemster() {
               <TableHead>Finish Semester</TableHead>
               <TableHead>Academy year</TableHead>
               <TableHead>status</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -151,7 +181,7 @@ export default function ManageSemster() {
                 <TableCell>{semesterItem.academicYear}</TableCell>
                 <TableCell>{semesterItem.status}</TableCell>
                 <TableCell>
-                  <div className="flex justify-center gap-2">
+                  <div>
                     <Button
                       onClick={() => handleOpenEditModal(semesterItem)}
                       variant="ghost"
@@ -173,14 +203,14 @@ export default function ManageSemster() {
             ))}
           </TableBody>
         </Table>
-        <SemesterModal
-          isOpen={isModalOpen}
-          mode={modalMode}
-          initialData={initialData}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleSubmit}
-        />
-      </CardContent>
-    </Card>
+      </div>
+      <SemesterModal
+        isOpen={isModalOpen}
+        mode={modalMode}
+        initialData={initialData}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSubmit}
+      />
+    </div>
   );
 }

@@ -218,7 +218,7 @@ export function SemesterModal({
           <Button variant="outline" onClick={onClose}>
             Discard
           </Button>
-          <Button onClick={handleSubmit}>
+          <Button className="bg-green-900 text-white" onClick={handleSubmit}>
             {mode === "add" ? "Save" : "Update"}
           </Button>
         </DialogFooter>

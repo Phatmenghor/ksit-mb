@@ -12,18 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
-import { MajorFormData } from "@/model/major/major-model";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { departments } from "@/constants/constant";
 import { Separator } from "@/components/ui/separator";
+import { StatusEnum } from "@/constants/constant";
+import { MajorFormData, MajorModel } from "@/model/major/major-model";
+import { ComboboxSelectMajor } from "./major-comboBox-select";
 
-interface MajorModalProps {
+interface nameModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: MajorFormData) => void;
@@ -39,13 +33,15 @@ export function MajorModal({
   onSubmit,
   initialData,
   mode,
-}: MajorModalProps) {
+}: nameModalProps) {
   const [formData, setFormData] = useState<MajorFormData>({
-    majorCode: "",
-    major: "",
-    department: "",
+    code: "",
+    name: "",
+    departmentId: 0,
+    status: StatusEnum.ACTIVE,
   });
-
+  const [selectedDepartment, setSelectedDepartment] =
+    useState<MajorModel | null>(null);
   const [errors, setErrors] = useState<
     Partial<Record<keyof MajorFormData, string>>
   >({});
@@ -55,9 +51,10 @@ export function MajorModal({
       setFormData(initialData);
     } else {
       setFormData({
-        majorCode: "",
-        major: "",
-        department: "",
+        code: "",
+        name: "",
+        departmentId: 0,
+        status: StatusEnum.ACTIVE,
       });
     }
     setErrors({});
@@ -66,11 +63,8 @@ export function MajorModal({
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof MajorFormData, string>> = {};
 
-    if (!formData.majorCode.trim())
-      newErrors.majorCode = "Major code is required";
-    if (!formData.major.trim()) newErrors.major = "Major name is required";
-    if (!formData.department.trim())
-      newErrors.department = "Department is required";
+    if (!formData.code.trim()) newErrors.code = "name code is required";
+    if (!formData.name.trim()) newErrors.name = "name name is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -85,8 +79,8 @@ export function MajorModal({
     if (validateForm()) {
       onSubmit(formData);
       toast({
-        title: `Major ${mode === "add" ? "added" : "updated"} successfully`,
-        description: `${formData.majorCode} - ${formData.major} has been ${
+        title: `name ${mode === "add" ? "added" : "updated"} successfully`,
+        description: `${formData.code} - ${formData.name} has been ${
           mode === "add" ? "added" : "updated"
         }.`,
       });
@@ -99,7 +93,7 @@ export function MajorModal({
       <DialogContent className="w-full max-w-md p-6 rounded-md shadow-md">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">
-            {mode === "add" ? " Add Major" : " Edit Major"}
+            {mode === "add" ? " Add name" : " Edit name"}
           </DialogTitle>
         </DialogHeader>
 
@@ -107,65 +101,56 @@ export function MajorModal({
 
         <div className="grid gap-4 mt-1">
           <div className="grid gap-2">
-            <Label>Major Code {requriedElements}</Label>
+            <Label>name Code {requriedElements}</Label>
             <Input
-              value={formData.majorCode}
-              placeholder="Enter major code"
-              onChange={(e) => handleChange("majorCode", e.target.value)}
+              value={formData.code}
+              placeholder="Enter name code"
+              onChange={(e) => handleChange("code", e.target.value)}
               className={`py-2 px-2 text-sm ${
-                errors.majorCode ? "border-red-500" : ""
+                errors.code ? "border-red-500" : ""
               }`}
             />
-            {errors.majorCode && (
-              <p className="text-sm text-red-500">{errors.majorCode}</p>
+            {errors.code && (
+              <p className="text-sm text-red-500">{errors.code}</p>
             )}
           </div>
 
           <div className="grid gap-2">
-            <Label>Major Name {requriedElements}</Label>
+            <Label>Name {requriedElements}</Label>
             <Input
-              value={formData.major}
-              placeholder="Enter major name"
-              onChange={(e) => handleChange("major", e.target.value)}
+              value={formData.name}
+              placeholder="Enter name name"
+              onChange={(e) => handleChange("name", e.target.value)}
               className={`py-2 px-2 text-sm ${
-                errors.major ? "border-red-500" : ""
+                errors.name ? "border-red-500" : ""
               }`}
             />
-            {errors.major && (
-              <p className="text-sm text-red-500">{errors.major}</p>
+            {errors.name && (
+              <p className="text-sm text-red-500">{errors.name}</p>
             )}
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="department">Department {requriedElements}</Label>
-            <Select
-              value={formData.department}
-              onValueChange={(value) => handleChange("department", value)}
-            >
-              <SelectTrigger
-                className={errors.department ? "border-red-500" : ""}
-              >
-                <SelectValue placeholder="Select departmnet" />
-              </SelectTrigger>
-              <SelectContent side="bottom" position="popper">
-                {departments.map((major) => (
-                  <SelectItem key={major.value} value={major.value}>
-                    {major.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.department && (
-              <p className="text-sm text-red-500">{errors.department}</p>
+            <Label htmlFor="name">Department {requriedElements}</Label>
+            <ComboboxSelectMajor
+              dataSelect={selectedDepartment}
+              onChangeSelected={(selected) =>
+                handleChange("departmentId", selected.name || "")
+              }
+            />
+
+            {errors.name && (
+              <p className="text-sm text-red-500">{errors.name}</p>
             )}
           </div>
         </div>
 
         <DialogFooter className="mt-2">
-          <Button variant="outline" onClick={onClose}>
+          <Button type="button" variant="outline" onClick={onClose}>
             Discard
           </Button>
           <Button
+            type="submit"
             onClick={handleSubmit}
             className="bg-green-900 hover:bg-green-950"
           >

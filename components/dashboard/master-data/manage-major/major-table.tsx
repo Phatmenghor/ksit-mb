@@ -13,7 +13,6 @@ import {
 import { MajorFormData } from "@/model/major/major-model";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { useState } from "react";
-import { MajorModal } from "./major-form-modal";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,6 +22,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Input } from "@/components/ui/input";
+import { ROUTE } from "@/constants/routes";
+import { MajorModal } from "./major-form-modal";
 
 export default function MajorTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -103,11 +104,11 @@ export default function MajorTable() {
   return (
     <div>
       <Card>
-        <CardContent className="p-6 space-y-3">
+        <CardContent className="p-6 space-y-2">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                <BreadcrumbLink href={ROUTE.DASHBOARD}>Home</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -116,7 +117,7 @@ export default function MajorTable() {
             </BreadcrumbList>
           </Breadcrumb>
           <h3 className="text-xl font-bold">Manage Major</h3>
-          <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="relative w-full md:flex-1">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -127,7 +128,7 @@ export default function MajorTable() {
             </div>
             <Button
               onClick={handleOpenAddModal}
-              className="bg-green-900 hover:bg-green-950"
+              className="bg-green-900 text-white hover:bg-green-950"
             >
               <Plus className="mr-2 h-2 w-2" />
               Add New
@@ -136,10 +137,10 @@ export default function MajorTable() {
         </CardContent>
       </Card>
 
-      <div className="overflow-hidden mt-6 rounded-lg border">
+      <div className="overflow-hidden mt-4">
         <Table>
           <TableHeader>
-            <TableRow className="divide-x divide-gray-200 hover:bg-transparent">
+            <TableRow>
               <TableHead>#</TableHead>
               <TableHead>Major Code</TableHead>
               <TableHead>Major</TableHead>
@@ -149,7 +150,7 @@ export default function MajorTable() {
           </TableHeader>
           <TableBody>
             {majors.map((major) => (
-              <TableRow key={major.id} className="divide-x divide-gray-200">
+              <TableRow key={major.id}>
                 <TableCell>{major.id}</TableCell>
                 <TableCell>
                   <span className="rounded bg-gray-100 px-2 py-1">
@@ -161,17 +162,18 @@ export default function MajorTable() {
                 <TableCell>
                   <div>
                     <Button
-                      onClick={() => handleOpenEditModal(major)}
                       variant="ghost"
-                      className="h-16 w-16 p-0 bg-transparent hover:bg-gray-100"
+                      size="icon"
+                      className="h-8 w-8 bg-gray-200"
                     >
-                      <Pencil className="h-10 w-10 text-black" />
+                      <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
-                      className="h-16 w-16 p-0 bg-transparent hover:bg-gray-100"
+                      size="icon"
+                      className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
                     >
-                      <Trash2 className="h-10 w-10 text-black" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </TableCell>

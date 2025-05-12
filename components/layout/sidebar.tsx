@@ -124,7 +124,7 @@ export function Sidebar() {
       {/* Desktop Sidebar - Hidden on mobile */}
       <div
         className={cn(
-          "hidden md:flex h-full flex-col z-50 text-gray-900 transition-all duration-300",
+          "hidden md:flex shadow-xl h-full flex-col z-50 text-gray-900 transition-all duration-300",
           collapsed ? "w-40" : "w-64"
         )}
       >

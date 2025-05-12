@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -8,72 +9,122 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { ROUTE } from "@/constants/routes";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { DepartmentFormData, DepartmentModal } from "./department-form-modal";
 
 export default function DepartmentsTable() {
-  const departments = [
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [initialData, setInitialData] = useState<
+    DepartmentFormData | undefined
+  >(undefined);
+
+  const [departments, setDepartments] = useState<DepartmentFormData[]>([
     {
-      id: 1,
-      code: "401",
-      name: "Computer Science",
-      totalMajors: 2,
-      logo: "/placeholder.svg?height=40&width=40",
-      createdAt: "25-01-2024",
+      departmentCode: "401",
+      department: "Computer Science",
+      logo: null,
+      status: "active",
     },
     {
-      id: 2,
-      code: "240",
-      name: "Food Technology",
-      totalMajors: 1,
-      logo: "/placeholder.svg?height=40&width=40",
-      createdAt: "25-01-2024",
+      departmentCode: "240",
+      department: "Food Technology",
+      logo: null,
+      status: "inactive",
     },
     {
-      id: 3,
-      code: "220",
-      name: "Animal Science",
-      totalMajors: 1,
-      logo: "/placeholder.svg?height=40&width=40",
-      createdAt: "25-01-2024",
+      departmentCode: "220",
+      department: "Animal Science",
+      logo: null,
+      status: "active",
     },
     {
-      id: 4,
-      code: "201",
-      name: "Plant Science",
-      totalMajors: 1,
-      logo: "/placeholder.svg?height=40&width=40",
-      createdAt: "25-01-2024",
+      departmentCode: "201",
+      department: "Plant Science",
+      logo: null,
+      status: "inactive",
     },
     {
-      id: 5,
-      code: "301",
-      name: "Electrical Technology",
-      totalMajors: 1,
-      logo: "/placeholder.svg?height=40&width=40",
-      createdAt: "25-01-2024",
+      departmentCode: "301",
+      department: "Electrical Technology",
+      logo: null,
+      status: "active",
     },
-    {
-      id: 6,
-      code: "Meca2312",
-      name: "Mechanical Technology",
-      totalMajors: 0,
-      logo: "/placeholder.svg?height=40&width=40",
-      createdAt: "25-01-2024",
-    },
-  ];
+  ]);
+
+  const handleOpenAddModal = () => {
+    setModalMode("add");
+    setInitialData(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (formData: DepartmentFormData) => {
+    setModalMode("edit");
+    setInitialData(formData);
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = (data: DepartmentFormData) => {
+    if (modalMode === "add") {
+      setDepartments([...departments, data]);
+    } else {
+      setDepartments(
+        departments.map((c) =>
+          c.departmentCode === initialData?.departmentCode ? data : c
+        )
+      );
+    }
+  };
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-lg font-medium">Manage Department</h3>
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="mr-2 h-4 w-4" />
-            ADD NEW
-          </Button>
-        </div>
+    <div>
+      <Card>
+        <CardContent className="p-6 space-y-2">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href={ROUTE.DASHBOARD}>Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Manage department</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <h3 className="text-xl font-bold">Manage Department</h3>
+          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="relative w-full md:flex-1">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search major..."
+                className="pl-8 w-full"
+              />
+            </div>
+            <Button
+              onClick={handleOpenAddModal}
+              className="bg-green-900 text-white hover:bg-green-950"
+            >
+              <Plus className="mr-2 h-2 w-2" />
+              Add New
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
+      <div className="overflow-hidden mt-4">
         <Table>
           <TableHeader>
             <TableRow>
@@ -81,31 +132,37 @@ export default function DepartmentsTable() {
               <TableHead>Department Code</TableHead>
               <TableHead>Logo</TableHead>
               <TableHead>Department</TableHead>
-              <TableHead>Total Majors</TableHead>
               <TableHead>Create Date</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {departments.map((dept, index) => (
-              <TableRow key={dept.id}>
+              <TableRow key={index}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>
                   <span className="rounded bg-blue-100 px-2 py-1 text-blue-800">
-                    {dept.code}
+                    {dept.departmentCode}
                   </span>
                 </TableCell>
                 <TableCell>
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={dept.logo} alt={dept.name} />
+                    <AvatarImage
+                      src={
+                        dept.logo
+                          ? URL.createObjectURL(dept.logo)
+                          : "/placeholder.svg"
+                      }
+                      alt={dept.department}
+                    />
                   </Avatar>
                 </TableCell>
-                <TableCell>{dept.name}</TableCell>
-                <TableCell>{dept.totalMajors}</TableCell>
-                <TableCell>{dept.createdAt}</TableCell>
+                <TableCell>{dept.department}</TableCell>
+                <TableCell>{dept.logo ? dept.logo.name : "No Logo"}</TableCell>
                 <TableCell>
-                  <div className="flex justify-center gap-2">
+                  <div>
                     <Button
+                      onClick={() => handleOpenEditModal(dept)}
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 bg-gray-200"
@@ -125,7 +182,14 @@ export default function DepartmentsTable() {
             ))}
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
+      </div>
+      <DepartmentModal
+        isOpen={isModalOpen}
+        mode={modalMode}
+        initialData={initialData}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSubmit}
+      />
+    </div>
   );
 }

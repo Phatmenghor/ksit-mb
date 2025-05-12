@@ -63,6 +63,10 @@ export const yearLevels = [
   { value: 4, label: "ឆ្នាំទី 4" },
 ];
 
+export enum StatusEnum {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}
 export const status = [
   { value: "ACTIVE", label: "Active" },
   { value: "INACTIVE", label: "Inactive" },

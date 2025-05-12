@@ -1,7 +1,10 @@
 import { ApiResponse } from "./../model/index-model";
 import { LoginRequest, LoginResponse } from "@/model/auth/auth.model";
 import { axiosClient } from "@/utils/axios";
-import { storeToken } from "@/utils/local-storage/token";
+import { storeRoles } from "@/utils/local-storage/user-info/roles";
+import { storeToken } from "@/utils/local-storage/user-info/token";
+import { storeUserId } from "@/utils/local-storage/user-info/userId";
+import { storeUsername } from "@/utils/local-storage/user-info/username";
 import axios from "axios";
 
 export const loginService = async (credentail: LoginRequest) => {
@@ -11,8 +14,14 @@ export const loginService = async (credentail: LoginRequest) => {
       credentail
     );
 
-    storeToken(response.data.data.accessToken);
-    return response.data.data;
+    const data = response.data.data;
+
+    storeUserId(data.userId);
+    storeToken(data.accessToken);
+    storeRoles(data.roles);
+    storeUsername(data.username);
+
+    return data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       // Extract error message from backend if available

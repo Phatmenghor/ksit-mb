@@ -4,7 +4,7 @@ import axios, {
   AxiosResponse,
   InternalAxiosRequestConfig,
 } from "axios";
-import { getToken } from "../local-storage/token";
+import { getToken } from "../local-storage/user-info/token";
 
 // Define types
 type RequestMetadata = {

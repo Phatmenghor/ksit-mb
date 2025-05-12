@@ -15,8 +15,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { ROUTE } from "@/constants/routes";
-import { Plus, Search } from "lucide-react";
+import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 export default function Courses() {
@@ -59,30 +67,41 @@ export default function Courses() {
   ];
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Courses List</CardTitle>
-          <CardDescription>View and manage all courses</CardDescription>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search courses..."
-              className="w-64 pl-8"
-            />
+    <div>
+      <Card>
+        <CardContent className="p-6 space-y-2">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href={ROUTE.DASHBOARD}>Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Manage course</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <h3 className="text-xl font-bold">Manage Course</h3>
+          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="relative w-full md:flex-1">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search major..."
+                className="pl-8 w-full"
+              />
+            </div>
+            <Link href={ROUTE.COURSES.ADD}>
+              <Button className="bg-green-900 text-white hover:bg-green-950">
+                <Plus className="mr-2 h-2 w-2" />
+                Add New
+              </Button>
+            </Link>
           </div>
-          <Link href={ROUTE.COURSES.ADD}>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Course
-            </Button>
-          </Link>
-        </div>
-      </CardHeader>
-      <CardContent>
+        </CardContent>
+      </Card>
+
+      <div className="overflow-hidden mt-4">
         <Table>
           <TableHeader>
             <TableRow>
@@ -91,13 +110,13 @@ export default function Courses() {
               <TableHead>Department</TableHead>
               <TableHead>Credits</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {courses.map((course) => (
               <TableRow key={course.id}>
-                <TableCell className="font-medium">{course.id}</TableCell>
+                <TableCell>{course.id}</TableCell>
                 <TableCell>{course.name}</TableCell>
                 <TableCell>{course.department}</TableCell>
                 <TableCell>{course.credits}</TableCell>
@@ -112,19 +131,29 @@ export default function Courses() {
                     {course.status}
                   </span>
                 </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm">
-                    Edit
-                  </Button>
-                  <Button variant="ghost" size="sm" className="text-red-500">
-                    Delete
-                  </Button>
+                <TableCell>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 bg-gray-200"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

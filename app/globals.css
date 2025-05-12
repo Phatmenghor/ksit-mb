@@ -5,50 +5,42 @@
 /* Include Khmer font from Google Fonts */
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap");
 
-body {
-  font-family: "Noto Sans Khmer", Arial, Helvetica, sans-serif;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
 @layer base {
   :root {
-    --radius: 0.3rem;
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.141 0.005 285.823);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.141 0.005 285.823);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.141 0.005 285.823);
-    --primary: oklch(0.21 0.006 285.885);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.967 0.001 286.375);
-    --secondary-foreground: oklch(0.21 0.006 285.885);
-    --muted: oklch(0.967 0.001 286.375);
-    --muted-foreground: oklch(0.552 0.016 285.938);
-    --accent: oklch(0.967 0.001 286.375);
-    --accent-foreground: oklch(0.21 0.006 285.885);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.92 0.004 286.32);
-    --input: oklch(0.92 0.004 286.32);
-    --ring: oklch(0.705 0.015 286.067);
-    --chart-1: oklch(0.646 0.222 41.116);
-    --chart-2: oklch(0.6 0.118 184.704);
-    --chart-3: oklch(0.398 0.07 227.392);
-    --chart-4: oklch(0.828 0.189 84.429);
-    --chart-5: oklch(0.769 0.188 70.08);
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.141 0.005 285.823);
-    --sidebar-primary: oklch(0.21 0.006 285.885);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.967 0.001 286.375);
-    --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-    --sidebar-border: oklch(0.92 0.004 286.32);
-    --sidebar-ring: oklch(0.705 0.015 286.067);
+    /* Enhanced light mode colors with better contrast and line quality */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217 19% 27%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 215 16% 90%;
+    --muted-foreground: 215 28% 39%;
+    --accent: 211 100% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 32% 65%; /* Darker border color for better visibility */
+    --input: 214 32% 81%;
+    --ring: 221 83% 53%;
+    --chart-1: 221 83% 53%;
+    --chart-2: 340 82% 52%;
+    --chart-3: 145 63% 42%;
+    --chart-4: 43 96% 58%;
+    --chart-5: 261 51% 51%;
+    --radius: 0.4rem;
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 221 83% 53%;
 
     /* Table specific colors */
     --table-header-bg: oklch(0.4 0.005 285.823);
@@ -75,8 +67,24 @@ body {
 
   /* Enhanced card border styling */
   .card {
-    border: 1.5px solid oklch(var(--card-border));
+    border: 1px solid oklch(var(--card-border));
     transition: border-color 0.15s ease-in-out;
+  }
+
+  .card:first-child {
+    @apply rounded-t-xl;
+  }
+
+  .card:last-child {
+    @apply rounded-b-xl;
+  }
+
+  dialog {
+    @apply bg-card text-foreground rounded-xl shadow-lg border border-border p-6;
+  }
+
+  dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.4); /* dark overlay */
   }
 
   /* Card hover effect */
@@ -90,7 +98,6 @@ body {
   table {
     @apply w-full table-auto text-sm;
     border-collapse: collapse;
-    border: 1px solid #4b5563; /* gray-600 */
     box-shadow: 0 4px 12px oklch(var(--table-shadow) / 0.08),
       0 2px 4px oklch(var(--table-shadow) / 0.08);
   }
@@ -103,10 +110,12 @@ body {
   /* Table header cells with gray-600 background and white text */
   th {
     @apply px-4 py-3 text-left font-semibold text-sm;
-    background-color: #4b5563; /* gray-600 */
+    background-color: black; /* gray-600 */
     color: #ffffff !important;
     white-space: nowrap;
-    border: 1px solid #4b5563; /* gray-600 */
+    box-sizing: border-box;
+    border-left: 1px solid #9ea0a2;
+    border-right: 1px solid #9ea0a2;
   }
 
   /* Table row styling */
@@ -116,31 +125,31 @@ body {
 
   /* Table cells - uniform border styling */
   td {
-    @apply px-4 py-3;
-    border: 1px solid #4b5563; /* gray-600 */
+    @apply px-1 py-1;
+    border: 1px solid #9ea0a2; /* gray-600 */
     color: oklch(var(--foreground));
+    background: white;
   }
 
-  /* Fix for first column border */
-  td:first-child,
   th:first-child {
-    border-left: 1px solid #4b5563; /* gray-600 */
+    @apply rounded-tl-xl border-none;
   }
 
-  /* Fix for last column border */
-  td:last-child,
   th:last-child {
-    border-right: 1px solid #4b5563; /* gray-600 */
-  }
-
-  /* Fix for first row border */
-  thead tr:first-child th {
-    border-top: 1px solid #4b5563; /* gray-600 */
+    @apply rounded-tr-xl border-none;
   }
 
   /* Fix for last row border */
   tbody tr:last-child td {
     border-bottom: 1px solid #4b5563; /* gray-600 */
+  }
+
+  tr:last-child td:first-child {
+    @apply rounded-bl-xl;
+  }
+
+  tr:last-child td:last-child {
+    @apply rounded-br-xl;
   }
 
   /* Alternating row colors */
