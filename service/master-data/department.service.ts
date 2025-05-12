@@ -23,8 +23,12 @@ export async function createDepartmentService(data: CreateDepartmentModel) {
     const response = await axiosClientWithAuth.post(`/v1/departments`, data);
     return response.data.data;
   } catch (error: any) {
+    // Extract error message from response if available
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
     console.error("Error creating department:", error);
-    return null;
+    throw error;
   }
 }
 
@@ -39,7 +43,12 @@ export async function updateDepartmentService(
     );
     return response.data.data;
   } catch (error: any) {
+    // Extract error message from response if available
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+
     console.error("Error updating department:", error);
-    return null;
+    throw error;
   }
 }

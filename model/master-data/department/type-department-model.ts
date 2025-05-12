@@ -7,10 +7,14 @@ export interface AllDepartmentFilterModel {
 
 export interface CreateDepartmentModel {
   name: string;
-  status: string;
+  code: string;
+  urlLogo?: string;
+  status?: string;
 }
 
 export interface UpdateDepartmentModel {
   name?: string;
   status?: string;
+  code?: string;
+  urlLogo?: string;
 }

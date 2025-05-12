@@ -138,59 +138,60 @@ export default function ManageDepartmentPage() {
       let response: DepartmentModel | null = null;
 
       if (modalMode === "add") {
-        response = await createDepartmentService(departmentData);
+        try {
+          response = await createDepartmentService(departmentData);
 
-        if (response) {
-          setAllDepartmentData((prevData) => {
-            if (!prevData) return null;
-            const updatedContent = response
-              ? [response, ...prevData.content]
-              : [...prevData.content];
+          if (response) {
+            setAllDepartmentData((prevData) => {
+              if (!prevData) return null;
+              const updatedContent = response
+                ? [response, ...prevData.content]
+                : [...prevData.content];
 
-            return {
-              ...prevData,
-              content: updatedContent,
-              totalElements: prevData.totalElements + 1,
-            } as AllDepartmentModel;
-          });
+              return {
+                ...prevData,
+                content: updatedContent,
+                totalElements: prevData.totalElements + 1,
+              } as AllDepartmentModel;
+            });
 
-          toast.success("Department added successfully");
+            toast.success("Department added successfully");
+            setIsModalOpen(false);
+          }
+        } catch (error: any) {
+          // Display the specific error message from the API
+          toast.error(error.message || "Failed to add department");
         }
       } else if (modalMode === "edit" && formData.id) {
-        response = await updateDepartmentService(formData.id, departmentData);
-        if (response) {
-          setAllDepartmentData((prevData) => {
-            if (!prevData) return null;
-            const updatedContent = prevData.content.map((dept) =>
-              dept.id === formData.id && response ? response : dept
-            );
+        try {
+          response = await updateDepartmentService(formData.id, departmentData);
 
-            return {
-              ...prevData,
-              content: updatedContent,
-            } as AllDepartmentModel;
-          });
+          if (response) {
+            setAllDepartmentData((prevData) => {
+              if (!prevData) return null;
+              const updatedContent = prevData.content.map((dept) =>
+                dept.id === formData.id && response ? response : dept
+              );
 
-          toast.success("Department updated successfully");
+              return {
+                ...prevData,
+                content: updatedContent,
+              } as AllDepartmentModel;
+            });
+
+            toast.success("Department updated successfully");
+            setIsModalOpen(false);
+          }
+        } catch (error: any) {
+          // Display the specific error message from the API
+          toast.error(error.message || "Failed to update department");
         }
       }
-
-      if (!response) {
-        toast.error(
-          modalMode === "add"
-            ? "Failed to add department"
-            : "Failed to update department"
-        );
-      }
-    } catch (error) {
-      toast.error(
-        modalMode === "add"
-          ? "An error occurred while adding the department"
-          : "An error occurred while updating the department"
-      );
+    } catch (error: any) {
+      // This catch block will handle any other errors not caught above
+      toast.error(error.message || "An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
-      setIsModalOpen(false);
     }
   }
 
