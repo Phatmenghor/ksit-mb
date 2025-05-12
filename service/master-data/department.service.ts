@@ -52,3 +52,14 @@ export async function updateDepartmentService(
     throw error;
   }
 }
+
+export async function deletedDepartmentService(departmentId: number) {
+  try {
+    const response = await axiosClientWithAuth.delete(
+      `/v1/departments/${departmentId}`
+    );
+    return response.data.data;
+  } catch (error: any) {
+    return null;
+  }
+}

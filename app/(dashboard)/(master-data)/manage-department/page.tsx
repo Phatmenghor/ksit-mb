@@ -44,6 +44,7 @@ import {
   getAllDepartmentService,
   createDepartmentService,
   updateDepartmentService,
+  deletedDepartmentService,
 } from "@/service/master-data/department.service";
 import PaginationPage from "@/components/shared/pagination-page";
 import { DateTimeFormatter } from "@/utils/date/date-time-format";
@@ -200,9 +201,7 @@ export default function ManageDepartmentPage() {
 
     setIsSubmitting(true);
     try {
-      const response = await updateDepartmentService(department.id, {
-        status: Constants.INACTIVE,
-      });
+      const response = await deletedDepartmentService(department.id);
 
       if (response) {
         setAllDepartmentData((prevData) => {
@@ -219,7 +218,7 @@ export default function ManageDepartmentPage() {
           };
         });
 
-        toast.success("Department marked as inactive");
+        toast.success("Department deleted successfully");
       } else {
         toast.error("Failed to delete department");
       }
