@@ -9,20 +9,19 @@ export const departmentTableHeader = [
   },
   {
     label: "Department",
-    className: "truncate",
+    className: "",
   },
   {
     label: "Logo",
     className: "",
   },
-
   {
     label: "Created At",
     className: "",
   },
   {
     label: "Actions",
-    className: "text-right",
+    className: "text-left",
   },
 ];
 
@@ -60,7 +59,7 @@ export const majorTableHeader = [
   },
   {
     label: "Actions",
-    className: "text-right",
+    className: "text-left",
   },
 ];
 

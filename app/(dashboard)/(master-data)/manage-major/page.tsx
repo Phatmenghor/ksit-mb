@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -11,7 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,8 +22,12 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Input } from "@/components/ui/input";
 import { ROUTE } from "@/constants/routes";
-
-import { createMajorService, deletedMajorService, getAllMajorService, updateMajorService } from "@/service/master-data/major.service";
+import {
+  createMajorService,
+  deletedMajorService,
+  getAllMajorService,
+  updateMajorService,
+} from "@/service/master-data/major.service";
 import { toast } from "sonner";
 import { Constants } from "@/constants/text-string";
 import { AllMajorFilterModel } from "@/model/master-data/major/type-major-model";
@@ -56,7 +60,6 @@ export default function ManageMajorPage() {
   const loadMajors = useCallback(
     async (param: AllMajorFilterModel) => {
       setIsLoading(true);
-
       try {
         const response = await getAllMajorService({
           search: searchQuery,
@@ -96,11 +99,11 @@ export default function ManageMajorPage() {
       departmentId: majorData.department.id,
       status: Constants.ACTIVE,
     };
-
     setModalMode("edit");
     setInitialData(formData);
     setIsModalOpen(true);
   };
+
   async function handleSubmit(formData: MajorFormData) {
     setIsSubmitting(true);
 
@@ -173,38 +176,38 @@ export default function ManageMajorPage() {
     setSearchQuery(e.target.value);
   };
   async function handleDeleteMajor() {
-      if (!majors) return;
-  
-      setIsSubmitting(true);
-      try {
-        const response = await deletedMajorService(majors.id);
-  
-        if (response) {
-          setAllMajorData((prevData) => {
-            if (!prevData) return null;
-  
-            const updatedContent = prevData.content.filter(
-              (item) => item.id !== majors.id
-            );
-  
-            return {
-              ...prevData,
-              content: updatedContent,
-              totalElements: prevData.totalElements - 1,
-            };
-          });
-  
-          toast.success("Major deleted successfully");
-        } else {
-          toast.error("Failed to delete major");
-        }
-      } catch (error) {
-        toast.error("An error occurred while deleting the major");
-      } finally {
-        setIsSubmitting(false);
-        setIsDeleteDialogOpen(false);
+    if (!majors) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await deletedMajorService(majors.id);
+
+      if (response) {
+        setAllMajorData((prevData) => {
+          if (!prevData) return null;
+
+          const updatedContent = prevData.content.filter(
+            (item) => item.id !== majors.id
+          );
+
+          return {
+            ...prevData,
+            content: updatedContent,
+            totalElements: prevData.totalElements - 1,
+          };
+        });
+
+        toast.success("Major deleted successfully");
+      } else {
+        toast.error("Failed to delete major");
       }
+    } catch (error) {
+      toast.error("An error occurred while deleting the major");
+    } finally {
+      setIsSubmitting(false);
+      setIsDeleteDialogOpen(false);
     }
+  }
   return (
     <div>
       <Card>
@@ -282,7 +285,7 @@ export default function ManageMajorPage() {
                       <TableCell>{major.name}</TableCell>
                       <TableCell>{major.department.name}</TableCell>
                       <TableCell>
-                        <div className="flex justify-end space-x-2">
+                        <div className="flex justify-start space-x-2">
                           <Button
                             onClick={() => handleOpenEditModal(major)}
                             variant="ghost"
@@ -325,6 +328,7 @@ export default function ManageMajorPage() {
         </div>
       )}
 
+      {/* Add/Edit Major Modal */}
       <MajorFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -332,6 +336,8 @@ export default function ManageMajorPage() {
         initialData={initialData}
         mode={modalMode}
       />
+
+      {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}

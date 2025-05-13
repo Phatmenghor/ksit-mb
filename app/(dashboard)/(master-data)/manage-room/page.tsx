@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,7 +40,7 @@ import {
   RoomModal,
 } from "@/components/dashboard/master-data/manage-room/room-form-model";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
-import { rooomTableHeader } from "@/constants/table/master-data";
+import { roomTableHeader } from "@/constants/table/master-data";
 import PaginationPage from "@/components/shared/pagination-page";
 import Loading from "@/components/shared/loading";
 
@@ -94,12 +95,9 @@ export default function ManageRoomPage() {
   const handleOpenEditModal = (room: RoomModel) => {
     const formData: RoomFormData = {
       id: room.id,
-
       name: room.name,
-
       status: room.status,
     };
-    console.log(formData);
 
     setModalMode("edit");
     setInitialData(formData);
@@ -114,7 +112,6 @@ export default function ManageRoomPage() {
     try {
       const roomtData = {
         name: formData.name.trim(),
-
         status: formData.status,
       };
 
@@ -127,6 +124,7 @@ export default function ManageRoomPage() {
           if (response) {
             setAllRoomtData((prevData) => {
               if (!prevData) return null;
+
               const updatedContent = response
                 ? [response, ...prevData.content]
                 : [...prevData.content];
@@ -147,6 +145,7 @@ export default function ManageRoomPage() {
       } else if (modalMode === "edit" && formData.id) {
         try {
           response = await updateRoomService(formData.id, roomtData);
+
           if (response) {
             setAllRoomtData((prevData) => {
               if (!prevData) return null;
@@ -177,8 +176,8 @@ export default function ManageRoomPage() {
 
   async function handleDeleteRoom() {
     if (!room) return;
-
     setIsSubmitting(true);
+
     try {
       const response = await deletedRoomService(room.id);
 
@@ -255,7 +254,7 @@ export default function ManageRoomPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                {rooomTableHeader.map((header, index) => (
+                {roomTableHeader.map((header, index) => (
                   <TableHead key={index} className={header.className}>
                     {header.label}
                   </TableHead>
@@ -282,7 +281,7 @@ export default function ManageRoomPage() {
                       <TableCell>{room.name}</TableCell>
 
                       <TableCell>
-                        <div className="flex justify-end space-x-2">
+                        <div className="flex justify-start space-x-2">
                           <Button
                             onClick={() => handleOpenEditModal(room)}
                             variant="ghost"

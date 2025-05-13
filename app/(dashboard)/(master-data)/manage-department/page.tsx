@@ -79,7 +79,6 @@ export default function ManageDepartmentPage() {
         });
 
         if (response) {
-          console.log("hi", response);
           setAllDepartmentData(response);
         } else {
           console.error("Failed to fetch departments:");
@@ -278,7 +277,7 @@ export default function ManageDepartmentPage() {
         {isLoading ? (
           <Loading />
         ) : (
-          <Table className="border-none border-0">
+          <Table>
             <TableHeader>
               <TableRow>
                 {departmentTableHeader.map((header, index) => (
@@ -321,7 +320,7 @@ export default function ManageDepartmentPage() {
                       </TableCell>
                       <TableCell>{DateTimeFormatter(dept.createdAt)}</TableCell>
                       <TableCell>
-                        <div className="flex justify-end space-x-2">
+                        <div className="flex justify-start space-x-2">
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -368,6 +367,7 @@ export default function ManageDepartmentPage() {
           </Table>
         )}
       </div>
+
       {/* Pagination */}
       {!isLoading && allDepartmentData && (
         <div className="mt-4 flex justify-end">
@@ -378,6 +378,7 @@ export default function ManageDepartmentPage() {
           />
         </div>
       )}
+
       {/* Department Edit/Add Modal */}
       <DepartmentModal
         isOpen={isModalOpen}

@@ -71,3 +71,8 @@ export const status = [
   { value: "ACTIVE", label: "Active" },
   { value: "INACTIVE", label: "Inactive" },
 ];
+
+export enum SemesterEnum {
+  SEMESTER_1 = "SEMESTER_1",
+  SEMESTER_2 = "SEMESTER_2",
+}
