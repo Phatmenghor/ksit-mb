@@ -1,5 +1,311 @@
-import ManageRoom from "@/components/dashboard/master-data/room-table";
+"use client"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Pencil, Plus, Search, Trash2 } from "lucide-react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { ROUTE } from "@/constants/routes";
+import { useCallback, useEffect, useState } from "react";
+import { AllRoomModel, RoomModel } from "@/model/room/all-room-model";
+import { AllRoomFilterModel } from "@/model/room/type-room-model";
+import { createRoomService, deletedRoomService, getAllRoomService, updateRoomService } from "@/service/master-data/room.service";
+import { Constants } from "@/constants/text-string";
+import { toast } from "sonner";
+import { RoomFormData, RoomModal } from "@/components/dashboard/master-data/manage-room/room-form-model";
+import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 
 export default function ManageRoomPage() {
-  return <ManageRoom />;
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [room, setRoom] = useState<RoomModel | null>(null);
+  const [allRoomData, setAllRoomtData] =
+    useState<AllRoomModel | null>(null);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [initialData, setInitialData] = useState<
+    RoomFormData | undefined
+  >(undefined);
+
+  const loadDepartments = useCallback(
+    async (param: AllRoomFilterModel) => {
+      setIsLoading(true);
+
+      try {
+        const response = await getAllRoomService({
+          search: searchQuery,
+          status: Constants.ACTIVE,
+          ...param,
+        });
+
+        if (response) {
+          setAllRoomtData(response);
+        } else {
+          console.error("Failed to fetch rooms:");
+        }
+      } catch (error) {
+        toast.error("An error occurred while loading rooms");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [searchQuery]
+  );
+
+  useEffect(() => {
+    loadDepartments({});
+  }, [searchQuery, loadDepartments]);
+  const handleOpenAddModal = () => {
+    setModalMode("add");
+    setInitialData(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (room: RoomModel) => {
+    const formData: RoomFormData = {
+      id: room.id,
+
+      name: room.name,
+
+      status: room.status,
+    };
+    console.log(formData);
+
+    setModalMode("edit");
+    setInitialData(formData);
+    setIsModalOpen(true);
+  };
+   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+  async function handleSubmit(formData: RoomFormData) {
+    setIsSubmitting(true);
+
+    try {
+      const roomtData = {
+
+        name: formData.name.trim(),
+
+        status: formData.status,
+      };
+
+      let response: RoomModel | null = null;
+
+      if (modalMode === "add") {
+        try {
+          response = await createRoomService(roomtData);
+
+          if (response) {
+            setAllRoomtData((prevData) => {
+              if (!prevData) return null;
+              const updatedContent = response
+                ? [response, ...prevData.content]
+                : [...prevData.content];
+
+              return {
+                ...prevData,
+                content: updatedContent,
+                totalElements: prevData.totalElements + 1,
+              } as AllRoomModel;
+            });
+
+            toast.success("Room added successfully");
+            setIsModalOpen(false);
+          }
+        } catch (error: any) {
+          toast.error(error.message || "Failed to add room");
+        }
+      } else if (modalMode === "edit" && formData.id) {
+
+        try {
+          response = await updateRoomService(formData.id, roomtData);
+          if (response) {
+            setAllRoomtData((prevData) => {
+              if (!prevData) return null;
+
+              const updatedContent = prevData.content.map((dept) =>
+                dept.id === formData.id && response ? response : dept
+              );
+
+              return {
+                ...prevData,
+                content: updatedContent,
+              } as AllRoomModel;
+            });
+
+            toast.success("Room updated successfully ");
+            setIsModalOpen(false);
+          }
+        } catch (error: any) {
+          toast.error(error.message || "Failed to update room");
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message || "An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleDeleteRoom() {
+    if (!room) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await deletedRoomService(room.id);
+
+      if (response) {
+        setAllRoomtData((prevData) => {
+          if (!prevData) return null;
+
+          const updatedContent = prevData.content.filter(
+            (item) => item.id !== room.id
+          );
+
+          return {
+            ...prevData,
+            content: updatedContent,
+            totalElements: prevData.totalElements - 1,
+          };
+        });
+
+        toast.success("Room deleted successfully");
+      } else {
+        toast.error("Failed to delete Room");
+      }
+    } catch (error) {
+      toast.error("An error occurred while deleting the Room");
+    } finally {
+      setIsSubmitting(false);
+      setIsDeleteDialogOpen(false);
+    }
+  }
+
+  return (
+    <div>
+      <Card>
+        <CardContent className="p-6 space-y-2">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href={ROUTE.DASHBOARD}>Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Manage room</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <h3 className="text-xl font-bold">Manage Room</h3>
+          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="relative w-full md:flex-1">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+               <Input
+                  type="search"
+                  placeholder="Search room..."
+                  className="pl-8 w-full"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+            </div>
+            <Button
+              onClick={handleOpenAddModal}
+              className="bg-green-900 text-white hover:bg-green-950"
+            >
+              <Plus className="mr-2 h-2 w-2" />
+              Add New
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="overflow-hidden mt-4">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[50px]">#</TableHead>
+              <TableHead>Room</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {allRoomData?.content.map((room) => (
+              <TableRow key={room.id}>
+                <TableCell>{room.id}</TableCell>
+                <TableCell>
+                  <span className="rounded bg-amber-100 px-2 py-1 text-amber-800">
+                    {room.name}
+                  </span>
+                </TableCell>
+
+                <TableCell>
+                  <div>
+                    <Button
+                      onClick={() => handleOpenEditModal(room)}
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                      disabled={isSubmitting}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setRoom(room);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
+                      disabled={isSubmitting}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+
+      </div>
+
+      {/* Room Edit/Add Modal */}
+      <RoomModal
+        isOpen={isModalOpen}
+        mode={modalMode}
+        initialData={initialData}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+      />
+
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onDelete={handleDeleteRoom}
+        title="Delete Room"
+        description="Are you sure you want to delete the room:"
+        itemName={room?.name}
+        isSubmitting={isSubmitting}
+      />
+    </div>
+  );
+
 }
