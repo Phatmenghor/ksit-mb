@@ -79,6 +79,7 @@ export default function ManageDepartmentPage() {
         });
 
         if (response) {
+          console.log("hi",response);
           setAllDepartmentData(response);
         } else {
           console.error("Failed to fetch departments:");

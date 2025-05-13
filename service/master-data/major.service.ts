@@ -1,44 +1,41 @@
-import {
-  AllDepartmentFilterModel,
-  CreateDepartmentModel,
-  UpdateDepartmentModel,
-} from "@/model/master-data/department/type-department-model";
+import { AllMajorFilterModel, CreateMajorModel, UpdateMajorModel } from "@/model/master-data/major/type-major-model";
 import { axiosClientWithAuth } from "@/utils/axios";
 
-export async function getAllDepartmentService(data: AllDepartmentFilterModel) {
+export async function getAllMajorService(data: AllMajorFilterModel) {
   try {
     const response = await axiosClientWithAuth.post(
-      `/v1/departments/all`,
-      // data
+      `/v1/majors/all`,
+      data
     );
     return response.data.data;
   } catch (error: any) {
-    console.error("Error fetching all departments:", error);
+    console.error("Error fetching all major:", error);
     return null;
   }
 }
 
-export async function createDepartmentService(data: CreateDepartmentModel) {
+export async function createMajorService(data: CreateMajorModel) {
   try {
-    const response = await axiosClientWithAuth.post(`/v1/departments`, data);
+    const response = await axiosClientWithAuth.post(`/v1/majors`, data);
     return response.data.data;
   } catch (error: any) {
     // Extract error message from response if available
     if (error.response && error.response.data && error.response.data.message) {
       throw new Error(error.response.data.message);
     }
-    console.error("Error creating department:", error);
+    console.error("Error creating major:", error);
     throw error;
   }
 }
 
-export async function updateDepartmentService(
-  departmentId: number,
-  data: UpdateDepartmentModel
+
+export async function updateRoomService(
+  majorId: number,
+  data: UpdateMajorModel
 ) {
   try {
     const response = await axiosClientWithAuth.post(
-      `/v1/departments/updateById/${departmentId}`,
+      `/v1/majors/updateById/${majorId}`,
       data
     );
     return response.data.data;
@@ -48,15 +45,16 @@ export async function updateDepartmentService(
       throw new Error(error.response.data.message);
     }
 
-    console.error("Error updating department:", error);
+    console.error("Error updating major:", error);
     throw error;
   }
 }
 
-export async function deletedDepartmentService(departmentId: number) {
+
+export async function deletedMajorService(majorId: number) {
   try {
     const response = await axiosClientWithAuth.delete(
-      `/v1/departments/${departmentId}`
+      `/v1/majors/${majorId}`
     );
     return response.data.data;
   } catch (error: any) {

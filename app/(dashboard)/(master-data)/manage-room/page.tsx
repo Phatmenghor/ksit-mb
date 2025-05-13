@@ -21,8 +21,8 @@ import {
 } from "@/components/ui/breadcrumb";
 import { ROUTE } from "@/constants/routes";
 import { useCallback, useEffect, useState } from "react";
-import { AllRoomModel, RoomModel } from "@/model/room/all-room-model";
-import { AllRoomFilterModel } from "@/model/room/type-room-model";
+import { AllRoomModel, RoomModel } from "@/model/master-data/room/all-room-model";
+import { AllRoomFilterModel } from "@/model/master-data/room/type-room-model";
 import { createRoomService, deletedRoomService, getAllRoomService, updateRoomService } from "@/service/master-data/room.service";
 import { Constants } from "@/constants/text-string";
 import { toast } from "sonner";
@@ -43,7 +43,7 @@ export default function ManageRoomPage() {
     RoomFormData | undefined
   >(undefined);
 
-  const loadDepartments = useCallback(
+  const loadRooms = useCallback(
     async (param: AllRoomFilterModel) => {
       setIsLoading(true);
 
@@ -69,8 +69,8 @@ export default function ManageRoomPage() {
   );
 
   useEffect(() => {
-    loadDepartments({});
-  }, [searchQuery, loadDepartments]);
+    loadRooms({});
+  }, [searchQuery, loadRooms]);
   const handleOpenAddModal = () => {
     setModalMode("add");
     setInitialData(undefined);

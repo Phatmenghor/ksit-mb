@@ -49,8 +49,8 @@ export function RoomModal({
     mode,
     isSubmitting = false,
 }: RoomModalProps) {
-    const [logoFile, setLogoFile] = useState<File | null>(null);
-    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+   
+  
     const [isUploading, setIsUploading] = useState(false);
     const form = useForm<RoomFormData>({
         resolver: zodResolver(roomFormSchema),
@@ -80,7 +80,7 @@ export function RoomModal({
                 });
 
             }
-            setLogoFile(null);
+            
         }
     }, [isOpen, initialData, mode, form]);
     const handleSubmit = async (data: RoomFormData) => {
@@ -101,9 +101,7 @@ export function RoomModal({
             setIsUploading(false);
         }
     };
-    const handleRemoveLogo = () => {
-        setLogoFile(null);
-    };
+  
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>

@@ -1,5 +1,5 @@
 
-import { AllRoomFilterModel, CreateRoomModel, UpdateRoomModel } from "@/model/room/type-room-model";
+import { AllRoomFilterModel, CreateRoomModel, UpdateRoomModel } from "@/model/master-data/room/type-room-model";
 import { axiosClientWithAuth } from "@/utils/axios";
 
 export async function getAllRoomService(data: AllRoomFilterModel) {
