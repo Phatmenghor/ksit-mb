@@ -24,7 +24,8 @@ export const ROUTE = {
   },
 
   USERS: {
-    MEMBERS: "/members",
+    ADMIN: "/admin",
+    STUFF_OFFICER: "/stuff-officer",
     TEACHERS: "/teachers",
     ADD_TEACHER: "/teachers/add",
   },
@@ -63,7 +64,7 @@ export const ROUTE = {
 export const sidebarRoutes = [
   {
     title: "Dashboard",
-    href: "/",
+    href: ROUTE.DASHBOARD,
     icon: Home,
   },
   {
@@ -71,12 +72,12 @@ export const sidebarRoutes = [
     icon: Database,
     section: "masterData",
     subroutes: [
-      { title: "Manage class", href: "/manage-class" },
-      { title: "Manage semester", href: "/manage-semester" },
-      { title: "Manage major", href: "/manage-major" },
-      { title: "Manage department", href: "/manage-department" },
-      { title: "Manage room", href: "/manage-room" },
-      { title: "Manage Course", href: "/courses" },
+      { title: "Manage class", href: ROUTE.MASTER_DATA.MANAGE_CLASS },
+      { title: "Manage semester", href: ROUTE.MASTER_DATA.MANAGE_SEMESTER },
+      { title: "Manage major", href: ROUTE.MASTER_DATA.MANAGE_MAJOR },
+      { title: "Manage department", href: ROUTE.MASTER_DATA.MANAGE_DEPARTMENT },
+      { title: "Manage room", href: ROUTE.MASTER_DATA.MANAGE_ROOM },
+      { title: "Manage Course", href: ROUTE.COURSES.INDEX },
     ],
   },
   {
@@ -84,8 +85,9 @@ export const sidebarRoutes = [
     icon: Users,
     section: "users",
     subroutes: [
-      { title: "Members", href: "/members" },
-      { title: "Teachers", href: "/teachers" },
+      { title: "Admin", href: ROUTE.USERS.ADMIN },
+      { title: "Staff Officer", href: ROUTE.USERS.STUFF_OFFICER },
+      { title: "Teachers", href: ROUTE.USERS.TEACHERS },
     ],
   },
   {
@@ -93,45 +95,45 @@ export const sidebarRoutes = [
     icon: Users,
     section: "students",
     subroutes: [
-      { title: "Add multiple users", href: "/add-multiple" },
-      { title: "Add single user", href: "/add-single" },
-      { title: "Students list", href: "/list" },
-      { title: "Dropout students", href: "/dropout" },
+      { title: "Add multiple users", href: ROUTE.STUDENTS.ADD_MULTIPLE },
+      { title: "Add single user", href: ROUTE.STUDENTS.ADD_SINGLE },
+      { title: "Students list", href: ROUTE.STUDENTS.LIST },
+      { title: "Dropout students", href: ROUTE.STUDENTS.DROPOUT },
     ],
   },
   {
     title: "Manage schedule",
-    href: "/manage-schedule",
+    href: ROUTE.SCHEDULE.MANAGE,
     icon: Calendar,
   },
   {
     title: "Student score",
-    href: "/student-score",
+    href: ROUTE.SCORES.STUDENT_SCORE,
     icon: Database,
   },
   {
     title: "Score submitted",
-    href: "/scores-submitted",
+    href: ROUTE.SCORES.SUBMITTED,
     icon: FileCheck,
   },
   {
     title: "Request",
-    href: "/requests",
+    href: ROUTE.REQUESTS,
     icon: FileText,
   },
   {
     title: "Theme setting",
-    href: "/settings/theme",
+    href: ROUTE.SETTINGS.THEME,
     icon: Palette,
   },
   {
     title: "Schedule",
-    href: "/schedule",
+    href: ROUTE.SCHEDULE.ROOT,
     icon: Calendar,
   },
   {
     title: "Role&User permission",
-    href: "/permissions",
+    href: ROUTE.PERMISSIONS,
     icon: ShieldCheck,
   },
 ];
