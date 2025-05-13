@@ -299,66 +299,70 @@ export default function ManageDepartmentPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                allDepartmentData?.content.map((dept, index) => (
-                  <TableRow key={dept.id || index}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>
-                      <span className="rounded bg-blue-100 px-2 py-1 text-blue-800">
-                        {dept.code}
-                      </span>
-                    </TableCell>
-                    <TableCell>{dept.name}</TableCell>
-                    <TableCell>
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={dept.urlLogo || "/placeholder.svg"}
-                          alt={dept.name}
-                        />
-                      </Avatar>
-                    </TableCell>
-                    <TableCell>{DateTimeFormatter(dept.createdAt)}</TableCell>
-                    <TableCell>
-                      <div className="flex justify-end space-x-2">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                onClick={() => handleOpenEditModal(dept)}
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
-                                disabled={isSubmitting}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Edit</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                allDepartmentData?.content.map((dept, index) => {
+                  const indexDisplay =
+                    ((allDepartmentData.pageNo || 1) - 1) * 10 + index + 1;
+                  return (
+                    <TableRow key={dept.id || index}>
+                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>
+                        <span className="rounded bg-blue-100 px-2 py-1 text-blue-800">
+                          {dept.code}
+                        </span>
+                      </TableCell>
+                      <TableCell>{dept.name}</TableCell>
+                      <TableCell>
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage
+                            src={dept.urlLogo || "/placeholder.svg"}
+                            alt={dept.name}
+                          />
+                        </Avatar>
+                      </TableCell>
+                      <TableCell>{DateTimeFormatter(dept.createdAt)}</TableCell>
+                      <TableCell>
+                        <div className="flex justify-end space-x-2">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => handleOpenEditModal(dept)}
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                  disabled={isSubmitting}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Edit</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
 
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                onClick={() => {
-                                  setDepartment(dept);
-                                  setIsDeleteDialogOpen(true);
-                                }}
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
-                                disabled={isSubmitting}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Delete</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => {
+                                    setDepartment(dept);
+                                    setIsDeleteDialogOpen(true);
+                                  }}
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
+                                  disabled={isSubmitting}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Delete</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>

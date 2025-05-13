@@ -5,14 +5,12 @@ export interface AllRoomFilterModel {
   pageSize?: number;
 }
 
-
-export interface CreateRoomModel{
-name?:string,
-status?:string
-
+export interface CreateRoomModel {
+  name?: string;
+  status?: string;
 }
 
-export interface UpdateRoomModel{
-    name?:string,
-    status?:string
+export interface UpdateRoomModel {
+  name?: string;
+  status?: string;
 }

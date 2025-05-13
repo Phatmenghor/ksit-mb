@@ -176,37 +176,41 @@ export default function ManageMajorPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                allMajorData?.content.map((major) => (
-                  <TableRow key={major.id}>
-                    <TableCell>{major.id}</TableCell>
-                    <TableCell>
-                      <span className="rounded bg-gray-100 px-2 py-1">
-                        {major.code}
-                      </span>
-                    </TableCell>
-                    <TableCell>{major.name}</TableCell>
-                    <TableCell>{major.department.name}</TableCell>
-                    <TableCell>
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          onClick={() => handleOpenEditModal(major)}
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 bg-gray-200"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                allMajorData?.content.map((major, index) => {
+                  const indexDisplay =
+                    ((allMajorData.pageNo || 1) - 1) * 10 + index + 1;
+                  return (
+                    <TableRow key={major.id}>
+                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>
+                        <span className="rounded bg-gray-100 px-2 py-1">
+                          {major.code}
+                        </span>
+                      </TableCell>
+                      <TableCell>{major.name}</TableCell>
+                      <TableCell>{major.department.name}</TableCell>
+                      <TableCell>
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            onClick={() => handleOpenEditModal(major)}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-gray-200"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>

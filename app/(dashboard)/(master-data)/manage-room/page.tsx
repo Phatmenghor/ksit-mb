@@ -273,38 +273,42 @@ export default function ManageRoomPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                allRoomData?.content.map((room) => (
-                  <TableRow key={room.id}>
-                    <TableCell>{room.id}</TableCell>
-                    <TableCell>{room.name}</TableCell>
+                allRoomData?.content.map((room, index) => {
+                  const indexDisplay =
+                    ((allRoomData.pageNo || 1) - 1) * 10 + index + 1;
+                  return (
+                    <TableRow key={room.id}>
+                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{room.name}</TableCell>
 
-                    <TableCell>
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          onClick={() => handleOpenEditModal(room)}
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
-                          disabled={isSubmitting}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setRoom(room);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
-                          disabled={isSubmitting}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                      <TableCell>
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            onClick={() => handleOpenEditModal(room)}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                            disabled={isSubmitting}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setRoom(room);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
+                            disabled={isSubmitting}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
