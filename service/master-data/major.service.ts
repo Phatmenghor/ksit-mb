@@ -29,7 +29,7 @@ export async function createMajorService(data: CreateMajorModel) {
 }
 
 
-export async function updateRoomService(
+export async function updateMajorService(
   majorId: number,
   data: UpdateMajorModel
 ) {

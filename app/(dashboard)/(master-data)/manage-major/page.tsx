@@ -23,7 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ROUTE } from "@/constants/routes";
 
-import { getAllMajorService } from "@/service/master-data/major.service";
+import { createMajorService, deletedMajorService, getAllMajorService, updateMajorService } from "@/service/master-data/major.service";
 import { toast } from "sonner";
 import { Constants } from "@/constants/text-string";
 import { AllMajorFilterModel } from "@/model/master-data/major/type-major-model";
@@ -38,6 +38,7 @@ import {
 import { majorTableHeader } from "@/constants/table/master-data";
 import Loading from "@/components/shared/loading";
 import PaginationPage from "@/components/shared/pagination-page";
+import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 
 export default function ManageMajorPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -101,18 +102,119 @@ export default function ManageMajorPage() {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (data: MajorFormData) => {
-    console.log("### ===data", data);
-    // if (modalMode === "add") {
-    //   setMajors([...majors, data]);
-    // } else {
-    //   setMajors(majors.map((c) => (c.id === initialData?.id ? data : c)));
-    // }
-  };
+  // const handleSubmit = (data: MajorFormData) => {
+  //   console.log("### ===data", data);
+  //   // if (modalMode === "add") {
+  //   //   setMajors([...majors, data]);
+  //   // } else {
+  //   //   setMajors(majors.map((c) => (c.id === initialData?.id ? data : c)));
+  //   // }
+  // };
+
+  async function handleSubmit(formData: MajorFormData) {
+    setIsSubmitting(true);
+
+    try {
+      const majorData = {
+        code: formData.code,
+        name: formData.name.trim(),
+        departmentId: formData.departmentId,
+        status: formData.status,
+      };
+
+      let response: MajorModel | null = null;
+
+      if (modalMode === "add") {
+        try {
+          response = await createMajorService(majorData);
+
+          if (response) {
+            setAllMajorData((prevData) => {
+              if (!prevData) return null;
+              const updatedContent = response
+                ? [response, ...prevData.content]
+                : [...prevData.content];
+
+              return {
+                ...prevData,
+                content: updatedContent,
+                totalElements: prevData.totalElements + 1,
+              } as AllMajorModel;
+            });
+
+            toast.success("Major added successfully");
+            setIsModalOpen(false);
+          }
+        } catch (error: any) {
+          toast.error(error.message || "Failed to add room");
+        }
+      } else if (modalMode === "edit" && formData.id) {
+        try {
+          response = await updateMajorService(formData.id, majorData);
+          if (response) {
+            setAllMajorData((prevData) => {
+              if (!prevData) return null;
+
+              const updatedContent = prevData.content.map((dept) =>
+                dept.id === formData.id && response ? response : dept
+              );
+
+              return {
+                ...prevData,
+                content: updatedContent,
+              } as AllMajorModel;
+            });
+
+            toast.success("Major updated successfully");
+            setIsModalOpen(false);
+          }
+        } catch (error: any) {
+          toast.error(error.message || "Failed to update major");
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message || "An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
+  async function handleDeleteMajor() {
+      if (!majors) return;
+  
+      setIsSubmitting(true);
+      try {
+        const response = await deletedMajorService(majors.id);
+  
+        if (response) {
+          setAllMajorData((prevData) => {
+            if (!prevData) return null;
+  
+            const updatedContent = prevData.content.filter(
+              (item) => item.id !== majors.id
+            );
+  
+            return {
+              ...prevData,
+              content: updatedContent,
+              totalElements: prevData.totalElements - 1,
+            };
+          });
+  
+          toast.success("Major deleted successfully");
+        } else {
+          toast.error("Failed to delete major");
+        }
+      } catch (error) {
+        toast.error("An error occurred while deleting the major");
+      } finally {
+        setIsSubmitting(false);
+        setIsDeleteDialogOpen(false);
+      }
+    }
   return (
     <div>
       <Card>
@@ -200,9 +302,14 @@ export default function ManageMajorPage() {
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
+                            onClick={() => {
+                              setMajors(major);
+                              setIsDeleteDialogOpen(true);
+                            }}
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
+                            disabled={isSubmitting}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -234,6 +341,15 @@ export default function ManageMajorPage() {
         onSubmit={handleSubmit}
         initialData={initialData}
         mode={modalMode}
+      />
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onDelete={handleDeleteMajor}
+        title="Delete Mojor"
+        description="Are you sure you want to delete the major:"
+        itemName={majors?.name}
+        isSubmitting={isSubmitting}
       />
     </div>
   );
