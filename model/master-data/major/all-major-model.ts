@@ -1,16 +1,20 @@
+import { DepartmentModel } from "../department/all-department-model";
+
 export interface AllMajorModel {
-  content: MajorModel[]
-  pageNo: number
-  pageSize: number
-  totalElements: number
-  totalPages: number
-  last: boolean
+  content: MajorModel[];
+  pageNo: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
 }
 
 export interface MajorModel {
-  id: number
-  code: string
-  name: string
-  departmentName: string
-  status: string
+  id: number;
+  code: string;
+  name: string;
+  status: string;
+  department: DepartmentModel;
+  createdAt: string;
+  updatedAt: any;
 }

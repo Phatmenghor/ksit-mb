@@ -79,7 +79,7 @@ export default function ManageDepartmentPage() {
         });
 
         if (response) {
-          console.log("hi",response);
+          console.log("hi", response);
           setAllDepartmentData(response);
         } else {
           console.error("Failed to fetch departments:");
@@ -248,21 +248,16 @@ export default function ManageDepartmentPage() {
           </Breadcrumb>
           <h3 className="text-xl font-bold">Manage Department</h3>
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <form
-              onSubmit={handleSearchSubmit}
-              className="flex flex-col md:flex-row gap-4 w-full md:flex-1"
-            >
-              <div className="relative w-full md:w-1/2">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search department..."
-                  className="pl-8 w-full"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                />
-              </div>
-            </form>
+            <div className="relative w-full md:w-1/2">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search department..."
+                className="pl-8 w-full"
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+            </div>
 
             <Button
               onClick={handleOpenAddModal}
@@ -283,92 +278,90 @@ export default function ManageDepartmentPage() {
         {isLoading ? (
           <Loading />
         ) : (
-          <div className="rounded-md border">
-            <Table className="border-none border-0">
-              <TableHeader>
+          <Table className="border-none border-0">
+            <TableHeader>
+              <TableRow>
+                {departmentTableHeader.map((header, index) => (
+                  <TableHead key={index} className={header.className}>
+                    {header.label}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {allDepartmentData?.content.length === 0 ? (
                 <TableRow>
-                  {departmentTableHeader.map((header, index) => (
-                    <TableHead key={index} className={header.className}>
-                      {header.label}
-                    </TableHead>
-                  ))}
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    No departments found
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {allDepartmentData?.content.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="text-center py-8 text-muted-foreground"
-                    >
-                      No departments found
+              ) : (
+                allDepartmentData?.content.map((dept, index) => (
+                  <TableRow key={dept.id || index}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                      <span className="rounded bg-blue-100 px-2 py-1 text-blue-800">
+                        {dept.code}
+                      </span>
+                    </TableCell>
+                    <TableCell>{dept.name}</TableCell>
+                    <TableCell>
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage
+                          src={dept.urlLogo || "/placeholder.svg"}
+                          alt={dept.name}
+                        />
+                      </Avatar>
+                    </TableCell>
+                    <TableCell>{DateTimeFormatter(dept.createdAt)}</TableCell>
+                    <TableCell>
+                      <div className="flex justify-end space-x-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                onClick={() => handleOpenEditModal(dept)}
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                disabled={isSubmitting}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Edit</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                onClick={() => {
+                                  setDepartment(dept);
+                                  setIsDeleteDialogOpen(true);
+                                }}
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
+                                disabled={isSubmitting}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
                     </TableCell>
                   </TableRow>
-                ) : (
-                  allDepartmentData?.content.map((dept, index) => (
-                    <TableRow key={dept.id || index}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>
-                        <span className="rounded bg-blue-100 px-2 py-1 text-blue-800">
-                          {dept.code}
-                        </span>
-                      </TableCell>
-                      <TableCell>{dept.name}</TableCell>
-                      <TableCell>
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage
-                            src={dept.urlLogo || "/placeholder.svg"}
-                            alt={dept.name}
-                          />
-                        </Avatar>
-                      </TableCell>
-                      <TableCell>{DateTimeFormatter(dept.createdAt)}</TableCell>
-                      <TableCell>
-                        <div className="flex justify-end space-x-2">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  onClick={() => handleOpenEditModal(dept)}
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
-                                  disabled={isSubmitting}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Edit</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  onClick={() => {
-                                    setDepartment(dept);
-                                    setIsDeleteDialogOpen(true);
-                                  }}
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
-                                  disabled={isSubmitting}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Delete</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                ))
+              )}
+            </TableBody>
+          </Table>
         )}
       </div>
       {/* Pagination */}

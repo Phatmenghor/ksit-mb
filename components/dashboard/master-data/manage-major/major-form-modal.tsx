@@ -23,19 +23,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Upload, X, ImageIcon } from "lucide-react";
 import { Constants } from "@/constants/text-string";
-import { ComboboxSelectDepartment } from "@/components/shared/ComboBox/combobox-department";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
+import { ComboboxSelectDepartment } from "@/components/shared/comboBox/combobox-department";
+import { MajorModel } from "@/model/master-data/major/all-major-model";
+
 const majorFormSchema = z.object({
   name: z.string().min(1, { message: "Room name is required" }),
+  code: z.string().min(1, { message: "Room code is required" }),
+  departmentId: z.number().min(1, { message: "Department is required" }),
   status: z.literal(Constants.ACTIVE),
 });
-export type MajorFormData = z.infer<typeof majorFormSchema> & {
-  id?: number,
 
+export type MajorFormData = z.infer<typeof majorFormSchema> & {
+  id?: number;
 };
-interface RoomModalProps {
+
+interface MajorModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: MajorFormData) => void;
@@ -43,49 +47,57 @@ interface RoomModalProps {
   mode: "add" | "edit";
   isSubmitting?: boolean;
 }
-export function RoomModal({
+
+export function MajorFormModal({
   isOpen,
   onClose,
   onSubmit,
   initialData,
   mode,
   isSubmitting = false,
-}: RoomModalProps) {
-
-const [selectedDepartment, setSelectedDepartment] =
+}: MajorModalProps) {
+  const [selectedDepartment, setSelectedDepartment] =
     useState<DepartmentModel | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
   const form = useForm<MajorFormData>({
     resolver: zodResolver(majorFormSchema),
     defaultValues: {
-
       name: "",
-
+      code: "",
+      departmentId: 0,
       status: Constants.ACTIVE,
     },
   });
+
   useEffect(() => {
     if (isOpen) {
       if (initialData && mode === "edit") {
         form.reset({
-
           name: initialData.name || "",
-
+          code: initialData.code || "",
+          departmentId: initialData.departmentId || 0,
           status: Constants.ACTIVE,
         });
-
       } else {
         form.reset({
-
           name: "",
-
+          code: "",
+          departmentId: 0,
           status: Constants.ACTIVE,
         });
-
+        setSelectedDepartment(null);
       }
-
     }
   }, [isOpen, initialData, mode, form]);
+
+  const handleDepartmentChange = (department: DepartmentModel) => {
+    setSelectedDepartment(department);
+    form.setValue("departmentId", department.id as number, {
+      shouldValidate: true,
+    });
+  };
+
   const handleSubmit = async (data: MajorFormData) => {
     setIsUploading(true);
     try {
@@ -93,6 +105,7 @@ const [selectedDepartment, setSelectedDepartment] =
         ...data,
         status: Constants.ACTIVE,
       };
+
       if (mode === "edit" && initialData?.id) {
         submitData.id = initialData.id;
       }
@@ -105,15 +118,12 @@ const [selectedDepartment, setSelectedDepartment] =
     }
   };
 
-
- 
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode === "add" ? "Add Room" : "Edit Room"}
+            {mode === "add" ? "Add Major" : "Edit Major"}
           </DialogTitle>
           <DialogDescription>
             Fill in the information below to{" "}
@@ -128,39 +138,55 @@ const [selectedDepartment, setSelectedDepartment] =
           >
             <FormField
               control={form.control}
-              name="name"
+              name="code"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Room Name <span className="text-red-500">*</span>
+                    Major Code <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter department name" {...field} />
+                    <Input placeholder="Enter room code" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Room Name <span className="text-red-500">*</span>
+                    Major Name <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter room name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="departmentId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Department <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
                     <ComboboxSelectDepartment
                       dataSelect={selectedDepartment}
-                      onChangeSelected={(selected) =>
-                        handleChange("departmentId", selected.name || "")
-                      }
+                      onChangeSelected={handleDepartmentChange}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <DialogFooter className="mt-6 sticky -bottom-8 z-10 bg-white py-4">
               <Button
                 type="button"
@@ -181,7 +207,7 @@ const [selectedDepartment, setSelectedDepartment] =
                     Saving...
                   </>
                 ) : (
-                  "Save Room"
+                  "Save Major"
                 )}
               </Button>
             </DialogFooter>

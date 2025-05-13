@@ -15,17 +15,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-// import { MajorModel } from "@/model/major/major-model";
 import { debounce } from "@/utils/debounce/debounce";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { StatusEnum } from "@/constants/constant";
-import { getAllMajorService } from "@/service/master-data/major.service";
 import { getAllDepartmentService } from "@/service/master-data/department.service";
-import { MajorModel } from "@/model/master-data/major/all-major-model";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
-// import { getAllMajorService } from "@/service/major.service";
 
 interface ComboboxSelectedProps {
   dataSelect: DepartmentModel | null;
@@ -119,11 +115,11 @@ export function ComboboxSelectDepartment({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full h-8 flex-1 justify-between"
+          className="w-full h-10 flex-1 justify-between"
         >
           {selectedValue
             ? data.find((item) => item.name === selectedValue)?.name
-            : "Select an branch..."}
+            : "Select an department..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
