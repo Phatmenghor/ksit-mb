@@ -25,8 +25,7 @@ import {
 } from "@/components/ui/form";
 import { Constants } from "@/constants/text-string";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
-import { ComboboxSelectDepartment } from "@/components/shared/comboBox/combobox-department";
-import { MajorModel } from "@/model/master-data/major/all-major-model";
+import { ComboboxSelectDepartment } from "@/components/shared/ComboBox/combobox-department";
 
 const majorFormSchema = z.object({
   name: z.string().min(1, { message: "Room name is required" }),
@@ -112,7 +111,7 @@ export function MajorFormModal({
 
       onSubmit(submitData);
     } catch (error) {
-      toast.error("An error occurred while saving room");
+      toast.error("An error occurred while saving major");
     } finally {
       setIsUploading(false);
     }
@@ -145,7 +144,7 @@ export function MajorFormModal({
                     Major Code <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter room code" {...field} />
+                    <Input placeholder="Enter major code" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -161,7 +160,7 @@ export function MajorFormModal({
                     Major Name <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter room name" {...field} />
+                    <Input placeholder="Enter major name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

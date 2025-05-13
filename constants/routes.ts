@@ -21,6 +21,7 @@ export const ROUTE = {
     MANAGE_MAJOR: "/manage-major",
     MANAGE_DEPARTMENT: "/manage-department",
     MANAGE_ROOM: "/manage-room",
+    MANAGE_SUBJECT: "/manage-subject",
   },
 
   USERS: {
@@ -77,6 +78,7 @@ export const sidebarRoutes = [
       { title: "Manage department", href: "/manage-department" },
       { title: "Manage room", href: "/manage-room" },
       { title: "Manage Course", href: "/courses" },
+      { title: "Manage Subject", href: "/manage-subject" },
     ],
   },
   {

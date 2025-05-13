@@ -26,7 +26,7 @@ export const departmentTableHeader = [
   },
 ];
 
-export const rooomTableHeader = [
+export const roomTableHeader = [
   {
     label: "#",
     className: "",
@@ -37,7 +37,7 @@ export const rooomTableHeader = [
   },
   {
     label: "Actions",
-    className: "text-right",
+    className: "text-left",
   },
 ];
 
@@ -61,5 +61,20 @@ export const majorTableHeader = [
   {
     label: "Actions",
     className: "text-right",
+  },
+];
+
+export const subjectTableHeader = [
+  {
+    label: "#",
+    className: "",
+  },
+  {
+    label: "Subject",
+    className: "",
+  },
+  {
+    label: "Actions",
+    className: "text-left",
   },
 ];

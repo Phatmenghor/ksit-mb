@@ -101,16 +101,6 @@ export default function ManageMajorPage() {
     setInitialData(formData);
     setIsModalOpen(true);
   };
-
-  // const handleSubmit = (data: MajorFormData) => {
-  //   console.log("### ===data", data);
-  //   // if (modalMode === "add") {
-  //   //   setMajors([...majors, data]);
-  //   // } else {
-  //   //   setMajors(majors.map((c) => (c.id === initialData?.id ? data : c)));
-  //   // }
-  // };
-
   async function handleSubmit(formData: MajorFormData) {
     setIsSubmitting(true);
 

@@ -25,35 +25,35 @@ import {
 } from "@/components/ui/form";
 import { Upload, X, ImageIcon } from "lucide-react";
 import { Constants } from "@/constants/text-string";
-const roomFormSchema = z.object({
-    name: z.string().min(1, { message: "Room name is required" }),
+const subjectFormSchema = z.object({
+    name: z.string().min(1, { message: "Subject name is required" }),
     status: z.literal(Constants.ACTIVE),
 });
-export type RoomFormData = z.infer<typeof roomFormSchema> & {
+export type SubjectFormData = z.infer<typeof subjectFormSchema> & {
     id?: number,
 
 };
-interface RoomModalProps {
+interface SubjectModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (data: RoomFormData) => void;
-    initialData?: RoomFormData;
+    onSubmit: (data: SubjectFormData) => void;
+    initialData?: SubjectFormData;
     mode: "add" | "edit";
     isSubmitting?: boolean;
 }
-export function RoomModal({
+export function SubjectModal({
     isOpen,
     onClose,
     onSubmit,
     initialData,
     mode,
     isSubmitting = false,
-}: RoomModalProps) {
+}: SubjectModalProps) {
    
   
     const [isUploading, setIsUploading] = useState(false);
-    const form = useForm<RoomFormData>({
-        resolver: zodResolver(roomFormSchema),
+    const form = useForm<SubjectFormData>({
+        resolver: zodResolver(subjectFormSchema),
         defaultValues: {
 
             name: "",
@@ -83,10 +83,10 @@ export function RoomModal({
             
         }
     }, [isOpen, initialData, mode, form]);
-    const handleSubmit = async (data: RoomFormData) => {
+    const handleSubmit = async (data: SubjectFormData) => {
         setIsUploading(true);
         try {
-            const submitData: RoomFormData = {
+            const submitData: SubjectFormData = {
                 ...data,
                 status: Constants.ACTIVE,
             };
@@ -96,7 +96,7 @@ export function RoomModal({
 
             onSubmit(submitData);
         } catch (error) {
-            toast.error("An error occurred while saving room");
+            toast.error("An error occurred while saving subject");
         } finally {
             setIsUploading(false);
         }
@@ -108,11 +108,11 @@ export function RoomModal({
             <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
-                        {mode === "add" ? "Add Room" : "Edit Room"}
+                        {mode === "add" ? "Add Subject" : "Edit Subject"}
                     </DialogTitle>
                     <DialogDescription>
                         Fill in the information below to{" "}
-                        {mode === "add" ? "create" : "update"} a room.
+                        {mode === "add" ? "create" : "update"} a subject.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -127,10 +127,10 @@ export function RoomModal({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>
-                                        Room Name <span className="text-red-500">*</span>
+                                        Subject Name <span className="text-red-500">*</span>
                                     </FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Enter room name" {...field} />
+                                        <Input placeholder="Enter subject name" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -156,7 +156,7 @@ export function RoomModal({
                                         Saving...
                                     </>
                                 ) : (
-                                    "Save Room"
+                                    "Save subject"
                                 )}
                             </Button>
                         </DialogFooter>
