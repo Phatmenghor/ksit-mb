@@ -67,6 +67,7 @@ export enum StatusEnum {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
 }
+
 export const status = [
   { value: "ACTIVE", label: "Active" },
   { value: "INACTIVE", label: "Inactive" },
@@ -78,4 +79,27 @@ export enum RoleEnum {
   STAFF = "STAFF", // School staff (teachers, office staff)
   TEACHER = "TEACHER", // School staff (teachers, office staff)
   STUDENT = "STUDENT",
+}
+
+export enum SemesterEnum {
+  SEMESTER_1 = "SEMESTER_1",
+  SEMESTER_2 = "SEMESTER_2",
+}
+
+export enum SemesterType {
+  PROGRESS = "PROGRESS",
+  PROCESSING = "PROCESSING",
+  DONE = "DONE",
+}
+
+export enum YearLevelEnum {
+  FIRST_YEAR = "FIRST_YEAR",
+  SECOND_YEAR = "SECOND_YEAR",
+  THIRD_YEAR = "THIRD_YEAR",
+  FOURTH_YEAR = "FOURTH_YEAR",
+}
+
+export enum DegreeEnum {
+  BACHELOR = "BACHELOR",
+  ASSOCIATE = "ASSOCIATE",
 }

@@ -1,7 +1,6 @@
 export interface AllDepartmentFilterModel {
   search?: string;
   status?: string;
-  
   pageNo?: number;
   pageSize?: number;
 }

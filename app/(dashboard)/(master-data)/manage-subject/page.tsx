@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -35,46 +34,57 @@ import {
 } from "@/service/master-data/room.service";
 import { Constants } from "@/constants/text-string";
 import { toast } from "sonner";
-import {
-  RoomFormData,
-  RoomModal,
-} from "@/components/dashboard/master-data/manage-room/room-form-model";
+import { RoomFormData as SubjectFormData } from "@/components/dashboard/master-data/manage-room/room-form-model";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
-import { roomTableHeader } from "@/constants/table/master-data";
+import { subjectTableHeader } from "@/constants/table/master-data";
 import PaginationPage from "@/components/shared/pagination-page";
 import Loading from "@/components/shared/loading";
+import {
+  AllSubjectModel,
+  SubjectModel,
+} from "@/model/master-data/subject/all-subject-model";
+import { AllSubjectFilterModel } from "@/model/master-data/subject/type-subject-mode";
+import {
+  createSubjectService,
+  deletedSubjectService,
+  getAllSubjectService,
+  updateSubjectService,
+} from "@/service/master-data/subject.service";
+import { SubjectModal } from "@/components/dashboard/master-data/manage-subject/subject-form-model";
 
-export default function ManageRoomPage() {
+export default function ManageRSubjectPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [room, setRoom] = useState<RoomModel | null>(null);
-  const [allRoomData, setAllRoomtData] = useState<AllRoomModel | null>(null);
+  const [subject, setSubject] = useState<SubjectModel | null>(null);
+  const [allSubjectData, setAllSubjectData] = useState<AllSubjectModel | null>(
+    null
+  );
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [initialData, setInitialData] = useState<RoomFormData | undefined>(
+  const [initialData, setInitialData] = useState<SubjectFormData | undefined>(
     undefined
   );
 
-  const loadRooms = useCallback(
-    async (param: AllRoomFilterModel) => {
+  const loadSubjects = useCallback(
+    async (param: AllSubjectFilterModel) => {
       setIsLoading(true);
 
       try {
-        const response = await getAllRoomService({
+        const response = await getAllSubjectService({
           search: searchQuery,
           status: Constants.ACTIVE,
           ...param,
         });
 
         if (response) {
-          setAllRoomtData(response);
+          setAllSubjectData(response);
         } else {
-          console.error("Failed to fetch rooms:");
+          console.error("Failed to fetch subject:");
         }
       } catch (error) {
-        toast.error("An error occurred while loading rooms");
+        toast.error("An error occurred while loading subject");
       } finally {
         setIsLoading(false);
       }
@@ -83,8 +93,8 @@ export default function ManageRoomPage() {
   );
 
   useEffect(() => {
-    loadRooms({});
-  }, [searchQuery, loadRooms]);
+    loadSubjects({});
+  }, [searchQuery, loadSubjects]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");
@@ -92,12 +102,15 @@ export default function ManageRoomPage() {
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (room: RoomModel) => {
-    const formData: RoomFormData = {
+  const handleOpenEditModal = (room: SubjectModel) => {
+    const formData: SubjectFormData = {
       id: room.id,
+
       name: room.name,
+
       status: room.status,
     };
+    console.log(formData);
 
     setModalMode("edit");
     setInitialData(formData);
@@ -106,12 +119,13 @@ export default function ManageRoomPage() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
-  async function handleSubmit(formData: RoomFormData) {
+  async function handleSubmit(formData: SubjectFormData) {
     setIsSubmitting(true);
 
     try {
       const roomtData = {
         name: formData.name.trim(),
+
         status: formData.status,
       };
 
@@ -119,12 +133,11 @@ export default function ManageRoomPage() {
 
       if (modalMode === "add") {
         try {
-          response = await createRoomService(roomtData);
+          response = await createSubjectService(roomtData);
 
           if (response) {
-            setAllRoomtData((prevData) => {
+            setAllSubjectData((prevData) => {
               if (!prevData) return null;
-
               const updatedContent = response
                 ? [response, ...prevData.content]
                 : [...prevData.content];
@@ -133,21 +146,20 @@ export default function ManageRoomPage() {
                 ...prevData,
                 content: updatedContent,
                 totalElements: prevData.totalElements + 1,
-              } as AllRoomModel;
+              } as AllSubjectModel;
             });
 
-            toast.success("Room added successfully");
+            toast.success("Subject added successfully");
             setIsModalOpen(false);
           }
         } catch (error: any) {
-          toast.error(error.message || "Failed to add room");
+          toast.error(error.message || "Failed to add subject");
         }
       } else if (modalMode === "edit" && formData.id) {
         try {
-          response = await updateRoomService(formData.id, roomtData);
-
+          response = await updateSubjectService(formData.id, roomtData);
           if (response) {
-            setAllRoomtData((prevData) => {
+            setAllSubjectData((prevData) => {
               if (!prevData) return null;
 
               const updatedContent = prevData.content.map((dept) =>
@@ -157,14 +169,14 @@ export default function ManageRoomPage() {
               return {
                 ...prevData,
                 content: updatedContent,
-              } as AllRoomModel;
+              } as AllSubjectModel;
             });
 
-            toast.success("Room updated successfully");
+            toast.success("Subject updated successfully");
             setIsModalOpen(false);
           }
         } catch (error: any) {
-          toast.error(error.message || "Failed to update room");
+          toast.error(error.message || "Failed to update subject");
         }
       }
     } catch (error: any) {
@@ -174,19 +186,19 @@ export default function ManageRoomPage() {
     }
   }
 
-  async function handleDeleteRoom() {
-    if (!room) return;
-    setIsSubmitting(true);
+  async function handleDeleteSubject() {
+    if (!subject) return;
 
+    setIsSubmitting(true);
     try {
-      const response = await deletedRoomService(room.id);
+      const response = await deletedSubjectService(subject.id);
 
       if (response) {
-        setAllRoomtData((prevData) => {
+        setAllSubjectData((prevData) => {
           if (!prevData) return null;
 
           const updatedContent = prevData.content.filter(
-            (item) => item.id !== room.id
+            (item) => item.id !== subject.id
           );
 
           return {
@@ -196,12 +208,12 @@ export default function ManageRoomPage() {
           };
         });
 
-        toast.success("Room deleted successfully");
+        toast.success("Subject deleted successfully");
       } else {
-        toast.error("Failed to delete Room");
+        toast.error("Failed to delete subject");
       }
     } catch (error) {
-      toast.error("An error occurred while deleting the Room");
+      toast.error("An error occurred while deleting the subject.");
     } finally {
       setIsSubmitting(false);
       setIsDeleteDialogOpen(false);
@@ -219,18 +231,18 @@ export default function ManageRoomPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Manage room</BreadcrumbPage>
+                <BreadcrumbPage>Manage Subject</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
 
-          <h3 className="text-xl font-bold">Manage Room</h3>
+          <h3 className="text-xl font-bold">Manage Subject</h3>
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="relative w-full md:w-1/2">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search room..."
+                placeholder="Search subject..."
                 className="pl-8 w-full"
                 value={searchQuery}
                 onChange={handleSearchChange}
@@ -254,7 +266,7 @@ export default function ManageRoomPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                {roomTableHeader.map((header, index) => (
+                {subjectTableHeader.map((header, index) => (
                   <TableHead key={index} className={header.className}>
                     {header.label}
                   </TableHead>
@@ -262,7 +274,7 @@ export default function ManageRoomPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {allRoomData?.content.length === 0 ? (
+              {allSubjectData?.content.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={6}
@@ -272,18 +284,18 @@ export default function ManageRoomPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                allRoomData?.content.map((room, index) => {
+                allSubjectData?.content.map((subject, index) => {
                   const indexDisplay =
-                    ((allRoomData.pageNo || 1) - 1) * 10 + index + 1;
+                    ((allSubjectData.pageNo || 1) - 1) * 10 + index + 1;
                   return (
-                    <TableRow key={room.id}>
+                    <TableRow key={subject.id}>
                       <TableCell>{indexDisplay}</TableCell>
-                      <TableCell>{room.name}</TableCell>
+                      <TableCell>{subject.name}</TableCell>
 
                       <TableCell>
-                        <div className="flex justify-start space-x-2">
+                        <div className="flex justify-end space-x-2">
                           <Button
-                            onClick={() => handleOpenEditModal(room)}
+                            onClick={() => handleOpenEditModal(subject)}
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
@@ -293,7 +305,7 @@ export default function ManageRoomPage() {
                           </Button>
                           <Button
                             onClick={() => {
-                              setRoom(room);
+                              setSubject(subject);
                               setIsDeleteDialogOpen(true);
                             }}
                             variant="ghost"
@@ -315,18 +327,18 @@ export default function ManageRoomPage() {
       </div>
 
       {/* Pagination */}
-      {!isLoading && allRoomData && (
+      {!isLoading && allSubjectData && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={allRoomData.pageNo}
-            totalPages={allRoomData.totalPages}
-            onPageChange={(page: number) => loadRooms({ pageNo: page })}
+            currentPage={allSubjectData.pageNo}
+            totalPages={allSubjectData.totalPages}
+            onPageChange={(page: number) => loadSubjects({ pageNo: page })}
           />
         </div>
       )}
 
-      {/* Room Edit/Add Modal */}
-      <RoomModal
+      {/* Subject Edit/Add Modal */}
+      <SubjectModal
         isOpen={isModalOpen}
         mode={modalMode}
         initialData={initialData}
@@ -338,10 +350,10 @@ export default function ManageRoomPage() {
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
-        onDelete={handleDeleteRoom}
-        title="Delete Room"
-        description="Are you sure you want to delete the room:"
-        itemName={room?.name}
+        onDelete={handleDeleteSubject}
+        title="Delete Subject"
+        description="Are you sure you want to delete the subject:"
+        itemName={subject?.name}
         isSubmitting={isSubmitting}
       />
     </div>
