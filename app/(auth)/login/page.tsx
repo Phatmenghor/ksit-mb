@@ -10,13 +10,13 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginService } from "@/service/auth.service";
 import { LoginRequest } from "@/model/auth/auth.model";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
 import { FormField } from "@/components/ui/form";
+import { loginService } from "@/service/auth/auth.service";
 
 const FormSchema = z.object({
   username: z.string().min(1, "Username is required"),

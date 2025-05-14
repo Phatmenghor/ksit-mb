@@ -2,43 +2,55 @@
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { CustomTable } from "@/components/shared/layout/TableSection";
 import { Button } from "@/components/ui/button";
+import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
+import { StaffModel } from "@/model/user/stuff.model";
+import { RequestAllStuff } from "@/model/user/stuff.request.model";
+import { getAllStuffService } from "@/service/user/user.service";
 import { Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
-import React, { useState } from "react";
-const StuffOfficers = [
-  {
-    id: 1,
-    fullname: "Vutheaims",
-    email: "tongvuthea@gmail.com",
-    username: "Vutheaims",
-    createdAt: "2024-06-21",
-    status: "Active",
-  },
-  {
-    id: 2,
-    fullname: "regStuffOfficers",
-    email: "regStuffOfficers@gmail.com",
-    username: "regStuffOfficers",
-    createdAt: "2024-12-10",
-    status: "Active",
-  },
-  {
-    id: 3,
-    fullname: "User01",
-    email: "user@gmail.com",
-    username: "user01",
-    createdAt: "2024-09-18",
-    status: "InActive",
-  },
-];
+import React, { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function StuffOfficerList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [data, setData] = useState<StaffModel[]>([]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
+  const loadData = useCallback(
+    async (
+      data: RequestAllStuff = {
+        departmentId: 1,
+        pageNo: 1,
+        pageSize: 10,
+        roles: [RoleEnum.STAFF],
+        search: searchQuery,
+        status: StatusEnum.ACTIVE,
+      }
+    ) => {
+      setIsLoading(true);
+      try {
+        const response = await getAllStuffService(data);
+        if (response) {
+          setData(response.content);
+        } else {
+          console.error("Failed to fetch officer:");
+        }
+      } catch (error) {
+        toast.error("An error occurred while loading officers");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [searchQuery]
+  );
+
+  useEffect(() => {
+    loadData();
+  }, [searchQuery, loadData]);
   const iconColor = "text-black";
 
   const columns = [
@@ -113,7 +125,7 @@ export default function StuffOfficerList() {
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
       />
 
-      <CustomTable data={StuffOfficers} columns={columns} />
+      <CustomTable data={data} isLoading={isLoading} columns={columns} />
     </div>
   );
 }

@@ -1,5 +1,5 @@
-import { ApiResponse } from "./../model/index-model";
 import { LoginRequest, LoginResponse } from "@/model/auth/auth.model";
+import { ApiResponse } from "@/model/index-model";
 import { axiosClient } from "@/utils/axios";
 import { storeRoles } from "@/utils/local-storage/user-info/roles";
 import { storeToken } from "@/utils/local-storage/user-info/token";

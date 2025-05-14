@@ -3,44 +3,55 @@
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { CustomTable } from "@/components/shared/layout/TableSection";
 import { Button } from "@/components/ui/button";
+import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
+import { StaffModel } from "@/model/user/stuff.model";
+import { RequestAllStuff } from "@/model/user/stuff.request.model";
+import { getAllStuffService } from "@/service/user/user.service";
 import { Pencil, Trash2, Plus, RotateCcw } from "lucide-react";
-import { useState } from "react";
-
-const admins = [
-  {
-    id: 1,
-    fullname: "Vutheaims",
-    email: "tongvuthea@gmail.com",
-    username: "Vutheaims",
-    createdAt: "2024-06-21",
-    status: "Active",
-  },
-  {
-    id: 2,
-    fullname: "regadmin",
-    email: "regadmin@gmail.com",
-    username: "regadmin",
-    createdAt: "2024-12-10",
-    status: "Active",
-  },
-  {
-    id: 3,
-    fullname: "User01",
-    email: "user@gmail.com",
-    username: "user01",
-    createdAt: "2024-09-18",
-    status: "InActive",
-  },
-];
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function AdminsList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [data, setData] = useState<StaffModel[]>([]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
+  const loadData = useCallback(
+    async (
+      data: RequestAllStuff = {
+        departmentId: 1,
+        pageNo: 1,
+        pageSize: 10,
+        roles: [RoleEnum.ADMIN],
+        search: searchQuery,
+        status: StatusEnum.ACTIVE,
+      }
+    ) => {
+      setIsLoading(true);
+      try {
+        const response = await getAllStuffService(data);
+        if (response) {
+          setData(response.content);
+        } else {
+          console.error("Failed to fetch admin:");
+        }
+      } catch (error) {
+        toast.error("An error occurred while loading admins");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [searchQuery]
+  );
+
+  useEffect(() => {
+    loadData();
+  }, [searchQuery, loadData]);
   const iconColor = "text-black";
 
   const columns = [
@@ -115,7 +126,7 @@ export default function AdminsList() {
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
       />
 
-      <CustomTable columns={columns} data={admins} />
+      <CustomTable isLoading={isLoading} columns={columns} data={data} />
     </div>
   );
 }

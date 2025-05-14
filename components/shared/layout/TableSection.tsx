@@ -18,9 +18,14 @@ interface Column<T> {
 interface CustomTableProps<T> {
   data: T[];
   columns: Column<T>[];
+  isLoading?: boolean;
 }
 
-export function CustomTable<T>({ data, columns }: CustomTableProps<T>) {
+export function CustomTable<T>({
+  data,
+  columns,
+  isLoading = false,
+}: CustomTableProps<T>) {
   return (
     <Table>
       <TableHeader>
@@ -31,15 +36,31 @@ export function CustomTable<T>({ data, columns }: CustomTableProps<T>) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.map((item, index) => (
-          <TableRow key={index}>
-            {columns.map((col, colIndex) => (
-              <TableCell key={colIndex}>
-                {col.render ? col.render(item, index) : (item as any)[col.key]}
-              </TableCell>
-            ))}
+        {isLoading ? (
+          <TableRow>
+            <TableCell colSpan={columns.length} className="text-center py-4">
+              Loading...
+            </TableCell>
           </TableRow>
-        ))}
+        ) : data.length > 0 ? (
+          data.map((item, index) => (
+            <TableRow key={index}>
+              {columns.map((col, colIndex) => (
+                <TableCell key={colIndex}>
+                  {col.render
+                    ? col.render(item, index)
+                    : (item as any)[col.key]}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={columns.length} className="text-center py-4">
+              No data available
+            </TableCell>
+          </TableRow>
+        )}
       </TableBody>
     </Table>
   );

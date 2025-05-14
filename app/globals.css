@@ -63,20 +63,7 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-  }
-
-  /* Enhanced card border styling */
-  .card {
-    border: 1px solid oklch(var(--card-border));
-    transition: border-color 0.15s ease-in-out;
-  }
-
-  .card:first-child {
-    @apply rounded-t-xl;
-  }
-
-  .card:last-child {
-    @apply rounded-b-xl;
+    font-family: "Noto Sans Khmer", ui-sans-serif, system-ui, sans-serif;
   }
 
   dialog {
@@ -85,11 +72,6 @@
 
   dialog::backdrop {
     background-color: rgba(0, 0, 0, 0.4); /* dark overlay */
-  }
-
-  /* Card hover effect */
-  .card:hover {
-    border-color: oklch(0.7 0.004 286.32);
   }
 }
 

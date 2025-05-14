@@ -1,61 +1,56 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { ROUTE } from "@/constants/routes";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { CustomTable } from "@/components/shared/layout/TableSection";
+import { getAllStuffService } from "@/service/user/user.service";
+import { RequestAllStuff } from "@/model/user/stuff.request.model";
+import { RoleEnum, StatusEnum } from "@/constants/constant";
+import { StaffModel } from "@/model/user/stuff.model";
+import { toast } from "sonner";
 
 export default function TeachersList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [data, setData] = useState<StaffModel[]>([]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const teachers = [
-    {
-      id: "T001",
-      name: "Dr. John Smith",
-      department: "Computer Science",
-      position: "Professor",
-      email: "john.smith@example.com",
-      status: "Active",
+  const loadData = useCallback(
+    async (
+      data: RequestAllStuff = {
+        departmentId: 1,
+        pageNo: 1,
+        pageSize: 10,
+        roles: [RoleEnum.TEACHER],
+        search: searchQuery,
+        status: StatusEnum.ACTIVE,
+      }
+    ) => {
+      setIsLoading(true);
+      try {
+        const response = await getAllStuffService(data);
+        if (response) {
+          setData(response.content);
+        } else {
+          console.error("Failed to fetch teachers:");
+        }
+      } catch (error) {
+        toast.error("An error occurred while loading teachers");
+      } finally {
+        setIsLoading(false);
+      }
     },
-    {
-      id: "T002",
-      name: "Dr. Jane Johnson",
-      department: "Food Technology",
-      position: "Associate Professor",
-      email: "jane.johnson@example.com",
-      status: "Active",
-    },
-    {
-      id: "T003",
-      name: "Dr. Robert Williams",
-      department: "Electrical Technology",
-      position: "Assistant Professor",
-      email: "robert.williams@example.com",
-      status: "Active",
-    },
-    {
-      id: "T004",
-      name: "Dr. Emily Brown",
-      department: "Animal Science",
-      position: "Lecturer",
-      email: "emily.brown@example.com",
-      status: "Active",
-    },
-    {
-      id: "T005",
-      name: "Dr. Michael Davis",
-      department: "Mechanical Technology",
-      position: "Professor",
-      email: "michael.davis@example.com",
-      status: "Inactive",
-    },
-  ];
+    [searchQuery]
+  );
+
+  useEffect(() => {
+    loadData();
+  }, [searchQuery, loadData]);
 
   const iconColor = "text-black";
 
@@ -130,7 +125,7 @@ export default function TeachersList() {
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
       />
 
-      <CustomTable columns={columns} data={teachers} />
+      <CustomTable columns={columns} isLoading={isLoading} data={data} />
     </div>
   );
 }

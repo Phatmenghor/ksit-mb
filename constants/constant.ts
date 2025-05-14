@@ -71,3 +71,11 @@ export const status = [
   { value: "ACTIVE", label: "Active" },
   { value: "INACTIVE", label: "Inactive" },
 ];
+
+export enum RoleEnum {
+  DEVELOPER = "DEVELOPER", // System developer with full access
+  ADMIN = "ADMIN", // School administrator
+  STAFF = "STAFF", // School staff (teachers, office staff)
+  TEACHER = "TEACHER", // School staff (teachers, office staff)
+  STUDENT = "STUDENT",
+}
