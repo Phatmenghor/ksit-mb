@@ -58,23 +58,27 @@ export default function AdminsList() {
     {
       key: "id",
       header: "#",
+      render: (_: any, index: number) => index + 1,
     },
     {
-      key: "fullname",
-      header: "fullName",
+      key: "adminid",
+      header: "Admin ID",
     },
     {
-      key: "email",
-      header: "Email",
+      key: "fullname(kh)",
+      header: "Fullname (KH)",
+      render: (admin: StaffModel) =>
+        `${admin.khmerFirstName} ${admin.khmerLastName}`,
+    },
+    {
+      key: "fullname(en)",
+      header: "Fullname (EN)",
+      render: (admin: StaffModel) =>
+        `${admin.englishFirstName} ${admin.englishLastName}`,
     },
     {
       key: "username",
       header: "Username",
-    },
-    {
-      key: "createdAt",
-      header: "Created At",
-      render: (item: any) => new Date(item.createdAt).toLocaleDateString(),
     },
     {
       key: "status",
@@ -82,7 +86,7 @@ export default function AdminsList() {
       render: (admin: any) => (
         <span
           className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-            admin.status === "Active"
+            admin.status === StatusEnum.ACTIVE
               ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-800"
           }`}

@@ -57,23 +57,27 @@ export default function StuffOfficerList() {
     {
       key: "id",
       header: "#",
+      render: (_: any, index: number) => index + 1,
     },
     {
-      key: "fullname",
-      header: "fullName",
+      key: "stuffid",
+      header: "Stuff ID",
     },
     {
-      key: "email",
-      header: "Email",
+      key: "fullname(kh)",
+      header: "Fullname (KH)",
+      render: (stuff: StaffModel) =>
+        `${stuff.khmerFirstName} ${stuff.khmerLastName}`,
+    },
+    {
+      key: "fullname(en)",
+      header: "Fullname (EN)",
+      render: (stuff: StaffModel) =>
+        `${stuff.englishFirstName} ${stuff.englishLastName}`,
     },
     {
       key: "username",
       header: "Username",
-    },
-    {
-      key: "createdAt",
-      header: "Created At",
-      render: (item: any) => new Date(item.createdAt).toLocaleDateString(),
     },
     {
       key: "status",
@@ -81,7 +85,7 @@ export default function StuffOfficerList() {
       render: (StuffOfficers: any) => (
         <span
           className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-            StuffOfficers.status === "Active"
+            StuffOfficers.status === StatusEnum.ACTIVE
               ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-800"
           }`}

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Filter } from "lucide-react";
+import { Search, Plus, Filter, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,6 +31,7 @@ interface CardHeaderSectionProps {
   breadcrumbs: BreadcrumbItemType[];
   title: string;
   searchPlaceholder?: string;
+  backHref?: string;
   searchValue?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   buttonText?: string;
@@ -46,11 +47,12 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
   onSearchChange,
   buttonText,
   buttonIcon,
+  backHref,
   buttonHref,
 }) => {
   return (
     <Card>
-      <CardContent className="p-6 space-y-2">
+      <CardContent className="p-6 space-y-3">
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbs.map((item, index) => (
@@ -77,7 +79,14 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
           </BreadcrumbList>
         </Breadcrumb>
 
-        <h3 className="text-xl font-bold">{title}</h3>
+        <div className="mb-6 flex flex-col md:flex-row md:items-start md:justify-start gap-4">
+          {backHref && (
+            <Link href={backHref}>
+              <ArrowLeft />
+            </Link>
+          )}
+          <h3 className="text-xl font-bold">{title}</h3>
+        </div>
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
           {/* Left side: Search input (flex-grow) */}

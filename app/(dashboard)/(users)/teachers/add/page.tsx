@@ -1,5 +1,6 @@
 import EducationForm from "@/components/dashboard/users/teachers/add/education";
 import PersonalHistoryForm from "@/components/dashboard/users/teachers/add/personal-history";
+import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,6 +11,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -27,29 +29,14 @@ import Link from "next/link";
 export default function AddTeacherPage() {
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <Card>
-        <CardContent className="p-6 space-y-3">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Manage major</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-
-          <div className="mb-6 flex flex-col md:flex-row md:items-start md:justify-start gap-4">
-            <Link href={ROUTE.COURSES.INDEX}>
-              <ArrowLeft />
-            </Link>
-            <h3 className="text-xl font-bold">Add new teacher</h3>
-          </div>
-        </CardContent>
-      </Card>
+      <CardHeaderSection
+        title="Add Teacher"
+        backHref={ROUTE.USERS.TEACHERS}
+        breadcrumbs={[
+          { label: "Home", href: ROUTE.DASHBOARD },
+          { label: "Add new", href: ROUTE.USERS.ADD_TEACHER },
+        ]}
+      />
 
       {/* Generate Data Card */}
       <Card>
@@ -188,18 +175,10 @@ export default function AddTeacherPage() {
 
       {/* Full Form Card */}
       <div className="w-full mx-auto">
-        <form className="space-y-10">
-          <Card>
-            <CardContent className="p-6 space-y-3">
-              <PersonalHistoryForm />
-            </CardContent>
-          </Card>
+        <form className="space-y-5">
+          <PersonalHistoryForm />
 
-          <Card>
-            <CardContent className="p-6 space-y-3">
-              <EducationForm />
-            </CardContent>
-          </Card>
+          <EducationForm />
 
           {/* Footer Buttons */}
           <div className="flex justify-between pt-4">

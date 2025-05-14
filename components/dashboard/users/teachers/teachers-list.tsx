@@ -58,22 +58,27 @@ export default function TeachersList() {
     {
       key: "id",
       header: "#",
+      render: (_: any, index: number) => index + 1,
     },
     {
-      key: "name",
-      header: "Name",
+      key: "teacherid",
+      header: "Teacher ID",
     },
     {
-      key: "department",
-      header: "Department",
+      key: "fullname(kh)",
+      header: "Fullname (KH)",
+      render: (teacher: StaffModel) =>
+        `${teacher.khmerFirstName} ${teacher.khmerLastName}`,
     },
     {
-      key: "position",
-      header: "Position",
+      key: "fullname(en)",
+      header: "Fullname (EN)",
+      render: (teacher: StaffModel) =>
+        `${teacher.englishFirstName} ${teacher.englishLastName}`,
     },
     {
-      key: "email",
-      header: "Email",
+      key: "username",
+      header: "Username",
     },
     {
       key: "status",
@@ -81,7 +86,7 @@ export default function TeachersList() {
       render: (teacher: any) => (
         <span
           className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-            teacher.status === "Active"
+            teacher.status === StatusEnum.ACTIVE
               ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-800"
           }`}

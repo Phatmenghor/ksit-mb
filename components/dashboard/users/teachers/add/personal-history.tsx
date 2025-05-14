@@ -1,3 +1,4 @@
+"use client";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -9,15 +10,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import React from "react";
+import CollapsibleCard from "./customFormSection";
 
 export default function PersonalHistoryForm() {
   return (
-    <div>
+    <CollapsibleCard title="ប្រវត្តិផ្ទាល់ខ្លួន">
       {/* Personal information section */}
       <div>
-        <h2 className="mb-8 font-bold border-b pb-2 text-[14px]">
-          ប្រវត្តិរូបគ្រូបង្រៀន
-        </h2>
         <div className="grid mb-7 grid-cols-1 gap-4 md:grid-cols-2">
           {/* Khmer Full Name */}
           <div className="grid grid-cols-1 gap-2">
@@ -316,6 +315,6 @@ export default function PersonalHistoryForm() {
           </div>
         </div>
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }
