@@ -12,7 +12,7 @@ interface FieldConfig {
 }
 
 interface Props {
-  labels: string[]; // Column headers
+  labels: string[];
   fields: FieldConfig[];
   defaultRows?: number;
 }
@@ -39,19 +39,32 @@ export default function DynamicInputGrid({
   };
 
   return (
-    <div className="border p-4 rounded-md shadow-sm space-y-4">
+    <div className="border p-4 rounded-md shadow-sm space-y-4 overflow-x-auto">
       {/* Header */}
-      <div className="grid grid-cols-4 gap-4 font-bold text-sm">
+      <div
+        className="grid gap-4 font-bold text-sm min-w-full"
+        style={{
+          gridTemplateColumns: `repeat(${fields.length}, minmax(200px, 1fr))`,
+        }}
+      >
         {labels.map((label, idx) => (
-          <div key={idx}>{label}</div>
+          <div key={idx} className="whitespace-nowrap">
+            {label}
+          </div>
         ))}
       </div>
 
-      {/* Rows */}
+      {/* Input Rows */}
       {rows.map((row, rowIndex) => (
-        <div key={rowIndex} className="grid grid-cols-4 gap-4 items-center">
+        <div
+          key={rowIndex}
+          className="grid gap-4 items-center min-w-full"
+          style={{
+            gridTemplateColumns: `repeat(${fields.length}, minmax(200px, 1fr))`,
+          }}
+        >
           {fields.map((field) => (
-            <div key={field.name} className="relative">
+            <div key={field.name + rowIndex} className="relative">
               <Input
                 type={field.type}
                 placeholder={field.placeholder}
@@ -71,7 +84,9 @@ export default function DynamicInputGrid({
 
       {/* Add Row */}
       <div className="flex items-center gap-4 mt-4">
-        <span className="text-sm font-medium">{rows.length}</span>
+        <span className="text-sm font-medium w-24 border border-gray-300 px-4 rounded-md py-2">
+          {rows.length}
+        </span>
         <Button onClick={addRow} className="bg-black text-white">
           Add Row
         </Button>

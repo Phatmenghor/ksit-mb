@@ -1,17 +1,15 @@
+import CourseForm from "@/components/dashboard/users/teachers/add/courseForm";
+import CulturalLevelForm from "@/components/dashboard/users/teachers/add/Cultural-level";
 import EducationForm from "@/components/dashboard/users/teachers/add/education";
+import FamilyStatusForm from "@/components/dashboard/users/teachers/add/FamilyStatusForm";
+import LanguageForm from "@/components/dashboard/users/teachers/add/LanguageForm";
 import PersonalHistoryForm from "@/components/dashboard/users/teachers/add/personal-history";
+import RateForm from "@/components/dashboard/users/teachers/add/RateSection";
+import ShortCourseForm from "@/components/dashboard/users/teachers/add/shortCourse";
+import WorkHistoryForm from "@/components/dashboard/users/teachers/add/workHistorySection";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -22,9 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { ROUTE, sidebarRoutes } from "@/constants/routes";
-import { ArrowLeft, Plus, Save, User } from "lucide-react";
-import Link from "next/link";
+import { ROUTE } from "@/constants/routes";
+import { Plus, Save, User } from "lucide-react";
 
 export default function AddTeacherPage() {
   return (
@@ -179,6 +176,20 @@ export default function AddTeacherPage() {
           <PersonalHistoryForm />
 
           <EducationForm />
+
+          <WorkHistoryForm />
+
+          <RateForm />
+
+          <CulturalLevelForm />
+
+          <CourseForm />
+
+          <ShortCourseForm />
+
+          <LanguageForm />
+
+          <FamilyStatusForm />
 
           {/* Footer Buttons */}
           <div className="flex justify-between pt-4">
