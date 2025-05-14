@@ -11,15 +11,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Filter, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useState, useEffect } from "react";
+  CalendarClock,
+  CheckCircle,
+  Clock,
+  Loader,
+  Loader2,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
+
+import { useState, useEffect, useCallback } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -33,56 +37,67 @@ import { ROUTE } from "@/constants/routes";
 import { format, parseISO } from "date-fns";
 import { SemesterFormModal } from "@/components/dashboard/master-data/manage-semester/semester-form-modal";
 import { YearSelector } from "@/components/shared/year-selector";
-import { SemesterEnum } from "@/constants/constant";
 import { toast } from "sonner";
-import { SemetsterModel } from "@/model/master-data/semester/semester-model";
-
-// Type-safe sample semester data
-const sampleSemesters: SemetsterModel[] = [
-  {
-    id: 1,
-    semester: SemesterEnum.SEMESTER_1,
-    startDate: "2025-01-15",
-    endDate: "2025-05-30",
-    academyYear: 2025,
-    status: "ACTIVE",
-  },
-  {
-    id: 2,
-    semester: SemesterEnum.SEMESTER_2,
-    startDate: "2025-06-15",
-    endDate: "2025-12-15",
-    academyYear: 2025,
-    status: "ACTIVE",
-  },
-  {
-    id: 3,
-    semester: SemesterEnum.SEMESTER_1,
-    startDate: "2024-01-10",
-    endDate: "2024-05-25",
-    academyYear: 2024,
-    status: "INACTIVE",
-  },
-];
-
+import {
+  AllSemesterModel,
+  SemesterModel,
+} from "@/model/master-data/semester/semester-model";
+import { AllSemesterFilterModel } from "@/model/master-data/semester/type-semester-model";
+import {
+  createSemesterService,
+  deletedSemesterService,
+  getAllSemesterService,
+  updateSemesterService,
+} from "@/service/master-data/semester.service";
+import { Constants } from "@/constants/text-string";
+import Loading from "@/components/shared/loading";
+import { semesterTableHeader } from "@/constants/table/master-data";
+import PaginationPage from "@/components/shared/pagination-page";
+import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
+import { SemesterType } from "@/constants/constant";
 export default function ManageSemester() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
-  const [initialData, setInitialData] = useState<SemetsterModel | undefined>(
+  const [initialData, setInitialData] = useState<SemesterModel | undefined>(
     undefined
   );
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [semesters, setSemesters] = useState<SemetsterModel[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [semesters, setSemesters] = useState<SemesterModel | null>(null);
+  const [allSemesterData, setAllSemesterData] =
+    useState<AllSemesterModel | null>(null);
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear()
   );
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const loadSemester = useCallback(
+    async (param: AllSemesterFilterModel) => {
+      setIsLoading(true);
+      try {
+        const response = await getAllSemesterService({
+          search: searchQuery,
+          academyYear: selectedYear,
+          status: Constants.ACTIVE,
+          ...param,
+        });
+        if (response) {
+          setAllSemesterData(response);
+        } else {
+          console.error("Failed to fetch semesters:");
+        }
+      } catch (error) {
+        toast.error("An error occurred while loading semester");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [searchQuery, selectedYear]
+  );
 
-  // Load semesters - in a real app, this would fetch from an API
   useEffect(() => {
-    // Simulating data fetch
-    setSemesters(sampleSemesters);
-  }, []);
+    loadSemester({});
+  }, [searchQuery, loadSemester, selectedYear]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");
@@ -90,76 +105,79 @@ export default function ManageSemester() {
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (semesterData: SemetsterModel) => {
+  const handleOpenEditModal = (semesterData: SemesterModel) => {
     setModalMode("edit");
     setInitialData(semesterData);
     setIsModalOpen(true);
   };
 
-  async function handleSubmit(formData: SemetsterModel) {
+  async function handleSubmit(formData: SemesterModel) {
     setIsSubmitting(true);
     try {
-      console.log("### ====Form submitted:", formData);
+      const semesterData = {
+        semester: formData.semester,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        academyYear: formData.academyYear,
+        status: formData.status,
+      };
 
-      // In a real app, you would call your API here
-      // if (modalMode === "add") {
-      //   await createSemester(formData);
-      // } else {
-      //   await updateSemester(formData);
-      // }
-
-      // Simulate API call with setTimeout
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Update local state to reflect changes (simulating API response)
+      let response: SemesterModel | null = null;
       if (modalMode === "add") {
-        // Add new semester with a generated ID
-        const newSemester = {
-          ...formData,
-          id: Math.max(0, ...semesters.map((s) => s.id || 0)) + 1,
-        };
-        setSemesters([...semesters, newSemester]);
-        toast.success("Semester added successfully");
-      } else if (initialData?.id) {
-        // Update existing semester
-        setSemesters(
-          semesters.map((semester) =>
-            semester.id === initialData.id
-              ? { ...formData, id: initialData.id }
-              : semester
-          )
-        );
-        toast.success("Semester updated successfully");
-      }
+        try {
+          response = await createSemesterService(semesterData);
+          if (response) {
+            setAllSemesterData((prevData) => {
+              if (!prevData) return null;
 
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Error submitting semester data:", error);
-      toast.error("Failed to save semester");
+              const updatedContent = response
+                ? [response, ...prevData.content]
+                : [...prevData.content];
+
+              return {
+                ...prevData,
+                content: updatedContent,
+                totalElements: prevData.totalElements + 1,
+              } as AllSemesterModel;
+            });
+
+            toast.success("Semester added successfully");
+            setIsModalOpen(false);
+          }
+        } catch (error: any) {
+          toast.error(error.message || "Failed to add semester");
+        }
+      } else if (modalMode === "edit" && formData.id) {
+        try {
+          response = await updateSemesterService(formData.id, semesterData);
+          if (response) {
+            setAllSemesterData((prevData) => {
+              if (!prevData) return null;
+
+              const updatedContent = prevData.content.map((dept) =>
+                dept.id === formData.id && response ? response : dept
+              );
+
+              return {
+                ...prevData,
+                content: updatedContent,
+              } as AllSemesterModel;
+            });
+
+            toast.success("Semester updated successfully");
+            setIsModalOpen(false);
+          }
+        } catch (error: any) {
+          toast.error(error.message || "Failed to update semester");
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message || "An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  // Function to delete a semester
-  const handleDeleteSemester = async (id: number) => {
-    try {
-      // In a real app, you would call your API here
-      // await deleteSemester(id);
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Update local state
-      setSemesters(semesters.filter((semester) => semester.id !== id));
-      toast.success("Semester deleted successfully");
-    } catch (error) {
-      console.error("Error deleting semester:", error);
-      toast.error("Failed to delete semester");
-    }
-  };
-
-  // Format date for display in the table
   const formatDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), "MMM dd, yyyy");
@@ -168,10 +186,42 @@ export default function ManageSemester() {
     }
   };
 
-  // Function to display semester name
-  const getSemesterName = (semester: SemesterEnum) => {
-    return semester === SemesterEnum.SEMESTER_1 ? "Semester 1" : "Semester 2";
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
+
+  async function handleDeleteSemester() {
+    if (!semesters) return;
+    setIsSubmitting(true);
+    try {
+      const response = await deletedSemesterService(semesters.id);
+
+      if (response) {
+        setAllSemesterData((prevData) => {
+          if (!prevData) return null;
+
+          const updatedContent = prevData.content.filter(
+            (item) => item.id !== semesters.id
+          );
+
+          return {
+            ...prevData,
+            content: updatedContent,
+            totalElements: prevData.totalElements - 1,
+          };
+        });
+
+        toast.success("Semester deleted successfully");
+      } else {
+        toast.error("Failed to delete semester");
+      }
+    } catch (error) {
+      toast.error("An error occurred while deleting the semester");
+    } finally {
+      setIsSubmitting(false);
+      setIsDeleteDialogOpen(false);
+    }
+  }
 
   return (
     <div>
@@ -196,8 +246,8 @@ export default function ManageSemester() {
                 type="search"
                 placeholder="Search semester..."
                 className="pl-8 w-full"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchQuery}
+                onChange={handleSearchChange}
               />
             </div>
             <div className="flex items-center gap-2">
@@ -216,69 +266,105 @@ export default function ManageSemester() {
       </Card>
 
       <div className="overflow-hidden mt-4">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]">#</TableHead>
-              <TableHead>Semester</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
-              <TableHead>Academy Year</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sampleSemesters.map((semesterItem, index) => (
-              <TableRow key={semesterItem.id}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>
-                  <span className="rounded bg-amber-100 px-2 py-1 text-amber-800">
-                    {semesterItem.semester
-                      ? getSemesterName(semesterItem.semester)
-                      : "-"}
-                  </span>
-                </TableCell>
-                <TableCell>{formatDate(semesterItem.startDate)}</TableCell>
-                <TableCell>{formatDate(semesterItem.endDate)}</TableCell>
-                <TableCell>{semesterItem.academyYear}</TableCell>
-                <TableCell>
-                  <span
-                    className={`rounded px-2 py-1 ${
-                      semesterItem.status === "ACTIVE"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {semesterItem.status}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => handleOpenEditModal(semesterItem)}
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 bg-gray-200"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
-                      onClick={() => handleDeleteSemester(semesterItem.id!)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {semesterTableHeader.map((header, index) => (
+                  <TableHead key={index} className={header.className}>
+                    {header.label}
+                  </TableHead>
+                ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {allSemesterData?.content.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    No semester found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                allSemesterData?.content.map((semesters, index) => {
+                  const indexDisplay =
+                    ((allSemesterData.pageNo || 1) - 1) * 10 + index + 1;
+                  return (
+                    <TableRow key={semesters.id}>
+                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{semesters.semester}</TableCell>
+                      <TableCell>{formatDate(semesters.startDate)}</TableCell>
+                      <TableCell>{formatDate(semesters.endDate)}</TableCell>
+                      <TableCell>{semesters.academyYear}</TableCell>
+
+                      <TableCell>
+                        {semesters.semesterType === SemesterType.DONE && (
+                          <div className="flex items-center gap-2 text-green-600">
+                            <CheckCircle size={16} />
+                            <span>Done</span>
+                          </div>
+                        )}
+                        {semesters.semesterType === SemesterType.PROCESSING && (
+                          <div className="flex items-center gap-2 text-blue-600">
+                            <Loader className="animate-spin" size={16} />
+                            <span>Processing</span>
+                          </div>
+                        )}
+                        {semesters.semesterType === SemesterType.PROGRESS && (
+                          <div className="flex items-center gap-2 text-yellow-500">
+                            <CalendarClock size={16} />
+                            <span>Progress</span>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-start space-x-2">
+                          <Button
+                            onClick={() => handleOpenEditModal(semesters)}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                            disabled={isSubmitting}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setSemesters(semesters);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
+                            disabled={isSubmitting}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        )}
       </div>
 
+      {/* Pagination */}
+      {!isLoading && allSemesterData && (
+        <div className="mt-4 flex justify-end">
+          <PaginationPage
+            currentPage={allSemesterData.pageNo}
+            totalPages={allSemesterData.totalPages}
+            onPageChange={(page: number) => loadSemester({ pageNo: page })}
+          />
+        </div>
+      )}
       {/* The semester form modal */}
       <SemesterFormModal
         isOpen={isModalOpen}
@@ -286,6 +372,16 @@ export default function ManageSemester() {
         initialData={initialData}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+      />
+
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onDelete={handleDeleteSemester}
+        title="Delete Semester"
+        description="Are you sure you want to delete the semeseter:"
+        itemName={semesters?.semester}
         isSubmitting={isSubmitting}
       />
     </div>

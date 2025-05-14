@@ -77,3 +77,34 @@ export const subjectTableHeader = [
     className: "text-left",
   },
 ];
+
+export const semesterTableHeader = [
+  {
+    label: "#",
+    className: "",
+  },
+  {
+    label: "Semester",
+    className: "",
+  },
+  {
+    label: "Start Semester",
+    className: "text-left",
+  },
+  {
+    label: "Finish Semester",
+    className: "Finish-left",
+  },
+  {
+    label: "Academy Year",
+    className: "Finish-left",
+  },
+  {
+    label: "Status",
+    className: "Finish-left",
+  },
+  {
+    label: "Action",
+    className: "Finish-left",
+  },
+];

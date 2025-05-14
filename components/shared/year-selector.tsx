@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronUp, ChevronDown, Calendar } from "lucide-react";
+import { ChevronUp, ChevronDown, Calendar, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface YearSelectorProps {

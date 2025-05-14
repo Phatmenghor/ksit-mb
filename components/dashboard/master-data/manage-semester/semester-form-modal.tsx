@@ -41,7 +41,7 @@ import { cn } from "@/lib/utils";
 import { Constants } from "@/constants/text-string";
 import { YearSelector } from "@/components/shared/year-selector";
 import { SemesterEnum } from "@/constants/constant";
-import { SemetsterModel } from "@/model/master-data/semester/semester-model";
+import { SemesterModel } from "@/model/master-data/semester/semester-model";
 
 const semesterFormSchema = z.object({
   startDate: z.date({
@@ -68,8 +68,8 @@ export type SemesterFormData = z.infer<typeof semesterFormSchema> & {
 interface SemesterModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: SemetsterModel) => void;
-  initialData?: SemetsterModel;
+  onSubmit: (data: SemesterModel) => void;
+  initialData?: SemesterModel;
   mode: "add" | "edit";
   isSubmitting?: boolean;
 }
@@ -165,7 +165,7 @@ export function SemesterFormModal({
       const formattedStartDate = format(data.startDate, "yyyy-MM-dd");
       const formattedEndDate = format(data.endDate, "yyyy-MM-dd");
 
-      const submitData: SemetsterModel = {
+      const submitData: SemesterModel = {
         startDate: formattedStartDate,
         endDate: formattedEndDate,
         academyYear: data.academyYear,
