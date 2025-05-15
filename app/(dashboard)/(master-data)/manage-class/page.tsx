@@ -26,24 +26,83 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClassFormData } from "@/model/class/class-model";
-import { useState } from "react";
+
+import { useCallback, useEffect, useState } from "react";
 
 import { ROUTE } from "@/constants/routes";
 import { Input } from "@/components/ui/input";
 
 import { YearSelector } from "@/components/shared/year-selector";
-import { ClassFormModal } from "@/components/dashboard/master-data/manage-class/class-form-modal";
+
+import { AllMajorFilterModel } from "@/model/master-data/major/type-major-model";
+import {
+  createClassService,
+  deleteClassService,
+  getAllClassService,
+  updateClassService,
+} from "@/service/master-data/class.service";
+import { Constants } from "@/constants/text-string";
+import {
+  AllClassModel,
+  ClassModel,
+} from "@/model/master-data/class/all-class-model";
+import { toast } from "sonner";
+import { classTableHeader } from "@/constants/table/master-data";
+import PaginationPage from "@/components/shared/pagination-page";
+import Loading from "../courses/loading";
+import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
+import {
+  ClassFormData,
+  ClassFormModal,
+} from "@/components/dashboard/master-data/manage-class/class-form-modal";
+import { DegreeEnum, YearLevelEnum, yearLevels } from "@/constants/constant";
 
 export default function ManageClassPage() {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [classes, setClasses] = useState<ClassModel | null>(null);
+  const [allClassData, setAllClassData] = useState<AllClassModel | null>(null);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear()
   );
   const [initialData, setInitialData] = useState<ClassFormData | undefined>(
     undefined
   );
+  const loadClass = useCallback(
+    async (param: AllMajorFilterModel) => {
+      setIsLoading(true);
+      try {
+        const response = await getAllClassService({
+          search: searchQuery,
+          status: Constants.ACTIVE,
+          ...param,
+        });
+
+        if (response) {
+          setAllClassData(response);
+        } else {
+          console.error("Failed to fetch class:");
+        }
+      } catch (error) {
+        toast.error("An error occurred while loading class");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [searchQuery]
+  );
+
+  useEffect(() => {
+    loadClass({});
+  }, [searchQuery, loadClass]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
   const handleOpenAddModal = () => {
     setModalMode("add");
@@ -51,7 +110,126 @@ export default function ManageClassPage() {
     setIsModalOpen(true);
   };
 
-  async function handleSubmit() {}
+  const handleOpenEditModal = (classData: ClassModel) => {
+    const formData: ClassFormData = {
+      id: classData.id,
+      academyYear: Number(classData.academyYear),
+      code: classData.code,
+      degree: classData.degree as DegreeEnum,
+      status: Constants.ACTIVE,
+      yearLevel: classData.yearLevel,
+      majorId: classData.major.id,
+    };
+    setModalMode("edit");
+    setInitialData(formData);
+    setIsModalOpen(true);
+  };
+
+  async function handleDeleteClass() {
+    if (!classes) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await deleteClassService(classes.id);
+
+      if (response) {
+        setAllClassData((prevData) => {
+          if (!prevData) return null;
+
+          const updatedContent = prevData.content.filter(
+            (item) => item.id !== classes.id
+          );
+
+          return {
+            ...prevData,
+            content: updatedContent,
+            totalElements: prevData.totalElements - 1,
+          };
+        });
+
+        toast.success("Class deleted successfully");
+      } else {
+        toast.error("Failed to delete class");
+      }
+    } catch (error) {
+      toast.error("An error occurred while deleting the class");
+    } finally {
+      setIsSubmitting(false);
+      setIsDeleteDialogOpen(false);
+    }
+  }
+
+  async function handleSubmit(formData: ClassFormData) {
+    setIsSubmitting(true);
+    console.log("##", formData);
+    // return;
+
+    try {
+      const majorData = {
+        code: formData.code.trim(),
+        academyYear: formData.academyYear,
+        degree: formData.degree,
+        majorId: formData.majorId,
+        status: formData.status,
+        yearLevel: formData.yearLevel,
+      };
+
+      let response: ClassModel | null = null;
+
+      if (modalMode === "add") {
+        try {
+          response = await createClassService(majorData);
+
+          if (response) {
+            setAllClassData((prevData) => {
+              if (!prevData) return null;
+              const updatedContent = response
+                ? [response, ...prevData.content]
+                : [...prevData.content];
+
+              return {
+                ...prevData,
+                content: updatedContent,
+                totalElements: prevData.totalElements + 1,
+              } as AllClassModel;
+            });
+
+            toast.success("Major added successfully");
+            setIsModalOpen(false);
+          }
+        } catch (error: any) {
+          toast.error(error.message || "Failed to add room");
+        }
+      } else if (modalMode === "edit" && formData.id) {
+        try {
+          response = await updateClassService(formData.id, majorData);
+          if (response) {
+            setAllClassData((prevData) => {
+              if (!prevData) return null;
+
+              const updatedContent = prevData.content.map((dept) =>
+                dept.id === formData.id && response ? response : dept
+              );
+
+              return {
+                ...prevData,
+                content: updatedContent,
+              } as AllClassModel;
+            });
+
+            toast.success("Major updated successfully");
+            setIsModalOpen(false);
+          }
+        } catch (error: any) {
+          toast.error(error.message || "Failed to update major");
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message || "An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
   return (
     <div>
       <Card>
@@ -75,8 +253,8 @@ export default function ManageClassPage() {
                 type="search"
                 placeholder="Search class..."
                 className="pl-8 w-full"
-                // value={searchQuery}
-                // onChange={handleSearchChange}
+                value={searchQuery}
+                onChange={handleSearchChange}
               />
             </div>
             <div className="flex items-center gap-2">
@@ -91,80 +269,110 @@ export default function ManageClassPage() {
               </Button>
             </div>
           </div>
-          {/* <div className="mb-4 flex items-center gap-2">
-            <Filter className="h-5 w-5 text-muted-foreground" />
-            <span className="text-sm font-medium">Filter by Academy year:</span>
-            <Select defaultValue="2025">
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Academy Year" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2023">2023</SelectItem>
-                <SelectItem value="2024">2024</SelectItem>
-                <SelectItem value="2025">2025</SelectItem>
-                <SelectItem value="2026">2026</SelectItem>
-              </SelectContent>
-            </Select>
-          </div> */}
         </CardContent>
       </Card>
 
-      <div className="overflow-hidden mt-4">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]">#</TableHead>
-              <TableHead>Class code</TableHead>
-              <TableHead>Major</TableHead>
-              <TableHead>Degree</TableHead>
-              <TableHead>Year level</TableHead>
-              <TableHead>Academy year</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {/* {classes.map((classItem) => (
-              <TableRow key={classItem.classCode}>
-                <TableCell>{classItem.id}</TableCell>
-                <TableCell>
-                  <span className="rounded bg-amber-100 px-2 py-1 text-amber-800">
-                    {classItem.classCode}
-                  </span>
-                </TableCell>
-                <TableCell>{classItem.major}</TableCell>
-                <TableCell>{classItem.degree}</TableCell>
-                <TableCell>{classItem.yearLevel}</TableCell>
-                <TableCell>{classItem.academicYear}</TableCell>
-                <TableCell>
-                  <div>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleOpenEditModal(classItem)}
-                      size="icon"
-                      className="h-8 w-8 bg-gray-200"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
+      <div className="overflow-x-auto mt-4">
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {classTableHeader.map((header, index) => (
+                  <TableHead key={index} className={header.className}>
+                    {header.label}
+                  </TableHead>
+                ))}
               </TableRow>
-            ))} */}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {allClassData?.content.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    No Class found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                allClassData?.content.map((cls, index) => {
+                  const indexDisplay =
+                    ((allClassData.pageNo || 1) - 1) * 10 + index + 1;
+                  return (
+                    <TableRow key={cls.id}>
+                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>
+                        <span className="rounded bg-gray-100 px-2 py-1">
+                          {cls.code}
+                        </span>
+                      </TableCell>
+
+                      <TableCell>{cls.major.name}</TableCell>
+                      <TableCell>{cls.degree}</TableCell>
+                      <TableCell>{cls.yearLevel}</TableCell>
+                      <TableCell>{cls.academyYear}</TableCell>
+
+                      <TableCell>
+                        <div className="flex justify-start space-x-2">
+                          <Button
+                            onClick={() => handleOpenEditModal(cls)}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-gray-200"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setClasses(cls);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
+                            disabled={isSubmitting}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        )}
       </div>
+
+      {/* Pagination */}
+      {!isLoading && allClassData && (
+        <div className="mt-4 flex justify-end">
+          <PaginationPage
+            currentPage={allClassData.pageNo}
+            totalPages={allClassData.totalPages}
+            onPageChange={(page: number) => loadClass({ pageNo: page })}
+          />
+        </div>
+      )}
       <ClassFormModal
         isOpen={isModalOpen}
         mode={modalMode}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleSubmit}
-        // initialData={initialData}
+        initialData={initialData}
+      />
+
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onDelete={handleDeleteClass}
+        title="Delete class"
+        description="Are you sure you want to delete the class:"
+        itemName={classes?.code}
+        isSubmitting={isSubmitting}
       />
     </div>
   );

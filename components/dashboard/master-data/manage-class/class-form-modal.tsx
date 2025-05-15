@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -23,11 +23,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Constants } from "@/constants/text-string";
+import { MajorModel } from "@/model/master-data/major/all-major-model";
+
 import {
   Select,
   SelectContent,
@@ -35,41 +33,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { format, parse, isValid } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Constants } from "@/constants/text-string";
+import { DegreeEnum, YearLevelEnum } from "@/constants/constant";
+import { ComboboxSelectMajor } from "@/components/shared/ComboBox/combobox-major";
 import { YearSelector } from "@/components/shared/year-selector";
-import { SemesterEnum } from "@/constants/constant";
-import { SemesterModel } from "@/model/master-data/semester/semester-model";
 
-const semesterFormSchema = z.object({
-  startDate: z.date({
-    required_error: "Start date is required",
-  }),
-  endDate: z
-    .date({
-      required_error: "End date is required",
-    })
-    .refine((endDate) => endDate, { message: "End date is required" }),
+// Define the schema once in a shared location
+export const classFormSchema = z.object({
+  code: z.string().min(1, { message: "Class code is required" }),
   academyYear: z.number({
     required_error: "Academy year is required",
   }),
-  semester: z.nativeEnum(SemesterEnum, {
-    required_error: "Semester is required",
+  degree: z.nativeEnum(DegreeEnum, {
+    required_error: "degree is required",
   }),
+  yearLevel: z.nativeEnum(YearLevelEnum, {
+    required_error: "year level is required",
+  }),
+  majorId: z.number().min(1, { message: "Major is required" }),
   status: z.literal(Constants.ACTIVE),
 });
 
-export type SemesterFormData = z.infer<typeof semesterFormSchema> & {
+// Export the type for use across your application
+export type ClassFormData = z.infer<typeof classFormSchema> & {
   id?: number;
 };
 
-interface SemesterModalProps {
+interface ClassFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: SemesterModel) => void;
-  initialData?: SemesterModel;
+  onSubmit: (data: ClassFormData) => void;
+  initialData?: ClassFormData;
   mode: "add" | "edit";
   isSubmitting?: boolean;
 }
@@ -81,95 +74,61 @@ export function ClassFormModal({
   initialData,
   mode,
   isSubmitting = false,
-}: SemesterModalProps) {
+}: ClassFormModalProps) {
+  const [selectedMajor, setSelectedMajor] = useState<MajorModel | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const form = useForm<SemesterFormData>({
-    resolver: zodResolver(semesterFormSchema),
+  const currentYear = new Date().getFullYear();
+
+  const form = useForm<ClassFormData>({
+    resolver: zodResolver(classFormSchema),
     defaultValues: {
-      startDate: new Date(),
-      endDate: new Date(),
+      code: "",
       academyYear: new Date().getFullYear(),
-      semester: SemesterEnum.SEMESTER_1,
+      degree: DegreeEnum.BACHELOR,
+      yearLevel: YearLevelEnum.FIRST_YEAR,
+      // majorId: 0,
       status: Constants.ACTIVE,
     },
   });
 
-  // Helper function to safely parse date strings
-  const parseDateString = (dateString: string | undefined): Date => {
-    if (!dateString) return new Date();
-
-    // Try parsing with various formats
-    try {
-      // First try ISO format (yyyy-MM-dd)
-      const parsedDate = new Date(dateString);
-      if (isValid(parsedDate)) return parsedDate;
-
-      // Try specific format parsing
-      const formatPatterns = ["yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy"];
-
-      for (const pattern of formatPatterns) {
-        try {
-          const date = parse(dateString, pattern, new Date());
-          if (isValid(date)) return date;
-        } catch (e) {
-          // Continue to next pattern if this one fails
-        }
-      }
-    } catch (e) {
-      console.error("Error parsing date:", e);
-    }
-
-    // Fallback to current date
-    return new Date();
-  };
-
   useEffect(() => {
     if (isOpen) {
       if (initialData && mode === "edit") {
-        console.log("Initializing form with data:", initialData);
-
-        // Parse dates properly
-        const startDate = parseDateString(initialData.startDate);
-        const endDate = parseDateString(initialData.endDate);
-
         form.reset({
-          startDate: startDate,
-          endDate: endDate,
-          academyYear: initialData.academyYear || new Date().getFullYear(),
-          semester: initialData.semester || SemesterEnum.SEMESTER_1,
+          code: initialData.code || "",
+          academyYear: initialData.academyYear || currentYear,
+          degree: initialData.degree || DegreeEnum.BACHELOR,
+          yearLevel: initialData.yearLevel || YearLevelEnum.FIRST_YEAR,
+          // majorId: initialData.majorId || 0,
           status: Constants.ACTIVE,
         });
       } else {
         form.reset({
-          startDate: new Date(),
-          endDate: new Date(),
-          academyYear: new Date().getFullYear(),
-          semester: SemesterEnum.SEMESTER_1,
+          code: "",
+          academyYear: currentYear,
+          degree: DegreeEnum.BACHELOR,
+          yearLevel: YearLevelEnum.FIRST_YEAR,
+          // majorId: 0,
           status: Constants.ACTIVE,
         });
+        setSelectedMajor(null);
       }
     }
-  }, [isOpen, initialData, mode, form]);
+  }, [isOpen, initialData, mode, form, currentYear]);
 
-  const handleYearChange = (year: number) => {
-    form.setValue("academyYear", year, {
+  const handleMajorChange = (cls: MajorModel) => {
+    setSelectedMajor(cls);
+    form.setValue("majorId", cls.id as number, {
       shouldValidate: true,
     });
   };
 
-  const handleSubmit = async (data: SemesterFormData) => {
+  const handleSubmit = async (data: ClassFormData) => {
     setIsUploading(true);
     try {
-      // Format dates to YYYY-MM-DD string format
-      const formattedStartDate = format(data.startDate, "yyyy-MM-dd");
-      const formattedEndDate = format(data.endDate, "yyyy-MM-dd");
-
-      const submitData: SemesterModel = {
-        startDate: formattedStartDate,
-        endDate: formattedEndDate,
-        academyYear: data.academyYear,
-        semester: data.semester,
+      const submitData: ClassFormData = {
+        ...data,
         status: Constants.ACTIVE,
       };
 
@@ -179,10 +138,16 @@ export function ClassFormModal({
 
       onSubmit(submitData);
     } catch (error) {
-      toast.error("An error occurred while saving semester");
+      toast.error("An error occurred while saving class");
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const handleYearChange = (year: number) => {
+    form.setValue("academyYear", year, {
+      shouldValidate: true,
+    });
   };
 
   return (
@@ -190,11 +155,11 @@ export function ClassFormModal({
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode === "add" ? "Add Semester" : "Edit Semester"}
+            {mode === "add" ? "Add Class" : "Edit Class"}
           </DialogTitle>
           <DialogDescription>
             Fill in the information below to{" "}
-            {mode === "add" ? "create" : "update"} a semester.
+            {mode === "add" ? "create" : "update"} a class.
           </DialogDescription>
         </DialogHeader>
 
@@ -205,87 +170,103 @@ export function ClassFormModal({
           >
             <FormField
               control={form.control}
-              name="startDate"
+              name="code"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem>
                   <FormLabel>
-                    Start Date <span className="text-red-500">*</span>
+                    Class Code <span className="text-red-500">*</span>
                   </FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <FormControl>
+                    <Input placeholder="Enter class code" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="majorId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Major <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <ComboboxSelectMajor
+                      dataSelect={selectedMajor}
+                      onChangeSelected={handleMajorChange}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* <FormField
+            <FormField
               control={form.control}
-              name="endDate"
+              name="degree"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem>
                   <FormLabel>
-                    End Date <span className="text-red-500">*</span>
+                    Degree <span className="text-red-500">*</span>
                   </FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        initialFocus
-                        disabled={(date) => date < form.getValues().startDate}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <FormControl>
+                    <Select
+                      onValueChange={(value) =>
+                        field.onChange(value as DegreeEnum)
+                      }
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select degree" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={DegreeEnum.BACHELOR}>
+                          Bachelor
+                        </SelectItem>
+                        <SelectItem value={DegreeEnum.ASSOCIATE}>
+                          Associate
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
-            /> */}
-
+            />
+            <FormField
+              control={form.control}
+              name="yearLevel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Year Level <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select year level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={YearLevelEnum.FIRST_YEAR}>
+                          Year 1
+                        </SelectItem>
+                        <SelectItem value={YearLevelEnum.SECOND_YEAR}>
+                          Year 2
+                        </SelectItem>
+                        <SelectItem value={YearLevelEnum.THIRD_YEAR}>
+                          Year 3
+                        </SelectItem>
+                        <SelectItem value={YearLevelEnum.FOURTH_YEAR}>
+                          Year 4
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="academyYear"
@@ -300,40 +281,6 @@ export function ClassFormModal({
                       onChange={handleYearChange}
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="semester"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Semester <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <Select
-                    onValueChange={(value) =>
-                      field.onChange(value as SemesterEnum)
-                    }
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a semester" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value={SemesterEnum.SEMESTER_1}>
-                        Semester 1
-                      </SelectItem>
-                      <SelectItem value={SemesterEnum.SEMESTER_2}>
-                        Semester 2
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -359,7 +306,7 @@ export function ClassFormModal({
                     Saving...
                   </>
                 ) : (
-                  "Save Semester"
+                  "Save Class"
                 )}
               </Button>
             </DialogFooter>

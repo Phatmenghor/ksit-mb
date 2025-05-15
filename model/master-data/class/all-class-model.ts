@@ -1,3 +1,4 @@
+import { YearLevelEnum } from "@/constants/constant";
 import { MajorModel } from "../major/all-major-model";
 
 export interface AllClassModel {
@@ -12,9 +13,9 @@ export interface AllClassModel {
 export interface ClassModel {
   id: number;
   code: string;
-  academyYear: number;
+  academyYear: YearLevelEnum;
   degree: string;
-  yearLevel: string;
+  yearLevel: YearLevelEnum;
   status: string;
   major: MajorModel;
   createdAt: string;

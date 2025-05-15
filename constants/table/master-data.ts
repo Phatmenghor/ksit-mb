@@ -108,3 +108,34 @@ export const semesterTableHeader = [
     className: "Finish-left",
   },
 ];
+
+export const classTableHeader = [
+  {
+    label: "#",
+    className: "",
+  },
+  {
+    label: "Class Code",
+    className: "",
+  },
+  {
+    label: "Major",
+    className: "text-left",
+  },
+  {
+    label: "Degree",
+    className: "Finish-left",
+  },
+  {
+    label: "Year year",
+    className: "Finish-left",
+  },
+  {
+    label: "Academy year",
+    className: "Finish-left",
+  },
+  {
+    label: "Action",
+    className: "Finish-left",
+  },
+];
