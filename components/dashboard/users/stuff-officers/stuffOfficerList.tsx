@@ -23,7 +23,6 @@ export default function StuffOfficerList() {
   const loadData = useCallback(
     async (
       data: RequestAllStuff = {
-        departmentId: 1,
         pageNo: 1,
         pageSize: 10,
         roles: [RoleEnum.STAFF],
@@ -55,12 +54,12 @@ export default function StuffOfficerList() {
 
   const columns = [
     {
-      key: "id",
+      key: "stuff#",
       header: "#",
       render: (_: any, index: number) => index + 1,
     },
     {
-      key: "stuffid",
+      key: "id",
       header: "Stuff ID",
     },
     {

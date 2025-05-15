@@ -2,8 +2,14 @@
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import React from "react";
+import { useFormContext } from "react-hook-form";
 
-export default function CourseForm() {
+export default function VocationalForm() {
+  const {
+    control,
+    register,
+    formState: { isSubmitting },
+  } = useFormContext();
   return (
     <CollapsibleCard title="វគ្គគរុកោសល្យ">
       <DynamicInputGrid
@@ -21,7 +27,7 @@ export default function CourseForm() {
             placeholder: "កម្រិតវិជ្ជាជីវៈ",
           },
           {
-            name: "description",
+            name: "description-1",
             type: "text",
             placeholder: "ឧកទេសទី១",
           },
@@ -31,7 +37,7 @@ export default function CourseForm() {
             placeholder: "ឧកទេសទី២",
           },
           {
-            name: "receivedDate",
+            name: "training-system",
             type: "text",
             placeholder: "ប្រព័ន្ធបណ្តុះបពណ្តាល",
           },
@@ -41,6 +47,7 @@ export default function CourseForm() {
             placeholder: "ថ្ងៃខែបានទទួល",
           },
         ]}
+        namePrefix="VocationalSchema"
         defaultRows={2}
       />
     </CollapsibleCard>

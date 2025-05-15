@@ -1,8 +1,14 @@
 "use client";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
+import { useFormContext } from "react-hook-form";
 
 export default function CulturalLevelForm() {
+  const {
+    control,
+    register,
+    formState: { isSubmitting },
+  } = useFormContext();
   return (
     <CollapsibleCard title="កម្រិតវប្បធម៌">
       <DynamicInputGrid
@@ -30,6 +36,7 @@ export default function CulturalLevelForm() {
           },
         ]}
         defaultRows={2}
+        namePrefix="VocationalSchema"
       />
     </CollapsibleCard>
   );

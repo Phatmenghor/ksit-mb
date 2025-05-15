@@ -24,7 +24,6 @@ export default function AdminsList() {
   const loadData = useCallback(
     async (
       data: RequestAllStuff = {
-        departmentId: 1,
         pageNo: 1,
         pageSize: 10,
         roles: [RoleEnum.ADMIN],
@@ -56,12 +55,12 @@ export default function AdminsList() {
 
   const columns = [
     {
-      key: "id",
+      key: "admin#",
       header: "#",
       render: (_: any, index: number) => index + 1,
     },
     {
-      key: "adminid",
+      key: "id",
       header: "Admin ID",
     },
     {

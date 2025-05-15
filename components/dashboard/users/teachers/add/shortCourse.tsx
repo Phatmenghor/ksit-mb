@@ -2,8 +2,14 @@
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import React from "react";
+import { useFormContext } from "react-hook-form";
 
 export default function ShortCourseForm() {
+  const {
+    control,
+    register,
+    formState: { isSubmitting },
+  } = useFormContext();
   return (
     <CollapsibleCard title="វគ្គខ្លីៗ">
       <DynamicInputGrid
@@ -53,6 +59,7 @@ export default function ShortCourseForm() {
             placeholder: "គាំទ្រដោយ",
           },
         ]}
+        namePrefix="ShortCourseSchema"
         defaultRows={2}
       />
     </CollapsibleCard>

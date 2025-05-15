@@ -2,8 +2,14 @@
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import React from "react";
+import { useFormContext } from "react-hook-form";
 
 export default function LanguageForm() {
+  const {
+    control,
+    register,
+    formState: { isSubmitting },
+  } = useFormContext();
   return (
     <CollapsibleCard title="ភាសាបរទេស">
       <DynamicInputGrid
@@ -30,6 +36,7 @@ export default function LanguageForm() {
             placeholder: "ការសន្ទនា",
           },
         ]}
+        namePrefix="LanguageSchema"
         defaultRows={2}
       />
     </CollapsibleCard>

@@ -2,9 +2,17 @@
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import { Input } from "@/components/ui/input";
+import { TeacherFormSchemaType } from "@/model/user/schema";
 import React from "react";
+import { Controller, useFormContext } from "react-hook-form";
 
-export default function WorkHistoryForm() {
+export default function ExperienceForm() {
+  const {
+    control,
+    register,
+    formState: { isSubmitting },
+  } = useFormContext<TeacherFormSchemaType>();
+
   return (
     <div>
       <CollapsibleCard title="ប្រវត្តិការងារបន្តបន្ទាប់">
@@ -15,10 +23,18 @@ export default function WorkHistoryForm() {
           >
             ស្ថានភាព
           </label>
-          <Input
-            id="latin-first-name"
-            placeholder="ស្ថានភាព..."
-            className="w-3/6 bg-gray-100"
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <Input
+                id="latin-first-name"
+                {...field}
+                disabled={isSubmitting}
+                placeholder="ស្ថានភាព..."
+                className="w-3/6 bg-gray-100"
+              />
+            )}
           />
         </div>
 
@@ -52,6 +68,7 @@ export default function WorkHistoryForm() {
             },
           ]}
           defaultRows={2}
+          namePrefix="ExperienceSchema"
         />
       </CollapsibleCard>
     </div>

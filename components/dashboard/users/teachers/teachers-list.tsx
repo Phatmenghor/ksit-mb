@@ -23,7 +23,6 @@ export default function TeachersList() {
   const loadData = useCallback(
     async (
       data: RequestAllStuff = {
-        departmentId: 1,
         pageNo: 1,
         pageSize: 10,
         roles: [RoleEnum.TEACHER],
@@ -56,12 +55,12 @@ export default function TeachersList() {
 
   const columns = [
     {
-      key: "id",
+      key: "teacher#",
       header: "#",
       render: (_: any, index: number) => index + 1,
     },
     {
-      key: "teacherid",
+      key: "id",
       header: "Teacher ID",
     },
     {

@@ -92,6 +92,11 @@ export enum SemesterType {
   DONE = "DONE",
 }
 
+export enum GenderEnum {
+  MALE = "MALE",
+  FEMALE = "FEMALE",
+}
+
 export enum YearLevelEnum {
   FIRST_YEAR = "FIRST_YEAR",
   SECOND_YEAR = "SECOND_YEAR",

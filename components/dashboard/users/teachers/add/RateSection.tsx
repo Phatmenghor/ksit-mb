@@ -1,8 +1,14 @@
 "use client";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
+import { useFormContext } from "react-hook-form";
 
-export default function RateForm() {
+export default function PraiseCriticismForm() {
+  const {
+    control,
+    register,
+    formState: { isSubmitting },
+  } = useFormContext();
   return (
     <CollapsibleCard title="ការសរសើរ​ / ស្តីបន្ទោស">
       <DynamicInputGrid
@@ -29,6 +35,7 @@ export default function RateForm() {
           },
         ]}
         defaultRows={2}
+        namePrefix="PraiseCriticismSchema"
       />
     </CollapsibleCard>
   );
