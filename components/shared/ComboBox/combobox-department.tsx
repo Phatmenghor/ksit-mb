@@ -26,16 +26,15 @@ import { DepartmentModel } from "@/model/master-data/department/all-department-m
 interface ComboboxSelectedProps {
   dataSelect: DepartmentModel | null;
   onChangeSelected: (item: DepartmentModel) => void; // Callback to notify parent about the selection change
+  disabled?: boolean;
 }
 
 export function ComboboxSelectDepartment({
   dataSelect,
   onChangeSelected,
+  disabled = false,
 }: ComboboxSelectedProps) {
   const [open, setOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState<string>(
-    dataSelect?.name || ""
-  );
   const [searchTerm, setSearchTerm] = useState("");
   const [data, setData] = useState<DepartmentModel[]>([]);
   const [page, setPage] = useState(1);
@@ -47,7 +46,7 @@ export function ComboboxSelectDepartment({
 
   // Fetch data from API
   const fetchData = async (search = "", newPage = 1) => {
-    if (loading || lastPage) return;
+    if (loading || (lastPage && newPage > 1)) return;
     setLoading(true);
     try {
       const result = await getAllDepartmentService({
@@ -64,8 +63,9 @@ export function ComboboxSelectDepartment({
       }
       setPage(result.pageNo);
       setLastPage(result.last);
-      setLoading(false);
-    } catch {
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+    } finally {
       setLoading(false);
     }
   };
@@ -91,11 +91,6 @@ export function ComboboxSelectDepartment({
     }
   }, [inView]);
 
-  // Update selected value when dataSelect changes
-  useEffect(() => {
-    setSelectedValue(dataSelect?.name || "");
-  }, [dataSelect]);
-
   async function onChangeSearch(value: string) {
     setSearchTerm(value);
     onSearchClick(value);
@@ -115,36 +110,34 @@ export function ComboboxSelectDepartment({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full h-10 flex-1 justify-between"
+          className={cn(
+            "w-full h-10 flex-1 justify-between",
+            !dataSelect && "text-muted-foreground",
+            disabled && "opacity-50 cursor-not-allowed"
+          )}
+          disabled={disabled}
         >
-          {selectedValue
-            ? data.find((item) => item.name === selectedValue)?.name
-            : "Select an department..."}
+          {/* Always show the name directly from dataSelect prop if available */}
+          {dataSelect ? dataSelect.name : "Select a department..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full flex p-0">
         <Command>
           <CommandInput
-            placeholder="Search..."
+            placeholder="Search department..."
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
           <CommandList className="max-h-60 overflow-y-auto">
-            <CommandEmpty>No items found.</CommandEmpty>
+            <CommandEmpty>No departments found.</CommandEmpty>
             <CommandGroup>
               {data?.map((item, index) => (
                 <CommandItem
                   key={item.id}
                   value={item.name}
-                  onSelect={(currentValue) => {
-                    const selectedItem = data.find(
-                      (item) => item.name === currentValue
-                    );
-                    if (selectedItem) {
-                      setSelectedValue(currentValue);
-                      onChangeSelected(selectedItem); // Notify parent about the change
-                    }
+                  onSelect={() => {
+                    onChangeSelected(item); // Notify parent about the change
                     setOpen(false);
                   }}
                   ref={index === data.length - 1 ? ref : null} // Attach observer to last item
@@ -152,7 +145,7 @@ export function ComboboxSelectDepartment({
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      selectedValue === item.name ? "opacity-100" : "opacity-0"
+                      dataSelect?.id === item.id ? "opacity-100" : "opacity-0"
                     )}
                   />
                   {item.name}

@@ -39,15 +39,19 @@ import { YearSelector } from "@/components/shared/year-selector";
 
 // Define the schema once in a shared location
 export const classFormSchema = z.object({
-  code: z.string().min(1, { message: "Class code is required" }),
+  code: z
+    .string()
+    .min(1, { message: "Class code is required" })
+    .max(50, { message: "Class code should be less than 50 characters" })
+    .trim(),
   academyYear: z.number({
     required_error: "Academy year is required",
   }),
   degree: z.nativeEnum(DegreeEnum, {
-    required_error: "degree is required",
+    required_error: "Degree is required",
   }),
   yearLevel: z.nativeEnum(YearLevelEnum, {
-    required_error: "year level is required",
+    required_error: "Year level is required",
   }),
   majorId: z.number().min(1, { message: "Major is required" }),
   status: z.literal(Constants.ACTIVE),
@@ -56,6 +60,7 @@ export const classFormSchema = z.object({
 // Export the type for use across your application
 export type ClassFormData = z.infer<typeof classFormSchema> & {
   id?: number;
+  selectedMajor?: MajorModel; // Add the selected major for edit mode
 };
 
 interface ClassFormModalProps {
@@ -75,57 +80,92 @@ export function ClassFormModal({
   mode,
   isSubmitting = false,
 }: ClassFormModalProps) {
-  const [selectedMajor, setSelectedMajor] = useState<MajorModel | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-
+  // Initialize selectedMajor with initialData.selectedMajor if available
+  const [selectedMajor, setSelectedMajor] = useState<MajorModel | null>(
+    initialData?.selectedMajor || null
+  );
+  const [isFormDirty, setIsFormDirty] = useState(false);
   const currentYear = new Date().getFullYear();
 
+  // Initialize the form with Zod validation
   const form = useForm<ClassFormData>({
     resolver: zodResolver(classFormSchema),
     defaultValues: {
       code: "",
-      academyYear: new Date().getFullYear(),
+      academyYear: currentYear,
       degree: DegreeEnum.BACHELOR,
       yearLevel: YearLevelEnum.FIRST_YEAR,
-      // majorId: 0,
+      majorId: 0,
       status: Constants.ACTIVE,
     },
+    mode: "onChange", // Validate on change for better UX
   });
 
+  // Reset form when modal opens/closes or initialData changes
   useEffect(() => {
     if (isOpen) {
       if (initialData && mode === "edit") {
+        // Set the form values
         form.reset({
           code: initialData.code || "",
           academyYear: initialData.academyYear || currentYear,
           degree: initialData.degree || DegreeEnum.BACHELOR,
           yearLevel: initialData.yearLevel || YearLevelEnum.FIRST_YEAR,
-          // majorId: initialData.majorId || 0,
+          majorId: initialData.majorId || 0,
           status: Constants.ACTIVE,
         });
+
+        // Set the selected major if it was passed from the parent
+        if (initialData.selectedMajor) {
+          setSelectedMajor(initialData.selectedMajor);
+        }
       } else {
+        // Reset for add mode
         form.reset({
           code: "",
           academyYear: currentYear,
           degree: DegreeEnum.BACHELOR,
           yearLevel: YearLevelEnum.FIRST_YEAR,
-          // majorId: 0,
+          majorId: 0,
           status: Constants.ACTIVE,
         });
         setSelectedMajor(null);
       }
+      setIsFormDirty(false);
     }
   }, [isOpen, initialData, mode, form, currentYear]);
 
-  const handleMajorChange = (cls: MajorModel) => {
-    setSelectedMajor(cls);
-    form.setValue("majorId", cls.id as number, {
+  // Track form changes
+  useEffect(() => {
+    const subscription = form.watch(() =>
+      setIsFormDirty(form.formState.isDirty)
+    );
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  // Handle close with confirmation if form is dirty
+  const handleCloseModal = () => {
+    if (isFormDirty) {
+      // Use native confirm for simplicity, could be replaced with a custom dialog
+      const confirmed = window.confirm(
+        "You have unsaved changes. Are you sure you want to close?"
+      );
+      if (!confirmed) return;
+    }
+    onClose();
+  };
+
+  // Handle major selection from ComboboxSelectMajor
+  const handleMajorChange = (major: MajorModel) => {
+    setSelectedMajor(major);
+    form.setValue("majorId", major.id as number, {
       shouldValidate: true,
+      shouldDirty: true,
     });
   };
 
+  // Handle form submission
   const handleSubmit = async (data: ClassFormData) => {
-    setIsUploading(true);
     try {
       const submitData: ClassFormData = {
         ...data,
@@ -138,20 +178,21 @@ export function ClassFormModal({
 
       onSubmit(submitData);
     } catch (error) {
+      console.error("Error submitting form:", error);
       toast.error("An error occurred while saving class");
-    } finally {
-      setIsUploading(false);
     }
   };
 
+  // Handle academy year change
   const handleYearChange = (year: number) => {
     form.setValue("academyYear", year, {
       shouldValidate: true,
+      shouldDirty: true,
     });
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleCloseModal}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -177,12 +218,18 @@ export function ClassFormModal({
                     Class Code <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter class code" {...field} />
+                    <Input
+                      placeholder="Enter class code"
+                      {...field}
+                      autoFocus
+                      maxLength={50}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="majorId"
@@ -195,6 +242,7 @@ export function ClassFormModal({
                     <ComboboxSelectMajor
                       dataSelect={selectedMajor}
                       onChangeSelected={handleMajorChange}
+                      disabled={isSubmitting}
                     />
                   </FormControl>
                   <FormMessage />
@@ -215,7 +263,8 @@ export function ClassFormModal({
                       onValueChange={(value) =>
                         field.onChange(value as DegreeEnum)
                       }
-                      defaultValue={field.value}
+                      value={field.value}
+                      disabled={isSubmitting}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select degree" />
@@ -234,6 +283,7 @@ export function ClassFormModal({
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="yearLevel"
@@ -243,7 +293,11 @@ export function ClassFormModal({
                     Year Level <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={isSubmitting}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select year level" />
                       </SelectTrigger>
@@ -267,6 +321,7 @@ export function ClassFormModal({
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="academyYear"
@@ -290,23 +345,27 @@ export function ClassFormModal({
               <Button
                 type="button"
                 variant="outline"
-                onClick={onClose}
-                disabled={isUploading}
+                onClick={handleCloseModal}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={isUploading || isSubmitting}
+                disabled={
+                  isSubmitting ||
+                  !form.formState.isDirty ||
+                  !form.formState.isValid
+                }
                 className="bg-green-900 text-white hover:bg-green-950"
               >
-                {isUploading || isSubmitting ? (
+                {isSubmitting ? (
                   <>
                     <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                    Saving...
+                    {mode === "add" ? "Creating..." : "Updating..."}
                   </>
                 ) : (
-                  "Save Class"
+                  `${mode === "add" ? "Create" : "Update"} Class`
                 )}
               </Button>
             </DialogFooter>

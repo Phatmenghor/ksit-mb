@@ -293,7 +293,7 @@ export default function ManageRSubjectPage() {
                       <TableCell>{subject.name}</TableCell>
 
                       <TableCell>
-                        <div className="flex justify-end space-x-2">
+                        <div className="flex justify-start space-x-2">
                           <Button
                             onClick={() => handleOpenEditModal(subject)}
                             variant="ghost"

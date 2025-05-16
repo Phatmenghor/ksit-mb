@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { useCallback, useEffect, useState } from "react";
 import {
   DepartmentFormData,
-  DepartmentModal,
+  DepartmentFormModal,
 } from "@/components/dashboard/master-data/manage-department/department-form-modal";
 import {
   AllDepartmentModel,
@@ -380,7 +380,7 @@ export default function ManageDepartmentPage() {
       )}
 
       {/* Department Edit/Add Modal */}
-      <DepartmentModal
+      <DepartmentFormModal
         isOpen={isModalOpen}
         mode={modalMode}
         initialData={initialData}

@@ -22,7 +22,10 @@ import {
 import { ROUTE } from "@/constants/routes";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { DepartmentFormData, DepartmentModal } from "./department-form-modal";
+import {
+  DepartmentFormData,
+  DepartmentFormModal,
+} from "./department-form-modal";
 
 export default function DepartmentsTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -183,7 +186,7 @@ export default function DepartmentsTable() {
           </TableBody>
         </Table>
       </div>
-      <DepartmentModal
+      <DepartmentFormModal
         isOpen={isModalOpen}
         mode={modalMode}
         initialData={initialData}

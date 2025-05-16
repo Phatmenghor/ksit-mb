@@ -26,16 +26,15 @@ import { MajorModel } from "@/model/master-data/major/all-major-model";
 interface ComboboxSelectedProps {
   dataSelect: MajorModel | null;
   onChangeSelected: (item: MajorModel) => void; // Callback to notify parent about the selection change
+  disabled?: boolean;
 }
 
 export function ComboboxSelectMajor({
   dataSelect,
   onChangeSelected,
+  disabled = false,
 }: ComboboxSelectedProps) {
   const [open, setOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState<string>(
-    dataSelect?.name || ""
-  );
   const [searchTerm, setSearchTerm] = useState("");
   const [data, setData] = useState<MajorModel[]>([]);
   const [page, setPage] = useState(1);
@@ -47,7 +46,7 @@ export function ComboboxSelectMajor({
 
   // Fetch data from API
   const fetchData = async (search = "", newPage = 1) => {
-    if (loading || lastPage) return;
+    if (loading || (lastPage && newPage > 1)) return;
     setLoading(true);
     try {
       const result = await getAllMajorService({
@@ -64,8 +63,9 @@ export function ComboboxSelectMajor({
       }
       setPage(result.pageNo);
       setLastPage(result.last);
-      setLoading(false);
-    } catch {
+    } catch (error) {
+      console.error("Error fetching majors:", error);
+    } finally {
       setLoading(false);
     }
   };
@@ -91,10 +91,10 @@ export function ComboboxSelectMajor({
     }
   }, [inView]);
 
-  // Update selected value when dataSelect changes
-  useEffect(() => {
-    setSelectedValue(dataSelect?.name || "");
-  }, [dataSelect]);
+  // Check if the current selection exists in the loaded data
+  const isSelectedItemInList = dataSelect
+    ? data.some((item) => item.id === dataSelect.id)
+    : false;
 
   async function onChangeSearch(value: string) {
     setSearchTerm(value);
@@ -108,6 +108,9 @@ export function ComboboxSelectMajor({
     [searchTerm]
   );
 
+  // Debug the dataSelect prop to make sure it's received correctly
+  console.log("dataSelect in ComboboxSelectMajor:", dataSelect);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -115,11 +118,15 @@ export function ComboboxSelectMajor({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full h-10 flex-1 justify-between"
+          className={cn(
+            "w-full h-10 flex-1 justify-between",
+            !dataSelect && "text-muted-foreground",
+            disabled && "opacity-50 cursor-not-allowed"
+          )}
+          disabled={disabled}
         >
-          {selectedValue
-            ? data.find((item) => item.name === selectedValue)?.name
-            : "Select a major..."}
+          {/* Always show the name from the dataSelect prop if available */}
+          {dataSelect ? dataSelect.name : "Select a major..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -137,14 +144,8 @@ export function ComboboxSelectMajor({
                 <CommandItem
                   key={item.id}
                   value={item.name}
-                  onSelect={(currentValue) => {
-                    const selectedItem = data.find(
-                      (item) => item.name === currentValue
-                    );
-                    if (selectedItem) {
-                      setSelectedValue(currentValue);
-                      onChangeSelected(selectedItem); // Notify parent about the change
-                    }
+                  onSelect={() => {
+                    onChangeSelected(item); // Notify parent about the change
                     setOpen(false);
                   }}
                   ref={index === data.length - 1 ? ref : null} // Attach observer to last item
@@ -152,7 +153,7 @@ export function ComboboxSelectMajor({
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      selectedValue === item.name ? "opacity-100" : "opacity-0"
+                      dataSelect?.id === item.id ? "opacity-100" : "opacity-0"
                     )}
                   />
                   {item.name} ({item.code})
