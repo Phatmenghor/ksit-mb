@@ -4,15 +4,18 @@ import { ClassModel } from "@/model/master-data/class/all-class-model";
 import { getAllClassService } from "@/service/student.service";
 import { StatusEnum } from "@/constants/constant";
 import { GetAllClassModel } from "@/model/class/class-model";
+import { title } from "process";
 
 export default function ComboBoxClass({
   selectedClass,
   onChange,
   disabled,
+  title,
 }: {
   selectedClass: ClassModel | null;
   disabled: boolean;
   onChange: (dept: ClassModel | null) => void;
+  title: string;
 }) {
   const fetchClasses = async (search: string, pageNo: number) => {
     const payload: GetAllClassModel = {
@@ -21,7 +24,6 @@ export default function ComboBoxClass({
       pageNo: 1,
       status: StatusEnum.ACTIVE,
     };
-    console.log(payload);
 
     const result = await getAllClassService(payload);
     // Ensure the return value always matches the expected shape
@@ -37,7 +39,7 @@ export default function ComboBoxClass({
         selectedItem={selectedClass}
         onSelect={onChange}
         fetcher={fetchClasses}
-        placeholder="Select a department..."
+        placeholder={title ?? "Select:"}
       />
     </div>
   );

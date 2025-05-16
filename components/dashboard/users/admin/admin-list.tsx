@@ -1,11 +1,12 @@
 "use client";
 
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
-import { CustomTable } from "@/components/shared/layout/TableSection";
+import { Column, CustomTable } from "@/components/shared/layout/TableSection";
+import PaginationPage from "@/components/shared/pagination-page";
 import { Button } from "@/components/ui/button";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
-import { StaffModel } from "@/model/user/stuff.model";
+import { AllStaffModel, StaffModel } from "@/model/user/stuff.model";
 import { RequestAllStuff } from "@/model/user/stuff.request.model";
 import { getAllStuffService } from "@/service/user/user.service";
 import { Pencil, Trash2, Plus, RotateCcw } from "lucide-react";
@@ -15,7 +16,7 @@ import { toast } from "sonner";
 export default function AdminsList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [data, setData] = useState<StaffModel[]>([]);
+  const [data, setData] = useState<AllStaffModel | null>(null);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -35,7 +36,7 @@ export default function AdminsList() {
       try {
         const response = await getAllStuffService(data);
         if (response) {
-          setData(response.content);
+          setData(response);
         } else {
           console.error("Failed to fetch admin:");
         }
@@ -53,7 +54,7 @@ export default function AdminsList() {
   }, [searchQuery, loadData]);
   const iconColor = "text-black";
 
-  const columns = [
+  const columns: Column<StaffModel>[] = [
     {
       key: "admin#",
       header: "#",
@@ -129,7 +130,21 @@ export default function AdminsList() {
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
       />
 
-      <CustomTable isLoading={isLoading} columns={columns} data={data} />
+      <CustomTable
+        isLoading={isLoading}
+        columns={columns}
+        data={data?.content ?? []}
+      />
+
+      {!isLoading && data && (
+        <div className="mt-4 flex justify-end">
+          <PaginationPage
+            currentPage={data.pageNo}
+            totalPages={data.totalPages}
+            onPageChange={(page: number) => loadData({ pageNo: page })}
+          />
+        </div>
+      )}
     </div>
   );
 }

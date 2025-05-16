@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,35 +18,25 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
+import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { ROUTE } from "@/constants/routes";
+import { GenerateDataForm } from "@/components/dashboard/users/teachers/add/GenerateDataForm";
+import ProfileUploadCard from "@/components/dashboard/users/teachers/add/profileUploadCard";
 
 export default function AddSingleStudentPage() {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Add single student</h1>
-          <p className="text-muted-foreground">Institute Management System</p>
-        </div>
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Add student</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
+      <CardHeaderSection
+        title="Add New Student"
+        breadcrumbs={[
+          { label: "Dashboard", href: ROUTE.DASHBOARD },
+          { label: "Add Student", href: ROUTE.STUDENTS.ADD_SINGLE },
+        ]}
+      />
 
-      <div className="mb-4">
-        <Link href="/students">
-          <Button variant="outline" size="sm" className="gap-1">
-            <ArrowLeft className="h-4 w-4" /> BACK
-          </Button>
-        </Link>
-      </div>
+      <GenerateDataForm onGenerate={} />
+
+      <ProfileUploadCard />
 
       <Card className="rounded-2xl shadow-sm border">
         <CardContent className="p-6 space-y-6">

@@ -1,17 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { Pencil, Plus, RotateCcw, Search, Trash2 } from "lucide-react";
 import Link from "next/link";
 import {
   Select,
@@ -21,160 +13,190 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import PaginationPage from "@/components/shared/pagination";
+import {
+  AllStudentModel,
+  RequestAllStudent,
+  StudentModel,
+} from "@/model/student/student.model";
+import { toast } from "sonner";
+import { getAllStudentsService } from "@/service/student.service";
+import { StatusEnum } from "@/constants/constant";
+import { Column, CustomTable } from "@/components/shared/layout/TableSection";
+import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { ROUTE } from "@/constants/routes";
+import { YearSelector } from "@/components/shared/year-selector";
+import { ComboboxSelect } from "@/components/shared/custom-comboBox";
+import ComboBoxClass from "@/components/shared/ComboBox/combobox-class";
+import { ClassModel } from "@/model/master-data/class/all-class-model";
 
 export default function StudentsListPage() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [academicYear, setAcademicYear] = useState("2024");
-  const [selectedClass, setSelectedClass] = useState("");
-  const [students, setStudents] = useState<AllPaginationStudentResponse | null>(
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectAcademicYear, setSelectAcademicYear] = useState<
+    number | undefined
+  >();
+  const [selectedClass, setSelectedClass] = useState<ClassModel>();
+  const [allStudentData, setAllStudentData] = useState<AllStudentModel | null>(
     null
   );
 
-  const loadUsers = async () => {
-    try {
-      const response: AllPaginationStudentResponse = await getStudents(
-        currentPage,
-        10
-      );
-      setStudents(response);
-    } catch (error) {
-      console.error("Error fetching students:", error);
-    }
-  };
+  const loadStudents = useCallback(
+    async (param: RequestAllStudent) => {
+      setIsLoading(true);
+
+      try {
+        const response = await getAllStudentsService({
+          search: searchQuery,
+          status: StatusEnum.ACTIVE,
+          ...param,
+        });
+
+        if (response) {
+          setAllStudentData(response);
+        } else {
+          console.error("Failed to fetch departments:");
+        }
+      } catch (error) {
+        toast.error("An error occurred while loading departments");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [searchQuery]
+  );
 
   useEffect(() => {
-    loadUsers();
-  }, [currentPage]);
+    loadStudents({});
+  }, [searchQuery, loadStudents, selectAcademicYear]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleYearChange = (e: number) => {
+    setSelectAcademicYear(e);
+  };
+
+  const handleClassChange = (e: ClassModel | null) => {
+    setSelectedClass(e ?? undefined);
+  };
+
+  const iconColor = "text-black";
+
+  const columns: Column<StudentModel>[] = [
+    {
+      key: "student#",
+      header: "#",
+      render: (_: any, index: number) => index + 1,
+    },
+    {
+      key: "id",
+      header: "student ID",
+    },
+    {
+      key: "fullname(kh)",
+      header: "Fullname (KH)",
+      render: (student: StudentModel) =>
+        `${student.khmerFirstName} ${student.khmerLastName}`,
+    },
+    {
+      key: "fullname(en)",
+      header: "Fullname (EN)",
+      render: (student: StudentModel) =>
+        `${student.englishFirstName} ${student.englishLastName}`,
+    },
+    {
+      key: "Gender",
+      header: "Gender",
+    },
+    {
+      key: "DateOfBirth",
+      header: "Date of birth",
+      render: (student: any) => (
+        <span
+          className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+            student.status === StatusEnum.ACTIVE
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {student.status}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      render: (student: any) => (
+        <>
+          <Button variant="ghost" className={iconColor} size="sm">
+            <RotateCcw />
+          </Button>
+          <Button variant="ghost" className={iconColor} size="sm">
+            <Pencil />
+          </Button>
+          <Button variant="ghost" className={iconColor} size="sm">
+            <Trash2 />
+          </Button>
+        </>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center">
-        <div className="border-l-4 border-green-600 pl-2">
-          <h1 className="text-xl font-medium">Student list</h1>
-          <p className="text-sm text-muted-foreground">
-            Institute Management System
-          </p>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <Link href="/home">Home</Link>
-          <span className="text-muted-foreground">›</span>
-          <span>Students</span>
-        </div>
-      </div>
-
-      <div className="rounded-md border">
-        <div className="p-4">
-          <Link href="/students/add-single">
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="mr-2 h-4 w-4" />
-              Add new
-            </Button>
-          </Link>
-        </div>
-
-        <div className="border-t p-4">
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <Select value={academicYear} onValueChange={setAcademicYear}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="ឆ្នាំសិក្សា 2024" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2022">ឆ្នាំសិក្សា 2022</SelectItem>
-                <SelectItem value="2023">ឆ្នាំសិក្សា 2023</SelectItem>
-                <SelectItem value="2024">ឆ្នាំសិក្សា 2024</SelectItem>
-                <SelectItem value="2025">ឆ្នាំសិក្សា 2025</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedClass} onValueChange={setSelectedClass}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="ថ្នាក់រៀន" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="234012">234012</SelectItem>
-                <SelectItem value="234013">234013</SelectItem>
-                <SelectItem value="234014">234014</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <div className="flex flex-1 items-center gap-2">
-              <Input
-                type="search"
-                placeholder="Enter student name or ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1"
+      <CardHeaderSection
+        breadcrumbs={[
+          { label: "Dashboard", href: ROUTE.DASHBOARD },
+          { label: "Student List", href: ROUTE.STUDENTS.LIST },
+        ]}
+        title="Student list"
+        searchValue={searchQuery}
+        searchPlaceholder="Search..."
+        onSearchChange={handleSearchChange}
+        buttonText="Add New"
+        buttonHref={ROUTE.STUDENTS.ADD_SINGLE}
+        buttonIcon={<Plus className="mr-2 h-2 w-2" />}
+        customSelect={
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
+            <div className="w-full min-w-[150px] md:w-1/2">
+              <YearSelector
+                title="ឆ្នាំសិក្សា"
+                onChange={handleYearChange}
+                value={selectAcademicYear ?? 2024}
+                maxYear={2040}
+                minYear={2020}
               />
-              <Button className="bg-green-600 hover:bg-green-700">
-                <Search className="h-4 w-4" />
-              </Button>
+            </div>
+
+            <div className="w-full min-w-[150px] md:w-1/2">
+              <ComboBoxClass
+                title="ថ្នាក់:"
+                disabled={isSubmitting}
+                onChange={handleClassChange}
+                selectedClass={selectedClass ?? null}
+              />
             </div>
           </div>
-        </div>
+        }
+      />
 
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-gray-100">
-              <TableRow>
-                <TableHead className="w-[50px] text-center">#</TableHead>
-                <TableHead>Student ID</TableHead>
-                <TableHead>Fullname (KH)</TableHead>
-                <TableHead>Fullname (EN)</TableHead>
-                <TableHead>Gender</TableHead>
-                <TableHead>Date of birth</TableHead>
-                <TableHead>Class code</TableHead>
-                <TableHead className="text-center">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {students?.content.map((student, index) => (
-                <TableRow key={student.id}>
-                  <TableCell className="text-center">{index + 1}</TableCell>
-                  <TableCell>{student.id}</TableCell>
-                  <TableCell>{student.nameKh}</TableCell>
-                  <TableCell>{student.nameEn}</TableCell>
-                  <TableCell>{student.gender}</TableCell>
-                  <TableCell>{student.dob}</TableCell>
-                  <TableCell>{student.classCode}</TableCell>
-                  <TableCell>
-                    <div className="flex justify-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 bg-blue-500 text-white hover:bg-blue-600"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 bg-amber-500 text-white hover:bg-amber-600"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        {students && students.totalPages > 1 && (
+      <CustomTable
+        columns={columns}
+        isLoading={isLoading}
+        data={allStudentData?.content ?? []}
+      />
+
+      {!isLoading && allStudentData && (
+        <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={students.pageNo}
-            totalPages={students.totalPages}
-            onPageChange={(page) => setCurrentPage(page)}
-            className="border-t p-4"
+            currentPage={allStudentData.pageNo}
+            totalPages={allStudentData.totalPages}
+            onPageChange={(page: number) => loadStudents({ pageNo: page })}
           />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import React from "react";
 
-interface Column<T> {
+export interface Column<T> {
   key: keyof T | string;
   header: string;
   render?: (item: T, index: number) => React.ReactNode;
@@ -42,7 +42,7 @@ export function CustomTable<T>({
               Loading...
             </TableCell>
           </TableRow>
-        ) : data.length > 0 ? (
+        ) : data?.length > 0 ? (
           data.map((item, index) => (
             <TableRow key={index}>
               {columns.map((col, colIndex) => (

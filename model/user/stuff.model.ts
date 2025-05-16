@@ -1,3 +1,11 @@
+export interface AllStaffModel {
+  content: StaffModel[];
+  pageNo: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
+}
 export interface StaffModel {
   id: number;
   username: string;

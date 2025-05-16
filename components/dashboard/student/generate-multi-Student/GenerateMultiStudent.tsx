@@ -28,7 +28,7 @@ export default function GenerateMultiStudentForm() {
     resolver: zodResolver(generateMultipleStudentSchema),
     defaultValues: {
       classId: undefined,
-      quantity: 0,
+      quantity: "",
       status: StatusEnum.ACTIVE,
     },
   });

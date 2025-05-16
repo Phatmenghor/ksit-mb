@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/select";
 import { StatusEnum } from "@/constants/constant";
 
+// ...imports remain the same
+
 interface BreadcrumbItemType {
   label: string;
   href?: string;
@@ -37,6 +39,7 @@ interface CardHeaderSectionProps {
   buttonText?: string;
   buttonIcon?: React.ReactNode;
   buttonHref?: string;
+  customSelect?: React.ReactNode; // 👈 new optional prop
 }
 
 export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
@@ -49,6 +52,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
   buttonIcon,
   backHref,
   buttonHref,
+  customSelect, // 👈 receive here
 }) => {
   return (
     <Card>
@@ -89,7 +93,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-          {/* Left side: Search input (flex-grow) */}
+          {/* Search input */}
           {onSearchChange && (
             <div className="relative w-full md:flex-1">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -102,20 +106,12 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
               />
             </div>
           )}
-          <div className="flex gap-2 md:items-center">
-            {/* <Select>
-              <SelectTrigger className="w-[140px]">
-                <Filter className="h-3 w-3 text-muted-foreground mr-1" />
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(StatusEnum).map(([key, value]) => (
-                  <SelectItem key={key} value={value}>
-                    {key}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select> */}
+
+          {/* Right side: Custom Select and Add Button */}
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="flex flex-col md:flex-row gap-4 w-full">
+              {customSelect && customSelect}
+            </div>
 
             {buttonText && buttonHref && (
               <Link href={buttonHref}>

@@ -4,37 +4,35 @@ import { Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { ROUTE } from "@/constants/routes";
 import { useCallback, useEffect, useState } from "react";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
-import { CustomTable } from "@/components/shared/layout/TableSection";
+import { Column, CustomTable } from "@/components/shared/layout/TableSection";
 import { getAllStuffService } from "@/service/user/user.service";
 import { RequestAllStuff } from "@/model/user/stuff.request.model";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
-import { StaffModel } from "@/model/user/stuff.model";
+import { AllStaffModel, StaffModel } from "@/model/user/stuff.model";
 import { toast } from "sonner";
+import PaginationPage from "@/components/shared/pagination-page";
 
 export default function TeachersList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [data, setData] = useState<StaffModel[]>([]);
+  const [allTeachersData, setallTeachersData] = useState<AllStaffModel>();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const loadData = useCallback(
-    async (
-      data: RequestAllStuff = {
-        pageNo: 1,
-        pageSize: 10,
-        roles: [RoleEnum.TEACHER],
-        search: searchQuery,
-        status: StatusEnum.ACTIVE,
-      }
-    ) => {
+  const loadTeachers = useCallback(
+    async (param: RequestAllStuff) => {
       setIsLoading(true);
       try {
-        const response = await getAllStuffService(data);
+        const response = await getAllStuffService({
+          roles: [RoleEnum.TEACHER],
+          search: searchQuery,
+          status: StatusEnum.ACTIVE,
+          ...param,
+        });
         if (response) {
-          setData(response.content);
+          setallTeachersData(response);
         } else {
           console.error("Failed to fetch teachers:");
         }
@@ -48,12 +46,12 @@ export default function TeachersList() {
   );
 
   useEffect(() => {
-    loadData();
-  }, [searchQuery, loadData]);
+    loadTeachers({});
+  }, [searchQuery, loadTeachers]);
 
   const iconColor = "text-black";
 
-  const columns = [
+  const columns: Column<StaffModel>[] = [
     {
       key: "teacher#",
       header: "#",
@@ -67,13 +65,13 @@ export default function TeachersList() {
       key: "fullname(kh)",
       header: "Fullname (KH)",
       render: (teacher: StaffModel) =>
-        `${teacher.khmerFirstName} ${teacher.khmerLastName}`,
+        `${teacher?.khmerFirstName} ${teacher?.khmerLastName}`,
     },
     {
       key: "fullname(en)",
       header: "Fullname (EN)",
       render: (teacher: StaffModel) =>
-        `${teacher.englishFirstName} ${teacher.englishLastName}`,
+        `${teacher?.englishFirstName} ${teacher?.englishLastName}`,
     },
     {
       key: "username",
@@ -129,7 +127,20 @@ export default function TeachersList() {
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
       />
 
-      <CustomTable columns={columns} isLoading={isLoading} data={data} />
+      <CustomTable
+        columns={columns}
+        isLoading={isLoading}
+        data={allTeachersData?.content ?? []}
+      />
+      {!isLoading && allTeachersData && (
+        <div className="mt-4 flex justify-end">
+          <PaginationPage
+            currentPage={allTeachersData.pageNo}
+            totalPages={allTeachersData.totalPages}
+            onPageChange={(page: number) => loadTeachers({ pageNo: page })}
+          />
+        </div>
+      )}
     </div>
   );
 }
