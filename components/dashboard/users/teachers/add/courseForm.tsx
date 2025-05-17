@@ -1,15 +1,22 @@
 "use client";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
+import { AddStaffModelType } from "@/model/user/schema";
 import React from "react";
-import { useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 
 export default function VocationalForm() {
   const {
     control,
     register,
     formState: { isSubmitting },
-  } = useFormContext();
+  } = useFormContext<AddStaffModelType>();
+
+  useFieldArray({
+    control: control,
+    name: "teacherVocationals",
+  });
+
   return (
     <CollapsibleCard title="វគ្គគរុកោសល្យ">
       <DynamicInputGrid
@@ -22,32 +29,32 @@ export default function VocationalForm() {
         ]}
         fields={[
           {
-            name: "type",
+            name: "culturalLevel",
             type: "text",
             placeholder: "កម្រិតវិជ្ជាជីវៈ",
           },
           {
-            name: "description-1",
+            name: "skillOne",
             type: "text",
             placeholder: "ឧកទេសទី១",
           },
           {
-            name: "decreeNumber",
+            name: "skillTwo",
             type: "text",
             placeholder: "ឧកទេសទី២",
           },
           {
-            name: "training-system",
+            name: "trainingSystem",
             type: "text",
             placeholder: "ប្រព័ន្ធបណ្តុះបពណ្តាល",
           },
           {
-            name: "receivedDate",
+            name: "dateAccepted",
             type: "date",
             placeholder: "ថ្ងៃខែបានទទួល",
           },
         ]}
-        namePrefix="VocationalSchema"
+        namePrefix="teacherVocationals"
         defaultRows={2}
       />
     </CollapsibleCard>

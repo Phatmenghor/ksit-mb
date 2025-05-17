@@ -1,4 +1,4 @@
-import { GetAllClassModel } from "./../model/class/class-model";
+import { GetAllClassModel } from "../../model/class/class-model";
 import { ApiResponse, PaginationResponse } from "@/model/index-model";
 import { AllClassModel } from "@/model/master-data/class/all-class-model";
 import {

@@ -4,13 +4,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { useFormContext, useFieldArray } from "react-hook-form";
+import React, { useEffect } from "react";
 
-type FieldType = "text" | "date";
+type FieldType = "text" | "date" | "select";
 
 interface FieldConfig {
   name: string;
   type: FieldType;
   placeholder: string;
+  key?: string; // Optional custom key for rendering
+  options?: { label: string; value: string }[]; // only for select
 }
 
 interface Props {
@@ -26,25 +29,29 @@ export default function DynamicInputGrid({
   defaultRows = 1,
   namePrefix,
 }: Props) {
-  const { control, register } = useFormContext();
+  const { control, register, getValues } = useFormContext();
 
   const { fields: arrayFields, append } = useFieldArray({
     control,
     name: namePrefix,
   });
 
-  // Auto-initialize rows if none present
-  if (arrayFields.length === 0) {
-    for (let i = 0; i < defaultRows; i++) {
-      append(Object.fromEntries(fields.map((f) => [f.name, ""])));
+  // Initialize rows once on mount
+  useEffect(() => {
+    const current = getValues(namePrefix);
+    if (!current || current.length === 0) {
+      for (let i = 0; i < defaultRows; i++) {
+        append(Object.fromEntries(fields.map((f) => [f.name, ""])));
+      }
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="border p-4 rounded-md shadow-sm space-y-4 overflow-x-auto">
       {/* Header */}
       <div
-        className="grid gap-4 font-bold text-sm min-w-full"
+        className="grid gap-4 font-bold text-sm"
         style={{
           gridTemplateColumns: `repeat(${fields.length}, minmax(200px, 1fr))`,
         }}
@@ -56,32 +63,54 @@ export default function DynamicInputGrid({
         ))}
       </div>
 
-      {/* Input Rows */}
+      {/* Rows */}
       {arrayFields.map((fieldRow, rowIndex) => (
         <div
-          key={fieldRow.id} // <-- unique and stable key
-          className="grid gap-4 items-center min-w-full"
+          key={fieldRow.id}
+          className="grid gap-4 items-center"
           style={{
             gridTemplateColumns: `repeat(${fields.length}, minmax(200px, 1fr))`,
           }}
         >
-          {fields.map((field) => (
-            <div key={`${field.name}-${rowIndex}`} className="relative">
-              <Input
-                type={field.type}
-                placeholder={field.placeholder}
-                {...register(`${namePrefix}.${rowIndex}.${field.name}`)}
-                className="bg-gray-100 pr-10"
-              />
-              {field.type === "date" && (
-                <CalendarIcon className="absolute right-2 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
-              )}
-            </div>
-          ))}
+          {fields.map((field, colIndex) => {
+            const inputName = `${namePrefix}.${rowIndex}.${field.name}`;
+            const key = field.key ?? `${field.name}-${rowIndex}`; // fallback to name + index
+            return (
+              <div key={key} className="relative">
+                {field.type === "select" ? (
+                  <select
+                    {...register(inputName)}
+                    className="bg-gray-100 pr-10 rounded-md w-full py-2 px-3 border border-gray-300"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      {field.placeholder}
+                    </option>
+                    {field.options?.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <Input
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    {...register(inputName)}
+                    className="bg-gray-100 pr-10"
+                  />
+                )}
+
+                {field.type === "date" && (
+                  <CalendarIcon className="absolute right-2 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
+                )}
+              </div>
+            );
+          })}
         </div>
       ))}
 
-      {/* Add Row */}
+      {/* Add Row Button */}
       <div className="flex items-center gap-4 mt-4">
         <span className="text-sm font-medium w-24 border border-gray-300 px-4 rounded-md py-2">
           {arrayFields.length}
@@ -93,7 +122,7 @@ export default function DynamicInputGrid({
           }
           className="bg-black text-white"
         >
-          Add Row
+          បន្ថែមជួរថ្មី
         </Button>
       </div>
     </div>

@@ -1,14 +1,20 @@
 "use client";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
-import { useFormContext } from "react-hook-form";
+import { AddStaffModelType } from "@/model/user/schema";
+import { useFieldArray, useFormContext } from "react-hook-form";
 
 export default function PraiseCriticismForm() {
   const {
     control,
     register,
     formState: { isSubmitting },
-  } = useFormContext();
+  } = useFormContext<AddStaffModelType>();
+
+  useFieldArray({
+    control: control,
+    name: "teacherPraiseOrCriticisms",
+  });
   return (
     <CollapsibleCard title="ការសរសើរ​ / ស្តីបន្ទោស">
       <DynamicInputGrid
@@ -19,23 +25,23 @@ export default function PraiseCriticismForm() {
         ]}
         fields={[
           {
-            name: "type",
+            name: "typePraiseOrCriticism",
             type: "text",
             placeholder: "ប្រភេទ",
           },
           {
-            name: "description",
+            name: "giveBy",
             type: "text",
             placeholder: "ផ្តល់ដោយ", // Textarea not yet supported directly
           },
           {
-            name: "decreeNumber",
+            name: "dateAccepted",
             type: "date",
             placeholder: "កាលបរិច្ឆេទទទួល",
           },
         ]}
         defaultRows={2}
-        namePrefix="PraiseCriticismSchema"
+        namePrefix="teacherPraiseOrCriticisms"
       />
     </CollapsibleCard>
   );

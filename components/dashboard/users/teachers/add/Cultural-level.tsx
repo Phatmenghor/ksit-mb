@@ -1,14 +1,21 @@
 "use client";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
-import { useFormContext } from "react-hook-form";
+import { AddStaffModelType } from "@/model/user/schema";
+import { useFieldArray, useFormContext } from "react-hook-form";
 
-export default function CulturalLevelForm() {
+export default function EducatonForm() {
   const {
     control,
     register,
     formState: { isSubmitting },
-  } = useFormContext();
+  } = useFormContext<AddStaffModelType>();
+
+  useFieldArray({
+    control: control,
+    name: "teacherEducations",
+  });
+
   return (
     <CollapsibleCard title="កម្រិតវប្បធម៌">
       <DynamicInputGrid
@@ -36,7 +43,7 @@ export default function CulturalLevelForm() {
           },
         ]}
         defaultRows={2}
-        namePrefix="VocationalSchema"
+        namePrefix="teacherEducations"
       />
     </CollapsibleCard>
   );

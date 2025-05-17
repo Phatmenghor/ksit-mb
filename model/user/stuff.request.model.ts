@@ -41,6 +41,21 @@ export interface AddStaffModel {
   decreeFinal: string;
   rankAndClass: string;
   departmentId: number;
+  taughtEnglish: string;
+  threeLevelClass: string;
+  referenceNote: string;
+  technicalTeamLeader: string;
+  assistInTeaching: string;
+  serialNumber: string;
+  twoLevelClass: string;
+  classResponsibility: string;
+  lastSalaryIncrementDate: string;
+  teachAcrossSchools: string;
+  overtimeHours: string;
+  issuedDate: string;
+  suitableClass: string;
+  bilingual: string;
+  academicYearTaught: string;
   workHistory: string;
   maritalStatus: string;
   mustBe: string;
@@ -49,79 +64,84 @@ export interface AddStaffModel {
   affiliatedOrganization: string;
   federationEstablishmentDate: string;
   wivesSalary: string;
-  teachersProfessionalRanks: TeachersProfessionalRank[];
-  teacherExperiences: TeacherExperience[];
-  teacherPraiseOrCriticisms: TeacherPraiseOrCriticism[];
-  teacherEducations: TeacherEducation[];
-  teacherVocationals: TeacherVocational[];
-  teacherShortCourses: TeacherShortCourse[];
-  teacherLanguages: TeacherLanguage[];
-  teacherFamilies: TeacherFamily[];
+  teachersProfessionalRanks?: TeachersProfessionalRank[];
+  teacherExperiences?: TeacherExperience[];
+  teacherPraiseOrCriticisms?: TeacherPraiseOrCriticism[];
+  teacherEducations?: TeacherEducation[];
+  teacherVocationals?: TeacherVocational[];
+  teacherShortCourses?: TeacherShortCourse[];
+  teacherLanguages?: TeacherLanguage[];
+  teacherFamilies?: TeacherFamily[];
   status: string;
 }
 
 export interface TeachersProfessionalRank {
-  id: number;
-  typeOfProfessionalRank: string;
-  description: string;
-  announcementNumber: string;
-  dateAccepted: string;
+  id?: number;
+  typeOfProfessionalRank?: string;
+  description?: string;
+  announcementNumber?: string;
+  dateAccepted?: string;
 }
 
 export interface TeacherExperience {
-  id: number;
-  continuousEmployment: string;
-  workPlace: string;
-  startDate: string;
-  endDate: string;
+  id?: number;
+  continuousEmployment?: string;
+  workPlace?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface TeacherPraiseOrCriticism {
-  id: number;
-  typePraiseOrCriticism: string;
-  giveBy: string;
-  dateAccepted: string;
+  id?: number;
+  typePraiseOrCriticism?: string;
+  giveBy?: string;
+  dateAccepted?: string;
 }
 
 export interface TeacherEducation {
-  id: number;
-  culturalLevel: string;
-  skillName: string;
-  dateAccepted: string;
+  id?: number;
+  culturalLevel?: string;
+  skillName?: string;
+  dateAccepted?: string;
 }
 
 export interface TeacherVocational {
-  id: number;
-  culturalLevel: string;
-  skillOne: string;
-  skillTwo: string;
-  trainingSystem: string;
-  dateAccepted: string;
+  id?: number;
+  culturalLevel?: string;
+  skillOne?: string;
+  skillTwo?: string;
+  trainingSystem?: string;
+  dateAccepted?: string;
 }
 
 export interface TeacherShortCourse {
-  id: number;
-  skill: string;
-  skillName: string;
-  startDate: string;
-  endDate: string;
-  duration: string;
-  preparedBy: string;
-  supportBy: string;
+  id?: number;
+  skill?: string;
+  skillName?: string;
+  startDate?: string;
+  endDate?: string;
+  duration?: string;
+  preparedBy?: string;
+  supportBy?: string;
 }
 
 export interface TeacherLanguage {
-  id: number;
-  language: string;
-  reading: string;
-  writing: string;
-  speaking: string;
+  id?: number;
+  language?: string;
+  reading?: string;
+  writing?: string;
+  speaking?: string;
 }
 
 export interface TeacherFamily {
-  id: number;
-  nameChild: string;
-  gender: string;
-  dateOfBirth: string;
-  working: string;
+  id?: number;
+  nameChild?: string;
+  gender?: string;
+  dateOfBirth?: string;
+  working?: string;
+}
+
+export interface uploadProfileRequest {
+  type: string;
+  base64: string;
 }

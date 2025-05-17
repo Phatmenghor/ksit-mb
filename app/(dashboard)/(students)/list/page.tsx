@@ -19,7 +19,7 @@ import {
   StudentModel,
 } from "@/model/student/student.model";
 import { toast } from "sonner";
-import { getAllStudentsService } from "@/service/student.service";
+import { getAllStudentsService } from "@/service/student/student.service";
 import { StatusEnum } from "@/constants/constant";
 import { Column, CustomTable } from "@/components/shared/layout/TableSection";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
@@ -95,19 +95,19 @@ export default function StudentsListPage() {
       header: "student ID",
     },
     {
-      key: "fullname(kh)",
+      key: "fullname (kh)",
       header: "Fullname (KH)",
       render: (student: StudentModel) =>
         `${student.khmerFirstName} ${student.khmerLastName}`,
     },
     {
-      key: "fullname(en)",
+      key: "fullname (en)",
       header: "Fullname (EN)",
       render: (student: StudentModel) =>
         `${student.englishFirstName} ${student.englishLastName}`,
     },
     {
-      key: "Gender",
+      key: "gender",
       header: "Gender",
     },
     {

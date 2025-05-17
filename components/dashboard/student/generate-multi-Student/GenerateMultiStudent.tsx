@@ -10,7 +10,7 @@ import {
   generateMultipleStudentSchema,
   GenerateMultipleStudentSchema,
 } from "@/model/student/student.zod.validate";
-import { generateMultipleStudentService } from "@/service/student.service";
+import { generateMultipleStudentService } from "@/service/student/student.service";
 import { exportStudentsToExcel } from "@/utils/excel/Excel-Generate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Plus } from "lucide-react";

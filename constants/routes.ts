@@ -100,7 +100,6 @@ export const sidebarRoutes = [
       { title: "Add multiple users", href: ROUTE.STUDENTS.ADD_MULTIPLE },
       { title: "Add single user", href: ROUTE.STUDENTS.ADD_SINGLE },
       { title: "Students list", href: ROUTE.STUDENTS.LIST },
-      { title: "Dropout students", href: ROUTE.STUDENTS.DROPOUT },
     ],
   },
   {

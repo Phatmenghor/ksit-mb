@@ -33,3 +33,9 @@ export interface Department {
   status: string;
   createdAt: string;
 }
+
+export interface ImageResponse {
+  id: string;
+  imageUrl: string;
+  type: string;
+}

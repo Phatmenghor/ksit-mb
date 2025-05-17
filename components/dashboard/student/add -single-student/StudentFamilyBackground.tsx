@@ -1,0 +1,214 @@
+"use client";
+import CollapsibleCard from "@/components/shared/collapsibleCard";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { GenderEnum } from "@/constants/constant";
+import { AddSingleStudentRequest } from "@/model/student/add.student.model";
+import { AddSingleStudentRequestType } from "@/model/student/add.student.zod";
+import React, { useEffect, useState } from "react";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+
+export default function StudentFamilyBackgroundSection() {
+  const {
+    control,
+    formState: { isSubmitting },
+    setValue,
+  } = useFormContext<AddSingleStudentRequestType>();
+
+  const { fields: parentFields } = useFieldArray({
+    control,
+    name: "studentParents",
+  });
+
+  const {
+    fields: siblingFields,
+    append: appendSibling,
+    remove: removeSibling,
+  } = useFieldArray({
+    control,
+    name: "studentSiblings",
+  });
+
+  useEffect(() => {
+    setValue("studentParents.0.parentType", "FATHER");
+    setValue("studentParents.1.parentType", "MOTHER");
+  }, [setValue]);
+
+  const handleAddSibling = () => {
+    appendSibling({
+      name: "",
+      gender: "",
+      dateOfBirth: "",
+      occupation: "",
+    });
+  };
+
+  return (
+    <CollapsibleCard title="ព័ត៌មានគ្រួសារ">
+      <div className="grid grid-cols-2 gap-6">
+        {[0, 1].map((index) => (
+          <div key={index} className="space-y-4">
+            <div>
+              <label className="block font-medium text-sm mb-1">
+                {index === 0 ? "ឈ្មោះឪពុក" : "ឈ្មោះម្ដាយ"}
+              </label>
+              <Controller
+                control={control}
+                name={`studentParents.${index}.name`}
+                render={({ field }) => <Input {...field} placeholder="ឈ្មោះ" />}
+              />
+            </div>
+            <div>
+              <label className="block font-medium text-sm mb-1">
+                {index === 0 ? "អាយុឪពុក" : "អាយុម្ដាយ"}
+              </label>
+              <Controller
+                control={control}
+                name={`studentParents.${index}.age`}
+                render={({ field }) => <Input {...field} placeholder="អាយុ" />}
+              />
+            </div>
+            <div>
+              <label className="block font-medium text-sm mb-1">មុខរបរ</label>
+              <Controller
+                control={control}
+                name={`studentParents.${index}.job`}
+                render={({ field }) => (
+                  <Input {...field} placeholder="មុខរបរ" />
+                )}
+              />
+            </div>
+            <div>
+              <label className="block font-medium text-sm mb-1">
+                លេខទូរស័ព្ទ
+              </label>
+              <Controller
+                control={control}
+                name={`studentParents.${index}.phone`}
+                render={({ field }) => (
+                  <Input {...field} placeholder="លេខទូរស័ព្ទ" />
+                )}
+              />
+            </div>
+            <div>
+              <label className="block font-medium text-sm mb-1">
+                ទីកន្លែងបច្ចុប្បន្ន
+              </label>
+              <Controller
+                control={control}
+                name={`studentParents.${index}.address`}
+                render={({ field }) => (
+                  <Textarea
+                    {...field}
+                    placeholder="ភូមិ ឃុំ/សង្កាត់ ស្រុក/ខណ្ច ខេត្ត"
+                  />
+                )}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Siblings Section */}
+      <div className="mt-8">
+        <div className="mb-2">
+          <h3 className="font-medium">បងប្អូនបង្កើត</h3>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="text-sm">
+                <th className="py-2 px-1 text-left">លេខរៀង</th>
+                <th className="py-2 px-4 text-left">ឈ្មោះ</th>
+                <th className="py-2 px-4 text-left">ភេទ</th>
+                <th className="py-2 px-4 text-left">ថ្ងៃខែឆ្នាំកំណើត</th>
+                <th className="py-2 px-4 text-left">មុខរបរ</th>
+                <th className="py-2 px-4 text-left">លេខទូរស័ព្ទ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {siblingFields.map((field, index) => (
+                <tr key={field.id}>
+                  <td className="py-2 px-1 align-top">{index + 1}</td>
+                  <td className="py-2 px-1 align-top">
+                    <Controller
+                      control={control}
+                      name={`studentSiblings.${index}.name`}
+                      render={({ field }) => (
+                        <Input {...field} placeholder="ឈ្មោះ" />
+                      )}
+                    />
+                  </td>
+                  <td className="py-2 px-1 align-top">
+                    <Controller
+                      control={control}
+                      name={`studentSiblings.${index}.gender`}
+                      render={({ field }) => (
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="MALE">ប្រុស</SelectItem>
+                            <SelectItem value="FEMALE">ស្រី</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  </td>
+                  <td className="py-2 px-1 align-top">
+                    <Controller
+                      control={control}
+                      name={`studentSiblings.${index}.dateOfBirth`}
+                      render={({ field }) => (
+                        <Input {...field} type="date" className="w-full" />
+                      )}
+                    />
+                  </td>
+                  <td className="py-2 px-1 align-top">
+                    <Controller
+                      control={control}
+                      name={`studentSiblings.${index}.occupation`}
+                      render={({ field }) => (
+                        <Input {...field} placeholder="មុខរបរ" />
+                      )}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-4 flex items-center">
+          <Input
+            type="number"
+            className="w-16 mr-2"
+            min="1"
+            placeholder="1"
+            disabled={isSubmitting}
+          />
+          <Button
+            onClick={handleAddSibling}
+            disabled={isSubmitting}
+            className="bg-black text-white hover:bg-gray-800"
+          >
+            Add Row
+          </Button>
+        </div>
+      </div>
+    </CollapsibleCard>
+  );
+}

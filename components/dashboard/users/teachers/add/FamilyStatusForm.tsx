@@ -3,14 +3,22 @@ import React from "react";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import { Input } from "@/components/ui/input";
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+import { AddStaffModelType } from "@/model/user/schema";
+import { GenderEnum } from "@/constants/constant";
 
 export default function FamilyStatusForm() {
   const {
     control,
     register,
     formState: { isSubmitting },
-  } = useFormContext();
+  } = useFormContext<AddStaffModelType>();
+
+  useFieldArray({
+    control: control,
+    name: "teacherFamilies",
+  });
+
   return (
     <CollapsibleCard title="ស្ថានភាពគ្រួសារ">
       <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
@@ -245,27 +253,31 @@ export default function FamilyStatusForm() {
           labels={["ឈ្មោះកូន", "ភេទ", "ថ្ងៃខែឆ្នាំកំណើត", "មុខរបរ"]}
           fields={[
             {
-              name: "childName",
+              name: "nameChild",
               type: "text",
               placeholder: "ឈ្មោះកូន",
             },
             {
               name: "gender",
-              type: "text",
+              type: "select",
               placeholder: "ភេទ",
+              options: [
+                { label: "ប្រុស", value: GenderEnum.MALE },
+                { label: "ស្រី", value: GenderEnum.FEMALE },
+              ],
             },
             {
-              name: "dob",
+              name: "dateOfBirth",
               type: "date",
               placeholder: "ថ្ងៃខែឆ្នាំកំណើត",
             },
             {
-              name: "job",
+              name: "working",
               type: "text",
               placeholder: "មុខរបរ",
             },
           ]}
-          namePrefix="FamilySchema"
+          namePrefix="teacherFamilies"
           defaultRows={2}
         />
       </div>

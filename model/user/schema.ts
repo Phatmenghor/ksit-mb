@@ -1,53 +1,39 @@
 // schemas/teacherSchema.ts
-import {
-  GenderEnum as GenderEnumValues,
-  StatusEnum as StatusEnumValue,
-} from "@/constants/constant";
 import { z } from "zod";
 
-// 👤 Gender Enum
-const GenderEnum = z.enum(
-  Object.values(GenderEnumValues) as [string, ...string[]]
-);
-
-// 📊 Status Enum
-const StatusEnum = z.enum(
-  Object.values(StatusEnumValue) as [string, ...string[]]
-);
-
-// 📚 Nested Arrays
-const ProfessionalRankSchema = z.object({
-  id: z.number(),
+// Helper schemas for nested types
+const TeachersProfessionalRankSchema = z.object({
+  id: z.number().optional(),
   typeOfProfessionalRank: z.string(),
   description: z.string(),
   announcementNumber: z.string(),
-  dateAccepted: z.string(), // or z.coerce.date() if you want Date object
+  dateAccepted: z.string(),
 });
 
-const ExperienceSchema = z.object({
-  id: z.number(),
+const TeacherExperienceSchema = z.object({
+  id: z.number().optional(),
   continuousEmployment: z.string(),
   workPlace: z.string(),
   startDate: z.string(),
   endDate: z.string(),
 });
 
-const PraiseCriticismSchema = z.object({
-  id: z.number(),
+const TeacherPraiseOrCriticismSchema = z.object({
+  id: z.number().optional(),
   typePraiseOrCriticism: z.string(),
   giveBy: z.string(),
   dateAccepted: z.string(),
 });
 
-const EducationSchema = z.object({
-  id: z.number(),
+const TeacherEducationSchema = z.object({
+  id: z.number().optional(),
   culturalLevel: z.string(),
   skillName: z.string(),
   dateAccepted: z.string(),
 });
 
-const VocationalSchema = z.object({
-  id: z.number(),
+const TeacherVocationalSchema = z.object({
+  id: z.number().optional(),
   culturalLevel: z.string(),
   skillOne: z.string(),
   skillTwo: z.string(),
@@ -55,8 +41,8 @@ const VocationalSchema = z.object({
   dateAccepted: z.string(),
 });
 
-const ShortCourseSchema = z.object({
-  id: z.number(),
+const TeacherShortCourseSchema = z.object({
+  id: z.number().optional(),
   skill: z.string(),
   skillName: z.string(),
   startDate: z.string(),
@@ -66,206 +52,120 @@ const ShortCourseSchema = z.object({
   supportBy: z.string(),
 });
 
-const LanguageSchema = z.object({
-  id: z.number(),
+const TeacherLanguageSchema = z.object({
+  id: z.number().optional(),
   language: z.string(),
   reading: z.string(),
   writing: z.string(),
   speaking: z.string(),
 });
 
-const FamilySchema = z.object({
-  id: z.number(),
+const TeacherFamilySchema = z.object({
+  id: z.number().optional(),
   nameChild: z.string(),
-  gender: GenderEnum,
+  gender: z.string(),
   dateOfBirth: z.string(),
   working: z.string(),
 });
 
-// 🧾 Main Schema
-export const TeacherFormSchema = z.object({
+// Main AddStaffModel schema
+export const AddStaffModelSchema = z.object({
+  // Required fields (based on common requirements for staff registration)
   username: z.string(),
   password: z.string(),
   email: z.string().email(),
-  roles: z.array(z.string()),
+  roles: z.array(z.string()).default([]),
 
+  // Personal information
   khmerFirstName: z.string(),
   khmerLastName: z.string(),
   englishFirstName: z.string(),
   englishLastName: z.string(),
-  gender: GenderEnum,
+  gender: z.string(),
   dateOfBirth: z.string(),
   phoneNumber: z.string(),
   currentAddress: z.string(),
   nationality: z.string(),
   ethnicity: z.string(),
   placeOfBirth: z.string(),
+
+  // ID information
   staffId: z.string(),
   nationalId: z.string(),
   identifyNumber: z.string(),
+
+  // Employment information
   startWorkDate: z.string(),
   currentPositionDate: z.string(),
   employeeWork: z.string(),
   disability: z.string(),
   payrollAccountNumber: z.string(),
   cppMembershipNumber: z.string(),
+
+  // Location information
   province: z.string(),
   district: z.string(),
   commune: z.string(),
   village: z.string(),
+
+  // Position information
   officeName: z.string(),
   currentPosition: z.string(),
   decreeFinal: z.string(),
   rankAndClass: z.string(),
   departmentId: z.number(),
+
+  // Teaching information
+  taughtEnglish: z.string(),
+  threeLevelClass: z.string(),
+  referenceNote: z.string(),
+  technicalTeamLeader: z.string(),
+  assistInTeaching: z.string(),
+  serialNumber: z.string(),
+  twoLevelClass: z.string(),
+  classResponsibility: z.string(),
+  lastSalaryIncrementDate: z.string(),
+  teachAcrossSchools: z.string(),
+  overtimeHours: z.string(),
+  issuedDate: z.string(),
+  suitableClass: z.string(),
+  bilingual: z.string(),
+  academicYearTaught: z.string(),
+
+  // Employment history
   workHistory: z.string(),
+
+  // Personal details
   maritalStatus: z.string(),
   mustBe: z.string(),
+
+  // Affiliation information
   affiliatedProfession: z.string(),
   federationName: z.string(),
   affiliatedOrganization: z.string(),
   federationEstablishmentDate: z.string(),
   wivesSalary: z.string(),
 
-  teachersProfessionalRanks: z.array(ProfessionalRankSchema),
-  teacherExperiences: z.array(ExperienceSchema),
-  teacherPraiseOrCriticisms: z.array(PraiseCriticismSchema),
-  teacherEducations: z.array(EducationSchema),
-  teacherVocationals: z.array(VocationalSchema),
-  teacherShortCourses: z.array(ShortCourseSchema),
-  teacherLanguages: z.array(LanguageSchema),
-  teacherFamilies: z.array(FamilySchema),
+  // Nested arrays of related information
+  teachersProfessionalRanks: z
+    .array(TeachersProfessionalRankSchema)
 
-  status: StatusEnum,
+    .default([]),
+  teacherExperiences: z.array(TeacherExperienceSchema).default([]),
+  teacherPraiseOrCriticisms: z
+    .array(TeacherPraiseOrCriticismSchema)
+
+    .default([]),
+  teacherEducations: z.array(TeacherEducationSchema).default([]),
+  teacherVocationals: z.array(TeacherVocationalSchema).default([]),
+  teacherShortCourses: z.array(TeacherShortCourseSchema).default([]),
+  teacherLanguages: z.array(TeacherLanguageSchema).default([]),
+  teacherFamilies: z.array(TeacherFamilySchema).default([]),
+
+  status: z.string(),
 });
 
-export type TeacherFormSchemaType = z.infer<typeof TeacherFormSchema>;
+export const AddStaffModelBase = AddStaffModelSchema.partial();
 
-export const teacherFormDefaultValues = {
-  username: "",
-  password: "",
-  email: "",
-  roles: [""],
-
-  khmerFirstName: "",
-  khmerLastName: "",
-  englishFirstName: "",
-  englishLastName: "",
-  gender: GenderEnumValues.MALE, // or "FEMALE"
-  dateOfBirth: "",
-  phoneNumber: "",
-  currentAddress: "",
-  nationality: "",
-  ethnicity: "",
-  placeOfBirth: "",
-  staffId: "",
-  nationalId: "",
-  identifyNumber: "",
-  startWorkDate: "",
-  currentPositionDate: "",
-  employeeWork: "",
-  disability: "",
-  payrollAccountNumber: "",
-  cppMembershipNumber: "",
-  province: "",
-  district: "",
-  commune: "",
-  village: "",
-  officeName: "",
-  currentPosition: "",
-  decreeFinal: "",
-  rankAndClass: "",
-  departmentId: 0,
-  workHistory: "",
-  maritalStatus: "",
-  mustBe: "",
-  affiliatedProfession: "",
-  federationName: "",
-  affiliatedOrganization: "",
-  federationEstablishmentDate: "",
-  wivesSalary: "",
-
-  teachersProfessionalRanks: [
-    {
-      id: 0,
-      typeOfProfessionalRank: "",
-      description: "",
-      announcementNumber: "",
-      dateAccepted: "",
-    },
-  ],
-
-  teacherExperiences: [
-    {
-      id: 0,
-      continuousEmployment: "",
-      workPlace: "",
-      startDate: "",
-      endDate: "",
-    },
-  ],
-
-  teacherPraiseOrCriticisms: [
-    {
-      id: 0,
-      typePraiseOrCriticism: "",
-      giveBy: "",
-      dateAccepted: "",
-    },
-  ],
-
-  teacherEducations: [
-    {
-      id: 0,
-      culturalLevel: "",
-      skillName: "",
-      dateAccepted: "",
-    },
-  ],
-
-  teacherVocationals: [
-    {
-      id: 0,
-      culturalLevel: "",
-      skillOne: "",
-      skillTwo: "",
-      trainingSystem: "",
-      dateAccepted: "",
-    },
-  ],
-
-  teacherShortCourses: [
-    {
-      id: 0,
-      skill: "",
-      skillName: "",
-      startDate: "",
-      endDate: "",
-      duration: "",
-      preparedBy: "",
-      supportBy: "",
-    },
-  ],
-
-  teacherLanguages: [
-    {
-      id: 0,
-      language: "",
-      reading: "",
-      writing: "",
-      speaking: "",
-    },
-  ],
-
-  teacherFamilies: [
-    {
-      id: 0,
-      nameChild: "",
-      gender: GenderEnumValues.MALE,
-      dateOfBirth: "",
-      working: "",
-    },
-  ],
-
-  status: StatusEnumValue.ACTIVE,
-};
+// Type definition based on the schema
+export type AddStaffModelType = z.infer<typeof AddStaffModelBase>;

@@ -5,13 +5,18 @@ import TeachingDetailForm from "./teaching-detail-form";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import { useFieldArray, useFormContext } from "react-hook-form";
+import { AddStaffModelType } from "@/model/user/schema";
 
 export default function EducationForm() {
   const {
     control,
-    register,
     formState: { isSubmitting },
-  } = useFormContext();
+  } = useFormContext<AddStaffModelType>();
+
+  useFieldArray({
+    control: control,
+    name: "teachersProfessionalRanks",
+  });
 
   return (
     <CollapsibleCard title="ឋានៈវិជ្ជាជីវៈគ្រូបង្រៀន">
@@ -24,13 +29,21 @@ export default function EducationForm() {
             "កាលបរិច្ឆេទទទួល",
           ]}
           fields={[
-            { name: "type", type: "text", placeholder: "ប្រភេទឋានៈវិជ្ជាជីវៈ" },
+            {
+              name: "typeOfProfessionalRank",
+              type: "text",
+              placeholder: "ប្រភេទឋានៈវិជ្ជាជីវៈ",
+            },
             { name: "description", type: "text", placeholder: "បរិយាយ" },
-            { name: "decreeNumber", type: "text", placeholder: "ប្រកាសលេខ" },
-            { name: "receivedDate", type: "date", placeholder: "mm/dd/yyyy" },
+            {
+              name: "announcementNumber",
+              type: "text",
+              placeholder: "ប្រកាសលេខ",
+            },
+            { name: "dateAccepted", type: "date", placeholder: "mm/dd/yyyy" },
           ]}
           defaultRows={2}
-          namePrefix="teacherProfessionalRanks"
+          namePrefix="teachersProfessionalRanks"
         />
 
         <Separator />

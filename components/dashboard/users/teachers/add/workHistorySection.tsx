@@ -2,16 +2,21 @@
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import { Input } from "@/components/ui/input";
-import { TeacherFormSchemaType } from "@/model/user/schema";
+import { AddStaffModel } from "@/model/user/stuff.request.model";
 import React from "react";
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 
 export default function ExperienceForm() {
   const {
     control,
     register,
     formState: { isSubmitting },
-  } = useFormContext<TeacherFormSchemaType>();
+  } = useFormContext<AddStaffModel>();
+
+  useFieldArray({
+    control: control,
+    name: "teacherExperiences",
+  });
 
   return (
     <div>
@@ -25,7 +30,7 @@ export default function ExperienceForm() {
           </label>
           <Controller
             control={control}
-            name="status"
+            name="workHistory"
             render={({ field }) => (
               <Input
                 id="latin-first-name"
@@ -47,28 +52,28 @@ export default function ExperienceForm() {
           ]}
           fields={[
             {
-              name: "type",
+              name: "continuousEmployment",
               type: "text",
               placeholder: "ការងារបន្តបន្ទាប់",
             },
             {
-              name: "description",
+              name: "workPlace",
               type: "text",
               placeholder: "អង្គភាពបម្រើការងារបច្ចុប្បន្ទ",
             },
             {
-              name: "decreeNumber",
+              name: "startDate",
               type: "date",
               placeholder: "ថ្ងៃចាប់ផ្តើម",
             },
             {
-              name: "receivedDate",
+              name: "endDate",
               type: "date",
               placeholder: "ថ្ងៃបញ្ចប់",
             },
           ]}
           defaultRows={2}
-          namePrefix="ExperienceSchema"
+          namePrefix="teacherExperiences"
         />
       </CollapsibleCard>
     </div>

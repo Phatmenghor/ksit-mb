@@ -11,21 +11,21 @@ import React from "react";
 import CollapsibleCard from "./customFormSection";
 import { Controller, useFormContext } from "react-hook-form";
 import { GenderEnum } from "@/constants/constant";
-import { AddStaffModel } from "@/model/user/stuff.request.model";
+import { AddStaffModelType } from "@/model/user/schema";
 
 export default function PersonalHistoryForm() {
   const {
     control,
     register,
     formState: { isSubmitting },
-  } = useFormContext<AddStaffModel>();
+  } = useFormContext<AddStaffModelType>();
 
   return (
     <CollapsibleCard title="ប្រវត្តិផ្ទាល់គ្រូបង្រៀន">
       {/* Personal information section */}
       <div>
         <div className="grid mb-7 grid-cols-1 gap-4 md:grid-cols-2">
-          {/* Khmer Full Name */}
+          {/* នាមត្រកូល និងនាមខ្លួន */}
           <div className="grid grid-cols-1 gap-2">
             <label
               htmlFor="khmer-full-name"
@@ -34,9 +34,9 @@ export default function PersonalHistoryForm() {
               នាមត្រកូល និងនាមខ្លួន
             </label>
 
-            <div className="flex gap-2" id="khmer-full-name">
+            <div className="flex gap-2" id="khmerFirstName">
               <Controller
-                name="englishFirstName"
+                name="khmerFirstName"
                 control={control}
                 render={({ field }) => (
                   <Input
@@ -62,7 +62,7 @@ export default function PersonalHistoryForm() {
               />
             </div>
           </div>
-          {/* Account Number */}
+          {/* លេខគណនីបៀវត្ស */}
           <div>
             <label
               htmlFor="account-number"
@@ -85,7 +85,7 @@ export default function PersonalHistoryForm() {
             />
           </div>
 
-          {/* Latin Full Name */}
+          {/* ជាអក្សរឡាតាំង */}
           <div className="grid grid-cols-1 gap-2">
             <label
               htmlFor="latin-full-name"
@@ -122,7 +122,7 @@ export default function PersonalHistoryForm() {
             </div>
           </div>
 
-          {/* Membership Number */}
+          {/* លេខសមាជិកបសបខ */}
           <div>
             <label
               htmlFor="membership-number"
@@ -145,7 +145,7 @@ export default function PersonalHistoryForm() {
             />
           </div>
 
-          {/* Gender */}
+          {/* ភេទ */}
           <div>
             <label htmlFor="gender" className="mb-1 block text-sm font-bold">
               ភេទ
@@ -155,7 +155,7 @@ export default function PersonalHistoryForm() {
               control={control}
               render={({ field }) => (
                 <Select
-                  onOpenChange={field.onChange}
+                  onValueChange={field.onChange}
                   disabled={isSubmitting}
                   value={field.value}
                 >
@@ -171,7 +171,7 @@ export default function PersonalHistoryForm() {
             />
           </div>
 
-          {/* Joining Date */}
+          {/* ថ្ងៃខែឆ្នាំចូលបម្រើការងារ */}
           <div>
             <label
               htmlFor="start-Work-Date"
@@ -195,7 +195,7 @@ export default function PersonalHistoryForm() {
             />
           </div>
 
-          {/* Date of Birth */}
+          {/* ថ្ងៃខែឆ្នាំកំណើត */}
           <div>
             <label htmlFor="dob" className="mb-1 block text-sm font-bold">
               ថ្ងៃខែឆ្នាំកំណើត
@@ -216,7 +216,7 @@ export default function PersonalHistoryForm() {
             />
           </div>
 
-          {/* Appointment Date */}
+          {/* ថ្ងៃខែឆ្នាំតែងតាំងស៊ុប */}
           <div>
             <label
               htmlFor="appointment-date"
@@ -240,7 +240,7 @@ export default function PersonalHistoryForm() {
             />
           </div>
 
-          {/* nationality */}
+          {/* ជនជាតិ */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div>
               <label
@@ -265,6 +265,7 @@ export default function PersonalHistoryForm() {
               />
             </div>
 
+            {/*  ពិការ */}
             <div>
               <label htmlFor="disable" className="mb-1 block text-sm font-bold">
                 ពិការ
@@ -426,17 +427,17 @@ export default function PersonalHistoryForm() {
           {/* លេខអត្តសញ្ញាណបណ្ណ */}
           <div>
             <label
-              htmlFor="identify-number"
+              htmlFor="national-Id"
               className="mb-1 block text-sm font-bold"
             >
               លេខអត្តសញ្ញាណបណ្ណ
             </label>
             <Controller
               control={control}
-              name="identifyNumber"
+              name="nationalId"
               render={({ field }) => (
                 <Input
-                  id="identify-number"
+                  id="national-Id"
                   type="texst"
                   {...field}
                   disabled={isSubmitting}
@@ -515,7 +516,7 @@ export default function PersonalHistoryForm() {
           </label>
           <Controller
             control={control}
-            name="mustBe"
+            name="decreeFinal"
             render={({ field }) => (
               <Input
                 id="Posts"

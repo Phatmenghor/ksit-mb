@@ -5,15 +5,13 @@ import ProfileUploadCard from "@/components/dashboard/users/teachers/add/profile
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
-import { DepartmentModel } from "@/model/master-data/department/all-department-model";
-import {
-  teacherFormDefaultValues,
-  TeacherFormSchema,
-} from "@/model/user/schema";
+import { AddStaffModelBase, AddStaffModelType } from "@/model/user/schema";
+
 import { AddStaffModel } from "@/model/user/stuff.request.model";
 import { addStaffService } from "@/service/user/user.service";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { removeEmptyStrings } from "@/utils/api-related/RemoveString";
 import { Loader2, Save } from "lucide-react";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -22,31 +20,27 @@ import { toast } from "sonner";
 export default function AddTeacherPage() {
   const [loading, setLoading] = useState(false);
 
-  const method = useForm<AddStaffModel>({
-    resolver: zodResolver(TeacherFormSchema),
-    defaultValues: teacherFormDefaultValues,
-  });
+  const method = useForm<AddStaffModelType>({});
   const {
-    setValue,
-    control,
-    register,
     handleSubmit,
     formState: { isSubmitting },
   } = method;
-  const [profileImage, setProfileImage] = useState<File | null>(null);
 
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      setProfileImage(e.target.files[0]);
-    }
-  };
-
-  const onSubmit = async (data: AddStaffModel) => {
+  const onSubmit = async (data: AddStaffModelType) => {
     setLoading(true);
     try {
-      await addStaffService(data);
+      const CleanData = removeEmptyStrings(AddStaffModelBase.parse(data));
+      const payload: Partial<AddStaffModel> = {
+        ...CleanData,
+        roles: [RoleEnum.TEACHER],
+        status: StatusEnum.ACTIVE,
+      };
+      await addStaffService(payload);
+      console.log(method.watch("username")); // Check if values change as you type
+      console.log(method.getValues());
       toast.success("Teacher created successfully");
     } catch (error: any) {
+      console.error("Error creating teacher: ", error);
       toast.error("Failed to create teacher");
     } finally {
       setLoading(false);
@@ -66,7 +60,8 @@ export default function AddTeacherPage() {
       <FormProvider {...method}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Generate Data Card */}
-          <GenerateDataForm onGenerate={() => {}} />
+          <GenerateDataForm />
+
           {/* upload profile Card */}
           <ProfileUploadCard />
 

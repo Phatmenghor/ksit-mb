@@ -21,7 +21,7 @@ export async function getAllStuffService(data: RequestAllStuff) {
   }
 }
 
-export async function addStaffService(data: AddStaffModel) {
+export async function addStaffService(data: Partial<AddStaffModel>) {
   try {
     const response = await axiosClientWithAuth.post<ApiResponse<AddStaffModel>>(
       `${endpoint}/register`,
