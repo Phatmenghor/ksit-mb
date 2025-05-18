@@ -1,7 +1,7 @@
-export function removeEmptyStrings<T extends object>(obj: T): T {
+export function removeEmptyStringsAndNulls<T extends object>(obj: T): T {
   return JSON.parse(
     JSON.stringify(obj, (key, value) => {
-      if (value === "") return undefined; // removes it from JSON
+      if (value === "" || value === null) return undefined; // remove empty string and null
       return value;
     })
   );

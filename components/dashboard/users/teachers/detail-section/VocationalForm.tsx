@@ -1,25 +1,28 @@
 "use client";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
-import { AddStaffModelType } from "@/model/user/schema";
+import { Mode } from "@/constants/constant";
+import { ZodStaffModelType } from "@/model/user/schema";
 import React from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
-export default function VocationalForm() {
+export default function VocationalForm({ mode }: { mode: Mode }) {
   const {
     control,
-    register,
-    formState: { isSubmitting },
-  } = useFormContext<AddStaffModelType>();
+    formState: { isSubmitting, isDirty },
+  } = useFormContext<ZodStaffModelType>();
 
   useFieldArray({
     control: control,
     name: "teacherVocationals",
   });
 
+  const isReadOnly = mode === Mode.VIEW;
+
   return (
     <CollapsibleCard title="វគ្គគរុកោសល្យ">
       <DynamicInputGrid
+        isSubmitting={isSubmitting || isReadOnly}
         labels={[
           "កម្រិតវិជ្ជាជីវៈ",
           "ឧកទេសទី១",

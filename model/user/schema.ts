@@ -1,75 +1,74 @@
 // schemas/teacherSchema.ts
 import { z } from "zod";
 
-// Helper schemas for nested types
 const TeachersProfessionalRankSchema = z.object({
   id: z.number().optional(),
-  typeOfProfessionalRank: z.string(),
-  description: z.string(),
-  announcementNumber: z.string(),
-  dateAccepted: z.string(),
+  typeOfProfessionalRank: z.string().nullable(),
+  description: z.string().nullable(),
+  announcementNumber: z.string().nullable(),
+  dateAccepted: z.string().nullable(),
 });
 
 const TeacherExperienceSchema = z.object({
   id: z.number().optional(),
-  continuousEmployment: z.string(),
-  workPlace: z.string(),
-  startDate: z.string(),
-  endDate: z.string(),
+  continuousEmployment: z.string().nullable(),
+  workPlace: z.string().nullable(),
+  startDate: z.string().nullable(),
+  endDate: z.string().nullable(),
 });
 
 const TeacherPraiseOrCriticismSchema = z.object({
   id: z.number().optional(),
-  typePraiseOrCriticism: z.string(),
-  giveBy: z.string(),
-  dateAccepted: z.string(),
+  typePraiseOrCriticism: z.string().nullable(),
+  giveBy: z.string().nullable(),
+  dateAccepted: z.string().nullable(),
 });
 
 const TeacherEducationSchema = z.object({
   id: z.number().optional(),
-  culturalLevel: z.string(),
-  skillName: z.string(),
-  dateAccepted: z.string(),
+  culturalLevel: z.string().nullable(),
+  skillName: z.string().nullable(),
+  dateAccepted: z.string().nullable(),
 });
 
 const TeacherVocationalSchema = z.object({
   id: z.number().optional(),
-  culturalLevel: z.string(),
-  skillOne: z.string(),
-  skillTwo: z.string(),
-  trainingSystem: z.string(),
-  dateAccepted: z.string(),
+  culturalLevel: z.string().nullable(),
+  skillOne: z.string().nullable(),
+  skillTwo: z.string().nullable(),
+  trainingSystem: z.string().nullable(),
+  dateAccepted: z.string().nullable(),
 });
 
 const TeacherShortCourseSchema = z.object({
   id: z.number().optional(),
-  skill: z.string(),
-  skillName: z.string(),
-  startDate: z.string(),
-  endDate: z.string(),
-  duration: z.string(),
-  preparedBy: z.string(),
-  supportBy: z.string(),
+  skill: z.string().nullable(),
+  skillName: z.string().nullable(),
+  startDate: z.string().nullable(),
+  endDate: z.string().nullable(),
+  duration: z.string().nullable(),
+  preparedBy: z.string().nullable(),
+  supportBy: z.string().nullable(),
 });
 
 const TeacherLanguageSchema = z.object({
   id: z.number().optional(),
-  language: z.string(),
-  reading: z.string(),
-  writing: z.string(),
-  speaking: z.string(),
+  language: z.string().nullable(),
+  reading: z.string().nullable(),
+  writing: z.string().nullable(),
+  speaking: z.string().nullable(),
 });
 
 const TeacherFamilySchema = z.object({
   id: z.number().optional(),
-  nameChild: z.string(),
-  gender: z.string(),
-  dateOfBirth: z.string(),
-  working: z.string(),
+  nameChild: z.string().nullable(),
+  gender: z.string().nullable(),
+  dateOfBirth: z.string().nullable(),
+  working: z.string().nullable(),
 });
 
 // Main AddStaffModel schema
-export const AddStaffModelSchema = z.object({
+export const StaffModelSchema = z.object({
   // Required fields (based on common requirements for staff registration)
   username: z.string(),
   password: z.string(),
@@ -81,6 +80,8 @@ export const AddStaffModelSchema = z.object({
   khmerLastName: z.string(),
   englishFirstName: z.string(),
   englishLastName: z.string(),
+  profileUrl: z.string(),
+
   gender: z.string(),
   dateOfBirth: z.string(),
   phoneNumber: z.string(),
@@ -149,23 +150,51 @@ export const AddStaffModelSchema = z.object({
   // Nested arrays of related information
   teachersProfessionalRanks: z
     .array(TeachersProfessionalRankSchema)
-
-    .default([]),
-  teacherExperiences: z.array(TeacherExperienceSchema).default([]),
+    .default([])
+    .nullable(),
+  teacherExperiences: z.array(TeacherExperienceSchema).default([]).nullable(),
   teacherPraiseOrCriticisms: z
     .array(TeacherPraiseOrCriticismSchema)
-
-    .default([]),
-  teacherEducations: z.array(TeacherEducationSchema).default([]),
-  teacherVocationals: z.array(TeacherVocationalSchema).default([]),
-  teacherShortCourses: z.array(TeacherShortCourseSchema).default([]),
-  teacherLanguages: z.array(TeacherLanguageSchema).default([]),
-  teacherFamilies: z.array(TeacherFamilySchema).default([]),
+    .default([])
+    .nullable(),
+  teacherEducations: z.array(TeacherEducationSchema).default([]).nullable(),
+  teacherVocationals: z.array(TeacherVocationalSchema).default([]).nullable(),
+  teacherShortCourses: z.array(TeacherShortCourseSchema).default([]).nullable(),
+  teacherLanguages: z.array(TeacherLanguageSchema).default([]).nullable(),
+  teacherFamilies: z.array(TeacherFamilySchema).default([]).nullable(),
 
   status: z.string(),
 });
 
-export const AddStaffModelBase = AddStaffModelSchema.partial();
-
 // Type definition based on the schema
-export type AddStaffModelType = z.infer<typeof AddStaffModelBase>;
+
+interface ZodObjectWithShape {
+  shape: Record<string, z.ZodTypeAny>;
+}
+
+type NullableStringFields<T extends ZodObjectWithShape> = {
+  [K in keyof T["shape"]]: T["shape"][K] extends z.ZodString
+    ? z.ZodNullable<T["shape"][K]>
+    : T["shape"][K];
+};
+
+const makeNullableStringFields = (
+  schema: ZodObjectWithShape
+): z.ZodObject<NullableStringFields<typeof schema>> => {
+  const shape = schema.shape;
+  const newShape: Record<string, z.ZodTypeAny> = {};
+  for (const key in shape) {
+    const field = shape[key];
+    if (field._def.typeName === "ZodString") {
+      newShape[key] = (field as z.ZodString).nullable();
+    } else {
+      newShape[key] = field;
+    }
+  }
+  return z.object(newShape) as z.ZodObject<NullableStringFields<typeof schema>>;
+};
+
+export const ZodStaffModelBase =
+  makeNullableStringFields(StaffModelSchema).partial();
+
+export type ZodStaffModelType = z.infer<typeof ZodStaffModelBase>;

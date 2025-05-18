@@ -14,6 +14,7 @@ export interface AddStaffModel {
   roles: string[];
   khmerFirstName: string;
   khmerLastName: string;
+  profileUrl: string;
   englishFirstName: string;
   englishLastName: string;
   gender: string;

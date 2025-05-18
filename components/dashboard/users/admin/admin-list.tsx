@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
 import { AllStaffModel, StaffModel } from "@/model/user/stuff.model";
-import { RequestAllStuff } from "@/model/user/stuff.request.model";
+import { RequestAllStuff } from "@/model/user/Add.staff.model";
 import { getAllStuffService } from "@/service/user/user.service";
 import { Pencil, Trash2, Plus, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";

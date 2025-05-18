@@ -114,3 +114,9 @@ export const educationLevels = [
   { label: "បឋមភូមិ	", value: "LOWER_SECONDARY_SCHOOL" },
   { label: "ទុតិយភូមិ", value: "UPPER_SECONDARY_SCHOOL" },
 ];
+
+export enum Mode {
+  VIEW = "VIEW",
+  EDIT = "EDIT",
+  ADD = "ADD",
+}

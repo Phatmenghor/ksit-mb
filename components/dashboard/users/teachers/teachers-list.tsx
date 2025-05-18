@@ -6,17 +6,19 @@ import { useCallback, useEffect, useState } from "react";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { Column, CustomTable } from "@/components/shared/layout/TableSection";
 import { getAllStuffService } from "@/service/user/user.service";
-import { RequestAllStuff } from "@/model/user/stuff.request.model";
+import { RequestAllStuff } from "@/model/user/Add.staff.model";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { AllStaffModel, StaffModel } from "@/model/user/stuff.model";
 import { toast } from "sonner";
 import PaginationPage from "@/components/shared/pagination-page";
+import { useRouter } from "next/navigation";
 
 export default function TeachersList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [allTeachersData, setallTeachersData] = useState<AllStaffModel>();
 
+  const router = useRouter();
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
@@ -65,17 +67,18 @@ export default function TeachersList() {
       key: "fullname(kh)",
       header: "Fullname (KH)",
       render: (teacher: StaffModel) =>
-        `${teacher?.khmerFirstName} ${teacher?.khmerLastName}`,
+        `${teacher?.khmerFirstName ?? ""} ${teacher?.khmerLastName ?? ""}`,
     },
     {
       key: "fullname(en)",
       header: "Fullname (EN)",
       render: (teacher: StaffModel) =>
-        `${teacher?.englishFirstName} ${teacher?.englishLastName}`,
+        `${teacher?.englishFirstName ?? ""} ${teacher?.englishLastName ?? ""}`,
     },
     {
       key: "username",
       header: "Username",
+      render: (teacher: StaffModel) => `${teacher?.username ?? ""}`,
     },
     {
       key: "status",
@@ -95,19 +98,35 @@ export default function TeachersList() {
     {
       key: "actions",
       header: "Actions",
-      render: (teacher: any) => (
-        <>
-          <Button variant="ghost" className={iconColor} size="sm">
-            <RotateCcw />
-          </Button>
-          <Button variant="ghost" className={iconColor} size="sm">
-            <Pencil />
-          </Button>
-          <Button variant="ghost" className={iconColor} size="sm">
-            <Trash2 />
-          </Button>
-        </>
-      ),
+      render: (teacher: StaffModel) => {
+        return (
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                router.push(ROUTE.USERS.VIEW_TEACHER(String(teacher.id)));
+              }}
+              className={iconColor}
+              size="sm"
+            >
+              <RotateCcw />
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                router.push(ROUTE.USERS.EDIT_TEACHER(String(teacher.id)));
+              }}
+              className={iconColor}
+              size="sm"
+            >
+              <Pencil />
+            </Button>
+            <Button variant="ghost" className={iconColor} size="sm">
+              <Trash2 />
+            </Button>
+          </>
+        );
+      },
     },
   ];
 

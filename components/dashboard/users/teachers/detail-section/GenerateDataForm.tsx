@@ -9,21 +9,25 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Mode } from "@/constants/constant";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
-import { AddStaffModelType } from "@/model/user/schema";
+import { ZodStaffModelType } from "@/model/user/schema";
 import { useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 
-export function GenerateDataForm() {
+export function BasicInformationForm({ mode }: { mode: Mode }) {
   const [selectedDepartment, setSelectedDepartment] =
     useState<DepartmentModel | null>(null);
   const {
     setValue,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isDirty, errors },
     control,
-  } = useFormContext<AddStaffModelType>();
+  } = useFormContext<ZodStaffModelType>();
+
+  const isReadOnly = mode === Mode.VIEW;
 
   const handleDepartmentChange = (department: DepartmentModel) => {
+    if (isReadOnly) return;
     setSelectedDepartment(department);
     setValue("departmentId", department.id as number, {
       shouldValidate: true,
@@ -50,13 +54,20 @@ export function GenerateDataForm() {
                 control={control}
                 name="username"
                 render={({ field }) => (
-                  <Input
-                    id="user-name"
-                    {...field}
-                    placeholder="Username..."
-                    disabled={isSubmitting}
-                    className="bg-gray-100"
-                  />
+                  <>
+                    <Input
+                      id="user-name"
+                      {...field}
+                      placeholder="Username..."
+                      disabled={isReadOnly || isSubmitting || isDirty}
+                      className="bg-gray-100"
+                    />
+                    {errors.username && (
+                      <p className="text-red-600 text-sm mt-1">
+                        {errors.username.message?.toString()}
+                      </p>
+                    )}
+                  </>
                 )}
               />
             </div>
@@ -72,14 +83,21 @@ export function GenerateDataForm() {
                 control={control}
                 name="password"
                 render={({ field }) => (
-                  <Input
-                    id="password"
-                    {...field}
-                    type="password"
-                    disabled={isSubmitting}
-                    className="bg-gray-100"
-                    placeholder="Password..."
-                  />
+                  <>
+                    <Input
+                      id="password"
+                      {...field}
+                      type="password"
+                      disabled={isReadOnly || isSubmitting || isDirty}
+                      className="bg-gray-100"
+                      placeholder="Password..."
+                    />
+                    {errors.username && (
+                      <p className="text-red-600 text-sm mt-1">
+                        {errors.username.message?.toString()}
+                      </p>
+                    )}
+                  </>
                 )}
               />
             </div>
@@ -95,13 +113,20 @@ export function GenerateDataForm() {
                 control={control}
                 name="identifyNumber"
                 render={({ field }) => (
-                  <Input
-                    id="identify-number"
-                    {...field}
-                    disabled={isSubmitting}
-                    placeholder="-"
-                    className="bg-gray-100"
-                  />
+                  <>
+                    <Input
+                      id="identify-number"
+                      {...field}
+                      disabled={isReadOnly || isSubmitting || isDirty}
+                      placeholder="-"
+                      className="bg-gray-100"
+                    />
+                    {errors.username && (
+                      <p className="text-red-600 text-sm mt-1">
+                        {errors.username.message?.toString()}
+                      </p>
+                    )}
+                  </>
                 )}
               />
             </div>
@@ -111,18 +136,26 @@ export function GenerateDataForm() {
                 control={control}
                 name="departmentId"
                 render={({ field }) => (
-                  <FormItem aria-disabled={isSubmitting} {...field}>
-                    <FormLabel>
-                      Department <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <ComboboxSelectDepartment
-                        dataSelect={selectedDepartment}
-                        onChangeSelected={handleDepartmentChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                  <>
+                    <FormItem {...field}>
+                      <FormLabel>
+                        Department <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <ComboboxSelectDepartment
+                          dataSelect={selectedDepartment}
+                          onChangeSelected={handleDepartmentChange}
+                          disabled={isSubmitting || isDirty || isReadOnly}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                    {errors.username && (
+                      <p className="text-red-600 text-sm mt-1">
+                        {errors.username.message?.toString()}
+                      </p>
+                    )}
+                  </>
                 )}
               />
             </div>

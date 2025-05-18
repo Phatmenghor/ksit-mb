@@ -18,6 +18,7 @@ interface FieldConfig {
 
 interface Props {
   labels: string[];
+  isSubmitting: boolean;
   fields: FieldConfig[];
   defaultRows?: number;
   namePrefix: string; // e.g., 'teacherProfessionalRanks'
@@ -26,6 +27,7 @@ interface Props {
 export default function DynamicInputGrid({
   labels,
   fields,
+  isSubmitting,
   defaultRows = 1,
   namePrefix,
 }: Props) {
@@ -77,11 +79,34 @@ export default function DynamicInputGrid({
             const key = field.key ?? `${field.name}-${rowIndex}`; // fallback to name + index
             return (
               <div key={key} className="relative">
-                {field.type === "select" ? (
+                {field.type === "date" ? (
+                  <div className="relative">
+                    <input
+                      type="date"
+                      disabled={isSubmitting}
+                      placeholder={field.placeholder}
+                      {...register(inputName)}
+                      className={`w-full py-2 px-3 border rounded-md pr-10
+                      ${
+                        isSubmitting
+                          ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200"
+                          : "bg-white text-black border-gray-300"
+                      }
+                    `}
+                    />
+                    <CalendarIcon className="absolute right-2 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+                ) : field.type === "select" ? (
                   <select
+                    disabled={isSubmitting}
                     {...register(inputName)}
-                    className="bg-gray-100 pr-10 rounded-md w-full py-2 px-3 border border-gray-300"
-                    defaultValue=""
+                    className={`w-full py-2 px-3 border rounded-md pr-10
+                    ${
+                      isSubmitting
+                        ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200"
+                        : "bg-white text-black border-gray-300"
+                    }
+                  `}
                   >
                     <option value="" disabled>
                       {field.placeholder}
@@ -94,15 +119,12 @@ export default function DynamicInputGrid({
                   </select>
                 ) : (
                   <Input
-                    type={field.type}
+                    disabled={isSubmitting}
+                    type="text"
                     placeholder={field.placeholder}
                     {...register(inputName)}
                     className="bg-gray-100 pr-10"
                   />
-                )}
-
-                {field.type === "date" && (
-                  <CalendarIcon className="absolute right-2 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
                 )}
               </div>
             );
@@ -116,6 +138,7 @@ export default function DynamicInputGrid({
           {arrayFields.length}
         </span>
         <Button
+          disabled={isSubmitting}
           type="button"
           onClick={() =>
             append(Object.fromEntries(fields.map((f) => [f.name, ""])))

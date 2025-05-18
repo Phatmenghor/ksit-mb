@@ -1,5 +1,5 @@
 import { ImageResponse } from "@/model/user/stuff.model";
-import { uploadProfileRequest } from "@/model/user/stuff.request.model";
+import { uploadProfileRequest } from "@/model/user/Add.staff.model";
 import { axiosClientWithAuth } from "@/utils/axios";
 
 const endpoint = "/images";
