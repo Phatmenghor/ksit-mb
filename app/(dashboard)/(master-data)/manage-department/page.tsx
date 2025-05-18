@@ -308,7 +308,7 @@ export default function ManageDepartmentPage() {
                             src={
                               dept.urlLogo
                                 ? `${baseAPI.BASE_IMAGE}${dept.urlLogo}`
-                                : "/assets/no-image.png"
+                                : baseAPI.NO_IMAGE
                             }
                             alt={dept.name}
                           />
