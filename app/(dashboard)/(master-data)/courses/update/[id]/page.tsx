@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/form";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -32,10 +32,15 @@ import { DepartmentModel } from "@/model/master-data/department/all-department-m
 import { SubjectModel } from "@/model/master-data/subject/all-subject-model";
 import { StaffModel } from "@/model/user/stuff.model";
 import { Constants } from "@/constants/text-string";
-import { createCourseService } from "@/service/master-data/course.service";
+import {
+  createCourseService,
+  updateCourseService,
+  DetailCourseService,
+} from "@/service/master-data/course.service";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
+import { DetialCourseModel } from "@/model/master-data/course/type-course-model";
 
 const courseFormSchema = z.object({
   subjectCode: z.string().min(1, "Subject code is required"),
@@ -54,7 +59,7 @@ const courseFormSchema = z.object({
   expectedOutcome: z.string().optional(),
 });
 
-export default function AddCoursePage() {
+export default function CourseFormPage() {
   const [selectedDepartment, setSelectedDepartment] =
     useState<DepartmentModel | null>(null);
   const [selectedSubjectType, setSelectedSubjectType] =
@@ -63,8 +68,12 @@ export default function AddCoursePage() {
     useState<StaffModel | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  // Initialize form
+  const params = useParams();
+  const courseId = params?.id ? Number(params.id) : null;
+  const isEditMode = !!courseId;
+
   const form = useForm({
     resolver: zodResolver(courseFormSchema),
     defaultValues: {
@@ -86,6 +95,47 @@ export default function AddCoursePage() {
   });
 
   type CourseFormData = z.infer<typeof courseFormSchema>;
+
+  useEffect(() => {
+    const fetchCourseDetails = async () => {
+      if (!courseId) return;
+      setIsLoading(true);
+      try {
+        const courseDetails = await DetailCourseService(courseId);
+        if (courseDetails) {
+          form.reset({
+            subjectCode: courseDetails.code || "",
+            subjectNameKh: courseDetails.nameKH || "",
+            subjectNameEn: courseDetails.nameEn || "",
+            credit: courseDetails.credit?.toString() || "",
+            theory: courseDetails.theory?.toString() || "",
+            execute: courseDetails.execute?.toString() || "",
+            apply: courseDetails.apply?.toString() || "",
+            departmentId: courseDetails.department?.id || 0,
+            subjectTypeId: courseDetails.subject?.id || 0,
+            instructorId: courseDetails.user?.id || 0,
+            totalHours: courseDetails.totalHour?.toString() || "",
+            description: courseDetails.description || "",
+            purpose: courseDetails.purpose || "",
+            expectedOutcome: courseDetails.expectedOutcome || "",
+          });
+          setSelectedDepartment(courseDetails.department || null);
+          setSelectedSubjectType(courseDetails.subject || null);
+          setSelectedInstructor(courseDetails.user || null);
+        } else {
+          toast.error("Course not found");
+          router.replace(ROUTE.COURSES.INDEX);
+        }
+      } catch (error) {
+        console.error("Error fetching course details:", error);
+        toast.error("Failed to load course details");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCourseDetails();
+  }, [courseId, form, router]);
 
   const handleDepartmentChange = (department: DepartmentModel) => {
     setSelectedDepartment(department);
@@ -112,7 +162,7 @@ export default function AddCoursePage() {
     setIsSubmitting(true);
     setIsUploading(true);
     try {
-      const courseData = {
+      const coursePayload = {
         code: data.subjectCode,
         nameKH: data.subjectNameKh,
         nameEn: data.subjectNameEn,
@@ -129,23 +179,46 @@ export default function AddCoursePage() {
         subjectId: data.subjectTypeId,
         teacherId: data.instructorId,
       };
-      await createCourseService(courseData);
-      toast.success("Course created successfully");
+
+      if (isEditMode && courseId) {
+        await updateCourseService(courseId, coursePayload);
+        toast.success("Course updated successfully");
+      } else {
+        await createCourseService(coursePayload);
+        toast.success("Course created successfully");
+      }
+
       router.replace(ROUTE.COURSES.INDEX);
     } catch (error: any) {
-      toast.error(error.message || "Failed to create course");
-      console.error("Error submitting course:", error);
+      toast.error(
+        error.message || `Failed to ${isEditMode ? "update" : "create"} course`
+      );
+      console.error(
+        `Error ${isEditMode ? "updating" : "creating"} course:`,
+        error
+      );
     } finally {
       setIsUploading(false);
       setIsSubmitting(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex h-[70vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+        <span className="ml-2">Loading course details...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Add course</h1>
+          <h1 className="text-2xl font-bold">
+            {isEditMode ? "Update" : "Add"} course
+          </h1>
           <p className="text-muted-foreground">Institute Management System</p>
         </div>
         <Breadcrumb>
@@ -159,7 +232,9 @@ export default function AddCoursePage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Add course</BreadcrumbPage>
+              <BreadcrumbPage>
+                {isEditMode ? "Update" : "Add"} course
+              </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -440,12 +515,6 @@ export default function AddCoursePage() {
               />
 
               <div>
-                {/* <Button
-                  type="submit"
-                  className="bg-emerald-600 hover:bg-emerald-700"
-                >
-                  <Save className="mr-2 h-4 w-4" /> Save course
-                </Button> */}
                 <Button
                   type="submit"
                   disabled={isUploading || isSubmitting}
@@ -454,8 +523,10 @@ export default function AddCoursePage() {
                   {isUploading || isSubmitting ? (
                     <>
                       <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      Saving...
+                      {isEditMode ? "Updating..." : "Saving..."}
                     </>
+                  ) : isEditMode ? (
+                    "Update Course"
                   ) : (
                     "Save Course"
                   )}

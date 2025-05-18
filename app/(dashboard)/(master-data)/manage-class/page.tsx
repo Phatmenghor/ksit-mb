@@ -45,11 +45,9 @@ import {
 } from "@/components/dashboard/master-data/manage-class/class-form-modal";
 import { DegreeEnum } from "@/constants/constant";
 import Loading from "@/components/shared/loading";
-import { MajorModel } from "@/model/master-data/major/all-major-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 
 export default function ManageClassPage() {
-  // State management
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -64,11 +62,7 @@ export default function ManageClassPage() {
   const [initialData, setInitialData] = useState<ClassFormData | undefined>(
     undefined
   );
-
-  // Debounce search query to prevent excessive API calls
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-
-  // Load class data with error handling and loading states
   const loadClass = useCallback(
     async (param: AllMajorFilterModel = {}) => {
       setIsLoading(true);
@@ -95,17 +89,14 @@ export default function ManageClassPage() {
     [debouncedSearchQuery, selectedYear]
   );
 
-  // Load data on component mount and when dependencies change
   useEffect(() => {
     loadClass();
   }, [loadClass, debouncedSearchQuery, selectedYear]);
 
-  // Handle search input changes
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  // Modal handlers
   const handleOpenAddModal = () => {
     setModalMode("add");
     setInitialData(undefined);
@@ -114,7 +105,6 @@ export default function ManageClassPage() {
 
   const handleOpenEditModal = (classData: ClassModel) => {
     setSelectedClass(classData);
-
     const formData: ClassFormData = {
       id: classData.id,
       academyYear: Number(classData.academyYear),
@@ -123,28 +113,19 @@ export default function ManageClassPage() {
       status: Constants.ACTIVE,
       yearLevel: classData.yearLevel,
       majorId: classData.major.id,
-      // Pass the major model directly to the form
       selectedMajor: classData.major,
     };
-
-    console.log("Setting form data with selected major:", formData);
-
-    // We need to set this first so the form can properly initialize
     setInitialData(formData);
     setModalMode("edit");
     setIsModalOpen(true);
   };
 
-  // Delete class handler with optimistic UI update
   async function handleDeleteClass() {
     if (!selectedClass) return;
 
     setIsSubmitting(true);
     try {
-      // Store original data for rollback in case of error
       const originalData = allClassData;
-
-      // Optimistic UI update
       setAllClassData((prevData) => {
         if (!prevData) return null;
         const updatedContent = prevData.content.filter(
@@ -162,14 +143,12 @@ export default function ManageClassPage() {
       if (response) {
         toast.success(`Class ${selectedClass.code} deleted successfully`);
       } else {
-        // Rollback if delete failed
         setAllClassData(originalData);
         toast.error("Failed to delete class");
       }
     } catch (error) {
       console.error("Error deleting class:", error);
       toast.error("An error occurred while deleting the class");
-      // Reload data on error to ensure UI is in sync
       loadClass({});
     } finally {
       setIsSubmitting(false);
@@ -177,7 +156,6 @@ export default function ManageClassPage() {
     }
   }
 
-  // Handle form submission for create/update
   async function handleSubmit(formData: ClassFormData) {
     setIsSubmitting(true);
 
@@ -192,11 +170,9 @@ export default function ManageClassPage() {
       };
 
       let response: ClassModel | null = null;
-
       if (modalMode === "add") {
         try {
           response = await createClassService(classData);
-
           if (response) {
             setAllClassData((prevData) => {
               if (!prevData) return null;
@@ -206,7 +182,6 @@ export default function ManageClassPage() {
                 totalElements: prevData.totalElements + 1,
               };
             });
-
             toast.success(`Class ${response.code} added successfully`);
             setIsModalOpen(false);
           }
@@ -216,7 +191,6 @@ export default function ManageClassPage() {
       } else if (modalMode === "edit" && formData.id) {
         try {
           response = await updateClassService(formData.id, classData);
-
           if (response) {
             setAllClassData((prevData) => {
               if (!prevData) return null;
@@ -244,14 +218,12 @@ export default function ManageClassPage() {
     }
   }
 
-  // Handle year change
   const handleYearChange = (year: number) => {
     setSelectedYear(year);
   };
 
   return (
     <div className="space-y-4">
-      {/* Header Card */}
       <Card>
         <CardContent className="p-6 space-y-2">
           <Breadcrumb>
@@ -291,8 +263,6 @@ export default function ManageClassPage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Table */}
       <div className="overflow-x-auto">
         {isLoading ? (
           <Loading />
