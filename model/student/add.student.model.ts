@@ -49,4 +49,5 @@ export interface StudentSibling {
   gender: string;
   dateOfBirth: string;
   occupation: string;
+  phoneNumber: string;
 }

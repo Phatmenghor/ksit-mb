@@ -2,12 +2,22 @@
 
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
-import { GenerateDataForm } from "@/components/dashboard/users/teachers/add/GenerateDataForm";
 import ProfileUploadCard from "@/components/dashboard/users/teachers/add/profileUploadCard";
-import StudentFormDetail from "@/components/dashboard/student/add -single-student/StudentFormDetail";
-import { FormProvider } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
+import { StudentBasicForm } from "@/components/dashboard/student/add -single-student/GenerateDataForm";
+import StudentPersonalDetailSection from "@/components/dashboard/student/add -single-student/StudentPersonalDetail";
+import { StudentStudiesHistorySection } from "@/components/dashboard/student/add -single-student/studentStudiesHistories";
+import StudentFamilyBackgroundSection from "@/components/dashboard/student/add -single-student/StudentFamilyBackground";
+import {
+  AddSingleStudentRequestType,
+  defaultAddSingleStudentRequest,
+} from "@/model/student/add.student.zod";
 
 export default function AddSingleStudentPage() {
+  const method = useForm<AddSingleStudentRequestType>({
+    defaultValues: defaultAddSingleStudentRequest,
+  });
+
   return (
     <div className="space-y-5">
       <CardHeaderSection
@@ -18,12 +28,17 @@ export default function AddSingleStudentPage() {
           { label: "Add Student", href: ROUTE.STUDENTS.ADD_SINGLE },
         ]}
       />
+      <FormProvider {...method}>
+        <form>
+          <StudentBasicForm />
 
-      <GenerateDataForm onGenerate={() => {}} />
+          <ProfileUploadCard />
 
-      <ProfileUploadCard />
-
-      <StudentFormDetail />
+          <StudentPersonalDetailSection />
+          <StudentStudiesHistorySection />
+          <StudentFamilyBackgroundSection />
+        </form>
+      </FormProvider>
     </div>
   );
 }

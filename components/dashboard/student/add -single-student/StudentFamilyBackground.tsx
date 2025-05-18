@@ -1,5 +1,5 @@
-"use client";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -9,12 +9,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { GenderEnum } from "@/constants/constant";
-import { AddSingleStudentRequest } from "@/model/student/add.student.model";
 import { AddSingleStudentRequestType } from "@/model/student/add.student.zod";
-import React, { useEffect, useState } from "react";
-import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+import { useEffect } from "react";
+import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 
 export default function StudentFamilyBackgroundSection() {
   const {
@@ -22,6 +19,28 @@ export default function StudentFamilyBackgroundSection() {
     formState: { isSubmitting },
     setValue,
   } = useFormContext<AddSingleStudentRequestType>();
+
+  // Initialize parents array with 2 parents if empty
+  useEffect(() => {
+    setValue("studentParents", [
+      {
+        parentType: "FATHER",
+        name: "",
+        age: "",
+        job: "",
+        phone: "",
+        address: "",
+      },
+      {
+        parentType: "MOTHER",
+        name: "",
+        age: "",
+        job: "",
+        phone: "",
+        address: "",
+      },
+    ]);
+  }, [setValue]);
 
   const { fields: parentFields } = useFieldArray({
     control,
@@ -37,25 +56,21 @@ export default function StudentFamilyBackgroundSection() {
     name: "studentSiblings",
   });
 
-  useEffect(() => {
-    setValue("studentParents.0.parentType", "FATHER");
-    setValue("studentParents.1.parentType", "MOTHER");
-  }, [setValue]);
-
   const handleAddSibling = () => {
     appendSibling({
       name: "",
       gender: "",
       dateOfBirth: "",
       occupation: "",
+      phoneNumber: "",
     });
   };
 
   return (
     <CollapsibleCard title="ព័ត៌មានគ្រួសារ">
       <div className="grid grid-cols-2 gap-6">
-        {[0, 1].map((index) => (
-          <div key={index} className="space-y-4">
+        {parentFields.map((field, index) => (
+          <div key={field.id} className="space-y-4">
             <div>
               <label className="block font-medium text-sm mb-1">
                 {index === 0 ? "ឈ្មោះឪពុក" : "ឈ្មោះម្ដាយ"}
@@ -108,7 +123,7 @@ export default function StudentFamilyBackgroundSection() {
                 render={({ field }) => (
                   <Textarea
                     {...field}
-                    placeholder="ភូមិ ឃុំ/សង្កាត់ ស្រុក/ខណ្ច ខេត្ត"
+                    placeholder="ភូមិ ឃុំ/សង្កាត់ ស្រុក/ខណ្ឌ ខេត្ត"
                   />
                 )}
               />
@@ -119,8 +134,15 @@ export default function StudentFamilyBackgroundSection() {
 
       {/* Siblings Section */}
       <div className="mt-8">
-        <div className="mb-2">
-          <h3 className="font-medium">បងប្អូនបង្កើត</h3>
+        <div className="mb-2 flex gap-4 items-center">
+          <div>
+            <h1>ចំនួនសមាជិកបងប្អូន</h1>
+            <Input type="number" className="w-3/5" min="0" />
+          </div>
+          <div>
+            <h1>ចំនួនបងប្អូនស្រី</h1>
+            <Input type="number" className="w-3/5" min="0" />
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -186,26 +208,38 @@ export default function StudentFamilyBackgroundSection() {
                       )}
                     />
                   </td>
+                  <td className="py-2 px-1 align-top">
+                    <Controller
+                      control={control}
+                      name={`studentSiblings.${index}.phoneNumber`}
+                      render={({ field }) => (
+                        <Input {...field} placeholder="លេខទូរស័ព្ទ" />
+                      )}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        <div className="mt-4 flex items-center">
-          <Input
-            type="number"
-            className="w-16 mr-2"
-            min="1"
-            placeholder="1"
-            disabled={isSubmitting}
-          />
+        <div className="mt-4 flex gap-2">
           <Button
             onClick={handleAddSibling}
             disabled={isSubmitting}
             className="bg-black text-white hover:bg-gray-800"
           >
-            Add Row
+            Add Sibling
+          </Button>
+          <Button
+            onClick={() => {
+              if (siblingFields.length > 0)
+                removeSibling(siblingFields.length - 1);
+            }}
+            disabled={isSubmitting || siblingFields.length === 0}
+            className="bg-black text-white hover:bg-gray-800"
+          >
+            Remove Last Sibling
           </Button>
         </div>
       </div>

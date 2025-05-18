@@ -8,7 +8,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
 import { AddStaffModelBase, AddStaffModelType } from "@/model/user/schema";
-
 import { AddStaffModel } from "@/model/user/stuff.request.model";
 import { addStaffService } from "@/service/user/user.service";
 import { removeEmptyStrings } from "@/utils/api-related/RemoveString";
@@ -36,8 +35,7 @@ export default function AddTeacherPage() {
         status: StatusEnum.ACTIVE,
       };
       await addStaffService(payload);
-      console.log(method.watch("username")); // Check if values change as you type
-      console.log(method.getValues());
+
       toast.success("Teacher created successfully");
     } catch (error: any) {
       console.error("Error creating teacher: ", error);

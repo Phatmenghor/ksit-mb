@@ -1,4 +1,4 @@
-import { ComboboxSelectDepartment } from "@/components/shared/ComboBox/combobox-department";
+import ComboBoxClass from "@/components/shared/ComboBox/combobox-class";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   FormControl,
@@ -9,23 +9,22 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { DepartmentModel } from "@/model/master-data/department/all-department-model";
-import { AddStaffModelType } from "@/model/user/schema";
+import { ClassModel } from "@/model/master-data/class/all-class-model";
+import { AddSingleStudentRequestType } from "@/model/student/add.student.zod";
 import { useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 
-export function GenerateDataForm() {
-  const [selectedDepartment, setSelectedDepartment] =
-    useState<DepartmentModel | null>(null);
+export function StudentBasicForm() {
+  const [selectClass, setSelectedClass] = useState<ClassModel | null>(null);
   const {
     setValue,
     formState: { isSubmitting },
     control,
-  } = useFormContext<AddStaffModelType>();
+  } = useFormContext<AddSingleStudentRequestType>();
 
-  const handleDepartmentChange = (department: DepartmentModel) => {
-    setSelectedDepartment(department);
-    setValue("departmentId", department.id as number, {
+  const handleClassChange = (selectedClass: ClassModel | null) => {
+    setSelectedClass(selectedClass);
+    setValue("classId", selectedClass?.id as number, {
       shouldValidate: true,
     });
   };
@@ -85,40 +84,20 @@ export function GenerateDataForm() {
             </div>
 
             <div className="col-span-2 md:col-span-1">
-              <label
-                htmlFor="identify-number"
-                className="block mb-2 text-sm font-medium"
-              >
-                Identify number <span className="text-red-500">*</span>
-              </label>
-              <Controller
-                control={control}
-                name="identifyNumber"
-                render={({ field }) => (
-                  <Input
-                    id="identify-number"
-                    {...field}
-                    disabled={isSubmitting}
-                    placeholder="-"
-                    className="bg-gray-100"
-                  />
-                )}
-              />
-            </div>
-
-            <div className="col-span-2 md:col-span-1">
               <FormField
                 control={control}
-                name="departmentId"
+                name="classId"
                 render={({ field }) => (
                   <FormItem aria-disabled={isSubmitting} {...field}>
                     <FormLabel>
-                      Department <span className="text-red-500">*</span>
+                      Class <span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
-                      <ComboboxSelectDepartment
-                        dataSelect={selectedDepartment}
-                        onChangeSelected={handleDepartmentChange}
+                      <ComboBoxClass
+                        selectedClass={selectClass}
+                        disabled={isSubmitting}
+                        onChange={handleClassChange}
+                        title="Select Class"
                       />
                     </FormControl>
                     <FormMessage />

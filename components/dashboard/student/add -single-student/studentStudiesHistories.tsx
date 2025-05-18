@@ -1,146 +1,154 @@
-import { useFormContext, Controller, useFieldArray } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "lucide-react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { AddSingleStudentRequestType } from "@/model/student/add.student.zod";
-import CollapsibleCard from "@/components/shared/collapsibleCard";
+import { useEffect } from "react";
+import { educationLevels } from "@/constants/constant";
 
-export default function StudentStudiesHistorySection() {
-  const {
-    control,
-    formState: { isSubmitting },
-  } = useFormContext<AddSingleStudentRequestType>();
+export const StudentStudiesHistorySection = () => {
+  const { register, setValue, watch } =
+    useFormContext<AddSingleStudentRequestType>();
 
-  const { fields } = useFieldArray({
-    control,
-    name: "studentStudiesHistories",
-  });
+  useEffect(() => {
+    educationLevels.forEach((level, index) => {
+      setValue(`studentStudiesHistories.${index}.typeStudies`, level.value, {
+        shouldValidate: false,
+        shouldDirty: false,
+      });
+    });
+  }, [setValue]);
 
   return (
-    <CollapsibleCard title="ប្រវត្តិសិក្សា">
-      {/* Table Header */}
-      <div className="grid grid-cols-6 gap-2 mb-2 text-sm font-semibold">
-        <div>ប្រភេទសិក្សា</div>
-        <div>ឈ្មោះសាលា</div>
-        <div>ទីតាំង</div>
-        <div>ចូលឆ្នាំ</div>
-        <div>បញ្ចប់ឆ្នាំ</div>
-        <div>សញ្ញាប័ត្រ/និទ្ទេស</div>
-      </div>
+    <Card className="mt-4">
+      <CardContent className="pt-6 space-y-4">
+        <h3 className="text-lg font-semibold">ប្រវត្តិសិក្សា</h3>
+        <Card>
+          <CardContent className="p-4">
+            <div className="grid grid-cols-8 gap-2 font-medium mb-4 text-sm pb-2">
+              <span>កម្រិតថ្នាក់</span>
+              <span>ឈ្មោះសាលារៀន </span>
+              <span>ខេត្ត/រាជធានី </span>
+              <span>ពីឆ្នាំណាដល់ឆ្នាំណា </span>
+              <span>ពីឆ្នាំណាដល់ឆ្នាំណា </span>
+              <span>សញ្ញាបត្រទទួលបាន</span>
+              <span>ពិន្ទុសរុប</span>
+              <span></span>
+            </div>
 
-      {fields.map((field, index) => (
-        <div
-          key={field.id}
-          className="grid grid-cols-6 gap-2 mb-3 items-center"
-        >
-          {/* typeStudies */}
-          <Controller
-            control={control}
-            name={`studentStudiesHistories.${index}.typeStudies`}
-            render={({ field }) => (
-              <Input
-                {...field}
-                disabled={isSubmitting}
-                placeholder="ប្រភេទសិក្សា"
-                className="bg-gray-100"
-              />
-            )}
-          />
+            {educationLevels.map((level, index) => {
+              const fromYear = watch(
+                `studentStudiesHistories.${index}.fromYear`
+              );
+              const endYear = watch(`studentStudiesHistories.${index}.endYear`);
 
-          {/* schoolName */}
-          <Controller
-            control={control}
-            name={`studentStudiesHistories.${index}.schoolName`}
-            render={({ field }) => (
-              <Input
-                {...field}
-                disabled={isSubmitting}
-                placeholder="ឈ្មោះសាលា"
-                className="bg-gray-100"
-              />
-            )}
-          />
+              return (
+                <div
+                  key={level.value}
+                  className="grid grid-cols-8 gap-4 space-y-4 items-center"
+                >
+                  {/* Static label */}
+                  <div className="text-sm font-medium">{level.label}</div>
 
-          {/* location */}
-          <Controller
-            control={control}
-            name={`studentStudiesHistories.${index}.location`}
-            render={({ field }) => (
-              <Input
-                {...field}
-                disabled={isSubmitting}
-                placeholder="ទីតាំង"
-                className="bg-gray-100"
-              />
-            )}
-          />
-
-          {/* fromYear */}
-          <div className="relative">
-            <Controller
-              control={control}
-              name={`studentStudiesHistories.${index}.fromYear`}
-              render={({ field }) => (
-                <>
-                  <DatePicker
-                    selected={field.value ? new Date(field.value) : null}
-                    onChange={(date) =>
-                      field.onChange(date?.toISOString().split("T")[0])
-                    }
-                    placeholderText="Select"
-                    dateFormat="yyyy-MM-dd"
-                    className="w-full bg-gray-100 pr-10 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  {/* Inputs */}
+                  <Input
+                    placeholder="សាលា"
+                    {...register(`studentStudiesHistories.${index}.schoolName`)}
                   />
-                  <Calendar
-                    size={18}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none"
+                  <Input
+                    placeholder="ទីតាំង"
+                    {...register(`studentStudiesHistories.${index}.location`)}
                   />
-                </>
-              )}
-            />
-          </div>
 
-          {/* endYear */}
-          <div className="relative">
-            <Controller
-              control={control}
-              name={`studentStudiesHistories.${index}.endYear`}
-              render={({ field }) => (
-                <>
-                  <DatePicker
-                    selected={field.value ? new Date(field.value) : null}
-                    onChange={(date) =>
-                      field.onChange(date?.toISOString().split("T")[0])
-                    }
-                    placeholderText="Select"
-                    dateFormat="yyyy-MM-dd"
-                    className="w-full bg-gray-100 pr-10 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  />
-                  <Calendar
-                    size={18}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none"
-                  />
-                </>
-              )}
-            />
-          </div>
+                  {/* From Year */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left text-sm",
+                          !fromYear && "text-muted-foreground"
+                        )}
+                      >
+                        {fromYear
+                          ? format(new Date(fromYear), "yyyy-MM-dd")
+                          : "ជ្រើសរើស"}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={fromYear ? new Date(fromYear) : undefined}
+                        onSelect={(date) =>
+                          setValue(
+                            `studentStudiesHistories.${index}.fromYear`,
+                            format(date!, "yyyy-MM-dd")
+                          )
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
 
-          {/* obtainedCertificate */}
-          <Controller
-            control={control}
-            name={`studentStudiesHistories.${index}.obtainedCertificate`}
-            render={({ field }) => (
-              <Input
-                {...field}
-                disabled={isSubmitting}
-                placeholder="សញ្ញាប័ត្រ/និទ្ទេស"
-                className="bg-gray-100"
-              />
-            )}
-          />
-        </div>
-      ))}
-    </CollapsibleCard>
+                  {/* End Year */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left text-sm",
+                          !endYear && "text-muted-foreground"
+                        )}
+                      >
+                        {endYear
+                          ? format(new Date(endYear), "yyyy-MM-dd")
+                          : "ជ្រើសរើស"}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={endYear ? new Date(endYear) : undefined}
+                        onSelect={(date) =>
+                          setValue(
+                            `studentStudiesHistories.${index}.endYear`,
+                            format(date!, "yyyy-MM-dd")
+                          )
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  <Input
+                    placeholder="សញ្ញាបត្រ"
+                    {...register(
+                      `studentStudiesHistories.${index}.obtainedCertificate`
+                    )}
+                  />
+                  <Input
+                    placeholder="ពិន្ទុសរុប"
+                    {...register(
+                      `studentStudiesHistories.${index}.overallGrade`
+                    )}
+                  />
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      </CardContent>
+    </Card>
   );
-}
+};

@@ -109,8 +109,8 @@ export enum DegreeEnum {
   ASSOCIATE = "ASSOCIATE",
 }
 
-export enum EducationLevelEnum {
-  PRIMARY_SCHOOL = "PRIMARY_SCHOOL",
-  LOWER_SECONDARY_SCHOOL = "LOWER_SECONDARY_SCHOOL",
-  UPPER_SECONDARY_SCHOOL = "UPPER_SECONDARY_SCHOOL",
-}
+export const educationLevels = [
+  { label: "បឋមសិក្សា", value: "PRIMARY_SCHOOL" },
+  { label: "បឋមភូមិ	", value: "LOWER_SECONDARY_SCHOOL" },
+  { label: "ទុតិយភូមិ", value: "UPPER_SECONDARY_SCHOOL" },
+];
