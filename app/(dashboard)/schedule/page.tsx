@@ -1,137 +1,245 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link";
+import Image from "next/image";
+import { Search, ChevronRight } from "lucide-react";
+
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, ChevronLeft, ChevronRight, Plus } from "lucide-react"
+} from "@/components/ui/breadcrumb";
 
-export default function SchedulePage() {
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-  const timeSlots = ["8:00 - 9:30", "9:45 - 11:15", "11:30 - 1:00", "2:00 - 3:30", "3:45 - 5:15"]
+// Sample data for departments with server image URLs
+const departments = [
+  {
+    id: 1,
+    name: "Computer Science",
+    icon: "green",
+    imageUrl: "https://example.com/images/cs-icon-green.png",
+  },
+  {
+    id: 2,
+    name: "Computer Science",
+    icon: "green",
+    imageUrl: "https://example.com/images/cs-icon-green.png",
+  },
+  {
+    id: 3,
+    name: "Computer Science",
+    icon: "green",
+    imageUrl: "https://example.com/images/cs-icon-green.png",
+  },
+  {
+    id: 4,
+    name: "Computer Science",
+    icon: "green",
+    imageUrl: "https://example.com/images/cs-icon-green.png",
+  },
+  {
+    id: 5,
+    name: "Computer Science",
+    icon: "green",
+    imageUrl: "https://example.com/images/cs-icon-green.png",
+  },
+  {
+    id: 6,
+    name: "Computer Science",
+    icon: "blue",
+    imageUrl: "https://example.com/images/cs-icon-blue.png",
+  },
+  {
+    id: 7,
+    name: "Computer Science",
+    icon: "blue",
+    imageUrl: "https://example.com/images/cs-icon-blue.png",
+  },
+  {
+    id: 8,
+    name: "Computer Science",
+    icon: "blue",
+    imageUrl: "https://example.com/images/cs-icon-blue.png",
+  },
+  {
+    id: 9,
+    name: "Computer Science",
+    icon: "blue",
+    imageUrl: "https://example.com/images/cs-icon-blue.png",
+  },
+  {
+    id: 10,
+    name: "Computer Science",
+    icon: "blue",
+    imageUrl: "https://example.com/images/cs-icon-blue.png",
+  },
+  {
+    id: 11,
+    name: "Computer Science",
+    icon: "green",
+    imageUrl: "https://example.com/images/cs-icon-green.png",
+  },
+  {
+    id: 12,
+    name: "Computer Science",
+    icon: "green",
+    imageUrl: "https://example.com/images/cs-icon-green.png",
+  },
+  {
+    id: 13,
+    name: "Computer Science",
+    icon: "green",
+    imageUrl: "https://example.com/images/cs-icon-green.png",
+  },
+  {
+    id: 14,
+    name: "Computer Science",
+    icon: "green",
+    imageUrl: "https://example.com/images/cs-icon-green.png",
+  },
+  {
+    id: 15,
+    name: "Computer Science",
+    icon: "green",
+    imageUrl: "https://example.com/images/cs-icon-green.png",
+  },
+  {
+    id: 16,
+    name: "Computer Science",
+    icon: "blue",
+    imageUrl: "https://example.com/images/cs-icon-blue.png",
+  },
+  {
+    id: 17,
+    name: "Computer Science",
+    icon: "blue",
+    imageUrl: "https://example.com/images/cs-icon-blue.png",
+  },
+  {
+    id: 18,
+    name: "Computer Science",
+    icon: "blue",
+    imageUrl: "https://example.com/images/cs-icon-blue.png",
+  },
+  {
+    id: 19,
+    name: "Computer Science",
+    icon: "blue",
+    imageUrl: "https://example.com/images/cs-icon-blue.png",
+  },
+  {
+    id: 20,
+    name: "Computer Science",
+    icon: "blue",
+    imageUrl: "https://example.com/images/cs-icon-blue.png",
+  },
+];
 
-  const scheduleData = [
-    { day: "Monday", time: "8:00 - 9:30", course: "CS101", room: "A101", instructor: "Dr. Smith" },
-    { day: "Monday", time: "11:30 - 1:00", course: "FT201", room: "B202", instructor: "Dr. Johnson" },
-    { day: "Tuesday", time: "9:45 - 11:15", course: "ET301", room: "C303", instructor: "Dr. Williams" },
-    { day: "Wednesday", time: "2:00 - 3:30", course: "AS101", room: "D404", instructor: "Dr. Brown" },
-    { day: "Thursday", time: "3:45 - 5:15", course: "MT201", room: "E505", instructor: "Dr. Davis" },
-  ]
-
+export default function DepartmentListPage() {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Schedule</h1>
-          <p className="text-muted-foreground">View and manage class schedules</p>
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="mb-6">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard" className="font-medium">
+                  Dashboard
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink className="text-muted-foreground">
+                  Department List
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Schedule</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+
+        <h1 className="text-2xl font-bold mb-6">Schedule</h1>
+
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Enter name or ID..." className="pl-10" />
+        </div>
       </div>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Weekly Schedule</CardTitle>
-            <CardDescription>Academic Year 2023-2024, Semester 2</CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2">
-              <Select defaultValue="computer-science">
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select department" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="computer-science">Computer Science</SelectItem>
-                  <SelectItem value="food-technology">Food Technology</SelectItem>
-                  <SelectItem value="electrical-technology">Electrical Technology</SelectItem>
-                  <SelectItem value="animal-science">Animal Science</SelectItem>
-                  <SelectItem value="mechanical-technology">Mechanical Technology</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select defaultValue="year-3">
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="Select year" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="year-1">Year 1</SelectItem>
-                  <SelectItem value="year-2">Year 2</SelectItem>
-                  <SelectItem value="year-3">Year 3</SelectItem>
-                  <SelectItem value="year-4">Year 4</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Class
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between mb-4">
-            <Button variant="outline" size="sm">
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Previous Week
-            </Button>
-            <div className="flex items-center">
-              <Calendar className="mr-2 h-4 w-4" />
-              <span className="font-medium">May 1 - May 7, 2023</span>
-            </div>
-            <Button variant="outline" size="sm">
-              Next Week
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th className="border p-2 bg-muted font-medium text-left">Time / Day</th>
-                  {days.map((day) => (
-                    <th key={day} className="border p-2 bg-muted font-medium text-left">
-                      {day}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {timeSlots.map((time) => (
-                  <tr key={time}>
-                    <td className="border p-2 font-medium">{time}</td>
-                    {days.map((day) => {
-                      const scheduleItem = scheduleData.find((item) => item.day === day && item.time === time)
-                      return (
-                        <td key={`${day}-${time}`} className="border p-2 min-w-[150px]">
-                          {scheduleItem ? (
-                            <div className="p-1 bg-blue-50 rounded border border-blue-200">
-                              <div className="font-medium text-blue-700">{scheduleItem.course}</div>
-                              <div className="text-sm text-muted-foreground">Room: {scheduleItem.room}</div>
-                              <div className="text-sm text-muted-foreground">{scheduleItem.instructor}</div>
-                            </div>
-                          ) : null}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+
+      <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="mb-6">
+          <p className="text-muted-foreground">
+            Total Department: {departments.length}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {departments.map((department) => (
+            <DepartmentCard
+              key={department.id}
+              name={department.name}
+              iconType={department.icon}
+              imageUrl={department.imageUrl}
+            />
+          ))}
+        </div>
+      </div>
     </div>
-  )
+  );
+}
+
+function DepartmentCard({
+  name,
+  iconType,
+  imageUrl,
+}: {
+  name: string;
+  iconType: string;
+  imageUrl: string;
+}) {
+  return (
+    <Card className="flex items-center justify-between p-4 hover:bg-muted/20 transition-colors">
+      <div className="flex items-center gap-4">
+        <DepartmentIcon imageUrl={imageUrl} iconType={iconType} />
+        <div>
+          <p className="text-sm text-muted-foreground">Dep.</p>
+          <p className="font-medium">{name}</p>
+        </div>
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+        asChild
+      >
+        <Link href="#">
+          View Class
+          <ChevronRight className="ml-1 h-4 w-4" />
+        </Link>
+      </Button>
+    </Card>
+  );
+}
+
+function DepartmentIcon({
+  imageUrl,
+  iconType,
+}: {
+  imageUrl: string;
+  iconType: string;
+}) {
+  const fallbackImageSrc = "/api/placeholder/48/48";
+  const bgColorClass = iconType === "green" ? "bg-green-100" : "bg-blue-100";
+  return (
+    <div
+      className={`w-12 h-12 rounded-full overflow-hidden flex items-center justify-center ${bgColorClass}`}
+    >
+      <Image
+        src={fallbackImageSrc}
+        alt="Department icon"
+        width={48}
+        height={48}
+        className="w-full h-full object-cover"
+      />
+    </div>
+  );
 }
