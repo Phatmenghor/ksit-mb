@@ -29,9 +29,7 @@ export function Sidebar() {
   const renderNavItems = (isCollapsed = false) => (
     <nav className="flex flex-col gap-1">
       {sidebarRoutes.map((route) => {
-        const isActive = route.href
-          ? pathname === route.href
-          : route.subroutes?.some((sub) => pathname === sub.href);
+        const isActive = route.href ? pathname === route.href : false;
 
         if (route.subroutes) {
           const isOpen = route.section
@@ -43,8 +41,9 @@ export function Sidebar() {
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start text-gray-900 hover:bg-gray-100 rounded",
-                  isActive && "bg-gray-100 font-medium"
+                  "w-full justify-start text-gray-900 hover:bg-primary/10 hover:text-primary rounded",
+                  isActive &&
+                    "bg-primary/15 text-primary font-medium border-l-2 border-primary"
                 )}
                 onClick={() =>
                   route.section &&
@@ -77,8 +76,9 @@ export function Sidebar() {
                       variant="ghost"
                       asChild
                       className={cn(
-                        "w-full justify-start text-gray-900 hover:bg-gray-100 pl-6 rounded",
-                        pathname === subroute.href && "bg-gray-100 font-medium"
+                        "w-full justify-start text-gray-900 hover:bg-primary/10 hover:text-primary pl-6 rounded",
+                        pathname === subroute.href &&
+                          "bg-primary/15 text-primary font-medium border-l-2 border-primary"
                       )}
                     >
                       <Link
@@ -102,8 +102,9 @@ export function Sidebar() {
             variant="ghost"
             asChild
             className={cn(
-              "w-full justify-start text-gray-900 hover:bg-gray-100 rounded",
-              pathname === route.href && "bg-gray-100 font-medium"
+              "w-full justify-start text-gray-900 hover:bg-primary/10 hover:text-primary rounded",
+              pathname === route.href &&
+                "bg-primary/15 text-primary font-medium border-l-2 border-primary"
             )}
           >
             <Link
@@ -128,7 +129,7 @@ export function Sidebar() {
           collapsed ? "w-40" : "w-64"
         )}
       >
-        <div className="flex h-16 items-center bg-[#024D3E] justify-between px-4">
+        <div className="flex h-16 items-center bg-primary justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
             <div>
               <div className="rounded-full bg-white p-1">
