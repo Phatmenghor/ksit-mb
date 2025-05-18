@@ -8,44 +8,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { AddSingleStudentRequestType } from "@/model/student/add.student.zod";
-import { useEffect } from "react";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 
 export default function StudentFamilyBackgroundSection() {
   const {
     control,
     formState: { isSubmitting },
-    setValue,
   } = useFormContext<AddSingleStudentRequestType>();
-
-  // Initialize parents array with 2 parents if empty
-  useEffect(() => {
-    setValue("studentParents", [
-      {
-        parentType: "FATHER",
-        name: "",
-        age: "",
-        job: "",
-        phone: "",
-        address: "",
-      },
-      {
-        parentType: "MOTHER",
-        name: "",
-        age: "",
-        job: "",
-        phone: "",
-        address: "",
-      },
-    ]);
-  }, [setValue]);
-
-  const { fields: parentFields } = useFieldArray({
-    control,
-    name: "studentParents",
-  });
 
   const {
     fields: siblingFields,
@@ -68,70 +38,6 @@ export default function StudentFamilyBackgroundSection() {
 
   return (
     <CollapsibleCard title="ព័ត៌មានគ្រួសារ">
-      <div className="grid grid-cols-2 gap-6">
-        {parentFields.map((field, index) => (
-          <div key={field.id} className="space-y-4">
-            <div>
-              <label className="block font-medium text-sm mb-1">
-                {index === 0 ? "ឈ្មោះឪពុក" : "ឈ្មោះម្ដាយ"}
-              </label>
-              <Controller
-                control={control}
-                name={`studentParents.${index}.name`}
-                render={({ field }) => <Input {...field} placeholder="ឈ្មោះ" />}
-              />
-            </div>
-            <div>
-              <label className="block font-medium text-sm mb-1">
-                {index === 0 ? "អាយុឪពុក" : "អាយុម្ដាយ"}
-              </label>
-              <Controller
-                control={control}
-                name={`studentParents.${index}.age`}
-                render={({ field }) => <Input {...field} placeholder="អាយុ" />}
-              />
-            </div>
-            <div>
-              <label className="block font-medium text-sm mb-1">មុខរបរ</label>
-              <Controller
-                control={control}
-                name={`studentParents.${index}.job`}
-                render={({ field }) => (
-                  <Input {...field} placeholder="មុខរបរ" />
-                )}
-              />
-            </div>
-            <div>
-              <label className="block font-medium text-sm mb-1">
-                លេខទូរស័ព្ទ
-              </label>
-              <Controller
-                control={control}
-                name={`studentParents.${index}.phone`}
-                render={({ field }) => (
-                  <Input {...field} placeholder="លេខទូរស័ព្ទ" />
-                )}
-              />
-            </div>
-            <div>
-              <label className="block font-medium text-sm mb-1">
-                ទីកន្លែងបច្ចុប្បន្ន
-              </label>
-              <Controller
-                control={control}
-                name={`studentParents.${index}.address`}
-                render={({ field }) => (
-                  <Textarea
-                    {...field}
-                    placeholder="ភូមិ ឃុំ/សង្កាត់ ស្រុក/ខណ្ឌ ខេត្ត"
-                  />
-                )}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-
       {/* Siblings Section */}
       <div className="mt-8">
         <div className="mb-2 flex gap-4 items-center">

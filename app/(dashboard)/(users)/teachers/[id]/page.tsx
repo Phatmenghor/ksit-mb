@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import TeacherForm from "@/components/dashboard/users/teachers/form/TeacherForm";
 import { useRouter } from "next/navigation";
 
-export default function AddTeacherPage() {
+export default function EditTeacherPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 

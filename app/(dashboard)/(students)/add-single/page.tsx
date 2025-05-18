@@ -2,7 +2,7 @@
 
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
-import ProfileUploadCard from "@/components/dashboard/users/teachers/add/profileUploadCard";
+import ProfileUploadCard from "@/components/dashboard/users/teachers/form/profileUploadCard";
 import { FormProvider, useForm } from "react-hook-form";
 import { StudentBasicForm } from "@/components/dashboard/student/add -single-student/GenerateDataForm";
 import StudentPersonalDetailSection from "@/components/dashboard/student/add -single-student/StudentPersonalDetail";
