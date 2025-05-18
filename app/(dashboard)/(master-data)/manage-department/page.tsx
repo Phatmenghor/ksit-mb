@@ -120,11 +120,6 @@ export default function ManageDepartmentPage() {
     setSearchQuery(e.target.value);
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    loadDepartments({});
-  };
-
   async function handleSubmit(formData: DepartmentFormData) {
     setIsSubmitting(true);
 
