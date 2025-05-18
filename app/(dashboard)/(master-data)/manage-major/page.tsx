@@ -335,6 +335,7 @@ export default function ManageMajorPage() {
         onSubmit={handleSubmit}
         initialData={initialData}
         mode={modalMode}
+        isSubmitting={isSubmitting}
       />
 
       {/* Delete Confirmation Dialog */}

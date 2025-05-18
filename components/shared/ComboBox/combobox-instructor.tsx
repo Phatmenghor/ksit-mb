@@ -22,21 +22,23 @@ import { useInView } from "react-intersection-observer";
 import { StatusEnum } from "@/constants/constant";
 import { getAllDepartmentService } from "@/service/master-data/department.service";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
+import { StaffModel } from "@/model/user/stuff.model";
+import { getAllStuffService } from "@/service/user/user.service";
 
 interface ComboboxSelectedProps {
-  dataSelect: DepartmentModel | null;
-  onChangeSelected: (item: DepartmentModel) => void; // Callback to notify parent about the selection change
+  dataSelect: StaffModel | null;
+  onChangeSelected: (item: StaffModel) => void; // Callback to notify parent about the selection change
   disabled?: boolean;
 }
 
-export function ComboboxSelectDepartment({
+export function ComboboxSelectInstructor({
   dataSelect,
   onChangeSelected,
   disabled = false,
 }: ComboboxSelectedProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [data, setData] = useState<DepartmentModel[]>([]);
+  const [data, setData] = useState<StaffModel[]>([]);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -49,12 +51,17 @@ export function ComboboxSelectDepartment({
     if (loading || (lastPage && newPage > 1)) return;
     setLoading(true);
     try {
-      const result = await getAllDepartmentService({
+      const result = await getAllStuffService({
         search,
         pageSize: 10,
         pageNo: newPage,
         status: StatusEnum.ACTIVE,
       });
+
+      if (!result) {
+        console.error("No data returned from getAllStuffService");
+        return;
+      }
 
       if (newPage === 1) {
         setData(result.content);
@@ -118,24 +125,24 @@ export function ComboboxSelectDepartment({
           disabled={disabled}
         >
           {/* Always show the name directly from dataSelect prop if available */}
-          {dataSelect ? dataSelect.name : "Select a department..."}
+          {dataSelect ? dataSelect.username : "Select a instructor..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full flex p-0">
         <Command>
           <CommandInput
-            placeholder="Search department..."
+            placeholder="Search instructor..."
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
           <CommandList className="max-h-60 overflow-y-auto">
-            <CommandEmpty>No departments found.</CommandEmpty>
+            <CommandEmpty>No instructor found.</CommandEmpty>
             <CommandGroup>
               {data?.map((item, index) => (
                 <CommandItem
                   key={item.id}
-                  value={item.name}
+                  value={item.username}
                   onSelect={() => {
                     onChangeSelected(item); // Notify parent about the change
                     setOpen(false);
@@ -148,7 +155,7 @@ export function ComboboxSelectDepartment({
                       dataSelect?.id === item.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {item.name}
+                  {item.username}
                 </CommandItem>
               ))}
             </CommandGroup>

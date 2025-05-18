@@ -23,13 +23,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Upload, X, ImageIcon } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { Constants } from "@/constants/text-string";
+import { DepartmentModel } from "@/model/master-data/department/all-department-model";
 
 // Define Zod schema for department form validation
 const departmentFormSchema = z.object({
-  code: z.string().min(1, { message: "Department code is required" }),
-  name: z.string().min(1, { message: "Department name is required" }),
+  code: z
+    .string()
+    .min(1, { message: "Department code is required" })
+    .max(50, { message: "Department code should be less than 50 characters" })
+    .trim(),
+  name: z
+    .string()
+    .min(1, { message: "Department name is required" })
+    .max(100, { message: "Department name should be less than 100 characters" })
+    .trim(),
   urlLogo: z.string().optional(),
   status: z.literal(Constants.ACTIVE),
 });
@@ -37,6 +46,7 @@ const departmentFormSchema = z.object({
 // Type for the form data based on the Zod schema
 export type DepartmentFormData = z.infer<typeof departmentFormSchema> & {
   id?: number;
+  selectedDepartment?: DepartmentModel; // For edit mode
 };
 
 interface DepartmentModalProps {
@@ -45,10 +55,10 @@ interface DepartmentModalProps {
   onSubmit: (data: DepartmentFormData) => void;
   initialData?: DepartmentFormData;
   mode: "add" | "edit";
-  isSubmitting?: boolean; // Add this line
+  isSubmitting?: boolean;
 }
 
-export function DepartmentModal({
+export function DepartmentFormModal({
   isOpen,
   onClose,
   onSubmit,
@@ -59,6 +69,9 @@ export function DepartmentModal({
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isFormDirty, setIsFormDirty] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] =
+    useState<DepartmentModel | null>(initialData?.selectedDepartment || null);
 
   // Fixed image URL as requested
   const fixedImageUrl =
@@ -70,9 +83,10 @@ export function DepartmentModal({
     defaultValues: {
       code: "",
       name: "",
-      urlLogo: fixedImageUrl, // Set default to fixed image URL
+      urlLogo: fixedImageUrl,
       status: Constants.ACTIVE,
     },
+    mode: "onChange", // Validate on change for better UX
   });
 
   // Reset form when modal opens/closes or initialData changes
@@ -86,6 +100,15 @@ export function DepartmentModal({
           status: Constants.ACTIVE,
         });
 
+        // Correctly set the selected department
+        if (initialData.selectedDepartment) {
+          console.log(
+            "Setting selected department:",
+            initialData.selectedDepartment
+          );
+          setSelectedDepartment(initialData.selectedDepartment);
+        }
+
         // Always use the fixed image for preview
         setLogoPreview(fixedImageUrl);
       } else {
@@ -96,10 +119,32 @@ export function DepartmentModal({
           status: Constants.ACTIVE,
         });
         setLogoPreview(fixedImageUrl);
+        setSelectedDepartment(null);
       }
       setLogoFile(null);
+      setIsFormDirty(false);
     }
   }, [isOpen, initialData, mode, form]);
+
+  // Track form changes
+  useEffect(() => {
+    const subscription = form.watch(() =>
+      setIsFormDirty(form.formState.isDirty)
+    );
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  // Handle close with confirmation if form is dirty
+  const handleCloseModal = () => {
+    if (isFormDirty) {
+      // Use native confirm for simplicity, could be replaced with a custom dialog
+      const confirmed = window.confirm(
+        "You have unsaved changes. Are you sure you want to close?"
+      );
+      if (!confirmed) return;
+    }
+    onClose();
+  };
 
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,6 +164,7 @@ export function DepartmentModal({
     }
 
     setLogoFile(file);
+    setIsFormDirty(true);
 
     // For now, always use the fixed image
     setLogoPreview(fixedImageUrl);
@@ -146,6 +192,7 @@ export function DepartmentModal({
 
       onSubmit(submitData);
     } catch (error) {
+      console.error("Error submitting department form:", error);
       toast.error("An error occurred while saving department");
     } finally {
       setIsUploading(false);
@@ -157,11 +204,14 @@ export function DepartmentModal({
     // For now, even when "removing", we'll still use the fixed image
     setLogoFile(null);
     setLogoPreview(fixedImageUrl);
-    form.setValue("urlLogo", fixedImageUrl);
+    form.setValue("urlLogo", fixedImageUrl, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleCloseModal}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -188,7 +238,13 @@ export function DepartmentModal({
                     Department Code <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter department code" {...field} />
+                    <Input
+                      placeholder="Enter department code"
+                      {...field}
+                      autoFocus
+                      maxLength={50}
+                      disabled={isSubmitting || isUploading}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -205,7 +261,12 @@ export function DepartmentModal({
                     Department Name <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter department name" {...field} />
+                    <Input
+                      placeholder="Enter department name"
+                      {...field}
+                      maxLength={100}
+                      disabled={isSubmitting || isUploading}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -219,7 +280,7 @@ export function DepartmentModal({
                 <div className="flex flex-col items-center justify-center space-y-2">
                   <div className="relative w-24 h-24">
                     <img
-                      src={fixedImageUrl}
+                      src={logoPreview || fixedImageUrl}
                       alt="Department logo"
                       className="w-full h-full object-cover rounded-full"
                     />
@@ -229,6 +290,7 @@ export function DepartmentModal({
                       size="icon"
                       className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
                       onClick={handleRemoveLogo}
+                      disabled={isSubmitting || isUploading}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -237,7 +299,11 @@ export function DepartmentModal({
                   <div className="flex items-center justify-center">
                     <label
                       htmlFor="logo-upload"
-                      className="cursor-pointer px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 flex items-center"
+                      className={`cursor-pointer px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 flex items-center ${
+                        isSubmitting || isUploading
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
                     >
                       <Upload className="mr-2 h-4 w-4" />
                       Upload Logo
@@ -247,6 +313,7 @@ export function DepartmentModal({
                         accept="image/*"
                         className="sr-only"
                         onChange={handleFileChange}
+                        disabled={isSubmitting || isUploading}
                       />
                     </label>
                   </div>
@@ -262,23 +329,28 @@ export function DepartmentModal({
               <Button
                 type="button"
                 variant="outline"
-                onClick={onClose}
-                disabled={isUploading}
+                onClick={handleCloseModal}
+                disabled={isUploading || isSubmitting}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={isUploading || isSubmitting}
+                disabled={
+                  isUploading ||
+                  isSubmitting ||
+                  !form.formState.isDirty ||
+                  !form.formState.isValid
+                }
                 className="bg-green-900 text-white hover:bg-green-950"
               >
                 {isUploading || isSubmitting ? (
                   <>
                     <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                    Saving...
+                    {mode === "add" ? "Creating..." : "Updating..."}
                   </>
                 ) : (
-                  "Save Department"
+                  `${mode === "add" ? "Create" : "Update"} Department`
                 )}
               </Button>
             </DialogFooter>

@@ -22,21 +22,25 @@ import { useInView } from "react-intersection-observer";
 import { StatusEnum } from "@/constants/constant";
 import { getAllDepartmentService } from "@/service/master-data/department.service";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
+import { StaffModel } from "@/model/user/stuff.model";
+import { getAllStuffService } from "@/service/user/user.service";
+import { getAllSubjectService } from "@/service/master-data/subject.service";
+import { SubjectModel } from "@/model/master-data/subject/all-subject-model";
 
 interface ComboboxSelectedProps {
-  dataSelect: DepartmentModel | null;
-  onChangeSelected: (item: DepartmentModel) => void; // Callback to notify parent about the selection change
+  dataSelect: SubjectModel | null;
+  onChangeSelected: (item: SubjectModel) => void; // Callback to notify parent about the selection change
   disabled?: boolean;
 }
 
-export function ComboboxSelectDepartment({
+export function ComboboxSelectSubject({
   dataSelect,
   onChangeSelected,
   disabled = false,
 }: ComboboxSelectedProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [data, setData] = useState<DepartmentModel[]>([]);
+  const [data, setData] = useState<SubjectModel[]>([]);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -49,7 +53,7 @@ export function ComboboxSelectDepartment({
     if (loading || (lastPage && newPage > 1)) return;
     setLoading(true);
     try {
-      const result = await getAllDepartmentService({
+      const result = await getAllSubjectService({
         search,
         pageSize: 10,
         pageNo: newPage,
@@ -118,19 +122,19 @@ export function ComboboxSelectDepartment({
           disabled={disabled}
         >
           {/* Always show the name directly from dataSelect prop if available */}
-          {dataSelect ? dataSelect.name : "Select a department..."}
+          {dataSelect ? dataSelect.name : "Select a subject type..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full flex p-0">
         <Command>
           <CommandInput
-            placeholder="Search department..."
+            placeholder="Search subject type..."
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
           <CommandList className="max-h-60 overflow-y-auto">
-            <CommandEmpty>No departments found.</CommandEmpty>
+            <CommandEmpty>No subject type found.</CommandEmpty>
             <CommandGroup>
               {data?.map((item, index) => (
                 <CommandItem

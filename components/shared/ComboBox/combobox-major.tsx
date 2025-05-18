@@ -20,23 +20,23 @@ import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { StatusEnum } from "@/constants/constant";
-import { getAllDepartmentService } from "@/service/master-data/department.service";
-import { DepartmentModel } from "@/model/master-data/department/all-department-model";
+import { getAllMajorService } from "@/service/master-data/major.service";
+import { MajorModel } from "@/model/master-data/major/all-major-model";
 
 interface ComboboxSelectedProps {
-  dataSelect: DepartmentModel | null;
-  onChangeSelected: (item: DepartmentModel) => void; // Callback to notify parent about the selection change
+  dataSelect: MajorModel | null;
+  onChangeSelected: (item: MajorModel) => void; // Callback to notify parent about the selection change
   disabled?: boolean;
 }
 
-export function ComboboxSelectDepartment({
+export function ComboboxSelectMajor({
   dataSelect,
   onChangeSelected,
   disabled = false,
 }: ComboboxSelectedProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [data, setData] = useState<DepartmentModel[]>([]);
+  const [data, setData] = useState<MajorModel[]>([]);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -49,7 +49,7 @@ export function ComboboxSelectDepartment({
     if (loading || (lastPage && newPage > 1)) return;
     setLoading(true);
     try {
-      const result = await getAllDepartmentService({
+      const result = await getAllMajorService({
         search,
         pageSize: 10,
         pageNo: newPage,
@@ -64,7 +64,7 @@ export function ComboboxSelectDepartment({
       setPage(result.pageNo);
       setLastPage(result.last);
     } catch (error) {
-      console.error("Error fetching departments:", error);
+      console.error("Error fetching majors:", error);
     } finally {
       setLoading(false);
     }
@@ -91,6 +91,11 @@ export function ComboboxSelectDepartment({
     }
   }, [inView]);
 
+  // Check if the current selection exists in the loaded data
+  const isSelectedItemInList = dataSelect
+    ? data.some((item) => item.id === dataSelect.id)
+    : false;
+
   async function onChangeSearch(value: string) {
     setSearchTerm(value);
     onSearchClick(value);
@@ -102,6 +107,9 @@ export function ComboboxSelectDepartment({
     }),
     [searchTerm]
   );
+
+  // Debug the dataSelect prop to make sure it's received correctly
+  console.log("dataSelect in ComboboxSelectMajor:", dataSelect);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -117,20 +125,20 @@ export function ComboboxSelectDepartment({
           )}
           disabled={disabled}
         >
-          {/* Always show the name directly from dataSelect prop if available */}
-          {dataSelect ? dataSelect.name : "Select a department..."}
+          {/* Always show the name from the dataSelect prop if available */}
+          {dataSelect ? dataSelect.name : "Select a major..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full flex p-0">
         <Command>
           <CommandInput
-            placeholder="Search department..."
+            placeholder="Search major..."
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
           <CommandList className="max-h-60 overflow-y-auto">
-            <CommandEmpty>No departments found.</CommandEmpty>
+            <CommandEmpty>No majors found.</CommandEmpty>
             <CommandGroup>
               {data?.map((item, index) => (
                 <CommandItem
@@ -148,7 +156,7 @@ export function ComboboxSelectDepartment({
                       dataSelect?.id === item.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {item.name}
+                  {item.name} ({item.code})
                 </CommandItem>
               ))}
             </CommandGroup>
