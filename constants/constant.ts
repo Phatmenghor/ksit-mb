@@ -114,3 +114,41 @@ export const educationLevels = [
   { label: "បឋមភូមិ	", value: "LOWER_SECONDARY_SCHOOL" },
   { label: "ទុតិយភូមិ", value: "UPPER_SECONDARY_SCHOOL" },
 ];
+
+export const DAYS_OF_WEEK = [
+  {
+    displayName: "Monday",
+    name: "MONDAY",
+    id: 1,
+  },
+  {
+    displayName: "Tuesday",
+    name: "TUESDAY",
+    id: 2,
+  },
+  {
+    displayName: "Wednesday",
+    name: "WEDNESDAY",
+    id: 3,
+  },
+  {
+    displayName: "Thursday",
+    name: "THURSDAY",
+    id: 4,
+  },
+  {
+    displayName: "Friday",
+    name: "FRIDAY",
+    id: 5,
+  },
+  {
+    displayName: "Saturday",
+    name: "SATURDAY",
+    id: 6,
+  },
+  {
+    displayName: "Sunday",
+    name: "SUNDAY",
+    id: 0,
+  },
+];
