@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Plus, Pencil, Trash2, Search, Loader2 } from "lucide-react";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -51,6 +51,7 @@ import { DateTimeFormatter } from "@/utils/date/date-time-format";
 import { Constants } from "@/constants/text-string";
 import Loading from "@/components/shared/loading";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
+import { baseAPI } from "@/constants/api";
 
 export default function ManageDepartmentPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -299,18 +300,21 @@ export default function ManageDepartmentPage() {
                   return (
                     <TableRow key={dept.id || index}>
                       <TableCell>{indexDisplay}</TableCell>
-                      <TableCell>
-                        <span className="rounded bg-blue-100 px-2 py-1 text-blue-800">
-                          {dept.code}
-                        </span>
-                      </TableCell>
+                      <TableCell>{dept.code}</TableCell>
                       <TableCell>{dept.name}</TableCell>
                       <TableCell>
-                        <Avatar className="h-8 w-8">
+                        <Avatar className="h-12 w-12">
                           <AvatarImage
-                            src={dept.urlLogo || "/placeholder.svg"}
+                            src={
+                              dept.urlLogo
+                                ? `${baseAPI.BASE_IMAGE}${dept.urlLogo}`
+                                : "/assets/no-image.png"
+                            }
                             alt={dept.name}
                           />
+                          <AvatarFallback>
+                            {dept.name?.charAt(0)}
+                          </AvatarFallback>
                         </Avatar>
                       </TableCell>
                       <TableCell>{DateTimeFormatter(dept.createdAt)}</TableCell>

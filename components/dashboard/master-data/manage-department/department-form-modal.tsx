@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -26,20 +26,20 @@ import {
 import { Upload, X } from "lucide-react";
 import { Constants } from "@/constants/text-string";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
+import { uploadImageService } from "@/service/setting/image.serice";
+import {
+  convertFileToBase64,
+  getFileExtension,
+} from "@/utils/setting/image/image-upload";
+import { UploadImage } from "@/model/setting/image-model";
+import { baseAPI } from "@/constants/api";
 
 // Define Zod schema for department form validation
 const departmentFormSchema = z.object({
-  code: z
-    .string()
-    .min(1, { message: "Department code is required" })
-    .max(50, { message: "Department code should be less than 50 characters" })
-    .trim(),
-  name: z
-    .string()
-    .min(1, { message: "Department name is required" })
-    .max(100, { message: "Department name should be less than 100 characters" })
-    .trim(),
+  code: z.string().min(1, { message: "Department code is required" }).trim(),
+  name: z.string().min(1, { message: "Department name is required" }).trim(),
   urlLogo: z.string().optional(),
+  imageId: z.string().optional(),
   status: z.literal(Constants.ACTIVE),
 });
 
@@ -66,16 +66,15 @@ export function DepartmentFormModal({
   mode,
   isSubmitting = false,
 }: DepartmentModalProps) {
-  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [isFormDirty, setIsFormDirty] = useState(false);
-  const [selectedDepartment, setSelectedDepartment] =
-    useState<DepartmentModel | null>(initialData?.selectedDepartment || null);
+  const [fileInputKey, setFileInputKey] = useState<number>(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fixed image URL as requested
-  const fixedImageUrl =
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToIBhiJevC0oBF4f-zvmpQSWkubyRTHVXwxA&s";
+  // New state to store the selected file
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  // Flag to indicate if the logo was changed
+  const [logoChanged, setLogoChanged] = useState(false);
 
   // Initialize the form with react-hook-form and zod validation
   const form = useForm<DepartmentFormData>({
@@ -83,7 +82,8 @@ export function DepartmentFormModal({
     defaultValues: {
       code: "",
       name: "",
-      urlLogo: fixedImageUrl,
+      urlLogo: "",
+      imageId: "",
       status: Constants.ACTIVE,
     },
     mode: "onChange", // Validate on change for better UX
@@ -96,92 +96,143 @@ export function DepartmentFormModal({
         form.reset({
           code: initialData.code || "",
           name: initialData.name || "",
-          urlLogo: fixedImageUrl,
+          urlLogo: initialData.urlLogo || "",
+          imageId: initialData.imageId || "",
           status: Constants.ACTIVE,
         });
 
-        // Correctly set the selected department
-        if (initialData.selectedDepartment) {
-          console.log(
-            "Setting selected department:",
-            initialData.selectedDepartment
-          );
-          setSelectedDepartment(initialData.selectedDepartment);
+        // Set logo preview if urlLogo exists
+        if (initialData.urlLogo) {
+          setLogoPreview(initialData.urlLogo);
+        } else {
+          setLogoPreview(null);
         }
-
-        // Always use the fixed image for preview
-        setLogoPreview(fixedImageUrl);
       } else {
         form.reset({
           code: "",
           name: "",
-          urlLogo: fixedImageUrl,
+          urlLogo: "",
+          imageId: "",
           status: Constants.ACTIVE,
         });
-        setLogoPreview(fixedImageUrl);
-        setSelectedDepartment(null);
+        setLogoPreview(null);
       }
-      setLogoFile(null);
-      setIsFormDirty(false);
+
+      // Reset file-related states
+      setSelectedFile(null);
+      setLogoChanged(false);
+      setFileInputKey((prev) => prev + 1);
     }
   }, [isOpen, initialData, mode, form]);
 
-  // Track form changes
+  // Clean up object URL when component unmounts or new file is selected
   useEffect(() => {
-    const subscription = form.watch(() =>
-      setIsFormDirty(form.formState.isDirty)
-    );
-    return () => subscription.unsubscribe();
-  }, [form]);
+    return () => {
+      // Clean up any created object URLs when component unmounts
+      if (selectedFile && logoPreview && logoPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(logoPreview);
+      }
+    };
+  }, [selectedFile, logoPreview]);
 
-  // Handle close with confirmation if form is dirty
-  const handleCloseModal = () => {
-    if (isFormDirty) {
-      // Use native confirm for simplicity, could be replaced with a custom dialog
-      const confirmed = window.confirm(
-        "You have unsaved changes. Are you sure you want to close?"
-      );
-      if (!confirmed) return;
-    }
-    onClose();
-  };
-
-  // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle file selection without immediate upload
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     // Check file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
       toast.error("File size must be less than 2MB");
+      setFileInputKey((prev) => prev + 1);
       return;
     }
 
     // Check file type
     if (!file.type.startsWith("image/")) {
       toast.error("File must be an image");
+      setFileInputKey((prev) => prev + 1);
       return;
     }
 
-    setLogoFile(file);
-    setIsFormDirty(true);
+    // Clean up previous preview URL if it's a blob URL
+    if (selectedFile && logoPreview && logoPreview.startsWith("blob:")) {
+      URL.revokeObjectURL(logoPreview);
+    }
 
-    // For now, always use the fixed image
-    setLogoPreview(fixedImageUrl);
+    // Store the file in state
+    setSelectedFile(file);
+
+    // Create a local preview URL
+    const previewUrl = URL.createObjectURL(file);
+    setLogoPreview(previewUrl);
+
+    // Mark as changed
+    setLogoChanged(true);
+  };
+
+  // Upload the image and return the response
+  const uploadImage = async (file: File): Promise<any> => {
+    try {
+      // Convert file to base64
+      const base64Data = await convertFileToBase64(file);
+      const fileType = getFileExtension(file);
+
+      // Create upload data object
+      const uploadData: UploadImage = {
+        type: fileType,
+        base64: base64Data,
+      };
+
+      // Upload image using the service
+      const response = await uploadImageService(uploadData);
+
+      return response;
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
   };
 
   // Handle form submission
   const handleSubmit = async (data: DepartmentFormData) => {
-    setIsUploading(true);
-
     try {
-      // Always use the fixed image URL for now
-      const logoUrl = fixedImageUrl;
+      setIsUploading(true);
 
-      // Submit the form data with the logo URL
+      // If a new file was selected, upload it first
+      if (selectedFile && logoChanged) {
+        console.log("Uploading new image...");
+        try {
+          const response = await uploadImage(selectedFile);
+
+          // Update form data with new image info
+          data.imageId = response.id;
+          data.urlLogo = response.imageUrl;
+
+          // Clean up the object URL
+          if (logoPreview && logoPreview.startsWith("blob:")) {
+            URL.revokeObjectURL(logoPreview);
+            console.log("Cleaned up object URL");
+          }
+
+          // Update preview to use the actual URL
+          setLogoPreview(response.imageUrl);
+        } catch (error: any) {
+          console.error("Image upload failed:", error);
+          toast.error(error.message || "Failed to upload image");
+          setIsUploading(false);
+          return; // Stop form submission if image upload fails
+        }
+      } else if (logoChanged && !selectedFile) {
+        // If logo was removed
+        data.imageId = "";
+        data.urlLogo = "";
+      } else {
+        console.log("No logo changes");
+      }
+
+      // Prepare the submit data
       const submitData: DepartmentFormData = {
         ...data,
-        urlLogo: logoUrl,
         status: Constants.ACTIVE,
       };
 
@@ -190,6 +241,13 @@ export function DepartmentFormModal({
         submitData.id = initialData.id;
       }
 
+      console.log("Final submit data:", submitData);
+
+      // Reset flags
+      setLogoChanged(false);
+
+      // Submit the form
+      console.log("Calling onSubmit with data");
       onSubmit(submitData);
     } catch (error) {
       console.error("Error submitting department form:", error);
@@ -201,17 +259,41 @@ export function DepartmentFormModal({
 
   // Handle removing the logo
   const handleRemoveLogo = () => {
-    // For now, even when "removing", we'll still use the fixed image
-    setLogoFile(null);
-    setLogoPreview(fixedImageUrl);
-    form.setValue("urlLogo", fixedImageUrl, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    // Clean up object URL if it exists
+    if (selectedFile && logoPreview && logoPreview.startsWith("blob:")) {
+      URL.revokeObjectURL(logoPreview);
+    }
+
+    setLogoPreview(null);
+    setSelectedFile(null);
+    form.setValue("urlLogo", "", { shouldDirty: true });
+    form.setValue("imageId", "", { shouldDirty: true });
+    setLogoChanged(true);
+    setFileInputKey((prev) => prev + 1);
+  };
+
+  // Get placeholder or no-image URL for when no image is selected
+  const getPlaceholderImage = () => {
+    return baseAPI.NO_IMAGE; // Replace with your placeholder image path
+  };
+
+  // Determine the image source to display
+  const getImageSource = () => {
+    if (!logoPreview) {
+      return getPlaceholderImage();
+    }
+
+    // If it's a blob URL (local preview), use it directly
+    if (logoPreview.startsWith("blob:")) {
+      return logoPreview;
+    }
+
+    // Otherwise, it's an API URL, so add the base URL
+    return baseAPI.BASE_IMAGE + logoPreview;
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleCloseModal}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -280,25 +362,27 @@ export function DepartmentFormModal({
                 <div className="flex flex-col items-center justify-center space-y-2">
                   <div className="relative w-24 h-24">
                     <img
-                      src={logoPreview || fixedImageUrl}
-                      alt="Department logo"
-                      className="w-full h-full object-cover rounded-full"
+                      src={getImageSource()}
+                      alt={logoPreview ? "Department logo" : "No logo"}
+                      className="w-full h-full object-cover rounded-full bg-gray-100"
                     />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                      onClick={handleRemoveLogo}
-                      disabled={isSubmitting || isUploading}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                    {logoPreview && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                        onClick={handleRemoveLogo}
+                        disabled={isSubmitting || isUploading}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-center">
                     <label
-                      htmlFor="logo-upload"
+                      htmlFor={`logo-upload-${fileInputKey}`}
                       className={`cursor-pointer px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 flex items-center ${
                         isSubmitting || isUploading
                           ? "opacity-50 cursor-not-allowed"
@@ -306,9 +390,11 @@ export function DepartmentFormModal({
                       }`}
                     >
                       <Upload className="mr-2 h-4 w-4" />
-                      Upload Logo
+                      {logoChanged && !logoPreview ? "Add" : "Change"} Logo
                       <input
-                        id="logo-upload"
+                        id={`logo-upload-${fileInputKey}`}
+                        key={fileInputKey}
+                        ref={fileInputRef}
                         type="file"
                         accept="image/*"
                         className="sr-only"
@@ -329,7 +415,7 @@ export function DepartmentFormModal({
               <Button
                 type="button"
                 variant="outline"
-                onClick={handleCloseModal}
+                onClick={onClose}
                 disabled={isUploading || isSubmitting}
               >
                 Cancel
@@ -339,7 +425,7 @@ export function DepartmentFormModal({
                 disabled={
                   isUploading ||
                   isSubmitting ||
-                  !form.formState.isDirty ||
+                  (!form.formState.isDirty && !logoChanged) ||
                   !form.formState.isValid
                 }
                 className="bg-green-900 text-white hover:bg-green-950"
