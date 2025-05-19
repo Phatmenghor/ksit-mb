@@ -65,7 +65,7 @@ export default function AdminsList() {
       key: "fullname(kh)",
       header: "Fullname (KH)",
       render: (admin: StaffModel) =>
-        `${admin.khmerFirstName} ${admin.khmerLastName}`,
+        `${admin?.khmerFirstName || ""} ${admin?.khmerLastName || ""}`,
     },
     {
       key: "fullname(en)",

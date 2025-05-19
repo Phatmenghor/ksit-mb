@@ -45,6 +45,12 @@ export const ROUTE = {
     ROOT: "/schedule",
   },
 
+  ATTENDANCE: {
+    CLASS_SCHEDULE: "/attendance/schedule",
+    ATTENDANCE_CHECK: "/attendance/schedule/check",
+    HISTORY_RECORD: "/attendance/history-records",
+  },
+
   COURSES: {
     INDEX: "/courses",
     ADD: "/courses/add",
@@ -108,6 +114,15 @@ export const sidebarRoutes = [
     title: "Manage schedule",
     href: ROUTE.SCHEDULE.MANAGE,
     icon: Calendar,
+  },
+  {
+    title: "Attendance",
+    icon: Users,
+    section: "attendance",
+    subroutes: [
+      { title: "Class Schedule", href: ROUTE.ATTENDANCE.CLASS_SCHEDULE },
+      { title: "History Records", href: ROUTE.ATTENDANCE.HISTORY_RECORD },
+    ],
   },
   {
     title: "Student score",

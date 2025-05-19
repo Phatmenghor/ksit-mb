@@ -115,8 +115,46 @@ export const educationLevels = [
   { label: "ទុតិយភូមិ", value: "UPPER_SECONDARY_SCHOOL" },
 ];
 
-export enum Mode {
-  VIEW = "VIEW",
-  EDIT = "EDIT",
-  ADD = "ADD",
+export interface DayType {
+  displayName: string;
+  name: string;
+  id: number;
 }
+
+export const DAYS_OF_WEEK = [
+  {
+    displayName: "Monday",
+    name: "MONDAY",
+    id: 1,
+  },
+  {
+    displayName: "Tuesday",
+    name: "TUESDAY",
+    id: 2,
+  },
+  {
+    displayName: "Wednesday",
+    name: "WEDNESDAY",
+    id: 3,
+  },
+  {
+    displayName: "Thursday",
+    name: "THURSDAY",
+    id: 4,
+  },
+  {
+    displayName: "Friday",
+    name: "FRIDAY",
+    id: 5,
+  },
+  {
+    displayName: "Saturday",
+    name: "SATURDAY",
+    id: 6,
+  },
+  {
+    displayName: "Sunday",
+    name: "SUNDAY",
+    id: 0,
+  },
+];

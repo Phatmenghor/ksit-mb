@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Plus, Pencil, Trash2, Search, Loader2 } from "lucide-react";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -39,7 +39,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { AllDepartmentFilterModel } from "@/model/master-data/department/type-department-model";
+import {
+  AllDepartmentFilterModel,
+  CreateDepartmentModel,
+} from "@/model/master-data/department/type-department-model";
 import {
   getAllDepartmentService,
   createDepartmentService,
@@ -51,6 +54,7 @@ import { DateTimeFormatter } from "@/utils/date/date-time-format";
 import { Constants } from "@/constants/text-string";
 import Loading from "@/components/shared/loading";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
+import { baseAPI } from "@/constants/api";
 
 export default function ManageDepartmentPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -120,19 +124,14 @@ export default function ManageDepartmentPage() {
     setSearchQuery(e.target.value);
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    loadDepartments({});
-  };
-
   async function handleSubmit(formData: DepartmentFormData) {
     setIsSubmitting(true);
 
     try {
-      const departmentData = {
+      const departmentData: CreateDepartmentModel = {
         code: formData.code.trim(),
         name: formData.name.trim(),
-        urlLogo: formData.urlLogo || "",
+        urlLogo: formData.urlLogo ? formData.urlLogo.trim() : undefined,
         status: formData.status,
       };
 
@@ -300,22 +299,28 @@ export default function ManageDepartmentPage() {
               ) : (
                 allDepartmentData?.content.map((dept, index) => {
                   const indexDisplay =
-                    ((allDepartmentData.pageNo || 1) - 1) * 10 + index + 1;
+                    ((allDepartmentData.pageNo || 1) - 1) *
+                      (allDepartmentData.pageSize || 10) +
+                    index +
+                    1;
                   return (
                     <TableRow key={dept.id || index}>
                       <TableCell>{indexDisplay}</TableCell>
-                      <TableCell>
-                        <span className="rounded bg-blue-100 px-2 py-1 text-blue-800">
-                          {dept.code}
-                        </span>
-                      </TableCell>
+                      <TableCell>{dept.code}</TableCell>
                       <TableCell>{dept.name}</TableCell>
                       <TableCell>
-                        <Avatar className="h-8 w-8">
+                        <Avatar className="h-12 w-12">
                           <AvatarImage
-                            src={dept.urlLogo || "/placeholder.svg"}
+                            src={
+                              dept.urlLogo
+                                ? `${baseAPI.BASE_IMAGE}${dept.urlLogo}`
+                                : baseAPI.NO_IMAGE
+                            }
                             alt={dept.name}
                           />
+                          <AvatarFallback>
+                            {dept.name?.charAt(0)}
+                          </AvatarFallback>
                         </Avatar>
                       </TableCell>
                       <TableCell>{DateTimeFormatter(dept.createdAt)}</TableCell>

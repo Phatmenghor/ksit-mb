@@ -57,9 +57,6 @@ export default function TeachersList() {
     {
       key: "teacher#",
       header: "#",
-      render: (teacher, index: number) => {
-        ((teacher.pageNo || 1) - 1) * (teacher.pageSize || 10) + index + 1;
-      },
     },
 
     {
@@ -150,6 +147,7 @@ export default function TeachersList() {
         isLoading={isLoading}
         data={allTeachersData?.content ?? []}
       />
+
       {!isLoading && allTeachersData && (
         <div className="mt-4 flex justify-end">
           <PaginationPage

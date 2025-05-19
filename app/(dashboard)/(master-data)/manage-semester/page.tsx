@@ -69,6 +69,7 @@ export default function ManageSemester() {
   );
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
   const loadSemester = useCallback(
     async (param: AllSemesterFilterModel) => {
       setIsLoading(true);

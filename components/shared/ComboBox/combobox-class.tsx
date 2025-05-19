@@ -3,8 +3,8 @@ import { ComboboxSelect } from "../custom-comboBox";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
 import { getAllClassService } from "@/service/user/student.service";
 import { StatusEnum } from "@/constants/constant";
-import { GetAllClassModel } from "@/model/class/class-model";
 import { title } from "process";
+import { AllClassFilterModel } from "@/model/master-data/class/type-class-model";
 
 export default function ComboBoxClass({
   selectedClass,
@@ -15,10 +15,10 @@ export default function ComboBoxClass({
   selectedClass: ClassModel | null;
   disabled: boolean;
   onChange: (dept: ClassModel | null) => void;
-  title: string;
+  title?: string;
 }) {
   const fetchClasses = async (search: string, pageNo: number) => {
-    const payload: GetAllClassModel = {
+    const payload: AllClassFilterModel = {
       search: search,
       pageSize: 10,
       pageNo: 1,
