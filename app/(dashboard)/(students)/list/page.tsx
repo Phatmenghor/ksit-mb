@@ -2,24 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Pencil, Plus, RotateCcw, Search, Trash2 } from "lucide-react";
-import Link from "next/link";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import PaginationPage from "@/components/shared/pagination";
 import {
   AllStudentModel,
   RequestAllStudent,
   StudentModel,
-} from "@/model/student/student.model";
+} from "@/model/user/student/student.model";
 import { toast } from "sonner";
-import { getAllStudentsService } from "@/service/student/student.service";
+import { getAllStudentsService } from "@/service/user/student.service";
 import { StatusEnum } from "@/constants/constant";
 import { Column, CustomTable } from "@/components/shared/layout/TableSection";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
@@ -91,20 +82,21 @@ export default function StudentsListPage() {
       render: (_: any, index: number) => index + 1,
     },
     {
-      key: "id",
-      header: "student ID",
-    },
-    {
       key: "fullname (kh)",
       header: "Fullname (KH)",
       render: (student: StudentModel) =>
-        `${student.khmerFirstName} ${student.khmerLastName}`,
+        `${student.khmerFirstName ?? ""} ${student.khmerLastName ?? ""}`,
     },
     {
       key: "fullname (en)",
       header: "Fullname (EN)",
       render: (student: StudentModel) =>
-        `${student.englishFirstName} ${student.englishLastName}`,
+        `${student.englishFirstName ?? ""} ${student.englishLastName ?? ""}`,
+    },
+    {
+      key: "id",
+      header: "student ID",
+      render: (student: StudentModel) => `${student.id ?? ""}`,
     },
     {
       key: "gender",

@@ -22,7 +22,7 @@ import { useInView } from "react-intersection-observer";
 import { StatusEnum } from "@/constants/constant";
 import { getAllDepartmentService } from "@/service/master-data/department.service";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
-import { StaffModel } from "@/model/user/stuff.model";
+import { StaffModel } from "@/model/user/staff/stuff.model";
 import { getAllStuffService } from "@/service/user/user.service";
 
 interface ComboboxSelectedProps {

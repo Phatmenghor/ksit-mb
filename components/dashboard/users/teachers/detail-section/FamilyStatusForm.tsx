@@ -5,7 +5,7 @@ import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import { Input } from "@/components/ui/input";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import { GenderEnum, Mode } from "@/constants/constant";
-import { ZodStaffModelType } from "@/model/user/schema";
+import { ZodStaffModelType } from "@/model/user/staff/schema";
 
 export default function FamilyStatusForm({ mode }: { mode: Mode }) {
   const {

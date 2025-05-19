@@ -1,6 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { ZodStaffModelBase, ZodStaffModelType } from "@/model/user/schema";
+import {
+  ZodStaffModelBase,
+  ZodStaffModelType,
+} from "@/model/user/staff/schema";
 import {
   getStuffByIdService,
   updateStaffService,

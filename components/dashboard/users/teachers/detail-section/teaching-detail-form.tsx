@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Mode } from "@/constants/constant";
-import { ZodStaffModelType } from "@/model/user/schema";
+import { ZodStaffModelType } from "@/model/user/staff/schema";
 import { Controller, useFormContext } from "react-hook-form";
 
 export default function TeachingDetailForm({ mode }: { mode: Mode }) {

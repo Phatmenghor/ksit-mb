@@ -9,18 +9,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Mode } from "@/constants/constant";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
-import { AddSingleStudentRequestType } from "@/model/student/add.student.zod";
-import { useState } from "react";
-import { useFormContext, Controller } from "react-hook-form";
+import { StudentFormData } from "@/model/user/student/add.student.zod";
 
-export function StudentBasicForm() {
+import { useState } from "react";
+import { Controller, useForm, useFormContext } from "react-hook-form";
+
+export function StudentBasicForm({ mode }: { mode: Mode }) {
   const [selectClass, setSelectedClass] = useState<ClassModel | null>(null);
   const {
     setValue,
-    formState: { isSubmitting },
     control,
-  } = useFormContext<AddSingleStudentRequestType>();
+    formState: { isSubmitting },
+  } = useFormContext<StudentFormData>();
 
   const handleClassChange = (selectedClass: ClassModel | null) => {
     setSelectedClass(selectedClass);

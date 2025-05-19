@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,32 +9,109 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AddSingleStudentRequestType } from "@/model/student/add.student.zod";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
+import { GenderEnum } from "@/constants/constant";
+import { StudentFormData } from "@/model/user/student/add.student.zod";
 
 export default function StudentFamilyBackgroundSection() {
   const {
     control,
     formState: { isSubmitting },
-  } = useFormContext<AddSingleStudentRequestType>();
+    setValue,
+    watch,
+  } = useFormContext<StudentFormData>();
+
+  const [totalSiblings, setTotalSiblings] = useState(0);
+  const [femaleSiblings, setFemaleSiblings] = useState(0);
 
   const {
     fields: siblingFields,
     append: appendSibling,
     remove: removeSibling,
+    replace: replaceSiblings,
   } = useFieldArray({
     control,
     name: "studentSiblings",
   });
 
+  // Handle changes to total siblings and female siblings
+  const handleTotalSiblingsChange = (e) => {
+    const value = parseInt(e.target.value) || 0;
+    setTotalSiblings(value);
+  };
+
+  const handleFemaleSiblingsChange = (e) => {
+    const value = parseInt(e.target.value) || 0;
+    setFemaleSiblings(Math.min(value, totalSiblings));
+  };
+
+  // Generate siblings based on totals
+  useEffect(() => {
+    if (totalSiblings >= 0) {
+      const maleSiblings =
+        totalSiblings - Math.min(femaleSiblings, totalSiblings);
+      const newSiblings = [];
+
+      // Create female siblings
+      for (let i = 0; i < femaleSiblings; i++) {
+        newSiblings.push({
+          name: "",
+          gender: "FEMALE",
+          dateOfBirth: "",
+          occupation: "",
+          phoneNumber: "",
+        });
+      }
+
+      // Create male siblings
+      for (let i = 0; i < maleSiblings; i++) {
+        newSiblings.push({
+          name: "",
+          gender: "MALE",
+          dateOfBirth: "",
+          occupation: "",
+          phoneNumber: "",
+        });
+      }
+
+      // Replace all existing siblings with new array
+      replaceSiblings(newSiblings);
+      setValue("numberOfSiblings", String(totalSiblings));
+    }
+  }, [totalSiblings, femaleSiblings, replaceSiblings]);
+
   const handleAddSibling = () => {
     appendSibling({
       name: "",
-      gender: "",
+      gender: "MALE",
       dateOfBirth: "",
       occupation: "",
       phoneNumber: "",
     });
+    setTotalSiblings((prev) => prev + 1);
+  };
+
+  const handleRemoveSibling = () => {
+    if (siblingFields.length > 0) {
+      // Get the index of the last sibling
+      const lastIndex = siblingFields.length - 1;
+
+      // Get the full data of the last sibling (including gender)
+      // We need to use watch to get the actual form values, not just the field metadata
+      const siblingValues = watch("studentSiblings");
+      const lastSibling = siblingValues[lastIndex];
+
+      // Remove the sibling
+      removeSibling(lastIndex);
+
+      // Update counts
+      setTotalSiblings((prev) => prev - 1);
+
+      // Check if the removed sibling was female and update the female count
+      if (lastSibling && lastSibling.gender === GenderEnum.FEMALE) {
+        setFemaleSiblings((prev) => prev - 1);
+      }
+    }
   };
 
   return (
@@ -43,11 +121,24 @@ export default function StudentFamilyBackgroundSection() {
         <div className="mb-2 flex gap-4 items-center">
           <div>
             <h1>ចំនួនសមាជិកបងប្អូន</h1>
-            <Input type="number" className="w-3/5" min="0" />
+            <Input
+              type="number"
+              className="w-3/5"
+              min="0"
+              value={totalSiblings}
+              onChange={handleTotalSiblingsChange}
+            />
           </div>
           <div>
             <h1>ចំនួនបងប្អូនស្រី</h1>
-            <Input type="number" className="w-3/5" min="0" />
+            <Input
+              type="number"
+              className="w-3/5"
+              min="0"
+              max={totalSiblings}
+              value={femaleSiblings}
+              onChange={handleFemaleSiblingsChange}
+            />
           </div>
         </div>
 
@@ -138,10 +229,7 @@ export default function StudentFamilyBackgroundSection() {
             Add Sibling
           </Button>
           <Button
-            onClick={() => {
-              if (siblingFields.length > 0)
-                removeSibling(siblingFields.length - 1);
-            }}
+            onClick={handleRemoveSibling}
             disabled={isSubmitting || siblingFields.length === 0}
             className="bg-black text-white hover:bg-gray-800"
           >

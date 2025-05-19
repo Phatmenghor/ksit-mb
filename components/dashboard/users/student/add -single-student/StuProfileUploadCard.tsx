@@ -5,12 +5,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { User } from "lucide-react";
 import { useFormContext } from "react-hook-form";
+import { uploadProfileService } from "@/service/user/image.service";
 import { uploadProfileRequest } from "@/model/user/staff/Add.staff.model";
 import { Mode } from "@/constants/constant";
 import { Input } from "@/components/ui/input";
-import { uploadProfileService } from "@/service/user/image.service";
 
-export default function ProfileUploadCard({ mode }: { mode: Mode }) {
+export default function StudentProfileUploadCard({ mode }: { mode: Mode }) {
   const { setValue, watch } = useFormContext();
   const profileUrl = watch("profileUrl");
 

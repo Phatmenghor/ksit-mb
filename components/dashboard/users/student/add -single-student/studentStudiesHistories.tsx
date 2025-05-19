@@ -11,13 +11,12 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { AddSingleStudentRequestType } from "@/model/student/add.student.zod";
 import { useEffect } from "react";
 import { educationLevels } from "@/constants/constant";
+import { StudentFormData } from "@/model/user/student/add.student.zod";
 
 export const StudentStudiesHistorySection = () => {
-  const { register, setValue, watch } =
-    useFormContext<AddSingleStudentRequestType>();
+  const { register, setValue, watch } = useFormContext<StudentFormData>();
 
   useEffect(() => {
     educationLevels.forEach((level, index) => {

@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
-import { ZodStaffModelType, ZodStaffModelBase } from "@/model/user/schema";
+import {
+  ZodStaffModelType,
+  ZodStaffModelBase,
+} from "@/model/user/staff/schema";
 import { addStaffService } from "@/service/user/user.service";
 import { removeEmptyStringsAndNulls } from "@/utils/api-related/RemoveString";
 import { Mode, RoleEnum, StatusEnum } from "@/constants/constant";
@@ -8,6 +11,7 @@ import { toast } from "sonner";
 import TeacherForm from "@/components/dashboard/users/teachers/form/TeacherForm";
 import { useRouter } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
+import { AddSingleStudentRequestSchema } from "@/model/user/student/add.student.zod";
 
 export default function AddTeacherPage() {
   const [loading, setLoading] = useState(false);
@@ -17,7 +21,7 @@ export default function AddTeacherPage() {
     setLoading(true);
     try {
       const cleanData = removeEmptyStringsAndNulls(
-        ZodStaffModelBase.parse(data)
+        AddSingleStudentRequestSchema.safeParse(data)
       );
       const payload = {
         ...cleanData,

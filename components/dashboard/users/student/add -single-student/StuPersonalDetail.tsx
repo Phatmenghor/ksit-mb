@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { GenderEnum } from "@/constants/constant";
-import { AddSingleStudentRequest } from "@/model/student/add.student.model";
+import { StudentFormData } from "@/model/user/student/add.student.zod";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
@@ -18,7 +18,8 @@ export default function StudentPersonalDetailSection() {
   const {
     control,
     formState: { isSubmitting },
-  } = useFormContext<AddSingleStudentRequest>();
+  } = useFormContext<StudentFormData>();
+
   return (
     <CollapsibleCard title="ប្រវត្តិផ្ទាល់">
       {/* Personal information section */}
@@ -34,8 +35,8 @@ export default function StudentPersonalDetailSection() {
 
           <div className="flex gap-2" id="khmer-full-name">
             <Controller
-              name="englishFirstName"
               control={control}
+              name="khmerFirstName"
               render={({ field }) => (
                 <Input
                   id="khmerFirstName"
@@ -47,8 +48,8 @@ export default function StudentPersonalDetailSection() {
               )}
             />
             <Controller
-              name="khmerLastName"
               control={control}
+              name="khmerLastName"
               render={({ field }) => (
                 <Input
                   {...field}
@@ -71,8 +72,8 @@ export default function StudentPersonalDetailSection() {
               ជនជាតិ
             </label>
             <Controller
-              name="nationality"
               control={control}
+              name="nationality"
               render={({ field }) => (
                 <Input
                   id="nationality"
@@ -92,8 +93,8 @@ export default function StudentPersonalDetailSection() {
               សញ្ជាតិ
             </label>
             <Controller
-              name="ethnicity"
               control={control}
+              name="ethnicity"
               render={({ field }) => (
                 <Input
                   id="ethnicity"
@@ -118,8 +119,8 @@ export default function StudentPersonalDetailSection() {
           </label>
           <div className="flex gap-2">
             <Controller
-              name="englishFirstName"
               control={control}
+              name="englishFirstName"
               render={({ field }) => (
                 <Input
                   id="latin-first-name"
@@ -130,8 +131,8 @@ export default function StudentPersonalDetailSection() {
               )}
             />
             <Controller
-              name="englishLastName"
               control={control}
+              name="englishLastName"
               render={({ field }) => (
                 <Input
                   id="latin-last-name"
@@ -166,16 +167,16 @@ export default function StudentPersonalDetailSection() {
 
         <div className="grid grid-cols-2 gap-2 items-start">
           {/* ភេទ */}
-          <div className="flex flex-col">
+          <div>
             <label htmlFor="gender" className="mb-1 block text-sm font-bold">
               ភេទ
             </label>
             <Controller
-              name="gender"
               control={control}
+              name=""
               render={({ field }) => (
                 <Select
-                  onOpenChange={field.onChange}
+                  onValueChange={field.onChange}
                   disabled={isSubmitting}
                   value={field.value}
                 >

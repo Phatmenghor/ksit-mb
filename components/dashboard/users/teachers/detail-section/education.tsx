@@ -5,7 +5,7 @@ import TeachingDetailForm from "./teaching-detail-form";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { ZodStaffModelType } from "@/model/user/schema";
+import { ZodStaffModelType } from "@/model/user/staff/schema";
 import { Mode } from "@/constants/constant";
 
 export default function EducationForm({ mode }: { mode: Mode }) {

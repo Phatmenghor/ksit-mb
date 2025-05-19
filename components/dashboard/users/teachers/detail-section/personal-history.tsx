@@ -11,7 +11,7 @@ import React from "react";
 import CollapsibleCard from "./customFormSection";
 import { Controller, useFormContext } from "react-hook-form";
 import { GenderEnum, Mode } from "@/constants/constant";
-import { ZodStaffModelType } from "@/model/user/schema";
+import { ZodStaffModelType } from "@/model/user/staff/schema";
 
 export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
   const {

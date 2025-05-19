@@ -178,7 +178,7 @@ type NullableStringFields<T extends ZodObjectWithShape> = {
     : T["shape"][K];
 };
 
-const makeNullableStringFields = (
+export const makeNullableStringFields = (
   schema: ZodObjectWithShape
 ): z.ZodObject<NullableStringFields<typeof schema>> => {
   const shape = schema.shape;

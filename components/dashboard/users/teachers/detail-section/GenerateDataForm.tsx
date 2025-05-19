@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Mode } from "@/constants/constant";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
-import { ZodStaffModelType } from "@/model/user/schema";
+import { ZodStaffModelType } from "@/model/user/staff/schema";
 import { useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 
@@ -59,7 +59,7 @@ export function BasicInformationForm({ mode }: { mode: Mode }) {
                       id="user-name"
                       {...field}
                       placeholder="Username..."
-                      disabled={isReadOnly || isSubmitting || isDirty}
+                      disabled={isReadOnly || isSubmitting}
                       className="bg-gray-100"
                     />
                     {errors.username && (
@@ -88,7 +88,7 @@ export function BasicInformationForm({ mode }: { mode: Mode }) {
                       id="password"
                       {...field}
                       type="password"
-                      disabled={isReadOnly || isSubmitting || isDirty}
+                      disabled={isReadOnly || isSubmitting}
                       className="bg-gray-100"
                       placeholder="Password..."
                     />
@@ -117,7 +117,7 @@ export function BasicInformationForm({ mode }: { mode: Mode }) {
                     <Input
                       id="identify-number"
                       {...field}
-                      disabled={isReadOnly || isSubmitting || isDirty}
+                      disabled={isReadOnly || isSubmitting}
                       placeholder="-"
                       className="bg-gray-100"
                     />
@@ -145,7 +145,7 @@ export function BasicInformationForm({ mode }: { mode: Mode }) {
                         <ComboboxSelectDepartment
                           dataSelect={selectedDepartment}
                           onChangeSelected={handleDepartmentChange}
-                          disabled={isSubmitting || isDirty || isReadOnly}
+                          disabled={isSubmitting || isReadOnly}
                         />
                       </FormControl>
                       <FormMessage />

@@ -2,19 +2,24 @@
 import { FormProvider, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Ban, Loader2, Save, X } from "lucide-react";
-import FormDetail from "./FormDetail";
+import { Ban, Loader2, Save } from "lucide-react";
 import { ZodStaffModelType } from "@/model/user/staff/schema";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 import { useEffect } from "react";
-import { BasicInformationForm } from "../detail-section/GenerateDataForm";
-import ProfileUploadCard from "./profileUploadCard";
 import { Mode, StatusEnum } from "@/constants/constant";
+import { StudentBasicForm } from "../add -single-student/StuBasicForm";
+import StudentProfileUploadCard from "../add -single-student/StuProfileUploadCard";
+import StudentFormDetail from "./StudentFormDetail";
+import { StudentModel } from "@/model/user/student/student.model";
+import {
+  initStudentFormData,
+  StudentFormData,
+} from "@/model/user/student/add.student.zod";
 
 type Props = {
-  initialValues?: ZodStaffModelType;
-  onSubmit: (data: ZodStaffModelType) => Promise<void>;
+  initialValues?: StudentFormData;
+  onSubmit: (data: StudentFormData) => Promise<void>;
   loading: boolean;
   title: string;
   mode: Mode;
@@ -22,7 +27,7 @@ type Props = {
   onDiscard?: () => void;
 };
 
-export default function TeacherForm({
+export default function StudentForm({
   initialValues,
   onSubmit,
   loading,
@@ -31,14 +36,15 @@ export default function TeacherForm({
   onDiscard,
   back,
 }: Props) {
-  const methods = useForm<ZodStaffModelType>({
-    defaultValues: initialValues || {},
+  const methods = useForm<StudentFormData>({
+    defaultValues: initialValues ?? initStudentFormData,
   });
 
   const {
     setValue,
     formState: { isSubmitting },
   } = methods;
+
   useEffect(() => {
     if (initialValues) {
       methods.reset(initialValues);
@@ -61,15 +67,15 @@ export default function TeacherForm({
             <div className="space-y-4">
               <CardHeaderSection
                 title={title}
-                backHref={ROUTE.USERS.TEACHERS}
+                backHref={ROUTE.STUDENTS.LIST}
                 breadcrumbs={[
-                  { label: "Home", href: ROUTE.DASHBOARD },
-                  { label: "View teacher", href: back },
+                  { label: "Dashboard", href: ROUTE.DASHBOARD },
+                  { label: "Add Student", href: ROUTE.STUDENTS.ADD_SINGLE },
                 ]}
               />
-              <BasicInformationForm mode={mode} />
-              <ProfileUploadCard mode={mode} />
-              <FormDetail mode={mode} />
+              <StudentBasicForm mode={mode} />
+              <StudentProfileUploadCard mode={mode} />
+              <StudentFormDetail />
             </div>
           ) : (
             // EDIT / ADD MODE: form with submit
@@ -79,17 +85,17 @@ export default function TeacherForm({
               noValidate
             >
               <CardHeaderSection
-                title={title}
-                backHref={ROUTE.USERS.TEACHERS}
+                title="Add New Student"
+                backHref={ROUTE.STUDENTS.LIST}
                 breadcrumbs={[
-                  { label: "Home", href: ROUTE.DASHBOARD },
-                  { label: "Add new", href: back },
+                  { label: "Dashboard", href: ROUTE.DASHBOARD },
+                  { label: "Add Student", href: ROUTE.STUDENTS.ADD_SINGLE },
                 ]}
               />
-              {mode === Mode.ADD && <BasicInformationForm mode={mode} />}
-              <ProfileUploadCard mode={mode} />
+              {mode === Mode.ADD && <StudentBasicForm mode={mode} />}
+              <StudentProfileUploadCard mode={mode} />
               <div className="w-full mx-auto space-y-5">
-                <FormDetail mode={mode} />
+                <StudentFormDetail />
                 <Card>
                   <CardContent>
                     <div className="flex justify-between items-center pt-5 gap-3">

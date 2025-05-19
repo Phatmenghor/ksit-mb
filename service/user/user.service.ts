@@ -1,10 +1,13 @@
 import { PaginationResponse } from "./../../model/index-model";
 import { ApiResponse } from "@/model/index-model";
-import { GetStaffByIdResponseModel } from "@/model/user/getById.staff.model";
-import { StaffModel } from "@/model/user/stuff.model";
-import { AddStaffModel, RequestAllStuff } from "@/model/user/Add.staff.model";
-import { UpdateStaffRequest } from "@/model/user/update.Request.staff";
-import { UpdateStaffResponse } from "@/model/user/update.Response.staff.model";
+import { GetStaffByIdResponseModel } from "@/model/user/staff/getById.staff.model";
+import { StaffModel } from "@/model/user/staff/stuff.model";
+import {
+  AddStaffModel,
+  RequestAllStuff,
+} from "@/model/user/staff/Add.staff.model";
+import { UpdateStaffRequest } from "@/model/user/staff/update.Request.staff";
+import { UpdateStaffResponse } from "@/model/user/staff/update.Response.staff.model";
 import { axiosClientWithAuth } from "@/utils/axios";
 
 const endpoint = "/v1/staff";

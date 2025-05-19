@@ -5,12 +5,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { StatusEnum } from "@/constants/constant";
-import { GenerateMultipleStudent } from "@/model/student/student.model";
+import { GenerateMultipleStudent } from "@/model/user/student/student.model";
 import {
   generateMultipleStudentSchema,
   GenerateMultipleStudentSchema,
-} from "@/model/student/student.zod.validate";
-import { generateMultipleStudentService } from "@/service/student/student.service";
+} from "@/model/user/student/student.zod.validate";
+import { generateMultipleStudentService } from "@/service/user/student.service";
 import { exportStudentsToExcel } from "@/utils/excel/Excel-Generate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Plus } from "lucide-react";

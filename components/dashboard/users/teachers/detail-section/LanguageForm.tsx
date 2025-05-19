@@ -2,7 +2,7 @@
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import { Mode } from "@/constants/constant";
-import { ZodStaffModelType } from "@/model/user/schema";
+import { ZodStaffModelType } from "@/model/user/staff/schema";
 import React from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 

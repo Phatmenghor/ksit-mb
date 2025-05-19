@@ -1,7 +1,7 @@
 import React from "react";
 import { ComboboxSelect } from "../custom-comboBox";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
-import { getAllClassService } from "@/service/student/student.service";
+import { getAllClassService } from "@/service/user/student.service";
 import { StatusEnum } from "@/constants/constant";
 import { GetAllClassModel } from "@/model/class/class-model";
 import { title } from "process";

@@ -2,7 +2,7 @@
 import TeacherForm from "@/components/dashboard/users/teachers/form/TeacherForm";
 import { Mode } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
-import { ZodStaffModelType } from "@/model/user/schema";
+import { ZodStaffModelType } from "@/model/user/staff/schema";
 import { getStuffByIdService } from "@/service/user/user.service";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";

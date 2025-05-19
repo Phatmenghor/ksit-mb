@@ -6,9 +6,9 @@ import { useCallback, useEffect, useState } from "react";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { Column, CustomTable } from "@/components/shared/layout/TableSection";
 import { getAllStuffService } from "@/service/user/user.service";
-import { RequestAllStuff } from "@/model/user/Add.staff.model";
+import { RequestAllStuff } from "@/model/user/staff/Add.staff.model";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
-import { AllStaffModel, StaffModel } from "@/model/user/stuff.model";
+import { AllStaffModel, StaffModel } from "@/model/user/staff/stuff.model";
 import { toast } from "sonner";
 import PaginationPage from "@/components/shared/pagination-page";
 import { useRouter } from "next/navigation";
@@ -57,12 +57,11 @@ export default function TeachersList() {
     {
       key: "teacher#",
       header: "#",
-      render: (_: any, index: number) => index + 1,
+      render: (teacher, index: number) => {
+        ((teacher.pageNo || 1) - 1) * (teacher.pageSize || 10) + index + 1;
+      },
     },
-    {
-      key: "id",
-      header: "Teacher ID",
-    },
+
     {
       key: "fullname(kh)",
       header: "Fullname (KH)",
