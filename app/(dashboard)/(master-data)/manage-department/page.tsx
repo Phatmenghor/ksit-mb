@@ -39,7 +39,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { AllDepartmentFilterModel } from "@/model/master-data/department/type-department-model";
+import {
+  AllDepartmentFilterModel,
+  CreateDepartmentModel,
+} from "@/model/master-data/department/type-department-model";
 import {
   getAllDepartmentService,
   createDepartmentService,
@@ -125,10 +128,10 @@ export default function ManageDepartmentPage() {
     setIsSubmitting(true);
 
     try {
-      const departmentData = {
+      const departmentData: CreateDepartmentModel = {
         code: formData.code.trim(),
         name: formData.name.trim(),
-        urlLogo: formData.urlLogo || "",
+        urlLogo: formData.urlLogo ? formData.urlLogo.trim() : undefined,
         status: formData.status,
       };
 
@@ -296,7 +299,10 @@ export default function ManageDepartmentPage() {
               ) : (
                 allDepartmentData?.content.map((dept, index) => {
                   const indexDisplay =
-                    ((allDepartmentData.pageNo || 1) - 1) * 10 + index + 1;
+                    ((allDepartmentData.pageNo || 1) - 1) *
+                      (allDepartmentData.pageSize || 10) +
+                    index +
+                    1;
                   return (
                     <TableRow key={dept.id || index}>
                       <TableCell>{indexDisplay}</TableCell>

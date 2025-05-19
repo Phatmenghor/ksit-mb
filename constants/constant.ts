@@ -115,6 +115,12 @@ export const educationLevels = [
   { label: "ទុតិយភូមិ", value: "UPPER_SECONDARY_SCHOOL" },
 ];
 
+export interface DayType {
+  displayName: string;
+  name: string;
+  id: number;
+}
+
 export const DAYS_OF_WEEK = [
   {
     displayName: "Monday",

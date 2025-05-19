@@ -44,7 +44,8 @@ export const ROUTE = {
   },
 
   ATTENDANCE: {
-    CLASS_SCHEDULE: "/attendance/class-schedule",
+    CLASS_SCHEDULE: "/attendance/schedule",
+    ATTENDANCE_CHECK: "/attendance/schedule/check",
     HISTORY_RECORD: "/attendance/history-records",
   },
 

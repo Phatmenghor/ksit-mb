@@ -71,7 +71,7 @@ export default function TeachersList() {
       key: "fullname(en)",
       header: "Fullname (EN)",
       render: (teacher: StaffModel) =>
-        `${teacher?.englishFirstName} ${teacher?.englishLastName}`,
+        `${teacher?.englishFirstName || ""} ${teacher?.englishLastName || ""}`,
     },
     {
       key: "username",
@@ -132,6 +132,7 @@ export default function TeachersList() {
         isLoading={isLoading}
         data={allTeachersData?.content ?? []}
       />
+
       {!isLoading && allTeachersData && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
