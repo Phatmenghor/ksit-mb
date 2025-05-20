@@ -31,8 +31,8 @@ export const StudentStudiesHistorySection = () => {
       <CardContent className="pt-6 space-y-4">
         <h3 className="text-lg font-semibold">ប្រវត្តិសិក្សា</h3>
         <Card>
-          <CardContent className="p-4">
-            <div className="grid grid-cols-8 gap-2 font-medium mb-4 text-sm pb-2">
+          <CardContent className="p-3">
+            <div className="grid grid-cols-7 gap-2 font-semibold text-sm">
               <span>កម្រិតថ្នាក់</span>
               <span>ឈ្មោះសាលារៀន </span>
               <span>ខេត្ត/រាជធានី </span>
@@ -52,10 +52,10 @@ export const StudentStudiesHistorySection = () => {
               return (
                 <div
                   key={level.value}
-                  className="grid grid-cols-8 gap-4 space-y-4 items-center"
+                  className="grid grid-cols-7 gap-4 space-y-4 items-center"
                 >
                   {/* Static label */}
-                  <div className="text-sm font-medium">{level.label}</div>
+                  <div className="text-sm font-semibold">{level.label}</div>
 
                   {/* Inputs */}
                   <Input

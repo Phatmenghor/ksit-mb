@@ -1,6 +1,13 @@
 "use client";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -10,6 +17,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { GenderEnum } from "@/constants/constant";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
@@ -161,20 +171,28 @@ export default function StudentPersonalDetailSection() {
               name="gender"
               render={({ field }) => (
                 <Select
+                  value={field.value || ""}
                   onValueChange={field.onChange}
                   disabled={isSubmitting}
-                  value={field.value}
                 >
-                  <SelectTrigger className="bg-gray-100" />
-                  <SelectValue placeholder="សូមជ្រើសរើស" />
+                  <SelectTrigger id="gender" className="bg-gray-100">
+                    <SelectValue>
+                      {field.value === "MALE"
+                        ? "ប្រុស"
+                        : field.value === "FEMALE"
+                        ? "ស្រី"
+                        : "សូមជ្រើសរើស"}
+                    </SelectValue>
+                  </SelectTrigger>
                   <SelectContent className="bg-gray-100">
-                    <SelectItem value={GenderEnum.MALE}>ប្រុស</SelectItem>
-                    <SelectItem value={GenderEnum.FEMALE}>ស្រី</SelectItem>
+                    <SelectItem value="MALE">ប្រុស</SelectItem>
+                    <SelectItem value="FEMALE">ស្រី</SelectItem>
                   </SelectContent>
                 </Select>
               )}
             />
           </div>
+
           <div className="flex flex-col flex-1 gap-2">
             <label htmlFor="dob" className="text-sm font-bold">
               ថ្ងៃខែឆ្នាំកំណើត
@@ -182,16 +200,44 @@ export default function StudentPersonalDetailSection() {
             <Controller
               name="dateOfBirth"
               control={control}
-              render={({ field }) => (
-                <Input
-                  id="dob"
-                  {...field}
-                  disabled={isSubmitting}
-                  type="date"
-                  placeholder="mm/dd/yyyy"
-                  className="w-full bg-gray-100"
-                />
-              )}
+              render={({ field }) => {
+                const selectedDate = field.value
+                  ? new Date(field.value)
+                  : undefined;
+
+                return (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full bg-gray-100 justify-start text-left text-sm",
+                          !selectedDate && "text-muted-foreground"
+                        )}
+                        disabled={isSubmitting}
+                      >
+                        {selectedDate
+                          ? format(selectedDate, "yyyy-MM-dd")
+                          : "ជ្រើសរើស"}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date) => {
+                          field.onChange(
+                            date ? format(date, "yyyy-MM-dd") : ""
+                          );
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                );
+              }}
             />
           </div>
         </div>

@@ -5,6 +5,15 @@ import { Input } from "@/components/ui/input";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { GenderEnum } from "@/constants/constant";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 export default function StudentSibling() {
   const {
@@ -104,7 +113,7 @@ export default function StudentSibling() {
     <div className="space-y-4">
       <div className="flex gap-4 mt-4">
         <div className="flex flex-col">
-          <label className="text-sm mb-2 font-medium">ចំនួនបងប្អូន</label>
+          <label className="text-sm mb-2 font-semibold">ចំនួនបងប្អូន</label>
           <Input
             type="text"
             pattern="\d*"
@@ -125,7 +134,7 @@ export default function StudentSibling() {
         </div>
 
         <div className="flex flex-col">
-          <label className="text-sm mb-2 font-medium">ចំនួនបងប្អូនស្រី</label>
+          <label className="text-sm mb-2 font-semibold">ចំនួនបងប្អូនស្រី</label>
           <Input
             type="text"
             pattern="\d*"
@@ -143,9 +152,9 @@ export default function StudentSibling() {
           />
         </div>
       </div>
-      <Card className="overflow-x-auto p-3">
+      <Card className="overflow-x-auto p-1">
         <CardContent>
-          <div className="grid grid-cols-5 gap-4 font-semibold pb-2 mb-1">
+          <div className="grid grid-cols-5 mt-3 gap-4 font-semibold pb-2">
             <div>ឈ្មោះ</div>
             <div>ភេទ</div>
             <div>ថ្ងៃខែឆ្នាំកំណើត</div>
@@ -166,8 +175,8 @@ export default function StudentSibling() {
                   render={({ field }) => (
                     <input
                       {...field}
-                      className="border border-gray-300 rounded px-2 py-1 w-full"
-                      placeholder="Placeholder"
+                      className="border border-gray-300 bg-gray-100 rounded px-2 py-1 w-full"
+                      placeholder="ឈ្មោះ"
                     />
                   )}
                 />
@@ -179,7 +188,7 @@ export default function StudentSibling() {
                   render={({ field }) => (
                     <select
                       {...field}
-                      className="border border-gray-300 rounded px-2 py-1 w-full"
+                      className="border border-gray-300 bg-gray-100 rounded px-2 py-1 w-full"
                     >
                       <option value="">Select</option>
                       <option value="MALE">ប្រុស</option>
@@ -192,13 +201,44 @@ export default function StudentSibling() {
                 <Controller
                   control={control}
                   name={`studentSiblings.${index}.dateOfBirth`}
-                  render={({ field }) => (
-                    <input
-                      {...field}
-                      type="date"
-                      className="border border-gray-300 rounded px-2 py-1 w-full"
-                    />
-                  )}
+                  render={({ field }) => {
+                    const selectedDate = field.value
+                      ? new Date(field.value)
+                      : undefined;
+
+                    return (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full bg-gray-100 justify-start text-left text-sm",
+                              !selectedDate && "text-muted-foreground"
+                            )}
+                            disabled={isSubmitting}
+                          >
+                            {selectedDate
+                              ? format(selectedDate, "yyyy-MM-dd")
+                              : "ជ្រើសរើស"}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={(date) => {
+                              field.onChange(
+                                date ? format(date, "yyyy-MM-dd") : ""
+                              );
+                            }}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    );
+                  }}
                 />
 
                 {/* Occupation */}
@@ -208,8 +248,8 @@ export default function StudentSibling() {
                   render={({ field }) => (
                     <input
                       {...field}
-                      className="border border-gray-300 rounded px-2 py-1 w-full"
-                      placeholder="Placeholder"
+                      className="border border-gray-300 rounded bg-gray-100 px-2 py-1 w-full"
+                      placeholder="មុខរបរ"
                     />
                   )}
                 />
@@ -221,8 +261,8 @@ export default function StudentSibling() {
                   render={({ field }) => (
                     <input
                       {...field}
-                      className="border border-gray-300 rounded px-2 py-1 w-full"
-                      placeholder="Placeholder"
+                      className="border border-gray-300 bg-gray-100 rounded px-2 py-1 w-full"
+                      placeholder="លេខទូរស័ព្ទ"
                     />
                   )}
                 />

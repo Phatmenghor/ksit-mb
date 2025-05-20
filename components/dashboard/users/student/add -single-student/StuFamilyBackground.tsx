@@ -30,7 +30,7 @@ export default function StudentFamilyBackgroundSection() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Father Section */}
         <div className="rounded-md">
-          <div className="gap-4">
+          <div className="flex flex-col gap-4">
             {/* Father Name */}
             <div>
               <label
@@ -159,7 +159,7 @@ export default function StudentFamilyBackgroundSection() {
 
         {/* Mother Section */}
         <div className="rounded-md">
-          <div className="gap-4">
+          <div className="flex flex-col gap-4">
             {/* Mother Name */}
             <div>
               <label
