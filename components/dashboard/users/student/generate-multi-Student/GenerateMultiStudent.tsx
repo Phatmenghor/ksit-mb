@@ -6,10 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { StatusEnum } from "@/constants/constant";
 import { GenerateMultipleStudent } from "@/model/user/student/student.model";
-import {
-  generateMultipleStudentSchema,
-  GenerateMultipleStudentSchema,
-} from "@/model/user/student/student.zod.validate";
 import { generateMultipleStudentService } from "@/service/user/student.service";
 import { exportStudentsToExcel } from "@/utils/excel/Excel-Generate";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +13,25 @@ import { Loader2, Plus } from "lucide-react";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const generateMultipleStudentSchema = z.object({
+  classId: z.object({
+    id: z.number(),
+    code: z.string(),
+  }),
+  quantity: z
+    .string()
+    .regex(/^\d+$/, { message: "Quantity must be a positive number" })
+    .refine((val) => parseInt(val, 10) >= 1, {
+      message: "Quantity must be at least 1",
+    }),
+  status: z.string().min(1, "Status is required"),
+});
+
+export type GenerateMultipleStudentSchema = z.infer<
+  typeof generateMultipleStudentSchema
+>;
 
 export default function GenerateMultiStudentForm() {
   const [isLoading, setIsLoading] = useState(false);

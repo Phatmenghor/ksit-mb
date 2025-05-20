@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import TeacherForm from "@/components/dashboard/users/teachers/form/TeacherForm";
 import { useRouter } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
-import { AddSingleStudentRequestSchema } from "@/model/user/student/add.student.zod";
+import { AddSingleStudentRequestSchema } from "@/model/user/student/add-edit.student.zod";
 
 export default function AddTeacherPage() {
   const [loading, setLoading] = useState(false);

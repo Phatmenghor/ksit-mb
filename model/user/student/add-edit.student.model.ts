@@ -1,4 +1,4 @@
-export interface AddSingleStudentRequest {
+export interface AddSingleStudentBase {
   password: string;
   username: string;
   email: string;
@@ -57,3 +57,18 @@ export interface uploadProfileRequest {
   type: string;
   base64: string;
 }
+
+type RequiredStudentFields = Pick<
+  AddSingleStudentBase,
+  "username" | "password" | "classId"
+>;
+
+type OptionalStudentFields = Partial<
+  Omit<AddSingleStudentBase, "username" | "password" | "classId">
+>;
+
+export type AddStudentData = RequiredStudentFields & OptionalStudentFields;
+
+export type EditStudentData = {
+  id: number;
+} & Partial<Omit<AddStudentData, "password">>;

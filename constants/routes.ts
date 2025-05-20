@@ -37,7 +37,7 @@ export const ROUTE = {
     ADD_MULTIPLE: "/add-multiple",
     ADD_SINGLE: "/add-single",
     LIST: "/list",
-    DROPOUT: "/dropout",
+    EDIT_STUDENT: (id: string) => `/edit/${id}`,
   },
 
   SCHEDULE: {

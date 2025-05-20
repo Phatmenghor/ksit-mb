@@ -13,10 +13,9 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import { educationLevels } from "@/constants/constant";
-import { StudentFormData } from "@/model/user/student/add.student.zod";
 
 export const StudentStudiesHistorySection = () => {
-  const { register, setValue, watch } = useFormContext<StudentFormData>();
+  const { register, setValue, watch } = useFormContext();
 
   useEffect(() => {
     educationLevels.forEach((level, index) => {

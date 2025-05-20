@@ -1,5 +1,4 @@
 import React from "react";
-import { Mode } from "@/constants/constant";
 import StudentPersonalDetailSection from "../add -single-student/StuPersonalDetail";
 import { StudentStudiesHistorySection } from "../add -single-student/studentStudiesHistories";
 import StudentFamilyBackgroundSection from "../add -single-student/StuFamilyBackground";

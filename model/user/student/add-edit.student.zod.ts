@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { makeNullableStringFields } from "../staff/schema";
-import { GenderEnum, StatusEnum } from "@/constants/constant";
+import { StatusEnum } from "@/constants/constant";
+import { StudentByIdModel } from "./getById.student.model";
+import { profile } from "console";
 
 const StudentStudiesHistorySchema = z.object({
   id: z.number().optional(),
@@ -32,8 +33,7 @@ const StudentSiblingSchema = z.object({
   phoneNumber: z.string().nullable(),
 });
 
-export const AddSingleStudentRequestSchema = z.object({
-  password: z.string(),
+export const StudentFormSchema = z.object({
   username: z.string(),
   email: z.string().email(),
   khmerFirstName: z.string(),
@@ -45,11 +45,23 @@ export const AddSingleStudentRequestSchema = z.object({
   profileUrl: z.string(),
   phoneNumber: z.string(),
   currentAddress: z.string(),
-  nationality: z.string(),
-  ethnicity: z.string(),
+  nationality: z
+    .string()
+    .nullable()
+    .transform((val) => val ?? ""),
+  ethnicity: z
+    .string()
+    .nullable()
+    .transform((val) => val ?? ""),
   placeOfBirth: z.string(),
-  memberSiblings: z.string(),
-  numberOfSiblings: z.string(),
+  memberSiblings: z
+    .string()
+    .nullable()
+    .transform((val) => val ?? ""),
+  numberOfSiblings: z
+    .string()
+    .nullable()
+    .transform((val) => val ?? ""),
   classId: z.number(),
   studentStudiesHistories: z
     .array(StudentStudiesHistorySchema)
@@ -60,11 +72,17 @@ export const AddSingleStudentRequestSchema = z.object({
   status: z.string(),
 });
 
-export const StudentFormDataSchema = makeNullableStringFields(
-  AddSingleStudentRequestSchema
-).partial();
+// Add
+export const AddStudentSchema = StudentFormSchema.extend({
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+export type AddStudentFormData = z.infer<typeof AddStudentSchema>;
 
-export type StudentFormData = z.infer<typeof StudentFormDataSchema>;
+// Edit
+export const EditStudentSchema = StudentFormSchema.partial().extend({
+  id: z.number(),
+});
+export type EditStudentFormData = z.infer<typeof EditStudentSchema>;
 
 const defaultStudentStudiesHistory = {
   id: undefined,
@@ -109,16 +127,14 @@ export const initStudentFormData = {
   phoneNumber: "",
   currentAddress: "",
   nationality: "",
+  profileUrl: "",
   ethnicity: "",
   placeOfBirth: "",
   memberSiblings: "",
   numberOfSiblings: "",
   classId: 0, // or null, depends on your form usage
   studentStudiesHistories: [defaultStudentStudiesHistory], // start with one empty entry or empty array `[]`
-  studentParents: [
-    { ...defaultStudentParent, parentType: GenderEnum.MALE },
-    { ...defaultStudentParent, parentType: GenderEnum.FEMALE },
-  ],
+  studentParents: [],
   studentSiblings: [defaultStudentSibling], // empty initially, or [defaultStudentSibling] if you want one row
   status: StatusEnum.ACTIVE,
 };

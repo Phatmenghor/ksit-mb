@@ -19,8 +19,12 @@ export async function getAllStuffService(data: RequestAllStuff) {
     >(`${endpoint}/all`, data);
     return response.data.data;
   } catch (error: any) {
-    console.error("Error fetching all stuff:", error);
-    return null;
+    // Extract error message from response if available
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    console.error("Error get all staff:", error);
+    throw error;
   }
 }
 
@@ -34,8 +38,12 @@ export async function getStuffByIdService(id: string) {
     console.log(response.data.data);
     return response.data.data;
   } catch (error: any) {
-    console.error("Error fetching stuff by id:", error);
-    return null;
+    // Extract error message from response if available
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    console.error("Error get staff by id:", error);
+    throw error;
   }
 }
 
@@ -47,8 +55,12 @@ export async function addStaffService(data: Partial<AddStaffModel>) {
     );
     return response.data.data;
   } catch (error: any) {
+    // Extract error message from response if available
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
     console.error("Error adding staff:", error);
-    return null;
+    throw error;
   }
 }
 
@@ -63,7 +75,11 @@ export async function updateStaffService(
     );
     return response.data.data;
   } catch (error: any) {
+    // Extract error message from response if available
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
     console.error("Error updating staff:", error);
-    return null;
+    throw error;
   }
 }

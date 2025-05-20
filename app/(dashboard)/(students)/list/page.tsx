@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Pencil, Plus, RotateCcw, Search, Trash2 } from "lucide-react";
+import { Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import PaginationPage from "@/components/shared/pagination";
 import {
   AllStudentModel,
@@ -16,9 +16,9 @@ import { Column, CustomTable } from "@/components/shared/layout/TableSection";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 import { YearSelector } from "@/components/shared/year-selector";
-import { ComboboxSelect } from "@/components/shared/custom-comboBox";
 import ComboBoxClass from "@/components/shared/ComboBox/combobox-class";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
+import { useRouter } from "next/navigation";
 
 export default function StudentsListPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -32,6 +32,7 @@ export default function StudentsListPage() {
     null
   );
 
+  const router = useRouter();
   const loadStudents = useCallback(
     async (param: RequestAllStudent) => {
       setIsLoading(true);
@@ -125,7 +126,14 @@ export default function StudentsListPage() {
           <Button variant="ghost" className={iconColor} size="sm">
             <RotateCcw />
           </Button>
-          <Button variant="ghost" className={iconColor} size="sm">
+          <Button
+            variant="ghost"
+            className={iconColor}
+            onClick={() =>
+              router.push(`${ROUTE.STUDENTS.EDIT_STUDENT(student.id)}`)
+            }
+            size="sm"
+          >
             <Pencil />
           </Button>
           <Button variant="ghost" className={iconColor} size="sm">

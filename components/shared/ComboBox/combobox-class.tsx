@@ -1,10 +1,10 @@
 import React from "react";
 import { ComboboxSelect } from "../custom-comboBox";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
-import { getAllClassService } from "@/service/user/student.service";
 import { StatusEnum } from "@/constants/constant";
 import { title } from "process";
 import { AllClassFilterModel } from "@/model/master-data/class/type-class-model";
+import { getAllClassService } from "@/service/master-data/class.service";
 
 export default function ComboBoxClass({
   selectedClass,

@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Mode } from "@/constants/constant";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
-import { StudentFormData } from "@/model/user/student/add.student.zod";
 
 import { useState } from "react";
 import { Controller, useForm, useFormContext } from "react-hook-form";
@@ -22,7 +21,7 @@ export function StudentBasicForm({ mode }: { mode: Mode }) {
     setValue,
     control,
     formState: { isSubmitting },
-  } = useFormContext<StudentFormData>();
+  } = useFormContext();
 
   const handleClassChange = (selectedClass: ClassModel | null) => {
     setSelectedClass(selectedClass);
