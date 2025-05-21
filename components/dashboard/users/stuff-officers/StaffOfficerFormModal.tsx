@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { cleanRequired } from "@/utils/map-helper/student";
 
-interface AdminFormModalProps {
+interface StaffFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: StaffFormData) => void;
@@ -36,18 +36,17 @@ interface AdminFormModalProps {
   isSubmitting?: boolean;
 }
 
-export default function AdminModalForm({
+export default function StaffOfficerModalForm({
   isOpen,
   onClose,
   onSubmit,
   initialData,
   mode,
   isSubmitting = false,
-}: AdminFormModalProps) {
-  // Initialize selectedAdmin with initialData.selectedAdmin if available
-  const [selectedAdmin, setSelectedAdmin] = useState<StaffModel | null>(
-    initialData?.selectedStaff || null
-  );
+}: StaffFormModalProps) {
+  // Initialize selectedStaffOfficer with initialData.selectedStaffOfficer if available
+  const [selectedStaffOfficer, setselectedStaffOfficer] =
+    useState<StaffModel | null>(initialData?.selectedStaff || null);
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
 
@@ -62,7 +61,7 @@ export default function AdminModalForm({
       password: "",
       confirmPassword: "",
       status: Constants.ACTIVE,
-      roles: [RoleEnum.ADMIN],
+      roles: [RoleEnum.STAFF],
     },
     mode: "onChange", // Validate on change for better UX
   });
@@ -78,12 +77,12 @@ export default function AdminModalForm({
           email: initialData.email || "",
           fullname: initialData.fullname || "",
           status: Constants.ACTIVE,
-          roles: [RoleEnum.ADMIN],
+          roles: [RoleEnum.STAFF],
         });
 
         // Set the selected admin if it was passed from the parent
         if (initialData.selectedStaff) {
-          setSelectedAdmin(initialData.selectedStaff);
+          setselectedStaffOfficer(initialData.selectedStaff);
         }
       } else {
         // Reset for add mode
@@ -95,9 +94,9 @@ export default function AdminModalForm({
           password: "",
           confirmPassword: "",
           status: Constants.ACTIVE,
-          roles: [RoleEnum.ADMIN],
+          roles: [RoleEnum.STAFF],
         });
-        setSelectedAdmin(null);
+        setselectedStaffOfficer(null);
       }
       setIsFormDirty(false);
       setIsFormValid(false);
@@ -147,7 +146,7 @@ export default function AdminModalForm({
         username: cleanRequired(data.username),
         email: cleanRequired(data.email),
         status: Constants.ACTIVE,
-        roles: [RoleEnum.ADMIN],
+        roles: [RoleEnum.STAFF],
       };
 
       if (mode === "add") {
@@ -208,11 +207,11 @@ export default function AdminModalForm({
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode === "add" ? "Add Admin" : "Edit Admin"}
+            {mode === "add" ? "Add Admin" : "Edit Staff"}
           </DialogTitle>
           <DialogDescription>
             Fill in the information below to{" "}
-            {mode === "add" ? "create" : "update"} admin.
+            {mode === "add" ? "create" : "update"} staff.
           </DialogDescription>
         </DialogHeader>
 
@@ -383,7 +382,7 @@ export default function AdminModalForm({
                         {mode === "add" ? "Creating..." : "Updating..."}
                       </>
                     ) : (
-                      `${mode === "add" ? "Create" : "Update"} Admin`
+                      `${mode === "add" ? "Create" : "Update"} Staff`
                     )}
                   </Button>
                 </div>

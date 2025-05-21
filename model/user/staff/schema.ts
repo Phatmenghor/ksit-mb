@@ -167,8 +167,6 @@ export const StaffModelSchema = z.object({
   status: z.string(),
 });
 
-// Type definition based on the schema
-
 interface ZodObjectWithShape {
   shape: Record<string, z.ZodTypeAny>;
 }
@@ -201,7 +199,7 @@ export const ZodStaffModelBase =
 export type ZodStaffModelType = z.infer<typeof ZodStaffModelBase>;
 
 // Base schema shared by both Add and Edit modes
-const BaseAdminSchema = StaffModelSchema.pick({
+const BaseStaffSchema = StaffModelSchema.pick({
   username: true,
   email: true,
   status: true,
@@ -211,7 +209,7 @@ const BaseAdminSchema = StaffModelSchema.pick({
 });
 
 // Unified schema for Add and Edit modes
-export const AdminFormSchema = BaseAdminSchema.extend({
+export const StaffFormSchema = BaseStaffSchema.extend({
   password: z
     .string()
     .min(6, "Password must be at least 6 characters")
@@ -235,7 +233,7 @@ export const AdminFormSchema = BaseAdminSchema.extend({
   }
 );
 
-export type AdminFormData = z.infer<typeof AdminFormSchema> & {
+export type StaffFormData = z.infer<typeof StaffFormSchema> & {
   id?: number;
-  selectedAdmin?: StaffModel;
+  selectedStaff?: StaffModel;
 };
