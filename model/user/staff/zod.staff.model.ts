@@ -1,6 +1,4 @@
-// schemas/teacherSchema.ts
 import { z } from "zod";
-import { StaffModel } from "./stuff.model";
 
 const TeachersProfessionalRankSchema = z.object({
   id: z.number().optional(),
@@ -72,7 +70,7 @@ const TeacherFamilySchema = z.object({
 export const StaffModelSchema = z.object({
   // Required fields (based on common requirements for staff registration)
   username: z.string(),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string(),
   email: z.string().email(),
   roles: z.array(z.string()).default([]),
 
@@ -167,75 +165,18 @@ export const StaffModelSchema = z.object({
   status: z.string(),
 });
 
-// Type definition based on the schema
-
-interface ZodObjectWithShape {
-  shape: Record<string, z.ZodTypeAny>;
-}
-
-type NullableStringFields<T extends ZodObjectWithShape> = {
-  [K in keyof T["shape"]]: T["shape"][K] extends z.ZodString
-    ? z.ZodNullable<T["shape"][K]>
-    : T["shape"][K];
-};
-
-export const makeNullableStringFields = (
-  schema: ZodObjectWithShape
-): z.ZodObject<NullableStringFields<typeof schema>> => {
-  const shape = schema.shape;
-  const newShape: Record<string, z.ZodTypeAny> = {};
-  for (const key in shape) {
-    const field = shape[key];
-    if (field._def.typeName === "ZodString") {
-      newShape[key] = (field as z.ZodString).nullable();
-    } else {
-      newShape[key] = field;
-    }
-  }
-  return z.object(newShape) as z.ZodObject<NullableStringFields<typeof schema>>;
-};
-
-export const ZodStaffModelBase =
-  makeNullableStringFields(StaffModelSchema).partial();
-
-export type ZodStaffModelType = z.infer<typeof ZodStaffModelBase>;
-
-// Base schema shared by both Add and Edit modes
-const BaseAdminSchema = StaffModelSchema.pick({
+export const AdminFormSchema = StaffModelSchema.pick({
   username: true,
   email: true,
-  status: true,
-  roles: true,
-}).extend({
-  fullname: z.string().min(3, "Fullname must be at least 3 characters").max(50),
+  khmerFirstName: true,
+  khmerLastName: true,
+  password: true,
 });
 
-// Unified schema for Add and Edit modes
-export const AdminFormSchema = BaseAdminSchema.extend({
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .optional(),
-  confirmPassword: z
-    .string()
-    .min(6, "Confirm Password must be at least 6 characters")
-    .optional(),
-}).refine(
-  (data) => {
-    // If password is provided, confirmPassword must be provided and equal
-    if (data.password || data.confirmPassword) {
-      return data.password === data.confirmPassword;
-    }
-    // If no password provided, skip check
-    return true;
-  },
-  {
-    path: ["confirmPassword"],
-    message: "Passwords do not match",
-  }
-);
+export type AdminFormData = z.infer<typeof AdminFormSchema>;
 
-export type AdminFormData = z.infer<typeof AdminFormSchema> & {
-  id?: number;
-  selectedAdmin?: StaffModel;
-};
+export const AdminEditFormSchema = AdminFormSchema.omit({
+  password: true,
+});
+
+export type AdminEditFormData = z.infer<typeof AdminEditFormSchema>;

@@ -49,7 +49,7 @@ export async function getStuffByIdService(id: string) {
 
 export async function addStaffService(data: Partial<AddStaffModel>) {
   try {
-    const response = await axiosClientWithAuth.post<ApiResponse<AddStaffModel>>(
+    const response = await axiosClientWithAuth.post(
       `${endpoint}/register`,
       data
     );

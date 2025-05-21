@@ -39,6 +39,7 @@ interface CardHeaderSectionProps {
   buttonText?: string;
   buttonIcon?: React.ReactNode;
   buttonHref?: string;
+  openModal?: () => void;
   customSelect?: React.ReactNode; // 👈 new optional prop
 }
 
@@ -52,6 +53,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
   buttonIcon,
   backHref,
   buttonHref,
+  openModal,
   customSelect, // 👈 receive here
 }) => {
   return (
@@ -120,6 +122,15 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
                   {buttonText}
                 </Button>
               </Link>
+            )}
+            {buttonText && openModal && (
+              <Button
+                className="bg-green-900 text-white hover:bg-green-950 flex gap-1"
+                onClick={openModal}
+              >
+                {buttonIcon}
+                {buttonText}
+              </Button>
             )}
           </div>
         </div>
