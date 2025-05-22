@@ -29,6 +29,8 @@ export const ROUTE = {
     STUFF_OFFICER: "/stuff-officer",
     TEACHERS: "/teachers",
     ADD_TEACHER: "/teachers/add",
+    EDIT_TEACHER: (id: string) => `/teachers/edit/${id}`,
+    VIEW_TEACHER: (id: string) => `/teachers/view/${id}`,
   },
 
   STUDENTS: {
@@ -44,7 +46,8 @@ export const ROUTE = {
   },
 
   ATTENDANCE: {
-    CLASS_SCHEDULE: "/attendance/class-schedule",
+    CLASS_SCHEDULE: "/attendance/schedule",
+    ATTENDANCE_CHECK: "/attendance/schedule/check",
     HISTORY_RECORD: "/attendance/history-records",
   },
 

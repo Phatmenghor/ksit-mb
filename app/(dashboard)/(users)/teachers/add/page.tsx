@@ -1,21 +1,28 @@
 "use client";
 import { useState } from "react";
-import { AddStaffModelType, AddStaffModelBase } from "@/model/user/schema";
+import {
+  ZodStaffModelType,
+  ZodStaffModelBase,
+} from "@/model/user/staff/schema";
 import { addStaffService } from "@/service/user/user.service";
-import { removeEmptyStrings } from "@/utils/api-related/RemoveString";
-import { RoleEnum, StatusEnum } from "@/constants/constant";
+import { removeEmptyStringsAndNulls } from "@/utils/api-related/RemoveString";
+import { Mode, RoleEnum, StatusEnum } from "@/constants/constant";
 import { toast } from "sonner";
 import TeacherForm from "@/components/dashboard/users/teachers/form/TeacherForm";
 import { useRouter } from "next/navigation";
+import { ROUTE } from "@/constants/routes";
+import { AddSingleStudentRequestSchema } from "@/model/user/student/add.student.zod";
 
 export default function AddTeacherPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const onSubmit = async (data: AddStaffModelType) => {
+  const onSubmit = async (data: ZodStaffModelType) => {
     setLoading(true);
     try {
-      const cleanData = removeEmptyStrings(AddStaffModelBase.parse(data));
+      const cleanData = removeEmptyStringsAndNulls(
+        AddSingleStudentRequestSchema.safeParse(data)
+      );
       const payload = {
         ...cleanData,
         roles: [RoleEnum.TEACHER],
@@ -33,9 +40,11 @@ export default function AddTeacherPage() {
 
   return (
     <TeacherForm
+      mode={Mode.ADD}
       title="Add Teacher"
       onSubmit={onSubmit}
       loading={loading}
+      back={ROUTE.DASHBOARD}
       onDiscard={() => {
         router.back();
       }}

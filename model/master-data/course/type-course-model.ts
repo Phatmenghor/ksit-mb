@@ -1,4 +1,4 @@
-import { StaffModel } from "@/model/user/stuff.model";
+import { StaffModel } from "@/model/user/staff/stuff.model";
 import { DepartmentModel } from "../department/all-department-model";
 import { SubjectModel } from "../subject/all-subject-model";
 

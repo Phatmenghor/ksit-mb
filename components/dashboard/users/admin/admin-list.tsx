@@ -6,8 +6,8 @@ import PaginationPage from "@/components/shared/pagination-page";
 import { Button } from "@/components/ui/button";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
-import { AllStaffModel, StaffModel } from "@/model/user/stuff.model";
-import { RequestAllStuff } from "@/model/user/stuff.request.model";
+import { AllStaffModel, StaffModel } from "@/model/user/staff/stuff.model";
+import { RequestAllStuff } from "@/model/user/staff/Add.staff.model";
 import { getAllStuffService } from "@/service/user/user.service";
 import { Pencil, Trash2, Plus, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -60,10 +60,7 @@ export default function AdminsList() {
       header: "#",
       render: (_: any, index: number) => index + 1,
     },
-    {
-      key: "id",
-      header: "Admin ID",
-    },
+
     {
       key: "fullname(kh)",
       header: "Fullname (KH)",

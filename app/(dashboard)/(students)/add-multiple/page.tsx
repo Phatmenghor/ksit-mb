@@ -1,4 +1,4 @@
-import GenerateMultiStudentForm from "@/components/dashboard/student/generate-multi-Student/GenerateMultiStudent";
+import GenerateMultiStudentForm from "@/components/dashboard/users/student/generate-multi-Student/GenerateMultiStudent";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 

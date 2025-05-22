@@ -1,44 +1,53 @@
 "use client";
 
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
-import ProfileUploadCard from "@/components/dashboard/users/teachers/form/profileUploadCard";
-import { FormProvider, useForm } from "react-hook-form";
-import { StudentBasicForm } from "@/components/dashboard/student/add -single-student/GenerateDataForm";
-import StudentPersonalDetailSection from "@/components/dashboard/student/add -single-student/StudentPersonalDetail";
-import { StudentStudiesHistorySection } from "@/components/dashboard/student/add -single-student/studentStudiesHistories";
-import StudentFamilyBackgroundSection from "@/components/dashboard/student/add -single-student/StudentFamilyBackground";
 import {
-  AddSingleStudentRequestType,
-  defaultAddSingleStudentRequest,
-} from "@/model/student/add.student.zod";
+  AddSingleStudentRequestSchema,
+  StudentFormData,
+} from "@/model/user/student/add.student.zod";
+import StudentForm from "@/components/dashboard/users/student/form/StudentForm";
+import { Mode, RoleEnum, StatusEnum } from "@/constants/constant";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { removeEmptyStringsAndNulls } from "@/utils/api-related/RemoveString";
+import { toast } from "sonner";
+import { addStudentService } from "@/service/user/student.service";
+import { AddSingleStudentRequest } from "@/model/user/student/add.student.model";
 
 export default function AddSingleStudentPage() {
-  const method = useForm<AddSingleStudentRequestType>({
-    defaultValues: defaultAddSingleStudentRequest,
-  });
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const onSubmit = async (data: StudentFormData) => {
+    setLoading(true);
+    try {
+      const cleanData = removeEmptyStringsAndNulls(
+        AddSingleStudentRequestSchema.parse(data)
+      );
+      const payload = {
+        ...cleanData,
+        status: StatusEnum.ACTIVE,
+      };
+      await addStudentService(payload);
+      toast.success("Student created successfully");
+    } catch (error) {
+      console.error("Failed to create student:", error);
+      toast.error("Failed to create student");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="space-y-5">
-      <CardHeaderSection
-        title="Add New Student"
-        backHref={ROUTE.STUDENTS.LIST}
-        breadcrumbs={[
-          { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "Add Student", href: ROUTE.STUDENTS.ADD_SINGLE },
-        ]}
-      />
-      <FormProvider {...method}>
-        <form>
-          <StudentBasicForm />
-
-          <ProfileUploadCard />
-
-          <StudentPersonalDetailSection />
-          <StudentStudiesHistorySection />
-          <StudentFamilyBackgroundSection />
-        </form>
-      </FormProvider>
-    </div>
+    <StudentForm
+      mode={Mode.ADD}
+      title="Add Student"
+      onSubmit={onSubmit}
+      loading={loading}
+      back={ROUTE.DASHBOARD}
+      onDiscard={() => {
+        router.back();
+      }}
+    />
   );
 }

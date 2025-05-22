@@ -1,12 +1,13 @@
 import { PaginationResponse } from "./../../model/index-model";
 import { ApiResponse } from "@/model/index-model";
-import { StaffModel } from "@/model/user/stuff.model";
+import { GetStaffByIdResponseModel } from "@/model/user/staff/getById.staff.model";
+import { StaffModel } from "@/model/user/staff/stuff.model";
 import {
   AddStaffModel,
   RequestAllStuff,
-} from "@/model/user/stuff.request.model";
-import { UpdateStaffRequest } from "@/model/user/update.Request.staff";
-import { UpdateStaffResponse } from "@/model/user/update.Response.staff.model";
+} from "@/model/user/staff/Add.staff.model";
+import { UpdateStaffRequest } from "@/model/user/staff/update.Request.staff";
+import { UpdateStaffResponse } from "@/model/user/staff/update.Response.staff.model";
 import { axiosClientWithAuth } from "@/utils/axios";
 
 const endpoint = "/v1/staff";
@@ -19,6 +20,21 @@ export async function getAllStuffService(data: RequestAllStuff) {
     return response.data.data;
   } catch (error: any) {
     console.error("Error fetching all stuff:", error);
+    return null;
+  }
+}
+
+export async function getStuffByIdService(id: string) {
+  try {
+    console.log("🔍 Sending GET request to /api/staff/", id);
+
+    const response = await axiosClientWithAuth.get<GetStaffByIdResponseModel>(
+      `${endpoint}/${id}`
+    );
+    console.log(response.data.data);
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching stuff by id:", error);
     return null;
   }
 }
@@ -41,7 +57,7 @@ export async function updateStaffService(
   data: Partial<UpdateStaffRequest>
 ) {
   try {
-    const response = await axiosClientWithAuth.post<UpdateStaffResponse>(
+    const response = await axiosClientWithAuth.put<UpdateStaffResponse>(
       `${endpoint}/${staffId}`,
       data
     );

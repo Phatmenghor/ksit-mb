@@ -1,14 +1,18 @@
 "use client";
+
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { User } from "lucide-react";
-import React, { useState } from "react";
-import { uploadTeacherProfileService } from "@/service/user/image.service";
-import { uploadProfileRequest } from "@/model/user/stuff.request.model";
+import { useFormContext } from "react-hook-form";
+import { uploadProfileRequest } from "@/model/user/staff/Add.staff.model";
+import { Mode } from "@/constants/constant";
+import { Input } from "@/components/ui/input";
+import { uploadProfileService } from "@/service/user/image.service";
 
-export default function ProfileUploadCard() {
-  // Use useForm here instead of useFormContext
-  const [base64, setBase64] = useState<string | null>(null);
+export default function ProfileUploadCard({ mode }: { mode: Mode }) {
+  const { setValue, watch } = useFormContext();
+  const profileUrl = watch("profileUrl");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -17,65 +21,97 @@ export default function ProfileUploadCard() {
     const reader = new FileReader();
     reader.onloadend = async () => {
       const base64String = reader.result as string;
-
       const base64Data = base64String.split(",")[1];
+
       const payload: uploadProfileRequest = {
         base64: base64Data,
         type: file.type,
       };
 
-      const response = await uploadTeacherProfileService(payload);
-
-      console.log(response);
-
-      setBase64(base64String);
+      try {
+        const response = await uploadProfileService(payload);
+        setValue("profileUrl", response?.imageUrl, { shouldValidate: true });
+      } catch (error) {
+        console.error("Failed to upload image", error);
+      }
     };
     reader.readAsDataURL(file);
   };
+
+  const isReadOnly = mode === Mode.VIEW;
 
   return (
     <Card>
       <CardContent className="p-4 space-y-2 flex flex-col items-center">
         <div className="relative w-24 h-24 mb-3">
-          <label htmlFor="profile-upload" className="cursor-pointer">
-            <div className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-100 overflow-hidden">
-              {base64 ? (
+          {isReadOnly ? (
+            <div className="w-24 h-24 rounded-full border border-gray-300 bg-gray-100 overflow-hidden flex items-center justify-center">
+              {profileUrl ? (
                 <img
-                  src={base64}
-                  alt="Profile Preview"
+                  src={process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE + profileUrl}
+                  alt="Profile"
                   className="w-full h-full object-cover rounded-full"
+                  draggable={false} // optional
                 />
               ) : (
                 <User className="w-10 h-10 text-gray-300" />
               )}
             </div>
-            <div className="absolute bottom-0 right-0 bg-black rounded-full p-1 border-2 border-white">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-            </div>
-          </label>
+          ) : (
+            <>
+              <div className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-100 overflow-hidden">
+                {profileUrl ? (
+                  <img
+                    src={
+                      process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE + profileUrl
+                    }
+                    alt="Profile"
+                    className="w-full h-full object-cover rounded-full"
+                    draggable={false} // optional
+                  />
+                ) : (
+                  <User className="w-10 h-10 text-gray-300" />
+                )}
+              </div>
 
-          <input
-            id="profile-upload"
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="hidden"
-          />
+              {/* Label icon positioned for upload click */}
+              <label
+                htmlFor="profile-upload"
+                className="absolute bottom-0 right-0 bg-black rounded-full p-1 border-2 border-white cursor-pointer"
+                onClick={(e) => e.stopPropagation()} // prevents click bubbling to <img>
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+              </label>
+            </>
+          )}
+
+          {!isReadOnly && (
+            <Input
+              id="profile-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          )}
         </div>
-        <Label className="font-medium text-md">Add Profile</Label>
+
+        <Label className="font-medium text-md">
+          {isReadOnly ? "Profile" : "Add Profile"}
+        </Label>
       </CardContent>
     </Card>
   );

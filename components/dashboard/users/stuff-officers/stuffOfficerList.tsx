@@ -5,8 +5,8 @@ import PaginationPage from "@/components/shared/pagination-page";
 import { Button } from "@/components/ui/button";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
-import { AllStaffModel, StaffModel } from "@/model/user/stuff.model";
-import { RequestAllStuff } from "@/model/user/stuff.request.model";
+import { AllStaffModel, StaffModel } from "@/model/user/staff/stuff.model";
+import { RequestAllStuff } from "@/model/user/staff/Add.staff.model";
 import { getAllStuffService } from "@/service/user/user.service";
 import { Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
@@ -59,21 +59,18 @@ export default function StuffOfficerList() {
       header: "#",
       render: (_: any, index: number) => index + 1,
     },
-    {
-      key: "id",
-      header: "Stuff ID",
-    },
+
     {
       key: "fullname(kh)",
       header: "Fullname (KH)",
       render: (stuff: StaffModel) =>
-        `${stuff.khmerFirstName} ${stuff.khmerLastName}`,
+        `${stuff.khmerFirstName ?? ""} ${stuff.khmerLastName ?? ""}`,
     },
     {
       key: "fullname(en)",
       header: "Fullname (EN)",
       render: (stuff: StaffModel) =>
-        `${stuff.englishFirstName} ${stuff.englishLastName}`,
+        `${stuff.englishFirstName ?? ""} ${stuff.englishLastName ?? ""}`,
     },
     {
       key: "username",

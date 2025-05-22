@@ -278,7 +278,7 @@ export default function ManageRoomPage() {
                   return (
                     <TableRow key={room.id}>
                       <TableCell>{indexDisplay}</TableCell>
-                      <TableCell>{room.name}</TableCell>
+                      <TableCell>{room?.name}</TableCell>
 
                       <TableCell>
                         <div className="flex justify-start space-x-2">
