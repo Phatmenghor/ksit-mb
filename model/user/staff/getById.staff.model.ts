@@ -12,6 +12,7 @@ export interface Data {
   status: string;
   khmerFirstName: string;
   khmerLastName: string;
+  profileUrl: string;
   englishFirstName: string;
   englishLastName: string;
   gender: string;

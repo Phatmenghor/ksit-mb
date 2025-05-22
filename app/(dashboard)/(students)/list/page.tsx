@@ -123,7 +123,12 @@ export default function StudentsListPage() {
       header: "Actions",
       render: (student: any) => (
         <>
-          <Button variant="ghost" className={iconColor} size="sm">
+          <Button
+            variant="ghost"
+            className={iconColor}
+            onClick={() => router.push(`${ROUTE.STUDENTS.VIEW(student.id)}`)}
+            size="sm"
+          >
             <RotateCcw />
           </Button>
           <Button
@@ -147,6 +152,7 @@ export default function StudentsListPage() {
   return (
     <div className="space-y-4">
       <CardHeaderSection
+        back
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
           { label: "Student List", href: ROUTE.STUDENTS.LIST },

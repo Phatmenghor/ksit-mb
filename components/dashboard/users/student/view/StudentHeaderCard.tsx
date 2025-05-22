@@ -43,10 +43,9 @@ interface CardHeaderSectionProps {
   back: boolean;
   openModal?: () => void;
   customSelect?: React.ReactNode; // 👈 new optional prop
-  tabs?: React.ReactNode; // 👈 new prop
 }
 
-export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
+export const StudentCardHeaderSection: React.FC<CardHeaderSectionProps> = ({
   breadcrumbs,
   title,
   searchPlaceholder = "Search...",
@@ -59,7 +58,6 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
   buttonHref,
   openModal,
   customSelect, // 👈 receive here
-  tabs,
 }) => {
   const router = useRouter();
   return (
@@ -145,7 +143,6 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
           </div>
         </div>
       </CardContent>
-      {tabs && <div className="border-t px-6">{tabs}</div>}
     </Card>
   );
 };

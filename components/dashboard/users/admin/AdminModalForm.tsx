@@ -58,7 +58,8 @@ export default function AdminModalForm({
       id: initialData?.id || 0,
       username: initialData?.username || "",
       email: initialData?.email || "",
-      fullname: initialData?.fullname || "",
+      first_name: initialData?.first_name || "",
+      last_name: initialData?.last_name || "",
       password: "",
       confirmPassword: "",
       status: Constants.ACTIVE,
@@ -76,7 +77,8 @@ export default function AdminModalForm({
           id: initialData.id || 0,
           username: initialData.username || "",
           email: initialData.email || "",
-          fullname: initialData.fullname || "",
+          first_name: initialData.first_name || "",
+          last_name: initialData.last_name || "",
           status: Constants.ACTIVE,
           roles: [RoleEnum.ADMIN],
         });
@@ -91,7 +93,8 @@ export default function AdminModalForm({
           id: 0,
           username: "",
           email: "",
-          fullname: "",
+          first_name: "",
+          last_name: "",
           password: "",
           confirmPassword: "",
           status: Constants.ACTIVE,
@@ -143,7 +146,8 @@ export default function AdminModalForm({
   const handleSubmit = async (data: StaffFormData) => {
     try {
       const submitData: any = {
-        fullname: cleanRequired(data.fullname),
+        first_name: cleanRequired(data.first_name),
+        last_name: cleanRequired(data.last_name),
         username: cleanRequired(data.username),
         email: cleanRequired(data.email),
         status: Constants.ACTIVE,
@@ -181,7 +185,8 @@ export default function AdminModalForm({
       return (
         isFormValid ||
         (form.formState.isValid &&
-          !!form.getValues().fullname &&
+          !!form.getValues().first_name &&
+          !!form.getValues().last_name &&
           !!form.getValues().username &&
           !!form.getValues().email)
       );
@@ -191,7 +196,8 @@ export default function AdminModalForm({
       return (
         isFormValid ||
         (form.formState.isValid &&
-          !!form.getValues().fullname &&
+          !!form.getValues().first_name &&
+          !!form.getValues().last_name &&
           !!form.getValues().username &&
           !!form.getValues().email &&
           !!form.getValues().password &&
@@ -223,27 +229,6 @@ export default function AdminModalForm({
           >
             <FormField
               control={form.control}
-              name="fullname"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Fullname <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Enter fullname"
-                      autoFocus
-                      maxLength={50}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="username"
               render={({ field }) => (
                 <FormItem>
@@ -262,26 +247,7 @@ export default function AdminModalForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Email <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Enter email"
-                      maxLength={50}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             {mode === "add" && (
               <div className="space-y-4">
                 <FormField
@@ -326,6 +292,68 @@ export default function AdminModalForm({
                 />
               </div>
             )}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Email <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="Enter email"
+                      maxLength={50}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="first_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    First Name <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Enter first name"
+                      autoFocus
+                      maxLength={50}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="last_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Last Name <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Enter last name"
+                      autoFocus
+                      maxLength={50}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <DialogFooter className=" bg-white w-full">
               <div className="flex justify-between items-center w-full gap-3">

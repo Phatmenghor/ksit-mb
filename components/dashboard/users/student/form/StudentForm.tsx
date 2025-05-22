@@ -64,6 +64,7 @@ export default function StudentForm(props: Props) {
           noValidate
         >
           <CardHeaderSection
+            back
             title={title}
             backHref={back ?? ROUTE.STUDENTS.LIST}
             breadcrumbs={[{ label: "Dashboard", href: ROUTE.DASHBOARD }]}

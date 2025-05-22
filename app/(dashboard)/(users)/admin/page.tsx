@@ -224,6 +224,7 @@ export default function AdminsListPage() {
   return (
     <div className="space-y-4">
       <CardHeaderSection
+        back
         breadcrumbs={[
           { label: "Home", href: ROUTE.DASHBOARD },
           { label: "Admin List", href: ROUTE.USERS.ADMIN },

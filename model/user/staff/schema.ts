@@ -205,7 +205,14 @@ const BaseStaffSchema = StaffModelSchema.pick({
   status: true,
   roles: true,
 }).extend({
-  fullname: z.string().min(3, "Fullname must be at least 3 characters").max(50),
+  first_name: z
+    .string()
+    .min(3, "First name must be at least 3 characters")
+    .max(50),
+  last_name: z
+    .string()
+    .min(3, "Last name must be at least 3 characters")
+    .max(50),
 });
 
 // Unified schema for Add and Edit modes

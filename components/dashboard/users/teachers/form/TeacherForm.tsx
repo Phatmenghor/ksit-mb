@@ -60,6 +60,7 @@ export default function TeacherForm({
             // VIEW MODE: read-only, no form, no submit
             <div className="space-y-4">
               <CardHeaderSection
+                back
                 title={title}
                 backHref={ROUTE.USERS.TEACHERS}
                 breadcrumbs={[
@@ -79,6 +80,7 @@ export default function TeacherForm({
               noValidate
             >
               <CardHeaderSection
+                back
                 title={title}
                 backHref={ROUTE.USERS.TEACHERS}
                 breadcrumbs={[
