@@ -3,34 +3,45 @@ import { UserProfileSection } from "@/components/dashboard/users/shared/UserProf
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import React, { useEffect } from "react";
-import StudentPersonalInfo from "@/components/dashboard/users/student/view/section/StudentPersonalInfo";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getStudentByIdService } from "@/service/user/student.service";
 import { toast } from "sonner";
 import { StudentByIdModel } from "@/model/user/student/getById.student.model";
-import StudentStudyHistory from "@/components/dashboard/users/student/view/section/StudentStudyHistory";
-import { CircleAlert, FileText } from "lucide-react";
-import StudentTranscript from "@/components/dashboard/users/student/view/section/StudentTranscript";
-import StudentFamily from "@/components/dashboard/users/student/view/section/StudentFamily";
+import { CircleAlert, DollarSign, FileText } from "lucide-react";
+import StudentDetails from "@/components/dashboard/users/student/view/tab/StudentDetailsTabs";
+import StudentDetailsTabs from "@/components/dashboard/users/student/view/tab/StudentDetailsTabs";
+import PaymentTabs from "@/components/dashboard/users/student/view/tab/PaymentTabs";
+import TranscriptTabs from "@/components/dashboard/users/student/view/tab/TranscriptTabs";
 
+const tab = [
+  {
+    label: "",
+    value: "studentDetail",
+  },
+];
 export default function StudentViewPage() {
   const [activeTab, setActiveTab] = React.useState("information");
   const [isLoading, setIsLoading] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [studentDetail, setStudentDetail] =
     React.useState<StudentByIdModel | null>(null);
-  const params = useParams();
-  const studentId = params.id as string;
+  const { type, id } = useParams<{ type: string; id: string }>();
+  const [data, setData] = useState<any>(null);
 
-  const loadStudent = async () => {
+  const loadInfo = async () => {
     setIsLoading(true);
     try {
-      const response = await getStudentByIdService(studentId);
-      if (response) {
-        setStudentDetail(response);
-      } else {
-        toast.error("Error getting student data");
+      let res;
+      if (type === "student") {
+        const response = await getStudentByIdService(id);
+        if (response) {
+          setStudentDetail(response);
+        } else {
+          toast.error("Error getting student data");
+        }
+      } else if (type === "payment") {
+      } else if (type === "transcript") {
       }
     } catch (error) {
       console.error("Error fetching student data:", error);
@@ -40,8 +51,19 @@ export default function StudentViewPage() {
   };
 
   useEffect(() => {
-    loadStudent();
-  }, [studentId]);
+    // If `type` is one of the valid tabs, use it
+    if (["student", "payment", "transcript"].includes(type)) {
+      if (type === "student") {
+        setActiveTab("information");
+      } else {
+        setActiveTab(type);
+      }
+    }
+  }, [type]);
+
+  useEffect(() => {
+    loadInfo();
+  }, [id]);
 
   const profile = studentDetail
     ? {
@@ -63,34 +85,44 @@ export default function StudentViewPage() {
         back
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "View Student", href: ROUTE.STUDENTS.VIEW(studentId) },
+          { label: "View Student", href: ROUTE.STUDENTS.VIEW(id) },
         ]}
         tabs={
           <div className="container mx-auto mt-3">
-            <TabsList className="border-b w-full justify-start rounded-none gap-4 h-auto pb-0 bg-transparent">
-              <TabsTrigger
-                value="information"
-                className={`rounded-none pb-2 px-0 mr-6 data-[state=active]:border-b-2 data-[state=active]:border-primary ${
-                  activeTab === "information" ? "text-primary" : ""
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <CircleAlert className="h-4 w-4 text-primary" />
-                  <span>Student Information</span>
-                </div>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="transcript"
-                className={`rounded-none pb-2 px-0 data-[state=active]:border-b-2 data-[state=active]:border-primary ${
-                  activeTab === "transcript" ? "text-primary" : ""
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary" />
-                  <span>Transcript</span>
-                </div>
-              </TabsTrigger>
+            <TabsList className="flex w-full border-b gap-6 pb-1 bg-transparent justify-start">
+              {[
+                {
+                  value: "information",
+                  label: "Student Information",
+                  icon: CircleAlert,
+                },
+                {
+                  value: "payment",
+                  label: "Payment",
+                  icon: DollarSign,
+                },
+                {
+                  value: "transcript",
+                  label: "Transcript",
+                  icon: FileText,
+                },
+              ].map(({ value, label, icon: Icon }) => (
+                <TabsTrigger
+                  key={value}
+                  value={value}
+                  className={`relative pb-2 text-sm font-medium transition-colors duration-200 px-1 hover:text-primary data-[state=active]:text-primary`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon className="h-4 w-4" />
+                    <span>{label}</span>
+                  </div>
+                  <span
+                    className={`absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 ${
+                      activeTab === value ? "bg-primary" : "bg-transparent"
+                    }`}
+                  />
+                </TabsTrigger>
+              ))}
             </TabsList>
           </div>
         }
@@ -98,16 +130,17 @@ export default function StudentViewPage() {
 
       {/* Tab Content outside the header */}
       <UserProfileSection user={profile} />
-
       <TabsContent value="information" className="space-y-4 w-full">
-        <StudentPersonalInfo student={studentDetail} />
-        <StudentStudyHistory student={studentDetail} />
-        <StudentFamily student={studentDetail} />
+        <StudentDetails studentDetail={studentDetail} />
+        <StudentDetailsTabs studentDetail={studentDetail} />
       </TabsContent>
 
-      <TabsContent value="transcript" className=" space-y-4 w-full">
-        {/* NOTED: HAVEN'T Integrated with api */}
-        <StudentTranscript student={studentDetail} />
+      <TabsContent value="payment" className="space-y-4 w-full">
+        <PaymentTabs />
+      </TabsContent>
+
+      <TabsContent value="transcript" className="space-y-4 w-full">
+        <TranscriptTabs />
       </TabsContent>
     </Tabs>
   );

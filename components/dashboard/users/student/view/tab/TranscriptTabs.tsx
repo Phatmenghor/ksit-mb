@@ -32,7 +32,7 @@ interface TranscriptSummary {
   cumulativeGPA: number;
 }
 
-const StudentTranscript = () => {
+const TranscriptTabs = () => {
   const studentInfo: StudentInfo = {
     studentId: "Placeholder",
     studentName: "Placeholder",
@@ -242,4 +242,4 @@ const StudentTranscript = () => {
   );
 };
 
-export default StudentTranscript;
+export default TranscriptTabs;
