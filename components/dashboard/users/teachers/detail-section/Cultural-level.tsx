@@ -19,6 +19,7 @@ export default function EducatonForm() {
   return (
     <CollapsibleCard title="កម្រិតវប្បធម៌">
       <DynamicInputGrid
+        isSubmitting={isSubmitting}
         labels={["កម្រិតវប្បធម៌​", "ឈ្មោះជំនាញ", "កាលបរិច្ឆេទទទួល", "ប្រទេស"]}
         fields={[
           {

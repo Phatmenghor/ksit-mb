@@ -1,13 +1,10 @@
 "use client";
-import {
-  StudentProfile,
-  UserProfileSection,
-} from "@/components/dashboard/users/student/view/section/StudentProfile";
+import { UserProfileSection } from "@/components/dashboard/users/shared/UserProfile";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React, { useEffect } from "react";
-import StudentPersonalInfo from "@/components/dashboard/users/student/view/section/StudentHistoryDetail";
+import StudentPersonalInfo from "@/components/dashboard/users/student/view/section/StudentPersonalInfo";
 import { useParams } from "next/navigation";
 import { getStudentByIdService } from "@/service/user/student.service";
 import { toast } from "sonner";

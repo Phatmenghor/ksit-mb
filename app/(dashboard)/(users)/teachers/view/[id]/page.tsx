@@ -1,5 +1,5 @@
 "use client";
-import { UserProfileSection } from "@/components/dashboard/users/student/view/section/StudentProfile";
+import { UserProfileSection } from "@/components/dashboard/users/shared/UserProfile";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 import React, { useEffect } from "react";
@@ -7,6 +7,15 @@ import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { getStuffByIdService } from "@/service/user/user.service";
 import { Data } from "@/model/user/staff/getById.staff.model";
+import TeacherPersonal from "@/components/dashboard/users/teachers/view/TeacherPersonalInfo";
+import TeacherProfessionalRank from "@/components/dashboard/users/teachers/view/TeacherProfessionalRank";
+import TeacherExperienceSection from "@/components/dashboard/users/teachers/view/TeacherExperience";
+import TeacherPraiseOrCriticismSection from "@/components/dashboard/users/teachers/view/TeacherPraiseOrCriticism";
+import TeacherEducationSection from "@/components/dashboard/users/teachers/view/TeacherEducation";
+import TeacherVocationalSection from "@/components/dashboard/users/teachers/view/TeacherVocational";
+import TeacherShortCourseSection from "@/components/dashboard/users/teachers/view/TeacherShortCourse";
+import TeacherLanguageSection from "@/components/dashboard/users/teachers/view/TeacherLanguage";
+import TeacherFamilySection from "@/components/dashboard/users/teachers/view/TeacherFamily";
 
 export default function TeacherViewPage() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -37,7 +46,7 @@ export default function TeacherViewPage() {
 
   const profile = teacher
     ? {
-        id: teacher.id,
+        id: teacher.identifyNumber,
         username: teacher.username,
         profileUrl: teacher.profileUrl,
       }
@@ -56,8 +65,25 @@ export default function TeacherViewPage() {
       />
 
       {/* Tab Content outside the header */}
-      <div className="mt-4">
-        <UserProfileSection user={teacher} />
+      <div className="mt-4 space-y-4">
+        <UserProfileSection user={profile} />
+        <TeacherPersonal teacher={teacher} />
+        <TeacherProfessionalRank teacher={teacher} />
+        <TeacherExperienceSection
+          teacher={teacher?.teacherExperience ?? null}
+        />
+        <TeacherPraiseOrCriticismSection
+          teacher={teacher?.teacherPraiseOrCriticism ?? null}
+        />
+        <TeacherEducationSection teacher={teacher?.teacherEducation ?? null} />
+        <TeacherVocationalSection
+          teacher={teacher?.teacherVocational ?? null}
+        />
+        <TeacherShortCourseSection
+          teacher={teacher?.teacherShortCourse ?? null}
+        />
+        <TeacherLanguageSection teacher={teacher?.teacherLanguage ?? null} />{" "}
+        <TeacherFamilySection teacher={teacher?.teacherFamily ?? null} />{" "}
       </div>
     </div>
   );

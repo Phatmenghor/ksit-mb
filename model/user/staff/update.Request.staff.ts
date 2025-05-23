@@ -93,6 +93,7 @@ export interface TeacherEducation {
   culturalLevel?: string;
   skillName?: string;
   dateAccepted?: string;
+  country?: string;
 }
 
 export interface TeacherVocational {
