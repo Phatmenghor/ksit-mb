@@ -1,5 +1,4 @@
 import React from "react";
-import CollapsibleCard from "../detail-section/customFormSection";
 import { Data } from "@/model/user/staff/getById.staff.model";
 import { Separator } from "@/components/ui/separator";
 import InfoGrid from "../../shared/UserPersonalHistory";

@@ -25,7 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
-import { cleanRequired } from "@/utils/map-helper/student";
+import { clean, cleanRequired } from "@/utils/map-helper/student";
 
 interface StaffFormModalProps {
   isOpen: boolean;
@@ -57,7 +57,8 @@ export default function StaffOfficerModalForm({
       id: initialData?.id || 0,
       username: initialData?.username || "",
       email: initialData?.email || "",
-      fullname: initialData?.fullname || "",
+      first_name: initialData?.first_name || "",
+      last_name: initialData?.last_name || "",
       password: "",
       confirmPassword: "",
       status: Constants.ACTIVE,
@@ -75,7 +76,8 @@ export default function StaffOfficerModalForm({
           id: initialData.id || 0,
           username: initialData.username || "",
           email: initialData.email || "",
-          fullname: initialData.fullname || "",
+          first_name: initialData.first_name || "",
+          last_name: initialData.last_name || "",
           status: Constants.ACTIVE,
           roles: [RoleEnum.STAFF],
         });
@@ -90,7 +92,8 @@ export default function StaffOfficerModalForm({
           id: 0,
           username: "",
           email: "",
-          fullname: "",
+          first_name: "",
+          last_name: "",
           password: "",
           confirmPassword: "",
           status: Constants.ACTIVE,
@@ -142,7 +145,8 @@ export default function StaffOfficerModalForm({
   const handleSubmit = async (data: StaffFormData) => {
     try {
       const submitData: any = {
-        fullname: cleanRequired(data.fullname),
+        first_name: clean(data.first_name),
+        last_name: clean(data.last_name),
         username: cleanRequired(data.username),
         email: cleanRequired(data.email),
         status: Constants.ACTIVE,
@@ -165,7 +169,7 @@ export default function StaffOfficerModalForm({
       onSubmit(submitData);
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast.error("An error occurred while saving admin");
+      toast.error("An error occurred while saving staff");
     }
   };
 
@@ -180,7 +184,6 @@ export default function StaffOfficerModalForm({
       return (
         isFormValid ||
         (form.formState.isValid &&
-          !!form.getValues().fullname &&
           !!form.getValues().username &&
           !!form.getValues().email)
       );
@@ -190,7 +193,6 @@ export default function StaffOfficerModalForm({
       return (
         isFormValid ||
         (form.formState.isValid &&
-          !!form.getValues().fullname &&
           !!form.getValues().username &&
           !!form.getValues().email &&
           !!form.getValues().password &&
@@ -207,7 +209,7 @@ export default function StaffOfficerModalForm({
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode === "add" ? "Add Admin" : "Edit Staff"}
+            {mode === "add" ? "Add staff" : "Edit Staff"}
           </DialogTitle>
           <DialogDescription>
             Fill in the information below to{" "}
@@ -220,27 +222,6 @@ export default function StaffOfficerModalForm({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-4 mt-4"
           >
-            <FormField
-              control={form.control}
-              name="fullname"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Fullname <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Enter fullname"
-                      autoFocus
-                      maxLength={50}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="username"
@@ -261,26 +242,7 @@ export default function StaffOfficerModalForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Email <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Enter email"
-                      maxLength={50}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             {mode === "add" && (
               <div className="space-y-4">
                 <FormField
@@ -325,6 +287,67 @@ export default function StaffOfficerModalForm({
                 />
               </div>
             )}
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Email <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="Enter email"
+                      maxLength={50}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="first_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    First Name <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Enter first name"
+                      autoFocus
+                      maxLength={50}
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="last_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Last Name <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Enter last name"
+                      autoFocus
+                      maxLength={50}
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
             <DialogFooter className=" bg-white w-full">
               <div className="flex justify-between items-center w-full gap-3">

@@ -31,6 +31,7 @@ import { StaffTableHeader } from "@/constants/table/user";
 import StaffOfficerModalForm from "@/components/dashboard/users/stuff-officers/StaffOfficerFormModal";
 import { UpdateStaffRequest } from "@/model/user/staff/update.Request.staff";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
+import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
 
 export default function StuffOfficerListPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -42,6 +43,8 @@ export default function StuffOfficerListPage() {
   const [initialData, setInitialData] = useState<StaffFormData | undefined>(
     undefined
   );
+  const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] =
+    useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedStaff, setselectedStaff] = useState<StaffModel | null>(null);
 
@@ -87,14 +90,13 @@ export default function StuffOfficerListPage() {
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (adminData: StaffModel) => {
-    setselectedStaff(adminData);
+  const handleOpenEditModal = (staffData: StaffModel) => {
+    setselectedStaff(staffData);
     setInitialData({
-      ...adminData,
-      roles: adminData.roles ?? [RoleEnum.ADMIN],
-      fullname: `${adminData.khmerFirstName ?? ""} ${
-        adminData.khmerLastName ?? ""
-      }`,
+      ...staffData,
+      roles: staffData.roles ?? [RoleEnum.STAFF],
+      first_name: staffData.khmerFirstName || "",
+      last_name: staffData.khmerLastName || "",
       confirmPassword: "",
     });
     setModalMode("edit");
@@ -106,14 +108,13 @@ export default function StuffOfficerListPage() {
     try {
       console.log("##Submitting data to api:", formData);
 
-      const [firstName = "", ...rest] = formData.fullname.split(" ");
-      const lastName = rest.join(" ");
-
       const basePayload = {
         username: formData.username,
         email: formData.email,
-        khmerFirstName: firstName,
-        khmerLastName: lastName,
+        khmerFirstName: formData.first_name,
+        khmerLastName: formData.last_name,
+        englishFirstName: formData.first_name,
+        englishLastName: formData.last_name,
         status: formData.status,
         roles: formData.roles,
       };
@@ -203,15 +204,15 @@ export default function StuffOfficerListPage() {
 
       if (response) {
         toast.success(
-          `Admin ${selectedStaff.username ?? ""} deleted successfully`
+          `staff ${selectedStaff.username ?? ""} deleted successfully`
         );
       } else {
         setData(originalData);
-        toast.error("Failed to delete admin");
+        toast.error("Failed to delete staff");
       }
     } catch (error) {
-      console.error("Error deleting admin:", error);
-      toast.error("An error occurred while deleting the admin");
+      console.error("Error deleting staff:", error);
+      toast.error("An error occurred while deleting the staff");
       loadData({});
     } finally {
       setIsSubmitting(false);
@@ -261,30 +262,28 @@ export default function StuffOfficerListPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                data?.content.map((admin, index) => {
+                data?.content.map((staff, index) => {
                   const indexDisplay =
                     ((data.pageNo || 1) - 1) * (data.pageSize || 10) +
                     index +
                     1;
                   return (
-                    <TableRow key={admin.id}>
+                    <TableRow key={staff.id}>
                       <TableCell>{indexDisplay}</TableCell>
                       <TableCell>
-                        <span className="rounded bg-gray-100 px-2 py-1 font-medium">
-                          {admin.khmerFirstName} {admin.khmerLastName}
-                        </span>
+                        {staff.khmerFirstName} {staff.khmerLastName}
                       </TableCell>
                       <TableCell>
                         {" "}
-                        {admin.englishFirstName ?? ""}{" "}
-                        {admin.englishLastName ?? ""}
+                        {staff.englishFirstName ?? ""}{" "}
+                        {staff.englishLastName ?? ""}
                       </TableCell>
-                      <TableCell>{admin.username}</TableCell>
-                      <TableCell>{admin.status}</TableCell>
+                      <TableCell>{staff.username}</TableCell>
+                      <TableCell>{staff.status}</TableCell>
                       <TableCell>
                         <div className="flex justify-start space-x-2">
                           <Button
-                            onClick={() => handleOpenEditModal(admin)}
+                            onClick={() => handleOpenEditModal(staff)}
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-black hover:text-gray-900"
@@ -295,7 +294,10 @@ export default function StuffOfficerListPage() {
 
                           <Button
                             variant="ghost"
-                            onClick={() => {}}
+                            onClick={() => {
+                              setIsChangePasswordDialogOpen(true);
+                              setselectedStaff(staff);
+                            }}
                             className={iconColor}
                             size="sm"
                           >
@@ -303,7 +305,7 @@ export default function StuffOfficerListPage() {
                           </Button>
                           <Button
                             onClick={() => {
-                              setselectedStaff(admin);
+                              setselectedStaff(staff);
                               setIsDeleteDialogOpen(true);
                             }}
                             variant="ghost"
@@ -332,6 +334,14 @@ export default function StuffOfficerListPage() {
         onSubmit={handleSubmit}
         initialData={initialData}
         isSubmitting={isSubmitting}
+      />
+      <ChangePasswordModal
+        isOpen={isChangePasswordDialogOpen}
+        onClose={() => {
+          setIsChangePasswordDialogOpen(false);
+          setselectedStaff(null);
+        }}
+        userId={selectedStaff?.id}
       />
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}

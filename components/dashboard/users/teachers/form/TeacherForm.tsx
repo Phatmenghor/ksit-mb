@@ -8,7 +8,7 @@ import { ZodStaffModelType } from "@/model/user/staff/schema";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 import { useEffect } from "react";
-import { BasicInformationForm } from "../detail-section/GenerateDataForm";
+import { BasicInformationForm } from "../detail-section/TeacherBasicInfo";
 import ProfileUploadCard from "./profileUploadCard";
 import { Mode, StatusEnum } from "@/constants/constant";
 

@@ -25,7 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
-import { cleanRequired } from "@/utils/map-helper/student";
+import { clean, cleanRequired } from "@/utils/map-helper/student";
 
 interface AdminFormModalProps {
   isOpen: boolean;
@@ -146,8 +146,8 @@ export default function AdminModalForm({
   const handleSubmit = async (data: StaffFormData) => {
     try {
       const submitData: any = {
-        first_name: cleanRequired(data.first_name),
-        last_name: cleanRequired(data.last_name),
+        first_name: clean(data.first_name),
+        last_name: clean(data.last_name),
         username: cleanRequired(data.username),
         email: cleanRequired(data.email),
         status: Constants.ACTIVE,
@@ -329,7 +329,6 @@ export default function AdminModalForm({
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -350,7 +349,6 @@ export default function AdminModalForm({
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />

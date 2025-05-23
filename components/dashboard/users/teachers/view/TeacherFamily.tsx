@@ -8,7 +8,7 @@ import { Data } from "@/model/user/staff/getById.staff.model";
 
 interface TeacherProps {
   teacher: TeacherFamily[] | null;
-  familyStatus: Data;
+  familyStatus: Data | null;
 }
 
 export default function TeacherFamilySection({

@@ -39,3 +39,9 @@ export interface ImageResponse {
   imageUrl: string;
   type: string;
 }
+
+export interface ChangePasswordByAdminModel {
+  id: number;
+  newPassword: string;
+  confirmNewPassword: string;
+}

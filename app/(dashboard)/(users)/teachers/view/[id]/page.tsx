@@ -83,7 +83,10 @@ export default function TeacherViewPage() {
           teacher={teacher?.teacherShortCourse ?? null}
         />
         <TeacherLanguageSection teacher={teacher?.teacherLanguage ?? null} />{" "}
-        <TeacherFamilySection teacher={teacher?.teacherFamily ?? null} />{" "}
+        <TeacherFamilySection
+          familyStatus={teacher}
+          teacher={teacher?.teacherFamily ?? null}
+        />{" "}
       </div>
     </div>
   );

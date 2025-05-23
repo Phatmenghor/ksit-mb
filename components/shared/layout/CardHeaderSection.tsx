@@ -1,3 +1,4 @@
+"use client";
 // components/CardHeaderSection.tsx
 import {
   Breadcrumb,

@@ -8,10 +8,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import React from "react";
-import CollapsibleCard from "./customFormSection";
 import { Controller, useFormContext } from "react-hook-form";
 import { GenderEnum, Mode } from "@/constants/constant";
 import { ZodStaffModelType } from "@/model/user/staff/schema";
+import CollapsibleCard from "@/components/shared/collapsibleCard";
 
 export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
   const {

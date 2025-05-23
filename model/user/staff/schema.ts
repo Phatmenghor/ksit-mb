@@ -205,25 +205,19 @@ const BaseStaffSchema = StaffModelSchema.pick({
   status: true,
   roles: true,
 }).extend({
-  first_name: z
-    .string()
-    .min(3, "First name must be at least 3 characters")
-    .max(50),
-  last_name: z
-    .string()
-    .min(3, "Last name must be at least 3 characters")
-    .max(50),
+  first_name: z.string().optional(),
+  last_name: z.string().optional(),
 });
 
 // Unified schema for Add and Edit modes
 export const StaffFormSchema = BaseStaffSchema.extend({
   password: z
     .string()
-    .min(6, "Password must be at least 6 characters")
+    .min(8, "Password must be at least 8 characters")
     .optional(),
   confirmPassword: z
     .string()
-    .min(6, "Confirm Password must be at least 6 characters")
+    .min(8, "Confirm Password must be at least 8 characters")
     .optional(),
 }).refine(
   (data) => {

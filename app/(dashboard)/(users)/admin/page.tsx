@@ -1,7 +1,6 @@
 "use client";
 
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
-import { Column, CustomTable } from "@/components/shared/layout/TableSection";
 import PaginationPage from "@/components/shared/pagination-page";
 import { Button } from "@/components/ui/button";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
@@ -33,6 +32,7 @@ import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmatio
 import Loading from "@/app/(dashboard)/permissions/loading";
 import AdminModalForm from "@/components/dashboard/users/admin/AdminModalForm";
 import { StaffTableHeader } from "@/constants/table/user";
+import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
 
 export default function AdminsListPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -44,6 +44,8 @@ export default function AdminsListPage() {
   const [initialData, setInitialData] = useState<StaffFormData | undefined>(
     undefined
   );
+  const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] =
+    useState(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [selectedAdmin, setSelectedAdmin] = useState<StaffModel | null>(null);
 
@@ -94,9 +96,8 @@ export default function AdminsListPage() {
     setInitialData({
       ...adminData,
       roles: adminData.roles ?? [RoleEnum.ADMIN],
-      fullname: `${adminData.khmerFirstName ?? ""} ${
-        adminData.khmerLastName ?? ""
-      }`,
+      first_name: adminData.khmerFirstName || "",
+      last_name: adminData.khmerLastName || "",
       confirmPassword: "",
     });
     setModalMode("edit");
@@ -108,21 +109,22 @@ export default function AdminsListPage() {
     try {
       console.log("##Submitting data to api:", formData);
 
-      const [firstName = "", ...rest] = formData.fullname.split(" ");
-      const lastName = rest.join(" ");
-
       const basePayload = {
         username: formData.username,
         email: formData.email,
-        khmerFirstName: firstName,
-        khmerLastName: lastName,
+        khmerFirstName: formData.first_name,
+        khmerLastName: formData.last_name,
+        englishFirstName: formData.first_name,
+        englishLastName: formData.last_name,
         status: formData.status,
         roles: formData.roles,
       };
+
       const addPayload: Partial<AddStaffModel> = {
         ...basePayload,
         ...(formData.password ? { password: formData.password } : {}),
       };
+
       const updatePayload: Partial<UpdateStaffRequest> = {
         ...basePayload,
       };
@@ -272,9 +274,7 @@ export default function AdminsListPage() {
                     <TableRow key={admin.id}>
                       <TableCell>{indexDisplay}</TableCell>
                       <TableCell>
-                        <span className="rounded bg-gray-100 px-2 py-1 font-medium">
-                          {admin.khmerFirstName} {admin.khmerLastName}
-                        </span>
+                        {admin.khmerFirstName} {admin.khmerLastName}
                       </TableCell>
                       <TableCell>
                         {" "}
@@ -296,7 +296,10 @@ export default function AdminsListPage() {
                           </Button>
                           <Button
                             variant="ghost"
-                            onClick={() => {}}
+                            onClick={() => {
+                              setIsChangePasswordDialogOpen(true);
+                              setSelectedAdmin(admin);
+                            }}
                             className={iconColor}
                             size="sm"
                           >
@@ -333,6 +336,15 @@ export default function AdminsListPage() {
         onSubmit={handleSubmit}
         initialData={initialData}
         isSubmitting={isSubmitting}
+      />
+
+      <ChangePasswordModal
+        isOpen={isChangePasswordDialogOpen}
+        onClose={() => {
+          setIsChangePasswordDialogOpen(false);
+          setSelectedAdmin(null);
+        }}
+        userId={selectedAdmin?.id}
       />
 
       <DeleteConfirmationDialog
