@@ -10,18 +10,10 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Filter, ArrowLeft } from "lucide-react";
+import { Search, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { StatusEnum } from "@/constants/constant";
 import { useRouter } from "next/navigation";
 
 // ...imports remain the same
@@ -92,7 +84,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="mb-6 flex flex-col md:flex-row md:items-start md:justify-start gap-4">
+        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-start gap-4">
           {backHref ? (
             <Link href={backHref}>
               <ArrowLeft />

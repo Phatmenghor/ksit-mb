@@ -3,7 +3,7 @@ import { Mode, StatusEnum } from "@/constants/constant";
 import { EditStudentFormData } from "@/model/user/student/add-edit.student.zod";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import StudentProfileUploadCard from "../add -single-student/StuProfileUploadCard";
+import StudentProfileUploadCard from "../add-single-student/StuProfileUploadCard";
 import StudentFormDetail from "./StudentFormDetail";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

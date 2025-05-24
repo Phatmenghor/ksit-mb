@@ -8,8 +8,8 @@ import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection"
 import { ROUTE } from "@/constants/routes";
 import { useEffect } from "react";
 import { Mode, StatusEnum } from "@/constants/constant";
-import { StudentBasicForm } from "../add -single-student/StuBasicForm";
-import StudentProfileUploadCard from "../add -single-student/StuProfileUploadCard";
+import { StudentBasicForm } from "../add-single-student/StuBasicForm";
+import StudentProfileUploadCard from "../add-single-student/StuProfileUploadCard";
 import StudentFormDetail from "./StudentFormDetail";
 import {
   AddStudentFormData,
