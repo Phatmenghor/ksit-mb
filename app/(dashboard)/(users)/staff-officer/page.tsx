@@ -25,7 +25,6 @@ import {
   getAllStaffService,
   updateStaffService,
 } from "@/service/user/user.service";
-import Loading from "../../permissions/loading";
 import { StaffTableHeader } from "@/constants/table/user";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
@@ -39,6 +38,7 @@ import {
   StaffModel,
 } from "@/model/user/staff/staff.respond.model";
 import { StaffListRequest } from "@/model/user/staff/staff.request.model";
+import Loading from "@/components/shared/loading";
 
 export default function StuffOfficerListPage() {
   const [searchQuery, setSearchQuery] = useState("");

@@ -20,7 +20,6 @@ import { getAllStaffService } from "@/service/user/user.service";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
 import PaginationPage from "@/components/shared/pagination-page";
 import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
-import Loading from "../../permissions/loading";
 import { StaffTableHeader, TeacherTableHeader } from "@/constants/table/user";
 import {
   AllStaffModel,
@@ -28,6 +27,7 @@ import {
 } from "@/model/user/staff/staff.respond.model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { StaffListRequest } from "@/model/user/staff/staff.request.model";
+import Loading from "@/components/shared/loading";
 
 export default function TeachersListPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");

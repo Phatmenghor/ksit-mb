@@ -30,7 +30,6 @@ import {
   updateStaffService,
 } from "@/service/user/user.service";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
-import Loading from "@/app/(dashboard)/permissions/loading";
 import AdminModalForm from "@/components/dashboard/users/admin/AdminModalForm";
 import { AdminTableHeader, StaffTableHeader } from "@/constants/table/user";
 import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
@@ -46,6 +45,7 @@ import {
   StaffModel,
 } from "@/model/user/staff/staff.respond.model";
 import { cleanField, cleanRequiredField } from "@/utils/map-helper/student";
+import Loading from "@/components/shared/loading";
 
 export default function AdminsListPage() {
   const [searchQuery, setSearchQuery] = useState("");
