@@ -20,10 +20,6 @@ import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { StatusEnum } from "@/constants/constant";
-import { getAllDepartmentService } from "@/service/master-data/department.service";
-import { DepartmentModel } from "@/model/master-data/department/all-department-model";
-import { StaffModel } from "@/model/user/staff/stuff.model";
-import { getAllStuffService } from "@/service/user/user.service";
 import { getAllSubjectService } from "@/service/master-data/subject.service";
 import { SubjectModel } from "@/model/master-data/subject/all-subject-model";
 

@@ -20,10 +20,8 @@ import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { StatusEnum } from "@/constants/constant";
-import { getAllDepartmentService } from "@/service/master-data/department.service";
-import { DepartmentModel } from "@/model/master-data/department/all-department-model";
-import { StaffModel } from "@/model/user/staff/stuff.model";
-import { getAllStuffService } from "@/service/user/user.service";
+import { StaffModel } from "@/model/user/staff/staff.respond.model";
+import { getAllStaffService } from "@/service/user/user.service";
 
 interface ComboboxSelectedProps {
   dataSelect: StaffModel | null;
@@ -51,7 +49,7 @@ export function ComboboxSelectInstructor({
     if (loading || (lastPage && newPage > 1)) return;
     setLoading(true);
     try {
-      const result = await getAllStuffService({
+      const result = await getAllStaffService({
         search,
         pageSize: 10,
         pageNo: newPage,

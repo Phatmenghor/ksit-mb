@@ -29,11 +29,6 @@ export function Header() {
     }
   }, [isMobile]);
 
-  // Load roles on mount (client side)
-  useEffect(() => {
-    setRoles(getRoles());
-  }, []);
-
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
