@@ -68,7 +68,7 @@ export default function AdminModalForm({
       status: Constants.ACTIVE,
       roles: [RoleEnum.ADMIN],
     },
-    mode: "onChange", // Validate on change for better UX
+    mode: "onChange",
   });
 
   // Reset form when modal opens/closes or initialData changes
@@ -120,7 +120,6 @@ export default function AdminModalForm({
           form.formState.isValid
       );
 
-      // Debug logs
       console.log(
         "Dirty:",
         form.formState.isDirty,
@@ -177,12 +176,10 @@ export default function AdminModalForm({
   };
 
   // Determine if the form can be submitted
-  // For edit mode, we only need the required fields to be valid
   const canSubmitForm = () => {
     if (isSubmitting) return false;
 
     // In edit mode, we'll allow submission if the form is valid, even if not dirty
-    // This is because zodResolver might consider the form valid from initialization
     if (mode === "edit") {
       return (
         isFormValid ||
@@ -227,7 +224,7 @@ export default function AdminModalForm({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4 mt-4"
+            className="space-y-1 mt-2"
           >
             <FormField
               control={form.control}
@@ -251,7 +248,7 @@ export default function AdminModalForm({
             />
 
             {mode === "add" && (
-              <div className="space-y-4">
+              <div className="space-y-1">
                 <FormField
                   control={form.control}
                   name="password"
@@ -357,7 +354,7 @@ export default function AdminModalForm({
             />
 
             <DialogFooter className=" bg-white w-full">
-              <div className="flex justify-between items-center w-full gap-3">
+              <div className="flex justify-between items-center mt-4 w-full gap-3">
                 {/* Left side: Disable User button */}
                 <div className="flex-shrink-0">
                   {mode === "edit" && (

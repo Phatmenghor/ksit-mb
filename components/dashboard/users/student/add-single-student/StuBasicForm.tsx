@@ -1,5 +1,5 @@
 "use client";
-import ComboBoxClass from "@/components/shared/ComboBox/combobox-class";
+import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   FormControl,
@@ -117,11 +117,10 @@ export function StudentBasicForm() {
                       Class <span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
-                      <ComboBoxClass
-                        selectedClass={selectClass}
+                      <ComboboxSelectClass
+                        dataSelect={selectClass}
                         disabled={isSubmitting}
-                        onChange={handleClassChange}
-                        title="Select Class"
+                        onChangeSelected={handleClassChange}
                       />
                     </FormControl>
                     <FormMessage />

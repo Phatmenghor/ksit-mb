@@ -38,9 +38,7 @@ export default function StudentForm({
   onDiscard,
   back,
 }: Props) {
-  // Local state to track if the form has unsaved changes (dirty)
   const [isFormDirty, setIsFormDirty] = useState(false);
-  // Local state to track if the form passes validation
   const [isFormValid, setIsFormValid] = useState(false);
 
   // Initialize react-hook-form with validation schema depending on mode
@@ -110,10 +108,6 @@ export default function StudentForm({
     }
   };
 
-  /**
-   * Main form submission handler wrapping the onSubmit prop
-   * with error handling
-   */
   const handleFormSubmit = async (data: any) => {
     try {
       await onSubmit(data);
@@ -135,12 +129,6 @@ export default function StudentForm({
     );
   }
 
-  /**
-   * Determine if the form can be submitted based on mode, validity, and dirty state
-   * - Disables submit while submitting
-   * - For edit mode: allow submit if form is valid (dirty not required)
-   * - For add mode: require form to be valid and have required fields filled
-   */
   const canSubmitForm = () => {
     if (isSubmitting) return false;
 

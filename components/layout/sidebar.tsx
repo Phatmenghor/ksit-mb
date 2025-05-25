@@ -131,16 +131,7 @@ export function Sidebar() {
       >
         <div className="flex h-16 items-center bg-primary justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <div>
-              <div className="rounded-full bg-white p-1">
-                <img
-                  src="/placeholder.svg?height=40&width=40"
-                  alt="Logo"
-                  className="h-8 w-8"
-                />
-              </div>
-            </div>
-            <span className="font-bold text-white text-lg">Admin</span>
+            <span className="font-bold text-white text-lg">KSIT</span>
           </Link>
         </div>
 

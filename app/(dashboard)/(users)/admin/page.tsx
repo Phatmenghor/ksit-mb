@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pencil, Trash2, Plus, RotateCcw, Check, X } from "lucide-react";
+import { Pencil, Trash2, Plus, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -73,18 +73,15 @@ export default function AdminsListPage() {
   };
 
   const loadData = useCallback(
-    async (
-      data: StaffListRequest = {
-        pageNo: 1,
-        pageSize: 10,
-        roles: [RoleEnum.ADMIN],
-        search: searchQuery,
-        status: statusFilter,
-      }
-    ) => {
+    async (param: StaffListRequest) => {
       setIsLoading(true);
       try {
-        const response = await getAllStaffService(data);
+        const response = await getAllStaffService({
+          ...param,
+          roles: [RoleEnum.ADMIN],
+          search: searchQuery,
+          status: statusFilter,
+        });
         if (response) {
           setData(response);
         } else {
@@ -100,7 +97,7 @@ export default function AdminsListPage() {
   );
 
   useEffect(() => {
-    loadData();
+    loadData({});
   }, [debouncedSearchQuery, statusFilter, loadData]);
 
   const handleOpenAddModal = () => {
@@ -141,15 +138,15 @@ export default function AdminsListPage() {
       // Payload for adding a new admin
       const addPayload: AddStaffModel = {
         ...basePayload,
-        roles: formData.roles ?? undefined, // Ensure roles is never null
-        password: cleanRequiredField(formData.password), // Ensure password is always a string
+        roles: formData.roles ?? undefined,
+        password: cleanRequiredField(formData.password),
       };
 
       // Payload for updating an existing admin
       const updatePayload: EditStaffModel = {
         ...basePayload,
-        status: formData.status ?? undefined, // Ensure status is never null
-        roles: formData.roles ?? undefined, // Ensure roles is never null
+        status: formData.status ?? undefined,
+        roles: formData.roles ?? undefined,
       };
 
       if (modalMode === "add") {
@@ -250,7 +247,6 @@ export default function AdminsListPage() {
           { label: "Home", href: ROUTE.DASHBOARD },
           { label: "Admin List", href: ROUTE.USERS.ADMIN },
         ]}
-        title="Admins"
         searchValue={searchQuery}
         searchPlaceholder="Search..."
         onSearchChange={handleSearchChange}
@@ -305,27 +301,15 @@ export default function AdminsListPage() {
                   return (
                     <TableRow key={admin.id}>
                       <TableCell>{indexDisplay}</TableCell>
-                      <TableCell>
-                        {admin.khmerFirstName} {admin.khmerLastName}
-                      </TableCell>
-                      <TableCell>
-                        {" "}
-                        {admin.englishFirstName ?? ""}{" "}
-                        {admin.englishLastName ?? ""}
-                      </TableCell>
                       <TableCell>{admin.username}</TableCell>
                       <TableCell>
-                        {admin.status === "ACTIVE" ? (
-                          <div className="text-green-500 flex gap-2 items-center">
-                            <Check className="w-4 h-4" />
-                            <span>{admin.status}</span>
-                          </div>
-                        ) : (
-                          <div className="text-red-500 flex gap-2 items-center">
-                            <X className="w-4 h-4" />
-                            <span>{admin.status}</span>
-                          </div>
-                        )}
+                        {`${admin.khmerFirstName || ""} ${
+                          admin.khmerLastName || ""
+                        }`.trim() || "---"}
+                      </TableCell>
+                      <TableCell>
+                        {`${admin.englishFirstName ?? ""}
+                        ${admin.englishLastName ?? ""}`.trim() || "---"}
                       </TableCell>
                       <TableCell>
                         <div className="flex justify-start space-x-2">

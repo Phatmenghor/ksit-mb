@@ -15,13 +15,39 @@ import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState, useEffect } from "react";
 import { MobileSidebar } from "@/components/layout/mobile-sidebar";
-import { getRoles } from "@/utils/local-storage/user-info/roles";
+import { clearRoles, getRoles } from "@/utils/local-storage/user-info/roles";
+import { clearUserId, getUserId } from "@/utils/local-storage/user-info/userId";
+import { useRouter } from "next/navigation";
+import { ROUTE } from "@/constants/routes";
+import { clearUsername } from "@/utils/local-storage/user-info/username";
+import { logoutUser } from "@/utils/local-storage/user-info/token";
 
 export function Header() {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [roles, setRoles] = useState<string[]>([]);
+  const roles = getRoles();
+  const role = roles[0] || "";
+  const router = useRouter();
+  const userId = getUserId();
+  const primaryRole = roles[0] || "";
 
+  const getProfileUrl = () => {
+    switch (primaryRole) {
+      case "ADMIN":
+        return ROUTE.USERS.ADMIN_VIEW(userId ?? "");
+      case "STAFF":
+        // assuming staff-officer profile route uses view route
+        return ROUTE.USERS.EDIT_STAFF(userId ?? "");
+      case "TEACHER":
+        return ROUTE.USERS.VIEW_TEACHER(userId ?? "");
+      case "STUDENT":
+        return ROUTE.STUDENTS.VIEW(userId ?? "");
+      default:
+        return "/"; // fallback
+    }
+  };
+
+  const profileUrl = getProfileUrl();
   // Close mobile menu when switching from mobile to desktop
   useEffect(() => {
     if (!isMobile) {
@@ -31,6 +57,14 @@ export function Header() {
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleLogout = () => {
+    clearUserId();
+    clearRoles();
+    clearUsername();
+    logoutUser();
+    router.push(ROUTE.AUTH.LOGIN);
   };
 
   return (
@@ -54,14 +88,8 @@ export function Header() {
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
               <Link href="/" className="flex items-center ml-2 gap-2">
-                <div className="rounded-full bg-white p-1">
-                  <img
-                    src="/placeholder.svg?height=40&width=40"
-                    alt="Logo"
-                    className="h-8 w-8"
-                  />
-                </div>
-                <span className="font-bold text-white text-lg">Admin</span>
+                <div className="rounded-full bg-white p-1"></div>
+                <span className="font-bold text-white text-lg">KSIT</span>
               </Link>
             </>
           )}
@@ -101,10 +129,12 @@ export function Header() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push(profileUrl)}>
+                Profile
+              </DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

@@ -23,7 +23,7 @@ interface BreadcrumbItemType {
 
 interface CardHeaderSectionProps {
   breadcrumbs: BreadcrumbItemType[];
-  title: string;
+  title?: string;
   searchPlaceholder?: string;
   backHref?: string;
   searchValue?: string;

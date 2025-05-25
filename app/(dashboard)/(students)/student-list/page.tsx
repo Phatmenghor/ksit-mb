@@ -74,6 +74,7 @@ export default function StudentsListPage() {
 
       try {
         const response = await getAllStudentsService({
+          ...param,
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
           classId: selectedClass?.id,
@@ -161,7 +162,6 @@ export default function StudentsListPage() {
           { label: "Dashboard", href: ROUTE.DASHBOARD },
           { label: "Student List", href: ROUTE.STUDENTS.LIST },
         ]}
-        title="Student list"
         searchValue={searchQuery}
         searchPlaceholder="Search..."
         onSearchChange={handleSearchChange}
@@ -174,9 +174,7 @@ export default function StudentsListPage() {
               <YearSelector
                 title="ឆ្នាំសិក្សា"
                 onChange={handleYearChange}
-                value={selectAcademicYear ?? 2024}
-                maxYear={2040}
-                minYear={2020}
+                value={selectAcademicYear ?? 0}
               />
             </div>
 

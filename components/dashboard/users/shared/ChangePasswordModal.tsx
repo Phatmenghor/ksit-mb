@@ -1,112 +1,90 @@
-import { useState } from "react";
+"use client";
+
+import { useState, useRef, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
+  DialogDescription,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Separator } from "@radix-ui/react-dropdown-menu";
-import { Save } from "lucide-react";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@radix-ui/react-dropdown-menu";
+import { Eye, EyeOff, Save } from "lucide-react";
 import { AdminChangePasswordService } from "@/service/auth/auth.service";
 
-const UserPasswordFormSchema = z
+const schema = z
   .object({
-    newPassword: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
-    }),
-    confirmNewPassword: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
-    }),
+    newPassword: z.string().min(8, "Must be 8+ chars"),
+    confirmNewPassword: z.string().min(8, "Must be 8+ chars"),
   })
   .refine((data) => data.newPassword === data.confirmNewPassword, {
     message: "Passwords must match",
     path: ["confirmNewPassword"],
   });
 
-type Props = {
-  userId: number | undefined;
-  onClose: () => void;
-  isOpen: boolean;
-};
-
-type formData = z.infer<typeof UserPasswordFormSchema>;
+type FormData = z.infer<typeof schema>;
 
 export default function ChangePasswordModal({
   userId,
-  onClose,
   isOpen,
-}: Props) {
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  onClose,
+}: {
+  userId?: number;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  const [show1, setShow1] = useState(false);
+  const [show2, setShow2] = useState(false);
+  const firstRef = useRef<HTMLInputElement>(null);
 
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<formData>({
-    resolver: zodResolver(UserPasswordFormSchema),
-    defaultValues: {
-      newPassword: "",
-      confirmNewPassword: "",
-    },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { newPassword: "", confirmNewPassword: "" },
   });
 
-  // Handle form submission
-  const handleChangeUserPassword = async (data: formData) => {
-    if (!userId) {
-      toast.error("User ID is required.");
-      return;
-    }
-    const newUserPassword = {
-      id: userId,
-      newPassword: data.newPassword,
-      confirmNewPassword: data.confirmNewPassword,
-    };
+  // autofocus first field when dialog opens
+  useEffect(() => {
+    if (isOpen) firstRef.current?.focus();
+  }, [isOpen]);
 
-    const response = await AdminChangePasswordService(newUserPassword);
-    if (response) {
-      toast.success("User password changed successfully.");
-      onClose();
-    } else {
-      toast.error("Failed to change password.");
-    }
+  const onSubmit = async (data: FormData) => {
+    if (!userId) return toast.error("User ID missing");
+    const ok = await AdminChangePasswordService({ id: userId, ...data });
+    ok
+      ? (toast.success("Password changed"), onClose())
+      : toast.error("Change failed");
   };
+
+  const inputClasses =
+    "pr-10 placeholder-gray-400 placeholder-opacity-80 text-gray-900";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <div className="z-50">
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Change Password</DialogTitle>
-            <DialogDescription>
-              Please enter your new password and confirm it below.
-            </DialogDescription>
-          </DialogHeader>
-          <form
-            onSubmit={handleSubmit(handleChangeUserPassword)}
-            className="space-y-6"
-          >
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Button
-                  type="button"
-                  variant="link"
-                  size="sm"
-                  className="px-0 text-xs"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                >
-                  {showNewPassword ? "Hide" : "Show"}
-                </Button>
-              </div>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Change Password</DialogTitle>
+          <DialogDescription>
+            Default: <strong className="text-blue-600">88889999</strong>
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* New Password */}
+          <div>
+            <Label htmlFor="newPassword">New Password</Label>
+            <div className="relative mt-1">
               <Controller
                 control={control}
                 name="newPassword"
@@ -114,35 +92,42 @@ export default function ChangePasswordModal({
                   <Input
                     {...field}
                     id="newPassword"
-                    type={showNewPassword ? "text" : "password"}
+                    type={show1 ? "text" : "password"}
                     placeholder="••••••••"
-                    className="placeholder-gray-500 focus:outline-none"
                     disabled={isSubmitting}
+                    className={inputClasses}
+                    ref={firstRef}
                   />
                 )}
               />
-              {errors.newPassword && (
-                <p className="text-sm text-destructive">
-                  {errors.newPassword.message}
-                </p>
-              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute inset-y-0 right-0 mr-2 text-gray-500"
+                onClick={() => setShow1((v) => !v)}
+                aria-label={show1 ? "Hide password" : "Show password"}
+              >
+                {show1 ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </Button>
             </div>
+            {errors.newPassword && (
+              <p className="text-sm text-destructive">
+                {errors.newPassword.message}
+              </p>
+            )}
+          </div>
 
-            <Separator />
+          <Separator />
 
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
-                <Button
-                  type="button"
-                  variant="link"
-                  size="sm"
-                  className="px-0 text-xs"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? "Hide" : "Show"}
-                </Button>
-              </div>
+          {/* Confirm New Password */}
+          <div>
+            <Label htmlFor="confirmNewPassword">Confirm Password</Label>
+            <div className="relative mt-1">
               <Controller
                 control={control}
                 name="confirmNewPassword"
@@ -150,29 +135,43 @@ export default function ChangePasswordModal({
                   <Input
                     {...field}
                     id="confirmNewPassword"
-                    type={showConfirmPassword ? "text" : "password"}
+                    type={show2 ? "text" : "password"}
                     placeholder="••••••••"
-                    className="placeholder-gray-400 focus:outline-none"
                     disabled={isSubmitting}
+                    className={inputClasses}
                   />
                 )}
               />
-              {errors.confirmNewPassword && (
-                <p className="text-sm text-destructive">
-                  {errors.confirmNewPassword.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex justify-end">
-              <Button type="submit" className="gap-1" disabled={isSubmitting}>
-                <Save className="h-4 w-4" />
-                Update Password
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute inset-y-0 right-0 mr-2 text-gray-500"
+                onClick={() => setShow2((v) => !v)}
+                aria-label={show2 ? "Hide password" : "Show password"}
+              >
+                {show2 ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
               </Button>
             </div>
-          </form>
-        </DialogContent>
-      </div>
+            {errors.confirmNewPassword && (
+              <p className="text-sm text-destructive">
+                {errors.confirmNewPassword.message}
+              </p>
+            )}
+          </div>
+
+          {/* Submit */}
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isSubmitting} className="gap-2">
+              <Save className="h-4 w-4" /> Update
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 }

@@ -174,12 +174,7 @@ export const AddStaffSchema = BaseStaffSchema.extend({
   username: z
     .string()
     .min(3, "Username must be at least 3 characters")
-    .max(20, "Username must be at most 20 characters")
-    .regex(
-      usernameRegex,
-      "Username can only contain letters, numbers, and underscores"
-    ),
-
+    .max(20, "Username must be at most 20 characters"),
   departmentId: z
     .number()
     .int("Department ID must be an integer")

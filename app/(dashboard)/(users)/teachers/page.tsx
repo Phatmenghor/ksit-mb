@@ -92,7 +92,6 @@ export default function TeachersListPage() {
           { label: "Home", href: ROUTE.DASHBOARD },
           { label: "Teacher List", href: ROUTE.USERS.TEACHERS },
         ]}
-        title="Teachers"
         searchValue={searchQuery}
         searchPlaceholder="Search..."
         onSearchChange={handleSearchChange}
@@ -136,20 +135,24 @@ export default function TeachersListPage() {
                     <TableRow key={teacher.id}>
                       <TableCell>{indexDisplay}</TableCell>
                       <TableCell>
-                        {teacher.khmerFirstName || ""}{" "}
-                        {teacher.khmerLastName || ""}
+                        {`${teacher.khmerFirstName || ""} ${
+                          teacher.khmerLastName || ""
+                        }`.trim() || "---"}
                       </TableCell>
                       <TableCell>
-                        {" "}
-                        {teacher.englishFirstName ?? ""}{" "}
-                        {teacher.englishLastName ?? ""}
+                        {`${teacher.englishFirstName ?? ""}
+                        ${teacher.englishLastName ?? ""}`.trim() || "---"}
                       </TableCell>
-                      <TableCell>{teacher.username || ""}</TableCell>
-                      <TableCell>{teacher.identifyNumber || ""}</TableCell>
-                      <TableCell>{teacher.gender || ""}</TableCell>
-                      <TableCell>{teacher.dateOfBirth || ""}</TableCell>
-                      <TableCell>{teacher.phoneNumber || ""}</TableCell>
-                      <TableCell>{teacher.department?.name || ""}</TableCell>
+                      <TableCell>{teacher.username.trim() || "---"}</TableCell>
+                      <TableCell>{teacher.identifyNumber || "---"}</TableCell>
+                      <TableCell>{teacher.gender || "---"}</TableCell>
+                      <TableCell>{teacher.dateOfBirth || "---"}</TableCell>
+                      <TableCell>
+                        {teacher.phoneNumber?.trim() || "---"}
+                      </TableCell>
+                      <TableCell>
+                        {teacher.department?.name?.trim() || "---"}
+                      </TableCell>
                       <TableCell>
                         <div className="flex justify-start">
                           <Button

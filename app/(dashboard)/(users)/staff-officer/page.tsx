@@ -132,7 +132,6 @@ export default function StuffOfficerListPage() {
           { label: "Home", href: ROUTE.DASHBOARD },
           { label: "Stuff-Officer-List", href: ROUTE.USERS.STUFF_OFFICER },
         ]}
-        title="Staff Officers"
         searchValue={searchQuery}
         buttonHref={ROUTE.USERS.ADD_STAFF}
         searchPlaceholder="Search..."
@@ -187,27 +186,15 @@ export default function StuffOfficerListPage() {
                   return (
                     <TableRow key={staff.id}>
                       <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{staff.username.trim() || "---"}</TableCell>
                       <TableCell>
-                        {staff.khmerFirstName || ""} {staff.khmerLastName || ""}
+                        {`${staff.khmerFirstName || ""} ${
+                          staff.khmerLastName || ""
+                        }`.trim() || "---"}
                       </TableCell>
                       <TableCell>
-                        {" "}
-                        {staff.englishFirstName || ""}{" "}
-                        {staff.englishLastName || ""}
-                      </TableCell>
-                      <TableCell>{staff.username || ""}</TableCell>
-                      <TableCell>
-                        {staff.status === "ACTIVE" ? (
-                          <div className="text-green-500 flex gap-2 items-center">
-                            <Check className="w-4 h-4" />
-                            <span>{staff.status}</span>
-                          </div>
-                        ) : (
-                          <div className="text-red-500 flex gap-2 items-center">
-                            <X className="w-4 h-4" />
-                            <span>{staff.status}</span>
-                          </div>
-                        )}
+                        {`${staff.englishFirstName ?? ""}
+                        ${staff.englishLastName ?? ""}`.trim() || "---"}
                       </TableCell>
                       <TableCell>
                         <div className="flex justify-start space-x-2">
