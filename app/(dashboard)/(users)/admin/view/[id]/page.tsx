@@ -11,7 +11,6 @@ import { toast } from "sonner";
 
 export default function AdminProfilePage() {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [admin, setAdmin] = React.useState<StaffRespondModel | null>(null);
   const params = useParams();
   const adminId = params.id as string;

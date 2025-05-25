@@ -1,27 +1,45 @@
 "use client";
+
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useParams } from "next/navigation";
+import { CircleAlert, DollarSign, FileText } from "lucide-react";
+
 import { UserProfileSection } from "@/components/dashboard/users/shared/UserProfile";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 import { getStudentByIdService } from "@/service/user/student.service";
-import { toast } from "sonner";
-import { CircleAlert, DollarSign, FileText } from "lucide-react";
 import StudentDetails from "@/components/dashboard/users/student/view/tab/StudentDetailsTabs";
 import StudentDetailsTabs from "@/components/dashboard/users/student/view/tab/StudentDetailsTabs";
 import PaymentTabs from "@/components/dashboard/users/student/view/tab/PaymentTabs";
 import TranscriptTabs from "@/components/dashboard/users/student/view/tab/TranscriptTabs";
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 
+const tabs = [
+  {
+    value: "information",
+    label: "Student Information",
+    icon: CircleAlert,
+  },
+  {
+    value: "payment",
+    label: "Payment",
+    icon: DollarSign,
+  },
+  {
+    value: "transcript",
+    label: "Transcript",
+    icon: FileText,
+  },
+];
+
 export default function StudentViewPage() {
   const [activeTab, setActiveTab] = React.useState("information");
   const [isLoading, setIsLoading] = React.useState(false);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [studentDetail, setStudentDetail] =
     React.useState<StudentByIdModel | null>(null);
   const { type, id } = useParams<{ type: string; id: string }>();
-  const [data, setData] = useState<any>(null);
 
   const loadInfo = async () => {
     setIsLoading(true);
@@ -79,23 +97,7 @@ export default function StudentViewPage() {
         tabs={
           <div className="container mx-auto mt-3">
             <TabsList className="flex w-full border-b gap-6 pb-1 bg-transparent justify-start">
-              {[
-                {
-                  value: "information",
-                  label: "Student Information",
-                  icon: CircleAlert,
-                },
-                {
-                  value: "payment",
-                  label: "Payment",
-                  icon: DollarSign,
-                },
-                {
-                  value: "transcript",
-                  label: "Transcript",
-                  icon: FileText,
-                },
-              ].map(({ value, label, icon: Icon }) => (
+              {tabs.map(({ value, label, icon: Icon }) => (
                 <TabsTrigger
                   key={value}
                   value={value}

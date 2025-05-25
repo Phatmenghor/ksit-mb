@@ -1,20 +1,23 @@
 "use client";
-import ComboBoxClass from "@/components/shared/ComboBox/combobox-class";
+
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Plus } from "lucide-react";
+import { z } from "zod";
+import { toast } from "sonner";
+import { Controller, useForm } from "react-hook-form";
+
+import ComboBoxClass from "@/components/shared/ComboBox/combobox-class";
 import { StatusEnum } from "@/constants/constant";
 import { GenerateMultipleStudent } from "@/model/user/student/student.request.model";
 import { generateMultipleStudentService } from "@/service/user/student.service";
 import { exportStudentsToExcel } from "@/utils/excel/Excel-Generate";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus } from "lucide-react";
-import React, { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
 
+// Validation schema for generating multiple students
 const generateMultipleStudentSchema = z.object({
   classId: z.object({
     id: z.number(),
@@ -29,12 +32,15 @@ const generateMultipleStudentSchema = z.object({
   status: z.string().min(1, "Status is required"),
 });
 
+// TypeScript type inferred from the schema
 export type GenerateMultipleStudentSchema = z.infer<
   typeof generateMultipleStudentSchema
 >;
 
 export default function GenerateMultiStudentForm() {
   const [isLoading, setIsLoading] = useState(false);
+
+  // React Hook Form setup with Zod schema resolver
   const {
     control,
     handleSubmit,
@@ -48,9 +54,11 @@ export default function GenerateMultiStudentForm() {
     },
   });
 
+  // Submit handler for generating students and exporting to Excel
   const onSubmitStudent = async (data: GenerateMultipleStudentSchema) => {
     setIsLoading(true);
     try {
+      // Check if classId is valid before proceeding
       if (!data.classId || !data.classId.id) {
         toast.error("Please select a valid class.");
         setIsLoading(false);
@@ -65,6 +73,7 @@ export default function GenerateMultiStudentForm() {
 
       const response = await generateMultipleStudentService(payload);
 
+      // Export generated students to Excel file
       await exportStudentsToExcel(
         response?.data ?? [],
         "generated_students.xlsx"

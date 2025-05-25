@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
-import PaginationPage from "@/components/shared/pagination";
 import {
   Table,
   TableBody,
@@ -13,14 +12,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { getAllStudentsService } from "@/service/user/student.service";
+import { useRouter } from "next/navigation";
+
+import PaginationPage from "@/components/shared/pagination";
+import {
+  editStudentService,
+  getAllStudentsService,
+} from "@/service/user/student.service";
 import { StatusEnum } from "@/constants/constant";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 import { YearSelector } from "@/components/shared/year-selector";
 import ComboBoxClass from "@/components/shared/ComboBox/combobox-class";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
-import { useRouter } from "next/navigation";
 import { useDebounce } from "@/utils/debounce/debounce";
 import Loading from "../../permissions/loading";
 import { StudentTableHeader } from "@/constants/table/user";
@@ -33,33 +37,42 @@ import {
 } from "@/model/user/student/student.request.model";
 
 export default function StudentsListPage() {
+  // Core state
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // Filter state
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectAcademicYear, setSelectAcademicYear] = useState<
     number | undefined
   >();
   const [selectedClass, setSelectedClass] = useState<ClassModel>();
+
+  // Main student data from API
   const [allStudentData, setAllStudentData] = useState<AllStudentModel | null>(
     null
   );
+
+  // Dialog state
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] =
     useState(false);
-  const [selectedStludent, setSelectedStudent] = useState<StudentModel | null>(
+  const [selectedStudent, setSelectedStudent] = useState<StudentModel | null>(
     null
   );
 
+  // Debounced search to reduce API call frequency
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-
   const router = useRouter();
+
+  // Fetch student data from server
   const loadStudents = useCallback(
     async (param: RequestAllStudent) => {
       setIsLoading(true);
 
       try {
         const response = await getAllStudentsService({
-          search: searchQuery,
+          search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
           ...param,
         });
@@ -78,10 +91,12 @@ export default function StudentsListPage() {
     [debouncedSearchQuery, selectedClass]
   );
 
+  // Run fetch on mount and when filters change
   useEffect(() => {
     loadStudents({});
   }, [loadStudents, selectedClass, debouncedSearchQuery, selectAcademicYear]);
 
+  // Handlers for search, year, class change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
@@ -94,18 +109,19 @@ export default function StudentsListPage() {
     setSelectedClass(e ?? undefined);
   };
 
-  const iconColor = "text-black";
-
+  // Delete selected student (optimistic UI update)
   async function handleDeleteStudent() {
-    if (!selectedStludent) return;
+    if (!selectedStudent) return;
 
     setIsSubmitting(true);
     try {
       const originalData = allStudentData;
+
+      // Optimistically remove student from UI
       setAllStudentData((prevData) => {
         if (!prevData) return null;
         const updatedContent = prevData.content.filter(
-          (item) => item.id !== selectedStludent.id
+          (item) => item.id !== selectedStudent.id
         );
         return {
           ...prevData,
@@ -114,14 +130,13 @@ export default function StudentsListPage() {
         };
       });
 
-      const response = await (selectedStludent.id,
-      {
+      const response = await editStudentService(selectedStudent.id, {
         status: StatusEnum.INACTIVE,
       });
 
       if (response) {
         toast.success(
-          `Student ${selectedStludent.username ?? ""} deleted successfully`
+          `Student ${selectedStudent.username ?? ""} deleted successfully`
         );
       } else {
         setAllStudentData(originalData);
@@ -234,7 +249,7 @@ export default function StudentsListPage() {
                             }
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-black hover:text-gray-900"
+                            className="text-black"
                             title="Edit"
                           >
                             <Pencil className="h-4 w-4" />
@@ -245,10 +260,10 @@ export default function StudentsListPage() {
                               setIsChangePasswordDialogOpen(true);
                               setSelectedStudent(student);
                             }}
-                            className={iconColor}
+                            className="text-black"
                             size="sm"
                           >
-                            <RotateCcw />
+                            <RotateCcw className="h-4 w-4" />
                           </Button>
                           <Button
                             onClick={() => {
@@ -257,7 +272,7 @@ export default function StudentsListPage() {
                             }}
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-black"
+                            className="text-black"
                             disabled={isSubmitting}
                             title="Delete"
                           >
@@ -280,7 +295,7 @@ export default function StudentsListPage() {
           setIsChangePasswordDialogOpen(false);
           setSelectedStudent(null);
         }}
-        userId={selectedStludent?.id}
+        userId={selectedStudent?.id}
       />
 
       <DeleteConfirmationDialog
@@ -288,8 +303,8 @@ export default function StudentsListPage() {
         onClose={() => setIsDeleteDialogOpen(false)}
         onDelete={handleDeleteStudent}
         title="Delete Student"
-        description={`Are you sure you want to delete the student: ${selectedStludent?.username}?`}
-        itemName={selectedStludent?.username}
+        description={`Are you sure you want to delete the student: ${selectedStudent?.username}?`}
+        itemName={selectedStudent?.username}
         isSubmitting={isSubmitting}
       />
 
