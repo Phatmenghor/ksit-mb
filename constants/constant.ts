@@ -167,3 +167,9 @@ export const DAYS_OF_WEEK = [
     id: 0,
   },
 ];
+
+export enum Mode {
+  VIEW = "VIEW",
+  ADD = "ADD",
+  EDIT = "EDIT",
+}

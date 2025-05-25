@@ -26,7 +26,10 @@ export const ROUTE = {
 
   USERS: {
     ADMIN: "/admin",
-    STUFF_OFFICER: "/stuff-officer",
+    ADMIN_VIEW: (id: string) => `/admin/view/${id}`,
+    EDIT_STAFF: (id: string) => `/staff-officer/edit/${id}`,
+    ADD_STAFF: "/staff-officer/add",
+    STUFF_OFFICER: "/staff-officer",
     TEACHERS: "/teachers",
     ADD_TEACHER: "/teachers/add",
     EDIT_TEACHER: (id: string) => `/teachers/edit/${id}`,
@@ -37,7 +40,8 @@ export const ROUTE = {
     ADD_MULTIPLE: "/add-multiple",
     ADD_SINGLE: "/add-single",
     LIST: "/list",
-    DROPOUT: "/dropout",
+    VIEW: (id: string) => `/view/${id}`,
+    EDIT_STUDENT: (id: string) => `/edit/${id}`,
   },
 
   SCHEDULE: {

@@ -1,3 +1,4 @@
+"use client";
 // components/CardHeaderSection.tsx
 import {
   Breadcrumb,
@@ -9,20 +10,11 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Filter, ArrowLeft } from "lucide-react";
+import { Search, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { StatusEnum } from "@/constants/constant";
-
-// ...imports remain the same
+import { useRouter } from "next/navigation";
 
 interface BreadcrumbItemType {
   label: string;
@@ -39,7 +31,10 @@ interface CardHeaderSectionProps {
   buttonText?: string;
   buttonIcon?: React.ReactNode;
   buttonHref?: string;
+  back: boolean;
+  openModal?: () => void;
   customSelect?: React.ReactNode; // 👈 new optional prop
+  tabs?: React.ReactNode; // 👈 new prop
 }
 
 export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
@@ -51,9 +46,13 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
   buttonText,
   buttonIcon,
   backHref,
+  back,
   buttonHref,
+  openModal,
   customSelect, // 👈 receive here
+  tabs,
 }) => {
+  const router = useRouter();
   return (
     <Card>
       <CardContent className="p-6 space-y-3">
@@ -83,12 +82,16 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="mb-6 flex flex-col md:flex-row md:items-start md:justify-start gap-4">
-          {backHref && (
+        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-start gap-4">
+          {backHref ? (
             <Link href={backHref}>
               <ArrowLeft />
             </Link>
-          )}
+          ) : back ? (
+            <Button variant="ghost" onClick={() => router.back()}>
+              <ArrowLeft />
+            </Button>
+          ) : null}
           <h3 className="text-xl font-bold">{title}</h3>
         </div>
 
@@ -121,9 +124,19 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
                 </Button>
               </Link>
             )}
+            {buttonText && openModal && (
+              <Button
+                className="bg-green-900 text-white hover:bg-green-950 flex gap-1"
+                onClick={openModal}
+              >
+                {buttonIcon}
+                {buttonText}
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>
+      {tabs && <div className="border-t px-6">{tabs}</div>}
     </Card>
   );
 };

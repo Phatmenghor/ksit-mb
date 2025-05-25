@@ -21,9 +21,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { StatusEnum } from "@/constants/constant";
 import { getAllDepartmentService } from "@/service/master-data/department.service";
-import { DepartmentModel } from "@/model/master-data/department/all-department-model";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
-
+import React from "react";
 interface ComboboxSelectedProps {
   dataSelect: ClassModel | null;
   onChangeSelected: (item: ClassModel) => void; // Callback to notify parent about the selection change

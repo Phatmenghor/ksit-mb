@@ -1,0 +1,63 @@
+"use client";
+import AdminPersonal from "@/components/dashboard/users/admin/AdminPersonal";
+import { UserProfileSection } from "@/components/dashboard/users/shared/UserProfile";
+import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { ROUTE } from "@/constants/routes";
+import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
+import { getStaffByIdService } from "@/service/user/user.service";
+import { useParams } from "next/navigation";
+import React, { useEffect } from "react";
+import { toast } from "sonner";
+
+export default function AdminProfilePage() {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [admin, setAdmin] = React.useState<StaffRespondModel | null>(null);
+  const params = useParams();
+  const adminId = params.id as string;
+
+  const loadAdmin = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getStaffByIdService(adminId);
+      if (response) {
+        setAdmin(response);
+      } else {
+        toast.error("Error getting admin data");
+      }
+    } catch (error) {
+      console.error("Error fetching admin data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAdmin();
+  }, [adminId]);
+
+  const profile = admin
+    ? {
+        id: admin.identifyNumber,
+        username: admin.username,
+        profileUrl: admin.profileUrl,
+      }
+    : null;
+
+  return (
+    <div>
+      {/* Header with TabsList injected via prop */}
+      <CardHeaderSection
+        title="Admin View Details"
+        back
+        breadcrumbs={[
+          { label: "Dashboard", href: ROUTE.DASHBOARD },
+          { label: "View Admin", href: ROUTE.USERS.ADMIN_VIEW(adminId) },
+        ]}
+      />
+      <div className="mt-4 space-y-4">
+        <UserProfileSection user={profile} />
+        <AdminPersonal admin={admin} />
+      </div>
+    </div>
+  );
+}

@@ -11,18 +11,22 @@ export interface AttendanceGenerateModel {
   className: string;
   teacherId: number;
   teacherName: string;
+  totalStudents: number;
+  totalPresent: number;
+  totalAbsent: number;
   attendances: AttendancModel[];
 }
 
 export interface AttendancModel {
   id: number;
-  status: any;
+  status: string;
   attendanceType: string;
+  identifyNumber: string;
   comment: string;
   recordedTime: string;
   finalizationStatus: string;
   studentId: number;
   studentName: string;
-  studentCode: string;
   attendanceSessionId: number;
+  createdAt: string;
 }
