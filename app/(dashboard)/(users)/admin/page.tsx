@@ -373,6 +373,16 @@ export default function AdminsListPage() {
         )}
       </div>
 
+      {!isLoading && data && (
+        <div className="mt-4 flex justify-end">
+          <PaginationPage
+            currentPage={data.pageNo}
+            totalPages={data.totalPages}
+            onPageChange={(page: number) => loadData({ pageNo: page })}
+          />
+        </div>
+      )}
+
       <AdminModalForm
         isOpen={isModalOpen}
         mode={modalMode}
@@ -400,16 +410,6 @@ export default function AdminsListPage() {
         itemName={selectedAdmin?.username}
         isSubmitting={isSubmitting}
       />
-
-      {!isLoading && data && (
-        <div className="mt-4 flex justify-end">
-          <PaginationPage
-            currentPage={data.pageNo}
-            totalPages={data.totalPages}
-            onPageChange={(page: number) => loadData({ pageNo: page })}
-          />
-        </div>
-      )}
     </div>
   );
 }

@@ -13,8 +13,6 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
-import PaginationPage from "@/components/shared/pagination";
 import {
   editStudentService,
   getAllStudentsService,
@@ -35,6 +33,7 @@ import {
 } from "@/model/user/student/student.request.model";
 import Loading from "@/components/shared/loading";
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
+import PaginationPage from "@/components/shared/pagination-page";
 
 export default function StudentsListPage() {
   // Core state
