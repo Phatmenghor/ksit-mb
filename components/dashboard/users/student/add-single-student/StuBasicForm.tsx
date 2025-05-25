@@ -1,3 +1,4 @@
+"use client";
 import ComboBoxClass from "@/components/shared/ComboBox/combobox-class";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -9,24 +10,25 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Mode } from "@/constants/constant";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
 
 import { useState } from "react";
-import { Controller, useForm, useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 
-export function StudentBasicForm({ mode }: { mode: Mode }) {
+export function StudentBasicForm() {
   const [selectClass, setSelectedClass] = useState<ClassModel | null>(null);
   const {
     setValue,
     control,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = useFormContext();
 
   const handleClassChange = (selectedClass: ClassModel | null) => {
+    console.log("##class: ", selectedClass?.id);
     setSelectedClass(selectedClass);
     setValue("classId", selectedClass?.id as number, {
       shouldValidate: true,
+      shouldDirty: true,
     });
   };
 
@@ -50,13 +52,23 @@ export function StudentBasicForm({ mode }: { mode: Mode }) {
                 control={control}
                 name="username"
                 render={({ field }) => (
-                  <Input
-                    id="user-name"
-                    {...field}
-                    placeholder="Username..."
-                    disabled={isSubmitting}
-                    className="bg-gray-100"
-                  />
+                  <>
+                    <Input
+                      id="user-name"
+                      {...field}
+                      placeholder="Username..."
+                      disabled={isSubmitting}
+                      className="bg-gray-100"
+                      required
+                    />
+                    {errors.username &&
+                      typeof errors.username === "object" &&
+                      "message" in errors.username && (
+                        <p className="text-red-600 text-sm mt-1">
+                          {errors.username.message as string}
+                        </p>
+                      )}
+                  </>
                 )}
               />
             </div>
@@ -72,14 +84,25 @@ export function StudentBasicForm({ mode }: { mode: Mode }) {
                 control={control}
                 name="password"
                 render={({ field }) => (
-                  <Input
-                    id="password"
-                    {...field}
-                    type="password"
-                    disabled={isSubmitting}
-                    className="bg-gray-100"
-                    placeholder="Password..."
-                  />
+                  <>
+                    <Input
+                      id="password"
+                      {...field}
+                      type="password"
+                      disabled={isSubmitting}
+                      className="bg-gray-100"
+                      placeholder="Password..."
+                      required
+                    />
+                    {errors.password &&
+                      typeof errors.password === "object" &&
+                      "message" in errors.password &&
+                      typeof errors.password.message === "string" && (
+                        <p className="text-red-600 text-sm mt-1">
+                          {errors.password.message}
+                        </p>
+                      )}
+                  </>
                 )}
               />
             </div>
@@ -89,7 +112,7 @@ export function StudentBasicForm({ mode }: { mode: Mode }) {
                 control={control}
                 name="classId"
                 render={({ field }) => (
-                  <FormItem aria-disabled={isSubmitting} {...field}>
+                  <FormItem {...field}>
                     <FormLabel>
                       Class <span className="text-red-500">*</span>
                     </FormLabel>

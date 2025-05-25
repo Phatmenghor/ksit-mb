@@ -7,19 +7,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import React from "react";
+import React, { useId } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { GenderEnum, Mode } from "@/constants/constant";
-import { ZodStaffModelType } from "@/model/user/staff/schema";
+import { GenderEnum } from "@/constants/constant";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 
-export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
+export default function PersonalHistoryForm() {
   const {
     control,
-    formState: { isSubmitting, isDirty },
-  } = useFormContext<ZodStaffModelType>();
+    formState: { isSubmitting },
+  } = useFormContext();
 
-  const isReadOnly = mode === Mode.VIEW;
+  const uniqueId = useId();
 
   return (
     <CollapsibleCard title="ប្រវត្តិផ្ទាល់គ្រូបង្រៀន">
@@ -44,7 +43,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                     id="khmerFirstName"
                     {...field}
                     placeholder="នាមត្រកូល..."
-                    disabled={isSubmitting || isReadOnly}
+                    disabled={isSubmitting}
                     className="w-1/2 bg-gray-100"
                   />
                 )}
@@ -55,7 +54,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                 render={({ field }) => (
                   <Input
                     {...field}
-                    disabled={isSubmitting || isReadOnly}
+                    disabled={isSubmitting}
                     placeholder="នាមខ្លួន..."
                     className="w-1/2 bg-gray-100"
                   />
@@ -78,7 +77,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                 <Input
                   id="account-number"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="លេខគណនីបៀវត្ស..."
                   className="w-full bg-gray-100"
                 />
@@ -89,7 +88,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
           {/* ជាអក្សរឡាតាំង */}
           <div className="grid grid-cols-1 gap-2">
             <label
-              htmlFor="latin-full-name"
+              htmlFor={`${uniqueId}-latin-full-name`}
               className="mb-1 block text-sm font-bold"
             >
               ជាអក្សរឡាតាំង
@@ -100,9 +99,9 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                 control={control}
                 render={({ field }) => (
                   <Input
-                    id="latin-first-name"
+                    id={`${uniqueId}-latin-first-name`}
                     {...field}
-                    disabled={isSubmitting || isReadOnly}
+                    disabled={isSubmitting}
                     placeholder="First name..."
                     className="w-1/2 bg-gray-100"
                   />
@@ -115,7 +114,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                   <Input
                     id="latin-last-name"
                     {...field}
-                    disabled={isSubmitting || isReadOnly}
+                    disabled={isSubmitting}
                     placeholder="Last name..."
                     className="w-1/2 bg-gray-100"
                   />
@@ -139,7 +138,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                 <Input
                   id="membership-number"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="លេខសមាជិកបសបខ..."
                   className="w-full bg-gray-100"
                 />
@@ -158,7 +157,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
               render={({ field }) => (
                 <Select
                   onValueChange={field.onChange}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   value={field.value}
                 >
                   <SelectTrigger className="bg-gray-100">
@@ -185,13 +184,13 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
               name="startWorkDate"
               control={control}
               render={({ field }) => (
-                <Input
+                <input
                   id="start-Work-Date"
                   type="date"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="mm/dd/yyyy"
-                  className="w-full bg-gray-100"
+                  className="w-full bg-gray-100 py-2 px-3 border rounded-md pr-10"
                 />
               )}
             />
@@ -206,13 +205,13 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
               name="dateOfBirth"
               control={control}
               render={({ field }) => (
-                <Input
+                <input
                   id="dob"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   type="date"
                   placeholder="mm/dd/yyyy"
-                  className="w-full bg-gray-100"
+                  className="w-full bg-gray-100 py-2 px-3 border rounded-md pr-10"
                 />
               )}
             />
@@ -230,13 +229,13 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
               control={control}
               name="currentPositionDate"
               render={({ field }) => (
-                <Input
+                <input
                   id="appointment-date"
                   type="date"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="mm/dd/yyyy"
-                  className="w-full bg-gray-100"
+                  className="w-full bg-gray-100 py-2 px-3 border rounded-md pr-10"
                 />
               )}
             />
@@ -259,7 +258,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                     id="nationality"
                     type="text"
                     {...field}
-                    disabled={isSubmitting || isReadOnly}
+                    disabled={isSubmitting}
                     placeholder="ជនជាតិ"
                     className="w-full bg-gray-100"
                   />
@@ -279,7 +278,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                   <Input
                     id="disable"
                     {...field}
-                    disabled={isSubmitting || isReadOnly}
+                    disabled={isSubmitting}
                     placeholder="បញ្ហាពិការ..."
                     className="w-full bg-gray-100"
                   />
@@ -304,7 +303,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                   id="employee-work"
                   type="text"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="អង្គភាពបម្រើការងារ..."
                   className="w-full bg-gray-100"
                 />
@@ -314,10 +313,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
 
           {/* អត្តលេខមន្ត្រី */}
           <div>
-            <label
-              htmlFor="identify-number"
-              className="mb-1 block text-sm font-bold"
-            >
+            <label htmlFor="staff-id" className="mb-1 block text-sm font-bold">
               អត្តលេខមន្ត្រី
             </label>
             <Controller
@@ -325,9 +321,9 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
               name="staffId"
               render={({ field }) => (
                 <Input
-                  id="identify-number"
+                  id="staff-id"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="អត្តលេខមន្ត្រី..."
                   className="w-full bg-gray-100"
                 />
@@ -352,7 +348,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                     <Input
                       id="village"
                       {...field}
-                      disabled={isSubmitting || isReadOnly}
+                      disabled={isSubmitting}
                       placeholder="ភូមិ..."
                       className="w-full bg-gray-100"
                     />
@@ -373,7 +369,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                     <Input
                       id="commune"
                       {...field}
-                      disabled={isSubmitting || isReadOnly}
+                      disabled={isSubmitting}
                       placeholder="ឃុំ..."
                       className="w-full bg-gray-100"
                     />
@@ -395,7 +391,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                     <Input
                       id="district"
                       {...field}
-                      disabled={isSubmitting || isReadOnly}
+                      disabled={isSubmitting}
                       placeholder="ស្រុក..."
                       className="w-full bg-gray-100"
                     />
@@ -416,7 +412,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                     <Input
                       id="province"
                       {...field}
-                      disabled={isSubmitting || isReadOnly}
+                      disabled={isSubmitting}
                       placeholder="ខេត្ត..."
                       className="w-full bg-gray-100"
                     />
@@ -442,7 +438,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                   id="national-Id"
                   type="texst"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="លេខអត្តសញ្ញាណបណ្ណ..."
                   className="w-full bg-gray-100"
                 />
@@ -452,7 +448,10 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
 
           {/* ការិយាល័យe */}
           <div>
-            <label htmlFor="Office" className="mb-1 block text-sm font-bold">
+            <label
+              htmlFor="staff-office"
+              className="mb-1 block text-sm font-bold"
+            >
               ការិយាល័យ
             </label>
             <Controller
@@ -460,10 +459,10 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
               name="officeName"
               render={({ field }) => (
                 <Input
-                  id="Office"
+                  id="staff-office"
                   type="text"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="ការិយាល័យ"
                   className="w-full bg-gray-100"
                 />
@@ -483,7 +482,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                 <Input
                   id="Office"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="ទីកន្លែងកំណើត"
                   className="w-full bg-gray-100"
                 />
@@ -503,7 +502,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
                 <Input
                   id="position"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="មុខតំណែង..."
                   className="w-full bg-gray-100"
                 />
@@ -523,7 +522,7 @@ export default function PersonalHistoryForm({ mode }: { mode: Mode }) {
               <Input
                 id="Posts"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="ប្រកាស..."
                 className="bg-gray-100"
               />

@@ -1,27 +1,23 @@
 "use client";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
-import { Mode } from "@/constants/constant";
-import { ZodStaffModelType } from "@/model/user/staff/schema";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
-export default function PraiseCriticismForm({ mode }: { mode: Mode }) {
+export default function PraiseCriticismForm() {
   const {
     control,
-    formState: { isSubmitting, isDirty },
-  } = useFormContext<ZodStaffModelType>();
+    formState: { isSubmitting },
+  } = useFormContext();
 
   useFieldArray({
     control: control,
     name: "teacherPraiseOrCriticisms",
   });
 
-  const isReadOnly = mode === Mode.VIEW;
-
   return (
     <CollapsibleCard title="ការសរសើរ​ / ស្តីបន្ទោស">
       <DynamicInputGrid
-        isSubmitting={isSubmitting || isReadOnly}
+        isSubmitting={isSubmitting}
         labels={[
           "ប្រភេទនៃការសរសើរ/ការស្តីបន្ទោស/ទទួលអធិការកិច្ច​",
           "ផ្តល់ដោយ",

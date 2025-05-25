@@ -3,7 +3,7 @@ import AdminPersonal from "@/components/dashboard/users/admin/AdminPersonal";
 import { UserProfileSection } from "@/components/dashboard/users/shared/UserProfile";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
-import { Data } from "@/model/user/staff/getById.staff.model";
+import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 import { getStuffByIdService } from "@/service/user/user.service";
 import { useParams } from "next/navigation";
 import React, { useEffect } from "react";
@@ -12,7 +12,7 @@ import { toast } from "sonner";
 export default function AdminProfilePage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [admin, setAdmin] = React.useState<Data | null>(null);
+  const [admin, setAdmin] = React.useState<StaffRespondModel | null>(null);
   const params = useParams();
   const adminId = params.id as string;
 

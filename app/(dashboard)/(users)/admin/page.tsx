@@ -1,20 +1,13 @@
 "use client";
 
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
-import PaginationPage from "@/components/shared/pagination-page";
 import { Button } from "@/components/ui/button";
-import { RoleEnum, StatusEnum } from "@/constants/constant";
-import { ROUTE } from "@/constants/routes";
-import { AllStaffModel, StaffModel } from "@/model/user/staff/stuff.model";
 import {
-  AddStaffModel,
-  RequestAllStuff,
-} from "@/model/user/staff/Add.staff.model";
-import {
-  addStaffService,
-  getAllStuffService,
-  updateStaffService,
-} from "@/service/user/user.service";
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -23,31 +16,57 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pencil, Trash2, Plus, RotateCcw } from "lucide-react";
+import { Pencil, Trash2, Plus, RotateCcw, Check, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { StaffFormData } from "@/model/user/staff/schema";
-import { UpdateStaffRequest } from "@/model/user/staff/update.Request.staff";
+
+import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import PaginationPage from "@/components/shared/pagination-page";
+import { RoleEnum, StatusEnum } from "@/constants/constant";
+import { ROUTE } from "@/constants/routes";
+import {
+  addStaffService,
+  getAllStaffService,
+  updateStaffService,
+} from "@/service/user/user.service";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import Loading from "@/app/(dashboard)/permissions/loading";
 import AdminModalForm from "@/components/dashboard/users/admin/AdminModalForm";
-import { StaffTableHeader } from "@/constants/table/user";
+import { AdminTableHeader, StaffTableHeader } from "@/constants/table/user";
 import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
+import { useDebounce } from "@/utils/debounce/debounce";
+import {
+  AddStaffModel,
+  EditStaffModel,
+  StaffListRequest,
+} from "@/model/user/staff/staff.request.model";
+import { AdminFormData } from "@/model/user/staff/staff.schema";
+import {
+  AllStaffModel,
+  StaffModel,
+} from "@/model/user/staff/staff.respond.model";
+import { cleanField, cleanRequiredField } from "@/utils/map-helper/student";
 
 export default function AdminsListPage() {
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<AllStaffModel | null>(null);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [initialData, setInitialData] = useState<StaffFormData | undefined>(
+  const [initialData, setInitialData] = useState<AdminFormData | undefined>(
     undefined
   );
   const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] =
     useState(false);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState<StaffModel | null>(null);
+  const [statusFilter, setStatusFilter] = useState("ACTIVE");
+
+  const iconColor = "text-black";
+
+  // Debounces search query input to reduce unnecessary API calls
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -55,17 +74,17 @@ export default function AdminsListPage() {
 
   const loadData = useCallback(
     async (
-      data: RequestAllStuff = {
+      data: StaffListRequest = {
         pageNo: 1,
         pageSize: 10,
         roles: [RoleEnum.ADMIN],
         search: searchQuery,
-        status: StatusEnum.ACTIVE,
+        status: statusFilter,
       }
     ) => {
       setIsLoading(true);
       try {
-        const response = await getAllStuffService(data);
+        const response = await getAllStaffService(data);
         if (response) {
           setData(response);
         } else {
@@ -77,13 +96,12 @@ export default function AdminsListPage() {
         setIsLoading(false);
       }
     },
-    [searchQuery]
+    [debouncedSearchQuery, statusFilter]
   );
 
   useEffect(() => {
     loadData();
-  }, [searchQuery, loadData]);
-  const iconColor = "text-black";
+  }, [debouncedSearchQuery, statusFilter, loadData]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");
@@ -104,34 +122,35 @@ export default function AdminsListPage() {
     setIsModalOpen(true);
   };
 
-  async function handleSubmit(formData: StaffFormData) {
+  // Handles add or edit form submission logic
+  async function handleSubmit(formData: AdminFormData) {
     setIsSubmitting(true);
     try {
-      console.log("##Submitting data to api:", formData);
-
+      // Prepare common payload fields
       const basePayload = {
-        username: formData.username,
-        email: formData.email,
-        khmerFirstName: formData.first_name,
-        khmerLastName: formData.last_name,
-        englishFirstName: formData.first_name,
-        englishLastName: formData.last_name,
-        status: formData.status,
+        username: cleanRequiredField(formData.username),
+        email: cleanRequiredField(formData.email),
+        khmerFirstName: cleanField(formData.first_name),
+        khmerLastName: cleanField(formData.last_name),
+        englishFirstName: cleanField(formData.first_name),
+        englishLastName: cleanField(formData.last_name),
+        status: cleanRequiredField(formData.status),
         roles: formData.roles,
       };
 
-      const addPayload: Partial<AddStaffModel> = {
+      // Payload for adding a new admin
+      const addPayload: AddStaffModel = {
         ...basePayload,
-        ...(formData.password ? { password: formData.password } : {}),
+        roles: formData.roles ?? undefined, // Ensure roles is never null
+        password: cleanRequiredField(formData.password), // Ensure password is always a string
       };
 
-      const updatePayload: Partial<UpdateStaffRequest> = {
+      // Payload for updating an existing admin
+      const updatePayload: EditStaffModel = {
         ...basePayload,
+        status: formData.status ?? undefined, // Ensure status is never null
+        roles: formData.roles ?? undefined, // Ensure roles is never null
       };
-
-      console.log("##ID:", formData.id);
-
-      console.log("##update payload to api:", updatePayload);
 
       if (modalMode === "add") {
         try {
@@ -183,6 +202,7 @@ export default function AdminsListPage() {
     }
   }
 
+  // Handles admin deletion by setting their status to INACTIVE
   async function handleDeleteAdmin() {
     if (!selectedAdmin) return;
 
@@ -238,6 +258,19 @@ export default function AdminsListPage() {
         buttonText="Add New"
         openModal={handleOpenAddModal}
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
+        customSelect={
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ACTIVE">Active</SelectItem>
+                <SelectItem value="INACTIVE">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        }
       />
 
       <div className="overflow-x-auto">
@@ -247,7 +280,7 @@ export default function AdminsListPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                {StaffTableHeader.map((header, index) => (
+                {AdminTableHeader.map((header, index) => (
                   <TableHead key={index} className={header.className}>
                     {header.label}
                   </TableHead>
@@ -282,7 +315,19 @@ export default function AdminsListPage() {
                         {admin.englishLastName ?? ""}
                       </TableCell>
                       <TableCell>{admin.username}</TableCell>
-                      <TableCell>{admin.status}</TableCell>
+                      <TableCell>
+                        {admin.status === "ACTIVE" ? (
+                          <div className="text-green-500 flex gap-2 items-center">
+                            <Check className="w-4 h-4" />
+                            <span>{admin.status}</span>
+                          </div>
+                        ) : (
+                          <div className="text-red-500 flex gap-2 items-center">
+                            <X className="w-4 h-4" />
+                            <span>{admin.status}</span>
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <div className="flex justify-start space-x-2">
                           <Button

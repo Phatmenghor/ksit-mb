@@ -1,3 +1,5 @@
+"use client";
+
 import { ComboboxSelectDepartment } from "@/components/shared/ComboBox/combobox-department";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -9,25 +11,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Mode } from "@/constants/constant";
-import { DepartmentModel } from "@/model/master-data/department/all-department-model";
-import { ZodStaffModelType } from "@/model/user/staff/schema";
 import { useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
+import { DepartmentModel } from "@/model/master-data/department/all-department-model";
 
-export function BasicInformationForm({ mode }: { mode: Mode }) {
+export function BasicInformationForm() {
   const [selectedDepartment, setSelectedDepartment] =
     useState<DepartmentModel | null>(null);
   const {
     setValue,
-    formState: { isSubmitting, isDirty, errors },
+    formState: { isSubmitting, errors },
     control,
-  } = useFormContext<ZodStaffModelType>();
-
-  const isReadOnly = mode === Mode.VIEW;
+  } = useFormContext();
 
   const handleDepartmentChange = (department: DepartmentModel) => {
-    if (isReadOnly) return;
     setSelectedDepartment(department);
     setValue("departmentId", department.id as number, {
       shouldValidate: true,
@@ -59,14 +56,17 @@ export function BasicInformationForm({ mode }: { mode: Mode }) {
                       id="user-name"
                       {...field}
                       placeholder="Username..."
-                      disabled={isReadOnly || isSubmitting}
+                      disabled={isSubmitting}
                       className="bg-gray-100"
+                      required
                     />
-                    {errors.username && (
-                      <p className="text-red-600 text-sm mt-1">
-                        {errors.username.message?.toString()}
-                      </p>
-                    )}
+                    {errors.username &&
+                      typeof errors.username === "object" &&
+                      "message" in errors.username && (
+                        <p className="text-red-600 text-sm mt-1">
+                          {errors.username.message as string}
+                        </p>
+                      )}
                   </>
                 )}
               />
@@ -88,15 +88,19 @@ export function BasicInformationForm({ mode }: { mode: Mode }) {
                       id="password"
                       {...field}
                       type="password"
-                      disabled={isReadOnly || isSubmitting}
+                      disabled={isSubmitting}
                       className="bg-gray-100"
                       placeholder="Password..."
+                      required
                     />
-                    {errors.username && (
-                      <p className="text-red-600 text-sm mt-1">
-                        {errors.username.message?.toString()}
-                      </p>
-                    )}
+                    {errors.password &&
+                      typeof errors.password === "object" &&
+                      "message" in errors.password &&
+                      typeof errors.password.message === "string" && (
+                        <p className="text-red-600 text-sm mt-1">
+                          {errors.password.message}
+                        </p>
+                      )}
                   </>
                 )}
               />
@@ -117,15 +121,19 @@ export function BasicInformationForm({ mode }: { mode: Mode }) {
                     <Input
                       id="identify-number"
                       {...field}
-                      disabled={isReadOnly || isSubmitting}
+                      disabled={isSubmitting}
                       placeholder="-"
                       className="bg-gray-100"
+                      required
                     />
-                    {errors.username && (
-                      <p className="text-red-600 text-sm mt-1">
-                        {errors.username.message?.toString()}
-                      </p>
-                    )}
+                    {errors.identifyNumber &&
+                      typeof errors.identifyNumber === "object" &&
+                      "message" in errors.identifyNumber &&
+                      typeof errors.identifyNumber.message === "string" && (
+                        <p className="text-red-600 text-sm mt-1">
+                          {errors.identifyNumber.message}
+                        </p>
+                      )}
                   </>
                 )}
               />
@@ -145,16 +153,11 @@ export function BasicInformationForm({ mode }: { mode: Mode }) {
                         <ComboboxSelectDepartment
                           dataSelect={selectedDepartment}
                           onChangeSelected={handleDepartmentChange}
-                          disabled={isSubmitting || isReadOnly}
+                          disabled={isSubmitting}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                    {errors.username && (
-                      <p className="text-red-600 text-sm mt-1">
-                        {errors.username.message?.toString()}
-                      </p>
-                    )}
                   </>
                 )}
               />

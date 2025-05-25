@@ -14,7 +14,7 @@ import { EditStaffFormData } from "@/model/user/staff/staff.schema";
 import { EditStaffModel } from "@/model/user/staff/staff.request.model";
 import { cleanField } from "@/utils/map-helper/student";
 
-export default function EditTeacherPage() {
+export default function EditStaffOfficerPage() {
   // Loading state to show spinner or disable UI while fetching or submitting
   const [loading, setLoading] = useState(false);
 
@@ -221,7 +221,7 @@ export default function EditTeacherPage() {
   return (
     <TeacherForm
       mode="Edit" // Indicates form mode for UI
-      title="Edit Teacher"
+      title="Edit Staff"
       onSubmit={onSubmit} // Submission handler
       initialValues={initialValues} // Prefilled form data
       loading={loading} // Loading indicator to disable UI if needed

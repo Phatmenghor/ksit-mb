@@ -1,7 +1,7 @@
 import React from "react";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
-import { StudentByIdModel } from "@/model/user/student/getById.student.model";
 import { educationLevels } from "@/constants/constant";
+import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 
 interface StudentProfileProps {
   student: StudentByIdModel | null;

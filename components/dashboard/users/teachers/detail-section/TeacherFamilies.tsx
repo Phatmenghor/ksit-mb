@@ -5,20 +5,17 @@ import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import { Input } from "@/components/ui/input";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import { GenderEnum, Mode } from "@/constants/constant";
-import { ZodStaffModelType } from "@/model/user/staff/schema";
 
-export default function FamilyStatusForm({ mode }: { mode: Mode }) {
+export default function FamilyStatusForm() {
   const {
     control,
-    formState: { isSubmitting, isDirty },
-  } = useFormContext<ZodStaffModelType>();
+    formState: { isSubmitting },
+  } = useFormContext();
 
   useFieldArray({
     control: control,
     name: "teacherFamilies",
   });
-
-  const isReadOnly = mode === Mode.VIEW;
 
   return (
     <CollapsibleCard title="ស្ថានភាពគ្រួសារ">
@@ -38,7 +35,7 @@ export default function FamilyStatusForm({ mode }: { mode: Mode }) {
               <Input
                 id="family-status"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="ឋានន្តរស័ក្តិ និងថ្នាក់..."
                 className="bg-gray-100"
               />
@@ -64,7 +61,7 @@ export default function FamilyStatusForm({ mode }: { mode: Mode }) {
                     id="relation-to"
                     {...field}
                     placeholder="ត្រូវជា..."
-                    disabled={isSubmitting || isReadOnly}
+                    disabled={isSubmitting}
                     className="bg-gray-100"
                   />
                 )}
@@ -84,7 +81,7 @@ export default function FamilyStatusForm({ mode }: { mode: Mode }) {
                   <Input
                     id="partner-job"
                     {...field}
-                    disabled={isSubmitting || isReadOnly}
+                    disabled={isSubmitting}
                     placeholder="មុខរបរ..."
                     className="bg-gray-100"
                   />
@@ -110,7 +107,7 @@ export default function FamilyStatusForm({ mode }: { mode: Mode }) {
                 <Input
                   id="partner-lastname"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="នាមត្រកូល"
                   className=" bg-gray-100"
                 />
@@ -132,7 +129,7 @@ export default function FamilyStatusForm({ mode }: { mode: Mode }) {
                 <Input
                   id="affiliatedOrganization"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="អង្គភាពសហព័ទ្ធ"
                   className=" bg-gray-100"
                 />
@@ -154,12 +151,12 @@ export default function FamilyStatusForm({ mode }: { mode: Mode }) {
               control={control}
               name="federationEstablishmentDate"
               render={({ field }) => (
-                <Input
+                <input
                   id="partner-dob"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   type="date"
-                  className="bg-gray-100"
+                  className="w-full bg-gray-100 py-2 px-3 border rounded-md pr-10"
                 />
               )}
             />
@@ -178,7 +175,7 @@ export default function FamilyStatusForm({ mode }: { mode: Mode }) {
                 <Input
                   id="partner-salary"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="ប្រាក់ខែ..."
                   className="bg-gray-100"
                 />
@@ -200,7 +197,7 @@ export default function FamilyStatusForm({ mode }: { mode: Mode }) {
                 <Input
                   id="phone"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="លេខទូរស័ព្ទ..."
                   className="bg-gray-100"
                 />
@@ -218,7 +215,7 @@ export default function FamilyStatusForm({ mode }: { mode: Mode }) {
                 <Input
                   id="email"
                   {...field}
-                  disabled={isSubmitting || isReadOnly}
+                  disabled={isSubmitting}
                   placeholder="example@email.com"
                   className="bg-gray-100"
                 />
@@ -239,7 +236,7 @@ export default function FamilyStatusForm({ mode }: { mode: Mode }) {
               <Input
                 id="address"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="អាសយដ្ឋាន..."
                 className="bg-gray-100"
               />
@@ -251,7 +248,7 @@ export default function FamilyStatusForm({ mode }: { mode: Mode }) {
       {/* Children Info Grid */}
       <div className="mt-6">
         <DynamicInputGrid
-          isSubmitting={isSubmitting || isReadOnly}
+          isSubmitting={isSubmitting}
           labels={["ឈ្មោះកូន", "ភេទ", "ថ្ងៃខែឆ្នាំកំណើត", "មុខរបរ"]}
           fields={[
             {

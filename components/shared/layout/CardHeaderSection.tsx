@@ -16,8 +16,6 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 
-// ...imports remain the same
-
 interface BreadcrumbItemType {
   label: string;
   href?: string;

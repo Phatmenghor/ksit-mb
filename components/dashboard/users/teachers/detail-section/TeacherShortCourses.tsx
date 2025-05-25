@@ -1,30 +1,26 @@
 "use client";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
-import { Mode } from "@/constants/constant";
-import { ZodStaffModelType } from "@/model/user/staff/schema";
 import React from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
-export default function ShortCourseForm({ mode }: { mode: Mode }) {
+export default function ShortCourseForm() {
   const {
     control,
-    formState: { isSubmitting, isDirty },
-  } = useFormContext<ZodStaffModelType>();
+    formState: { isSubmitting },
+  } = useFormContext();
   useFieldArray({
     control: control,
     name: "teacherShortCourses",
   });
-  const isReadOnly = mode === Mode.VIEW;
 
   return (
     <CollapsibleCard title="វគ្គខ្លីៗ">
       <DynamicInputGrid
-        isSubmitting={isSubmitting || isReadOnly}
+        isSubmitting={isSubmitting}
         labels={[
           "ផ្នែក",
           "ឈ្មោះជំនាញ",
-          "ផ្នែក",
           "ថ្ងៃចាប់ផ្តើម",
           "ថ្ងៃបញ្ចប់",
           "រយៈពេល",
@@ -42,11 +38,7 @@ export default function ShortCourseForm({ mode }: { mode: Mode }) {
             type: "text",
             placeholder: "ឈ្មោះជំនាញ",
           },
-          {
-            name: "startDate",
-            type: "text",
-            placeholder: "ផ្នែក",
-          },
+
           {
             name: "endDate",
             type: "date",

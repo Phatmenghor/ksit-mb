@@ -2,23 +2,19 @@
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import { Input } from "@/components/ui/input";
-import { Mode } from "@/constants/constant";
-import { ZodStaffModelType } from "@/model/user/staff/schema";
 import React from "react";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 
-export default function ExperienceForm({ mode }: { mode: Mode }) {
+export default function ExperienceForm() {
   const {
     control,
-    formState: { isSubmitting, isDirty },
-  } = useFormContext<ZodStaffModelType>();
+    formState: { isSubmitting },
+  } = useFormContext();
 
   useFieldArray({
     control: control,
     name: "teacherExperiences",
   });
-
-  const isReadOnly = mode === Mode.VIEW;
 
   return (
     <div>
@@ -37,7 +33,7 @@ export default function ExperienceForm({ mode }: { mode: Mode }) {
               <Input
                 id="latin-first-name"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="ស្ថានភាព..."
                 className="w-3/6 bg-gray-100"
               />
@@ -52,7 +48,7 @@ export default function ExperienceForm({ mode }: { mode: Mode }) {
             "ថ្ងៃចាប់ផ្តើម",
             "ថ្ងៃបញ្ចប់",
           ]}
-          isSubmitting={isSubmitting || isReadOnly}
+          isSubmitting={isSubmitting}
           fields={[
             {
               name: "continuousEmployment",
@@ -75,7 +71,7 @@ export default function ExperienceForm({ mode }: { mode: Mode }) {
               placeholder: "ថ្ងៃបញ្ចប់",
             },
           ]}
-          defaultRows={2}
+          defaultRows={1}
           namePrefix="teacherExperiences"
         />
       </CollapsibleCard>

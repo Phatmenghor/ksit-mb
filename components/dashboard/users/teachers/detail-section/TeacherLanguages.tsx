@@ -1,28 +1,24 @@
 "use client";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
-import { Mode } from "@/constants/constant";
-import { ZodStaffModelType } from "@/model/user/staff/schema";
 import React from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
-export default function LanguageForm({ mode }: { mode: Mode }) {
+export default function LanguageForm() {
   const {
     control,
-    formState: { isSubmitting, isDirty },
-  } = useFormContext<ZodStaffModelType>();
+    formState: { isSubmitting },
+  } = useFormContext();
 
   useFieldArray({
     control: control,
     name: "teacherLanguages",
   });
 
-  const isReadOnly = mode === Mode.VIEW;
-
   return (
     <CollapsibleCard title="ភាសាបរទេស">
       <DynamicInputGrid
-        isSubmitting={isSubmitting || isReadOnly}
+        isSubmitting={isSubmitting}
         labels={["ភាសា", "ការអាន", "ការសរសេរ", "ការសន្ទនា"]}
         fields={[
           {

@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { StatusEnum } from "@/constants/constant";
-import { GenerateMultipleStudent } from "@/model/user/student/student.model";
+import { GenerateMultipleStudent } from "@/model/user/student/student.request.model";
 import { generateMultipleStudentService } from "@/service/user/student.service";
 import { exportStudentsToExcel } from "@/utils/excel/Excel-Generate";
 import { zodResolver } from "@hookform/resolvers/zod";

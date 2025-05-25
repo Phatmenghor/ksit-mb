@@ -1,7 +1,5 @@
 "use client";
 import { Constants } from "@/constants/text-string";
-import { StaffFormData, StaffFormSchema } from "@/model/user/staff/schema";
-import { StaffModel } from "@/model/user/staff/stuff.model";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -25,13 +23,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
-import { clean, cleanRequired } from "@/utils/map-helper/student";
+import {
+  AdminFormData,
+  AdminFormSchema,
+} from "@/model/user/staff/staff.schema";
+import { StaffModel } from "@/model/user/staff/staff.respond.model";
+import { cleanField, cleanRequiredField } from "@/utils/map-helper/student";
 
 interface AdminFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: StaffFormData) => void;
-  initialData?: StaffFormData | null;
+  onSubmit: (data: AdminFormData) => void;
+  initialData?: AdminFormData | null;
   mode: "add" | "edit";
   isSubmitting?: boolean;
 }
@@ -52,8 +55,8 @@ export default function AdminModalForm({
   const [isFormValid, setIsFormValid] = useState(false);
 
   // Initialize the form with Zod validation
-  const form = useForm<StaffFormData>({
-    resolver: zodResolver(StaffFormSchema),
+  const form = useForm<AdminFormData>({
+    resolver: zodResolver(AdminFormSchema),
     defaultValues: {
       id: initialData?.id || 0,
       username: initialData?.username || "",
@@ -143,22 +146,21 @@ export default function AdminModalForm({
   };
 
   // Handle form submission
-  const handleSubmit = async (data: StaffFormData) => {
+  const handleSubmit = async (data: AdminFormData) => {
     try {
       const submitData: any = {
-        first_name: clean(data.first_name),
-        last_name: clean(data.last_name),
-        username: cleanRequired(data.username),
-        email: cleanRequired(data.email),
+        first_name: data.first_name,
+        last_name: data.last_name,
+        username: data.username,
+        email: data.email,
         status: Constants.ACTIVE,
         roles: [RoleEnum.ADMIN],
       };
 
       if (mode === "add") {
-        submitData.password = cleanRequired((data as StaffFormData).password);
-        submitData.confirmPassword = cleanRequired(
-          (data as StaffFormData).confirmPassword
-        );
+        submitData.password = (data as AdminFormData).password;
+
+        submitData.confirmPassword = (data as AdminFormData).confirmPassword;
       }
 
       if (mode === "edit" && initialData?.id) {
@@ -306,6 +308,7 @@ export default function AdminModalForm({
                       placeholder="Enter email"
                       maxLength={50}
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />

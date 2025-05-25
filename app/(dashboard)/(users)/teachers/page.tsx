@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Table,
   TableBody,
@@ -8,25 +9,25 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
-import { ROUTE } from "@/constants/routes";
+import { Eye, Pencil, Plus, RotateCcw, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
-import { Column, CustomTable } from "@/components/shared/layout/TableSection";
-import {
-  getAllStuffService,
-  updateStaffService,
-} from "@/service/user/user.service";
-import { RequestAllStuff } from "@/model/user/staff/Add.staff.model";
-import { RoleEnum, StatusEnum } from "@/constants/constant";
-import { AllStaffModel, StaffModel } from "@/model/user/staff/stuff.model";
 import { toast } from "sonner";
-import PaginationPage from "@/components/shared/pagination-page";
 import { useRouter } from "next/navigation";
+
+import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { ROUTE } from "@/constants/routes";
+import { getAllStaffService } from "@/service/user/user.service";
+import { RoleEnum, StatusEnum } from "@/constants/constant";
+import PaginationPage from "@/components/shared/pagination-page";
 import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
-import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import Loading from "../../permissions/loading";
-import { StaffTableHeader } from "@/constants/table/user";
+import { StaffTableHeader, TeacherTableHeader } from "@/constants/table/user";
+import {
+  AllStaffModel,
+  StaffModel,
+} from "@/model/user/staff/staff.respond.model";
+import { useDebounce } from "@/utils/debounce/debounce";
+import { StaffListRequest } from "@/model/user/staff/staff.request.model";
 
 export default function TeachersListPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -39,84 +40,51 @@ export default function TeachersListPage() {
   const [selectedTeacher, setSelectedTeacher] = useState<StaffModel | null>(
     null
   );
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const router = useRouter();
+  const debouncedSearchQuery = useDebounce(searchQuery, 500); // Debounced version of the searchQuery with 500ms delay to limit API calls
+  const iconColor = "text-black";
+
+  // Handler called when the search input changes
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
+  /**
+   * Function to load teachers from the backend API.
+   * Accepts parameters to specify additional filtering or pagination options.
+   */
   const loadTeachers = useCallback(
-    async (param: RequestAllStuff) => {
-      setIsLoading(true);
+    async (param: StaffListRequest) => {
+      setIsLoading(true); // Show loading indicator
       try {
-        const response = await getAllStuffService({
+        // Fetch teachers with role 'TEACHER', active status, and search filter
+        const response = await getAllStaffService({
           roles: [RoleEnum.TEACHER],
-          search: searchQuery,
+          search: searchQuery, // Note: searchQuery or debouncedSearchQuery? Here it uses searchQuery.
           status: StatusEnum.ACTIVE,
-          ...param,
+          ...param, // Spread additional params like pagination if provided
         });
+
         if (response) {
-          setallTeachersData(response);
+          setallTeachersData(response); // Update state with fetched data
         } else {
           console.error("Failed to fetch teachers:");
         }
       } catch (error) {
+        // Show a toast notification on error
         toast.error("An error occurred while loading teachers");
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Hide loading indicator regardless of success or failure
       }
     },
-    [searchQuery]
+    [debouncedSearchQuery] // Recreate function only when debouncedSearchQuery changes
   );
 
+  // Effect to reload teachers whenever the debounced search query or loadTeachers changes
   useEffect(() => {
     loadTeachers({});
-  }, [searchQuery, loadTeachers]);
-
-  const iconColor = "text-black";
-
-  async function handleDeleteStaff() {
-    if (!selectedTeacher) return;
-
-    setIsSubmitting(true);
-    try {
-      const originalData = allTeachersData;
-      setallTeachersData((prevData) => {
-        if (!prevData) return null;
-        const updatedContent = prevData.content.filter(
-          (item) => item.id !== selectedTeacher.id
-        );
-        return {
-          ...prevData,
-          content: updatedContent,
-          totalElements: prevData.totalElements - 1,
-        };
-      });
-
-      const response = await updateStaffService(selectedTeacher.id, {
-        status: StatusEnum.INACTIVE,
-      });
-
-      if (response) {
-        toast.success(
-          `Teacher ${selectedTeacher.username ?? ""} deleted successfully`
-        );
-      } else {
-        setallTeachersData(originalData);
-        toast.error("Failed to delete staff");
-      }
-    } catch (error) {
-      console.error("Error deleting staff:", error);
-      toast.error("An error occurred while deleting the staff");
-      loadTeachers({});
-    } finally {
-      setIsSubmitting(false);
-      setIsDeleteDialogOpen(false);
-    }
-  }
-
+  }, [debouncedSearchQuery, loadTeachers]);
   return (
     <div className="space-y-4">
       <CardHeaderSection
@@ -141,7 +109,7 @@ export default function TeachersListPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                {StaffTableHeader.map((header, index) => (
+                {TeacherTableHeader.map((header, index) => (
                   <TableHead key={index} className={header.className}>
                     {header.label}
                   </TableHead>
@@ -169,17 +137,35 @@ export default function TeachersListPage() {
                     <TableRow key={teacher.id}>
                       <TableCell>{indexDisplay}</TableCell>
                       <TableCell>
-                        {teacher.khmerFirstName} {teacher.khmerLastName}
+                        {teacher.khmerFirstName || ""}{" "}
+                        {teacher.khmerLastName || ""}
                       </TableCell>
                       <TableCell>
                         {" "}
                         {teacher.englishFirstName ?? ""}{" "}
                         {teacher.englishLastName ?? ""}
                       </TableCell>
-                      <TableCell>{teacher.username}</TableCell>
-                      <TableCell>{teacher.status}</TableCell>
+                      <TableCell>{teacher.username || ""}</TableCell>
+                      <TableCell>{teacher.identifyNumber || ""}</TableCell>
+                      <TableCell>{teacher.gender || ""}</TableCell>
+                      <TableCell>{teacher.dateOfBirth || ""}</TableCell>
+                      <TableCell>{teacher.phoneNumber || ""}</TableCell>
+                      <TableCell>{teacher.department?.name || ""}</TableCell>
                       <TableCell>
-                        <div className="flex justify-start space-x-2">
+                        <div className="flex justify-start">
+                          <Button
+                            onClick={() => {
+                              router.push(
+                                ROUTE.USERS.VIEW_TEACHER(String(teacher.id))
+                              );
+                            }}
+                            variant="ghost"
+                            size="icon"
+                            className={iconColor}
+                            title="View"
+                          >
+                            <Eye className="w-7 h-7 text-black" />
+                          </Button>
                           <Button
                             onClick={() => {
                               router.push(
@@ -188,10 +174,10 @@ export default function TeachersListPage() {
                             }}
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-black hover:text-gray-900"
+                            className={iconColor}
                             title="Edit"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="w-7 h-7 text-black" />
                           </Button>
 
                           <Button
@@ -203,20 +189,7 @@ export default function TeachersListPage() {
                             className={iconColor}
                             size="sm"
                           >
-                            <RotateCcw />
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setSelectedTeacher(teacher);
-                              setIsDeleteDialogOpen(true);
-                            }}
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-red-500 hover:text-red-600"
-                            disabled={isSubmitting}
-                            title="Delete"
-                          >
-                            <Trash2 className="h-4 w-4" />
+                            <RotateCcw className="w-7 h-7 text-black" />
                           </Button>
                         </div>
                       </TableCell>
@@ -236,15 +209,6 @@ export default function TeachersListPage() {
           setSelectedTeacher(null);
         }}
         userId={selectedTeacher?.id}
-      />
-      <DeleteConfirmationDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onDelete={handleDeleteStaff}
-        title="Delete Staff"
-        description={`Are you sure you want to delete the staff: ${selectedTeacher?.username}?`}
-        itemName={selectedTeacher?.username}
-        isSubmitting={isSubmitting}
       />
 
       {!isLoading && allTeachersData && (

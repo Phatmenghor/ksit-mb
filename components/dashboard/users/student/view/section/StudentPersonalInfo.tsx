@@ -1,7 +1,7 @@
 // components/student/StudentPersonalInfo.tsx
 import CollapsibleCard from "@/components/shared/collapsibleCard";
-import { StudentByIdModel } from "@/model/user/student/getById.student.model";
 import InfoGrid from "../../../shared/UserPersonalHistory";
+import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 
 interface StudentProfileProps {
   student: StudentByIdModel | null;

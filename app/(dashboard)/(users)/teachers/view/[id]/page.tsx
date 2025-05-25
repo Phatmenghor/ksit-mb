@@ -6,7 +6,6 @@ import React, { useEffect } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { getStuffByIdService } from "@/service/user/user.service";
-import { Data } from "@/model/user/staff/getById.staff.model";
 import TeacherPersonal from "@/components/dashboard/users/teachers/view/TeacherPersonalInfo";
 import TeacherProfessionalRank from "@/components/dashboard/users/teachers/view/TeacherProfessionalRank";
 import TeacherExperienceSection from "@/components/dashboard/users/teachers/view/TeacherExperience";
@@ -16,11 +15,11 @@ import TeacherVocationalSection from "@/components/dashboard/users/teachers/view
 import TeacherShortCourseSection from "@/components/dashboard/users/teachers/view/TeacherShortCourse";
 import TeacherLanguageSection from "@/components/dashboard/users/teachers/view/TeacherLanguage";
 import TeacherFamilySection from "@/components/dashboard/users/teachers/view/TeacherFamily";
+import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 
 export default function TeacherViewPage() {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [teacher, setteacher] = React.useState<Data | null>(null);
+  const [teacher, setteacher] = React.useState<StaffRespondModel | null>(null);
   const params = useParams();
   const teacherId = params.id as string;
 

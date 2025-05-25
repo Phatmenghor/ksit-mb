@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { GenderEnum } from "@/constants/constant";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -244,15 +243,16 @@ export default function StudentPersonalDetailSection() {
 
         {/* Email */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="email" className="text-sm font-bold">
+          <label htmlFor="student-email" className="text-sm font-bold">
             អ៊ីម៊ែល
           </label>
           <Controller
             control={control}
             name="email"
+            defaultValue=""
             render={({ field }) => (
               <Input
-                id="email"
+                id="student-email"
                 {...field}
                 disabled={isSubmitting}
                 placeholder="អ៊ីម៊ែល"

@@ -1,15 +1,13 @@
 "use client";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
-import { ZodStaffModelType } from "@/model/user/staff/schema";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
 export default function EducatonForm() {
   const {
     control,
-    register,
     formState: { isSubmitting },
-  } = useFormContext<ZodStaffModelType>();
+  } = useFormContext();
 
   useFieldArray({
     control: control,
@@ -39,7 +37,7 @@ export default function EducatonForm() {
           },
           {
             name: "country",
-            type: "date",
+            type: "text",
             placeholder: "ប្រទេស",
           },
         ]}

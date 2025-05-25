@@ -1,11 +1,6 @@
 "use client";
 
 import { ROUTE } from "@/constants/routes";
-import {
-  EditStudentFormData,
-  StudentFormSchema,
-} from "@/model/user/student/add-edit.student.zod";
-import { Mode } from "@/constants/constant";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -14,8 +9,12 @@ import {
   getStudentByIdService,
 } from "@/service/user/student.service";
 import StudentForm from "@/components/dashboard/users/student/form/StudentForm";
-import { removeEmptyStringsAndNulls } from "@/utils/api-related/RemoveString";
-import { EditStudentData } from "@/model/user/student/add-edit.student.model";
+import {
+  EditStudentFormData,
+  StudentFormSchema,
+} from "@/model/user/student/student.schema";
+import { EditStudentModel } from "@/model/user/student/student.request.model";
+import { cleanField } from "@/utils/map-helper/student";
 
 export default function EditSingleStudentPage() {
   const [loading, setLoading] = useState(false);
@@ -35,7 +34,6 @@ export default function EditSingleStudentPage() {
 
         setInitialValues({
           ...response,
-          id: Number(studentId),
           classId: response.studentClass.id,
           studentParents: response.studentParent,
           studentStudiesHistories: response.studentStudiesHistory,
@@ -66,60 +64,65 @@ export default function EditSingleStudentPage() {
       const formData = parsed.data;
 
       // Build payload matching EditStudentData
-      const payload: EditStudentData = {
-        id: Number(studentId),
-        username: formData.username,
-        email: formData.email,
-        khmerFirstName: formData.khmerFirstName,
-        khmerLastName: formData.khmerLastName,
-        englishFirstName: formData.englishFirstName,
-        englishLastName: formData.englishLastName,
-        gender: formData.gender,
-        profileUrl: formData.profileUrl,
-        dateOfBirth: formData.dateOfBirth,
-        phoneNumber: formData.phoneNumber,
-        currentAddress: formData.currentAddress,
-        nationality: formData.nationality,
-        ethnicity: formData.ethnicity,
-        placeOfBirth: formData.placeOfBirth,
-        memberSiblings: formData.memberSiblings,
-        numberOfSiblings: formData.numberOfSiblings,
-        classId: formData.classId,
-        studentStudiesHistories: (formData.studentStudiesHistories || []).map(
-          (history) => ({
-            ...history,
-            typeStudies: history.typeStudies ?? undefined,
-            schoolName: history.schoolName ?? undefined,
-            location: history.location ?? undefined,
-            fromYear: history.fromYear ?? undefined,
-            endYear: history.endYear ?? undefined,
-            obtainedCertificate: history.obtainedCertificate ?? undefined,
-            overallGrade: history.overallGrade ?? undefined,
+      const payload: EditStudentModel = {
+        // optional strings
+        email: cleanField(formData.email),
+        khmerFirstName: cleanField(formData.khmerFirstName),
+        khmerLastName: cleanField(formData.khmerLastName),
+        englishFirstName: cleanField(formData.englishFirstName),
+        englishLastName: cleanField(formData.englishLastName),
+        gender: cleanField(formData.gender),
+        profileUrl: cleanField(formData.profileUrl),
+        dateOfBirth: cleanField(formData.dateOfBirth),
+        phoneNumber: cleanField(formData.phoneNumber),
+        currentAddress: cleanField(formData.currentAddress),
+        nationality: cleanField(formData.nationality),
+        ethnicity: cleanField(formData.ethnicity),
+        placeOfBirth: cleanField(formData.placeOfBirth),
+        memberSiblings: cleanField(formData.memberSiblings),
+        numberOfSiblings: cleanField(formData.numberOfSiblings),
+
+        // nested arrays
+        studentStudiesHistories: (formData.studentStudiesHistories ?? []).map(
+          (h) => ({
+            ...h,
+            id: h.id == null ? undefined : h.id,
+            typeStudies: cleanField(h.typeStudies),
+            schoolName: cleanField(h.schoolName),
+            location: cleanField(h.location),
+            fromYear: cleanField(h.fromYear),
+            endYear: cleanField(h.endYear),
+            obtainedCertificate: cleanField(h.obtainedCertificate),
+            overallGrade: cleanField(h.overallGrade),
           })
         ),
-        studentParents: (formData.studentParents || []).map((parent) => ({
-          ...parent,
-          name: parent.name ?? undefined,
-          age: parent.age ?? undefined,
-          job: parent.job ?? undefined,
-          phone: parent.phone ?? undefined,
-          address: parent.address ?? undefined,
-          parentType: parent.parentType ?? undefined,
-          id: parent.id ?? undefined,
+
+        studentParents: (formData.studentParents ?? []).map((p) => ({
+          ...p,
+          id: p.id == null ? undefined : p.id,
+          name: cleanField(p.name),
+          age: cleanField(p.age),
+          job: cleanField(p.job),
+          phone: cleanField(p.phone),
+          address: cleanField(p.address),
+          parentType: cleanField(p.parentType),
         })),
-        studentSiblings: (formData.studentSiblings || []).map((sibling) => ({
-          ...sibling,
-          name: sibling.name ?? undefined,
-          occupation: sibling.occupation ?? undefined,
-          gender: sibling.gender ?? undefined,
-          dateOfBirth: sibling.dateOfBirth ?? undefined,
-          phoneNumber: sibling.phoneNumber ?? undefined,
-          id: sibling.id ?? undefined,
+
+        studentSiblings: (formData.studentSiblings ?? []).map((s) => ({
+          ...s,
+          id: s.id == null ? undefined : s.id,
+          name: cleanField(s.name),
+          occupation: cleanField(s.occupation),
+          gender: cleanField(s.gender),
+          dateOfBirth: cleanField(s.dateOfBirth),
+          phoneNumber: cleanField(s.phoneNumber),
         })),
-        status: formData.status,
+
+        // status remains as-is (assuming it’s a required enum)
+        status: cleanField(formData.status),
       };
 
-      await editStudentService(payload);
+      await editStudentService(Number(studentId), payload);
       toast.success("Student updated successfully");
     } catch (error) {
       console.error("Failed to update student:", error);
@@ -136,7 +139,7 @@ export default function EditSingleStudentPage() {
   return (
     <StudentForm
       initialValues={initialValues}
-      mode={Mode.EDIT}
+      mode="Edit"
       title="Edit Student"
       onSubmit={onSubmit}
       loading={loading}

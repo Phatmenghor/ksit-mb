@@ -7,12 +7,12 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getStudentByIdService } from "@/service/user/student.service";
 import { toast } from "sonner";
-import { StudentByIdModel } from "@/model/user/student/getById.student.model";
 import { CircleAlert, DollarSign, FileText } from "lucide-react";
 import StudentDetails from "@/components/dashboard/users/student/view/tab/StudentDetailsTabs";
 import StudentDetailsTabs from "@/components/dashboard/users/student/view/tab/StudentDetailsTabs";
 import PaymentTabs from "@/components/dashboard/users/student/view/tab/PaymentTabs";
 import TranscriptTabs from "@/components/dashboard/users/student/view/tab/TranscriptTabs";
+import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 
 const tab = [
   {

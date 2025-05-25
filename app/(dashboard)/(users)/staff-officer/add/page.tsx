@@ -1,35 +1,31 @@
 "use client";
-
 import { useState } from "react";
-import { toast } from "sonner";
-
 import { addStaffService } from "@/service/user/user.service";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
+import { toast } from "sonner";
 import TeacherForm from "@/components/dashboard/users/teachers/form/TeacherForm";
 import { useRouter } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
 import { AddStaffFormData } from "@/model/user/staff/staff.schema";
 import { AddStaffModel } from "@/model/user/staff/staff.request.model";
-import { cleanField, cleanRequiredField } from "@/utils/map-helper/student";
+import { cleanField } from "@/utils/map-helper/student";
 
-export default function AddTeacherPage() {
+export default function AddStaffOfficerPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Handle form submission for adding a new staff (teacher)
   const onSubmit = async (data: AddStaffFormData) => {
-    setLoading(true); // Set loading state to disable UI interactions
+    setLoading(true);
 
     try {
-      // Construct the payload to match AddStaffModel
       const payload: AddStaffModel = {
-        // Required fields (validated upfront)
-        username: cleanRequiredField(data.username),
-        password: cleanRequiredField(data.password),
-        departmentId: data.departmentId ?? undefined,
-        identifyNumber: cleanRequiredField(data.identifyNumber),
+        // required top-level
+        username: data.username,
+        password: data.password,
+        departmentId: data.departmentId,
+        identifyNumber: data.identifyNumber,
 
-        // Optional string fields (cleaned if provided)
+        // optional strings
         email: cleanField(data.email),
         khmerFirstName: cleanField(data.khmerFirstName),
         khmerLastName: cleanField(data.khmerLastName),
@@ -85,7 +81,7 @@ export default function AddTeacherPage() {
         ),
         wivesSalary: cleanField(data.wivesSalary),
 
-        // Nested arrays — map and clean each item
+        // nested arrays
         teachersProfessionalRanks: (data.teachersProfessionalRanks ?? []).map(
           (rank) => ({
             typeOfProfessionalRank: cleanField(rank.typeOfProfessionalRank),
@@ -149,24 +145,16 @@ export default function AddTeacherPage() {
           working: cleanField(fam.working),
         })),
 
-        // Set default roles and status for newly added teachers
-        roles: [RoleEnum.TEACHER],
+        roles: [RoleEnum.STAFF],
         status: StatusEnum.ACTIVE,
       };
 
-      // Call API service to create the new staff member
       await addStaffService(payload);
-
-      // Notify success to the user
-      toast.success("Teacher created successfully");
+      toast.success("Staff created successfully");
     } catch (error) {
-      // Log the error for debugging purposes
-      console.error("Failed to create teacher:", error);
-
-      // Notify failure to the user
-      toast.error("Failed to create teacher");
+      console.error("Failed to create Staff:", error);
+      toast.error("Failed to create Staff");
     } finally {
-      // Always reset loading state after the operation
       setLoading(false);
     }
   };
@@ -174,7 +162,7 @@ export default function AddTeacherPage() {
   return (
     <TeacherForm
       mode="Add"
-      title="Add Teacher"
+      title="Add Staff"
       onSubmit={onSubmit}
       loading={loading}
       back={ROUTE.DASHBOARD}

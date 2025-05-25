@@ -6,60 +6,165 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Ban, Loader2, Save } from "lucide-react";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
-import { useEffect } from "react";
-import { Mode, StatusEnum } from "@/constants/constant";
+import { useEffect, useState } from "react";
+import { StatusEnum } from "@/constants/constant";
 import { StudentBasicForm } from "../add-single-student/StuBasicForm";
 import StudentProfileUploadCard from "../add-single-student/StuProfileUploadCard";
 import StudentFormDetail from "./StudentFormDetail";
 import {
-  AddStudentFormData,
+  AddStudentSchema,
   EditStudentFormData,
-  initStudentFormData,
-} from "@/model/user/student/add-edit.student.zod";
+  EditStudentSchema,
+} from "@/model/user/student/student.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { initStudentFormData } from "@/model/user/student/student.request.model";
 
 type Props = {
-  initialValues: AddStudentFormData | EditStudentFormData;
-  onSubmit: (data: AddStudentFormData | EditStudentFormData) => Promise<void>;
+  initialValues?: EditStudentFormData;
+  onSubmit: (data: any) => Promise<void>;
   loading: boolean;
   title: string;
-  mode: Mode;
+  mode: "Add" | "Edit";
   onDiscard: () => void;
   back?: string;
 };
 
-export default function StudentForm(props: Props) {
-  const { initialValues, onSubmit, loading, title, mode, onDiscard, back } =
-    props;
+export default function StudentForm({
+  initialValues,
+  onSubmit,
+  loading,
+  title,
+  mode,
+  onDiscard,
+  back,
+}: Props) {
+  // Local state to track if the form has unsaved changes (dirty)
+  const [isFormDirty, setIsFormDirty] = useState(false);
+  // Local state to track if the form passes validation
+  const [isFormValid, setIsFormValid] = useState(false);
 
-  const methods = useForm<AddStudentFormData | EditStudentFormData>({
-    defaultValues:
-      mode === Mode.EDIT
-        ? (initialValues as EditStudentFormData)
-        : (initStudentFormData as AddStudentFormData),
+  // Initialize react-hook-form with validation schema depending on mode
+  const methods = useForm({
+    resolver: zodResolver(
+      mode === "Add" ? AddStudentSchema : EditStudentSchema
+    ),
+    defaultValues: initStudentFormData,
+    mode: "onChange",
   });
 
+  // Destructure methods and form state for easier access
   const {
     setValue,
-    formState: { isSubmitting },
+    reset,
+    getValues,
+    watch,
+    formState: { isSubmitting, isDirty, isValid, errors },
+    handleSubmit,
   } = methods;
 
+  // Effect to reset form values when initialValues or mode changes
   useEffect(() => {
-    if (initialValues) {
-      methods.reset(initialValues);
+    if (initialValues && mode === "Edit") {
+      // Reset form with existing values for editing
+      reset({
+        ...initStudentFormData,
+        ...Object.fromEntries(
+          // Convert null values to undefined for proper form handling
+          Object.entries(initialValues).map(([key, value]) => [
+            key,
+            value === null ? undefined : value,
+          ])
+        ),
+      });
+    } else {
+      // Reset to default values on add mode or no initialValues
+      reset(initStudentFormData);
     }
-  }, [initialValues, methods]);
+    setIsFormDirty(false);
+  }, [initialValues, methods, mode]);
+
+  // Subscribe to form changes to track dirty and valid state
+  useEffect(() => {
+    const subscription = watch(() => {
+      setIsFormDirty(isDirty);
+      setIsFormValid(Object.keys(errors).length === 0 && isValid);
+
+      // Optional debug logs for development
+      console.log("Dirty:", isDirty, "Valid:", isValid, "Errors:", errors);
+    });
+    return () => subscription.unsubscribe();
+  }, [methods]);
+
+  /**
+   * Handler to confirm closing page if there are unsaved changes
+   */
+  const handleClosePage = () => {
+    if (isFormDirty) {
+      const confirmed = window.confirm(
+        "You have unsaved changes. Are you sure you want to close?"
+      );
+      if (!confirmed) return;
+    }
+    if (onDiscard) {
+      onDiscard();
+    }
+  };
+
+  /**
+   * Main form submission handler wrapping the onSubmit prop
+   * with error handling
+   */
+  const handleFormSubmit = async (data: any) => {
+    try {
+      await onSubmit(data);
+    } catch (error) {
+      console.error("Form submission error:", error);
+      // Consider showing user feedback here (toast, alert, etc.)
+    }
+  };
+
+  // Show loading indicator if in edit mode but initialValues not loaded yet
+  if (!initialValues && mode === "Edit") {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <span className="ml-2 text-sm text-muted-foreground">
+          Loading student data...
+        </span>
+      </div>
+    );
+  }
+
+  /**
+   * Determine if the form can be submitted based on mode, validity, and dirty state
+   * - Disables submit while submitting
+   * - For edit mode: allow submit if form is valid (dirty not required)
+   * - For add mode: require form to be valid and have required fields filled
+   */
+  const canSubmitForm = () => {
+    if (isSubmitting) return false;
+
+    if (mode === "Edit") {
+      return isValid;
+    }
+
+    if (mode === "Add") {
+      return (
+        isFormValid ||
+        (!!getValues().username &&
+          !!getValues().password &&
+          !!getValues().classId)
+      );
+    }
+
+    return isFormDirty && isFormValid;
+  };
 
   return (
     <div className="space-y-6">
       <FormProvider {...methods}>
         <form
-          onSubmit={methods.handleSubmit((data) => {
-            if (mode === Mode.ADD) {
-              onSubmit(data as AddStudentFormData);
-            } else {
-              onSubmit(data as EditStudentFormData);
-            }
-          })}
+          onSubmit={handleSubmit(handleFormSubmit)}
           className="space-y-4"
           noValidate
         >
@@ -69,14 +174,14 @@ export default function StudentForm(props: Props) {
             backHref={back ?? ROUTE.STUDENTS.LIST}
             breadcrumbs={[{ label: "Dashboard", href: ROUTE.DASHBOARD }]}
           />
-          {mode === Mode.ADD && <StudentBasicForm mode={mode} />}
-          <StudentProfileUploadCard mode={mode} />
+          {mode === "Add" && <StudentBasicForm />}
+          <StudentProfileUploadCard />
           <div className="w-full mx-auto space-y-5">
             <StudentFormDetail />
             <Card>
               <CardContent>
                 <div className="flex justify-between items-center pt-5 gap-3">
-                  {mode === Mode.EDIT && (
+                  {mode === "Edit" && (
                     <Button
                       type="submit"
                       disabled={loading || isSubmitting}
@@ -101,14 +206,14 @@ export default function StudentForm(props: Props) {
                       type="button"
                       disabled={loading || isSubmitting}
                       variant="outline"
-                      onClick={onDiscard}
+                      onClick={handleClosePage}
                     >
                       Discard
                     </Button>
                     <Button
                       type="submit"
                       className="bg-emerald-800 hover:bg-emerald-900"
-                      disabled={loading || isSubmitting}
+                      disabled={!canSubmitForm()}
                     >
                       {loading || isSubmitting ? (
                         <>

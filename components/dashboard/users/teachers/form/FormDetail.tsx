@@ -2,31 +2,30 @@ import React from "react";
 import PersonalHistoryForm from "../detail-section/TeacherPersonalInfo";
 import ExperienceForm from "../detail-section/TeacherExperiences";
 import PraiseCriticismForm from "../detail-section/TeacherPraiseOrCriticisms";
-import VocationalForm from "../detail-section/VocationalForm";
 import ShortCourseForm from "../detail-section/TeacherShortCourses";
 import LanguageForm from "../detail-section/TeacherLanguages";
 import FamilyStatusForm from "../detail-section/TeacherFamilies";
-import { Mode } from "@/constants/constant";
-import EducationForm from "../detail-section/TeachersProfessionalRanks";
+import VocationalForm from "../detail-section/TeacherVocational";
+import EducatonForm from "../detail-section/TeacherEducations";
 
-export default function FormDetail({ mode }: { mode: Mode }) {
+export default function FormDetail() {
   return (
     <div className="space-y-5">
-      <PersonalHistoryForm mode={mode} />
+      <PersonalHistoryForm />
 
-      <ExperienceForm mode={mode} />
+      <ExperienceForm />
 
-      <PraiseCriticismForm mode={mode} />
+      <PraiseCriticismForm />
 
-      <EducationForm mode={mode} />
+      <EducatonForm />
 
-      <VocationalForm mode={mode} />
+      <VocationalForm />
 
-      <ShortCourseForm mode={mode} />
+      <ShortCourseForm />
 
-      <LanguageForm mode={mode} />
+      <LanguageForm />
 
-      <FamilyStatusForm mode={mode} />
+      <FamilyStatusForm />
     </div>
   );
 }
