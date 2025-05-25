@@ -294,7 +294,7 @@ export default function AdminsListPage() {
                     colSpan={StaffTableHeader.length}
                     className="text-center py-8 text-muted-foreground"
                   >
-                    No classes found
+                    No admin found
                   </TableCell>
                 </TableRow>
               ) : (

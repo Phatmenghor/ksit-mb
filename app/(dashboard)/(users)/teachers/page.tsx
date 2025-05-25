@@ -123,7 +123,7 @@ export default function TeachersListPage() {
                     colSpan={StaffTableHeader.length}
                     className="text-center py-8 text-muted-foreground"
                   >
-                    No classes found
+                    No teacher found
                   </TableCell>
                 </TableRow>
               ) : (

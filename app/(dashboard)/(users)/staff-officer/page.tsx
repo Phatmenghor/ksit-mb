@@ -189,14 +189,14 @@ export default function StuffOfficerListPage() {
                     <TableRow key={staff.id}>
                       <TableCell>{indexDisplay}</TableCell>
                       <TableCell>
-                        {staff.khmerFirstName} {staff.khmerLastName}
+                        {staff.khmerFirstName || ""} {staff.khmerLastName || ""}
                       </TableCell>
                       <TableCell>
                         {" "}
-                        {staff.englishFirstName ?? ""}{" "}
-                        {staff.englishLastName ?? ""}
+                        {staff.englishFirstName || ""}{" "}
+                        {staff.englishLastName || ""}
                       </TableCell>
-                      <TableCell>{staff.username}</TableCell>
+                      <TableCell>{staff.username || ""}</TableCell>
                       <TableCell>
                         {staff.status === "ACTIVE" ? (
                           <div className="text-green-500 flex gap-2 items-center">

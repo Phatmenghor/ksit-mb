@@ -1,11 +1,11 @@
 import React from "react";
-import { Data } from "@/model/user/staff/getById.staff.model";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import InfoGrid from "../shared/UserPersonalHistory";
+import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 
 interface AdminProps {
-  admin: Data | null;
+  admin: StaffRespondModel | null;
 }
 
 export default function AdminPersonal({ admin }: AdminProps) {

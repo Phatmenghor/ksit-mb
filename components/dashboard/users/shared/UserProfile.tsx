@@ -36,11 +36,11 @@ export const UserProfileSection: React.FC<ProfileProps> = ({
         <h3 className="font-medium text-lg mt-4">
           {user?.username || "Unknown"}
         </h3>
-        <p className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground">
           <Badge className="bg-green-100 text-green-900 p-2">
             ID: {user?.id ?? "N/A"}
           </Badge>
-        </p>
+        </div>
       </CardContent>
     </Card>
   );

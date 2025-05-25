@@ -5,7 +5,6 @@ import { ROUTE } from "@/constants/routes";
 import React, { useEffect } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { getStuffByIdService } from "@/service/user/user.service";
 import TeacherPersonal from "@/components/dashboard/users/teachers/view/TeacherPersonalInfo";
 import TeacherProfessionalRank from "@/components/dashboard/users/teachers/view/TeacherProfessionalRank";
 import TeacherExperienceSection from "@/components/dashboard/users/teachers/view/TeacherExperience";
@@ -16,6 +15,7 @@ import TeacherShortCourseSection from "@/components/dashboard/users/teachers/vie
 import TeacherLanguageSection from "@/components/dashboard/users/teachers/view/TeacherLanguage";
 import TeacherFamilySection from "@/components/dashboard/users/teachers/view/TeacherFamily";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
+import { getStaffByIdService } from "@/service/user/user.service";
 
 export default function TeacherViewPage() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -26,7 +26,7 @@ export default function TeacherViewPage() {
   const loadStudent = async () => {
     setIsLoading(true);
     try {
-      const response = await getStuffByIdService(teacherId);
+      const response = await getStaffByIdService(teacherId);
       if (response) {
         setteacher(response);
       } else {
@@ -69,22 +69,22 @@ export default function TeacherViewPage() {
         <TeacherPersonal teacher={teacher} />
         <TeacherProfessionalRank teacher={teacher} />
         <TeacherExperienceSection
-          teacher={teacher?.teacherExperience ?? null}
+          teacher={teacher?.teacherExperience || null}
         />
         <TeacherPraiseOrCriticismSection
-          teacher={teacher?.teacherPraiseOrCriticism ?? null}
+          teacher={teacher?.teacherPraiseOrCriticism || null}
         />
-        <TeacherEducationSection teacher={teacher?.teacherEducation ?? null} />
+        <TeacherEducationSection teacher={teacher?.teacherEducation || null} />
         <TeacherVocationalSection
-          teacher={teacher?.teacherVocational ?? null}
+          teacher={teacher?.teacherVocational || null}
         />
         <TeacherShortCourseSection
-          teacher={teacher?.teacherShortCourse ?? null}
+          teacher={teacher?.teacherShortCourse || null}
         />
-        <TeacherLanguageSection teacher={teacher?.teacherLanguage ?? null} />{" "}
+        <TeacherLanguageSection teacher={teacher?.teacherLanguage || null} />{" "}
         <TeacherFamilySection
           familyStatus={teacher}
-          teacher={teacher?.teacherFamily ?? null}
+          teacher={teacher?.teacherFamily || null}
         />{" "}
       </div>
     </div>

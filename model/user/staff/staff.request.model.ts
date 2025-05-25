@@ -77,7 +77,7 @@ interface BaseStaffModel {
 
 // Nested interfaces representing various detailed info related to a staff member
 
-interface TeachersProfessionalRank {
+export interface TeachersProfessionalRank {
   id?: number;
   typeOfProfessionalRank?: string; // Type/category of professional rank
   description?: string; // Description or notes
@@ -85,7 +85,7 @@ interface TeachersProfessionalRank {
   dateAccepted?: string; // Date when rank was accepted/granted
 }
 
-interface TeacherExperience {
+export interface TeacherExperience {
   id?: number;
   continuousEmployment?: string; // Duration of continuous employment
   workPlace?: string; // Name of workplace
@@ -93,14 +93,14 @@ interface TeacherExperience {
   endDate?: string; // End date of experience
 }
 
-interface TeacherPraiseOrCriticism {
+export interface TeacherPraiseOrCriticism {
   id?: number;
   typePraiseOrCriticism?: string; // Type: praise or criticism
   giveBy?: string; // Person who gave praise or criticism
   dateAccepted?: string; // Date when it was accepted/recorded
 }
 
-interface TeacherEducation {
+export interface TeacherEducation {
   id?: number;
   culturalLevel?: string; // Educational level (e.g., Bachelor, Master)
   skillName?: string; // Name of skill/degree obtained
@@ -108,7 +108,7 @@ interface TeacherEducation {
   country?: string; // Country where education was received
 }
 
-interface TeacherVocational {
+export interface TeacherVocational {
   id?: number;
   culturalLevel?: string; // Vocational education level
   skillOne?: string; // Primary skill learned
@@ -117,7 +117,7 @@ interface TeacherVocational {
   dateAccepted?: string; // Date training was completed
 }
 
-interface TeacherShortCourse {
+export interface TeacherShortCourse {
   id?: number;
   skill?: string; // Skill taught in the course
   skillName?: string; // Name of the course
@@ -128,7 +128,7 @@ interface TeacherShortCourse {
   supportBy?: string; // Supporting organizations
 }
 
-interface TeacherLanguage {
+export interface TeacherLanguage {
   id?: number;
   language?: string; // Language name (e.g., English, Khmer)
   reading?: string; // Reading proficiency level
@@ -136,7 +136,7 @@ interface TeacherLanguage {
   speaking?: string; // Speaking proficiency level
 }
 
-interface TeacherFamily {
+export interface TeacherFamily {
   id?: number;
   nameChild?: string; // Name of child family member
   gender?: string; // Gender of family member

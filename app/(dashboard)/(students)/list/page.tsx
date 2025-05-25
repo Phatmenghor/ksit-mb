@@ -257,7 +257,7 @@ export default function StudentsListPage() {
                             }}
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-red-500 hover:text-red-600"
+                            className="h-8 w-8 text-black"
                             disabled={isSubmitting}
                             title="Delete"
                           >

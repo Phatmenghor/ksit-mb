@@ -1,14 +1,14 @@
 import { Column, CustomTable } from "@/components/shared/layout/TableSection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { TeacherFamily } from "@/model/user/staff/Add.staff.model";
 import React from "react";
 import InfoGrid from "../../shared/UserPersonalHistory";
-import { Data } from "@/model/user/staff/getById.staff.model";
+import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
+import { TeacherFamily } from "@/model/user/staff/staff.request.model";
 
 interface TeacherProps {
   teacher: TeacherFamily[] | null;
-  familyStatus: Data | null;
+  familyStatus: StaffRespondModel | null;
 }
 
 export default function TeacherFamilySection({

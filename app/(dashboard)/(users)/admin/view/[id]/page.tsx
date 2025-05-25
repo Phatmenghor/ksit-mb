@@ -4,7 +4,7 @@ import { UserProfileSection } from "@/components/dashboard/users/shared/UserProf
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
-import { getStuffByIdService } from "@/service/user/user.service";
+import { getStaffByIdService } from "@/service/user/user.service";
 import { useParams } from "next/navigation";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
@@ -19,7 +19,7 @@ export default function AdminProfilePage() {
   const loadAdmin = async () => {
     setIsLoading(true);
     try {
-      const response = await getStuffByIdService(adminId);
+      const response = await getStaffByIdService(adminId);
       if (response) {
         setAdmin(response);
       } else {

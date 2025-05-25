@@ -1,12 +1,12 @@
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import React from "react";
 import InfoGrid from "../../shared/UserPersonalHistory";
-import { Data } from "@/model/user/staff/getById.staff.model";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 
 interface TeacherProfileProps {
-  teacher: Data | null;
+  teacher: StaffRespondModel | null;
 }
 
 export default function TeacherPersonal({ teacher }: TeacherProfileProps) {

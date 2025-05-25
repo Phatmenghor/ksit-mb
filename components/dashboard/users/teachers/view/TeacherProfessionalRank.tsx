@@ -1,11 +1,11 @@
 import React from "react";
-import { Data } from "@/model/user/staff/getById.staff.model";
 import { Separator } from "@/components/ui/separator";
 import InfoGrid from "../../shared/UserPersonalHistory";
 import { Card, CardContent } from "@/components/ui/card";
+import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 
 interface TeacherProps {
-  teacher: Data | null;
+  teacher: StaffRespondModel | null;
 }
 export default function TeacherProfessionalRank({ teacher }: TeacherProps) {
   const infoItems = [

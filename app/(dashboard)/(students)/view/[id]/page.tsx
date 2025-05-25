@@ -14,12 +14,6 @@ import PaymentTabs from "@/components/dashboard/users/student/view/tab/PaymentTa
 import TranscriptTabs from "@/components/dashboard/users/student/view/tab/TranscriptTabs";
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 
-const tab = [
-  {
-    label: "",
-    value: "studentDetail",
-  },
-];
 export default function StudentViewPage() {
   const [activeTab, setActiveTab] = React.useState("information");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -32,16 +26,11 @@ export default function StudentViewPage() {
   const loadInfo = async () => {
     setIsLoading(true);
     try {
-      let res;
-      if (type === "student") {
-        const response = await getStudentByIdService(id);
-        if (response) {
-          setStudentDetail(response);
-        } else {
-          toast.error("Error getting student data");
-        }
-      } else if (type === "payment") {
-      } else if (type === "transcript") {
+      const response = await getStudentByIdService(id);
+      if (response) {
+        setStudentDetail(response);
+      } else {
+        toast.error("Error getting student data");
       }
     } catch (error) {
       console.error("Error fetching student data:", error);

@@ -1,7 +1,7 @@
 import { Column, CustomTable } from "@/components/shared/layout/TableSection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { TeacherExperience } from "@/model/user/staff/Add.staff.model";
+import { TeacherExperience } from "@/model/user/staff/staff.request.model";
 import React from "react";
 
 interface TeacherProps {
