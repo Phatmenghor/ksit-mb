@@ -309,9 +309,11 @@ export default function AdminsListPage() {
                         {admin.khmerFirstName} {admin.khmerLastName}
                       </TableCell>
                       <TableCell>
-                        {" "}
-                        {admin.englishFirstName ?? ""}{" "}
-                        {admin.englishLastName ?? ""}
+                        {admin.englishFirstName || admin.englishLastName
+                          ? `${admin.englishFirstName ?? ""} ${
+                              admin.englishLastName ?? ""
+                            }`.trim()
+                          : "- - -"}
                       </TableCell>
                       <TableCell>{admin.username}</TableCell>
                       <TableCell>

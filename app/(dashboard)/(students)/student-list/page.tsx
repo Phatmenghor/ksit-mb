@@ -39,8 +39,6 @@ export default function StudentsListPage() {
   // Core state
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  // Filter state
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectAcademicYear, setSelectAcademicYear] = useState<
     number | undefined
@@ -171,11 +169,9 @@ export default function StudentsListPage() {
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
             <div className="w-full min-w-[150px] md:w-1/2">
               <YearSelector
-                title="ឆ្នាំសិក្សា"
+                title="Select Year"
                 onChange={handleYearChange}
-                value={selectAcademicYear ?? 2024}
-                maxYear={2040}
-                minYear={2020}
+                value={selectAcademicYear ?? 0}
               />
             </div>
 
