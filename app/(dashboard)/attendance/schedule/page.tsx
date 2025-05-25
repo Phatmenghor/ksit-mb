@@ -208,7 +208,7 @@ const ClassSchedulePage = () => {
       <div className="bg-white rounded-lg p-6 shadow-sm border">
         <div className="mb-4">
           <h2 className="text-lg font-bold">
-            {selectedDay ? `${selectedDay.displayName} Schedule` : "Schedule"}
+            {selectedDay ? `${selectedDay.displayName}` : ""}
           </h2>
           <p className="text-sm text-muted-foreground">
             Total Schedule: {scheduleData?.totalElements || 0}

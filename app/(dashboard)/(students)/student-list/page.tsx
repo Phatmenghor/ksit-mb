@@ -26,7 +26,6 @@ import { YearSelector } from "@/components/shared/year-selector";
 import ComboBoxClass from "@/components/shared/ComboBox/combobox-class";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
 import { useDebounce } from "@/utils/debounce/debounce";
-import Loading from "../../permissions/loading";
 import { StudentTableHeader } from "@/constants/table/user";
 import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
@@ -35,6 +34,7 @@ import {
   RequestAllStudent,
   StudentModel,
 } from "@/model/user/student/student.request.model";
+import Loading from "@/components/shared/loading";
 
 export default function StudentsListPage() {
   // Core state
