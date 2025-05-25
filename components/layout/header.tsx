@@ -15,10 +15,12 @@ import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState, useEffect } from "react";
 import { MobileSidebar } from "@/components/layout/mobile-sidebar";
+import { getRoles } from "@/utils/local-storage/user-info/roles";
 
 export function Header() {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [roles, setRoles] = useState<string[]>([]);
 
   // Close mobile menu when switching from mobile to desktop
   useEffect(() => {

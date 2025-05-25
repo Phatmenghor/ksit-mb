@@ -31,7 +31,7 @@ interface CardHeaderSectionProps {
   buttonText?: string;
   buttonIcon?: React.ReactNode;
   buttonHref?: string;
-  back: boolean;
+  back?: boolean;
   openModal?: () => void;
   customSelect?: React.ReactNode; // 👈 new optional prop
   tabs?: React.ReactNode; // 👈 new prop

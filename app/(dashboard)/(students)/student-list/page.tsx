@@ -23,7 +23,6 @@ import { StatusEnum } from "@/constants/constant";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 import { YearSelector } from "@/components/shared/year-selector";
-import ComboBoxClass from "@/components/shared/ComboBox/combobox-class";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { StudentTableHeader } from "@/constants/table/user";
@@ -35,6 +34,7 @@ import {
   StudentModel,
 } from "@/model/user/student/student.request.model";
 import Loading from "@/components/shared/loading";
+import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 
 export default function StudentsListPage() {
   // Core state
@@ -46,7 +46,9 @@ export default function StudentsListPage() {
   const [selectAcademicYear, setSelectAcademicYear] = useState<
     number | undefined
   >();
-  const [selectedClass, setSelectedClass] = useState<ClassModel>();
+  const [selectedClass, setSelectedClass] = useState<ClassModel | undefined>(
+    undefined
+  );
 
   // Main student data from API
   const [allStudentData, setAllStudentData] = useState<AllStudentModel | null>(
@@ -74,7 +76,7 @@ export default function StudentsListPage() {
         const response = await getAllStudentsService({
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
-          ...param,
+          classId: selectedClass?.id,
         });
 
         if (response) {
@@ -155,7 +157,6 @@ export default function StudentsListPage() {
   return (
     <div className="space-y-4">
       <CardHeaderSection
-        back
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
           { label: "Student List", href: ROUTE.STUDENTS.LIST },
@@ -180,11 +181,10 @@ export default function StudentsListPage() {
             </div>
 
             <div className="w-full min-w-[150px] md:w-1/2">
-              <ComboBoxClass
-                title="ថ្នាក់:"
+              <ComboboxSelectClass
+                dataSelect={selectedClass ?? null}
+                onChangeSelected={handleClassChange}
                 disabled={isSubmitting}
-                onChange={handleClassChange}
-                selectedClass={selectedClass ?? null}
               />
             </div>
           </div>
@@ -225,6 +225,7 @@ export default function StudentsListPage() {
                   return (
                     <TableRow key={student.id}>
                       <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{student.username}</TableCell>
                       <TableCell>
                         {student.khmerFirstName} {student.khmerLastName}
                       </TableCell>

@@ -1,26 +1,26 @@
 export const StaffTableHeader = [
-  { label: "Staff #", className: "w-[10%]" },
+  { label: "#", className: "w-[10%]" },
+  { label: "Username", className: "w-[20%]" },
   { label: "Fullname (KH)", className: "w-[30%]" },
   { label: "Fullname (EN)", className: "w-[30%]" },
-  { label: "Username", className: "w-[20%]" },
   { label: "Status", className: "w-[10%]" },
   { label: "Actions", className: "w-[10%]" },
 ];
 
 export const AdminTableHeader = [
-  { label: "Admin #", className: "w-[10%]" },
+  { label: "#", className: "w-[10%]" },
+  { label: "Username", className: "w-[20%]" },
   { label: "Fullname (KH)", className: "w-[30%]" },
   { label: "Fullname (EN)", className: "w-[30%]" },
-  { label: "Username", className: "w-[20%]" },
   { label: "Status", className: "w-[10%]" },
   { label: "Actions", className: "w-[10%]" },
 ];
 
 export const TeacherTableHeader = [
-  { label: "No", className: "w-[5%]" },
+  { label: "#", className: "w-[5%]" },
+  { label: "Username", className: "w-[20%]" },
   { label: "Fullname (KH)", className: "w-[30%]" },
   { label: "Fullname (EN)", className: "w-[30%]" },
-  { label: "Username", className: "w-[20%]" },
   { label: "Teacher ID", className: "w-[20%]" },
   { label: "Gender", className: "w-[20%]" },
   { label: "Date Of Birth", className: "w-[10%]" },
@@ -30,7 +30,8 @@ export const TeacherTableHeader = [
 ];
 
 export const StudentTableHeader = [
-  { label: "Student #", className: "w-[10%]" },
+  { label: "#", className: "w-[10%]" },
+  { label: "Username", className: "w-[20%]" },
   { label: "Fullname (KH)", className: "w-[30%]" },
   { label: "Fullname (EN)", className: "w-[30%]" },
   { label: "Student Id", className: "w-[10%]" },

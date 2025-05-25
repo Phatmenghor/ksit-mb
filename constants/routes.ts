@@ -39,7 +39,7 @@ export const ROUTE = {
   STUDENTS: {
     ADD_MULTIPLE: "/add-multiple",
     ADD_SINGLE: "/add-single",
-    LIST: "/list",
+    LIST: "/student-list",
     VIEW: (id: string) => `/view/${id}`,
     EDIT_STUDENT: (id: string) => `/edit/${id}`,
   },
