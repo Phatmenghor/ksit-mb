@@ -20,24 +20,25 @@ import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { StatusEnum } from "@/constants/constant";
-import { getAllDepartmentService } from "@/service/master-data/department.service";
-import { DepartmentModel } from "@/model/master-data/department/all-department-model";
-import { ClassModel } from "@/model/master-data/class/all-class-model";
+import { getAllMajorService } from "@/service/master-data/major.service";
+import { MajorModel } from "@/model/master-data/major/all-major-model";
+import { RoomModel } from "@/model/master-data/room/all-room-model";
+import { getAllRoomService } from "@/service/master-data/room.service";
 
 interface ComboboxSelectedProps {
-  dataSelect: ClassModel | null;
-  onChangeSelected: (item: ClassModel) => void; // Callback to notify parent about the selection change
+  dataSelect: RoomModel | null;
+  onChangeSelected: (item: RoomModel) => void; // Callback to notify parent about the selection change
   disabled?: boolean;
 }
 
-export function ComboboxSelectClass({
+export function ComboboxSelectRoom({
   dataSelect,
   onChangeSelected,
   disabled = false,
 }: ComboboxSelectedProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [data, setData] = useState<ClassModel[]>([]);
+  const [data, setData] = useState<RoomModel[]>([]);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -50,7 +51,7 @@ export function ComboboxSelectClass({
     if (loading || (lastPage && newPage > 1)) return;
     setLoading(true);
     try {
-      const result = await getAllDepartmentService({
+      const result = await getAllRoomService({
         search,
         pageSize: 10,
         pageNo: newPage,
@@ -65,7 +66,7 @@ export function ComboboxSelectClass({
       setPage(result.pageNo);
       setLastPage(result.last);
     } catch (error) {
-      console.error("Error fetching departments:", error);
+      console.error("Error fetching majors:", error);
     } finally {
       setLoading(false);
     }
@@ -91,6 +92,11 @@ export function ComboboxSelectClass({
       fetchData(searchTerm, page + 1);
     }
   }, [inView]);
+
+  // Check if the current selection exists in the loaded data
+  const isSelectedItemInList = dataSelect
+    ? data.some((item) => item.id === dataSelect.id)
+    : false;
 
   async function onChangeSearch(value: string) {
     setSearchTerm(value);
@@ -118,25 +124,25 @@ export function ComboboxSelectClass({
           )}
           disabled={disabled}
         >
-          {/* Always show the name directly from dataSelect prop if available */}
-          {dataSelect ? dataSelect.code : "Select a class..."}
+          {/* Always show the name from the dataSelect prop if available */}
+          {dataSelect ? dataSelect.name : "Select a major..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full flex p-0">
         <Command>
           <CommandInput
-            placeholder="Search class..."
+            placeholder="Search major..."
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
           <CommandList className="max-h-60 overflow-y-auto">
-            <CommandEmpty>No class found.</CommandEmpty>
+            <CommandEmpty>No majors found.</CommandEmpty>
             <CommandGroup>
               {data?.map((item, index) => (
                 <CommandItem
                   key={item.id}
-                  value={item.code}
+                  value={item.name}
                   onSelect={() => {
                     onChangeSelected(item); // Notify parent about the change
                     setOpen(false);
@@ -149,7 +155,7 @@ export function ComboboxSelectClass({
                       dataSelect?.id === item.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {item.code}
+                  {item.name} ({item.name})
                 </CommandItem>
               ))}
             </CommandGroup>

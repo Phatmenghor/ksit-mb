@@ -1,4 +1,5 @@
 import { ScheduleFilterModel } from "@/model/schedule/schedule/schedule-filter";
+import { CreateScheduleModel } from "@/model/schedules/type-schedule-model";
 import { axiosClientWithAuth } from "@/utils/axios";
 
 export async function getAllScheduleService(data: ScheduleFilterModel) {
@@ -20,5 +21,18 @@ export async function getDetailScheduleService(scheduleId: number) {
   } catch (error: any) {
     console.error("Error fetching schedule detail:", error);
     return null;
+  }
+}
+export async function createScheduleService(data: CreateScheduleModel) {
+  try {
+    const response = await axiosClientWithAuth.post(`/v1/schedules`, data);
+    return response.data.data;
+  } catch (error: any) {
+    // Extract error message from response if available
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    console.error("Error creating course:", error);
+    throw error;
   }
 }

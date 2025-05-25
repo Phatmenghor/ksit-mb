@@ -42,6 +42,7 @@ export const ROUTE = {
 
   SCHEDULE: {
     MANAGE: "/schedule/manage",
+    DEPARTMENT: "/schedule/department",
     ROOT: "/schedule",
   },
 
