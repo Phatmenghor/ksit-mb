@@ -88,7 +88,6 @@ export default function TeachersListPage() {
   return (
     <div className="space-y-4">
       <CardHeaderSection
-        back
         breadcrumbs={[
           { label: "Home", href: ROUTE.DASHBOARD },
           { label: "Teacher List", href: ROUTE.USERS.TEACHERS },

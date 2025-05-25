@@ -155,7 +155,6 @@ export default function StudentsListPage() {
   return (
     <div className="space-y-4">
       <CardHeaderSection
-        back
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
           { label: "Student List", href: ROUTE.STUDENTS.LIST },
@@ -225,6 +224,7 @@ export default function StudentsListPage() {
                   return (
                     <TableRow key={student.id}>
                       <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{student.username}</TableCell>
                       <TableCell>
                         {student.khmerFirstName} {student.khmerLastName}
                       </TableCell>

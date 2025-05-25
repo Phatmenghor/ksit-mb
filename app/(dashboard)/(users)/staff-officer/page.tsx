@@ -132,7 +132,6 @@ export default function StuffOfficerListPage() {
           { label: "Home", href: ROUTE.DASHBOARD },
           { label: "Stuff-Officer-List", href: ROUTE.USERS.STUFF_OFFICER },
         ]}
-        back
         title="Staff Officers"
         searchValue={searchQuery}
         buttonHref={ROUTE.USERS.ADD_STAFF}
