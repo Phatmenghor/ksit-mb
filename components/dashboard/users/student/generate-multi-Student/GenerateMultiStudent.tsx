@@ -10,12 +10,11 @@ import { Loader2, Plus } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Controller, useForm } from "react-hook-form";
-
-import ComboBoxClass from "@/components/shared/ComboBox/combobox-class";
 import { StatusEnum } from "@/constants/constant";
 import { GenerateMultipleStudent } from "@/model/user/student/student.request.model";
 import { generateMultipleStudentService } from "@/service/user/student.service";
 import { exportStudentsToExcel } from "@/utils/excel/Excel-Generate";
+import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 
 // Validation schema for generating multiple students
 const generateMultipleStudentSchema = z.object({
@@ -141,10 +140,10 @@ export default function GenerateMultiStudentForm() {
                   control={control}
                   name="classId"
                   render={({ field }) => (
-                    <ComboBoxClass
+                    <ComboboxSelectClass
                       disabled={isSubmitting}
-                      selectedClass={field.value as any} // Ensure field.value is a full ClassModel object
-                      onChange={(selected) => field.onChange(selected)}
+                      dataSelect={field.value as any} // Ensure field.value is a full ClassModel object
+                      onChangeSelected={(selected) => field.onChange(selected)}
                     />
                   )}
                 />

@@ -27,7 +27,6 @@ import {
   deletedStaffService,
   getAllStaffService,
 } from "@/service/user/user.service";
-import Loading from "../../permissions/loading";
 import { StaffTableHeader } from "@/constants/table/user";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
@@ -153,7 +152,9 @@ export default function StuffOfficerListPage() {
 
       <div className="overflow-x-auto">
         {isLoading ? (
-          <Loading />
+          <div className="flex justify-center py-8 text-muted-foreground">
+            Loading...
+          </div>
         ) : (
           <Table>
             <TableHeader>

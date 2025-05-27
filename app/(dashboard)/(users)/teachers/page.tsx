@@ -28,7 +28,6 @@ import {
 import { RoleEnum, StatusEnum } from "@/constants/constant";
 import PaginationPage from "@/components/shared/pagination-page";
 import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
-import Loading from "../../permissions/loading";
 import { StaffTableHeader, TeacherTableHeader } from "@/constants/table/user";
 import {
   AllStaffModel,
@@ -147,7 +146,9 @@ export default function TeachersListPage() {
 
       <div className="overflow-x-auto">
         {isLoading ? (
-          <Loading />
+          <div className="flex justify-center py-8">
+            <span className="text-muted-foreground">Loading...</span>
+          </div>
         ) : (
           <Table>
             <TableHeader>

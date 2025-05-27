@@ -35,10 +35,11 @@ const tabs = [
 ];
 
 export default function StudentViewPage() {
-  const [activeTab, setActiveTab] = React.useState("information");
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [studentDetail, setStudentDetail] =
-    React.useState<StudentByIdModel | null>(null);
+  const [activeTab, setActiveTab] = useState("information");
+  const [isLoading, setIsLoading] = useState(false);
+  const [studentDetail, setStudentDetail] = useState<StudentByIdModel | null>(
+    null
+  );
   const { type, id } = useParams<{ type: string; id: string }>();
 
   const loadInfo = async () => {

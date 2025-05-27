@@ -31,7 +31,6 @@ import {
   updateStaffService,
 } from "@/service/user/user.service";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
-import Loading from "@/app/(dashboard)/permissions/loading";
 import AdminModalForm from "@/components/dashboard/users/admin/AdminModalForm";
 import { AdminTableHeader, StaffTableHeader } from "@/constants/table/user";
 import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
@@ -54,6 +53,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
+import Loading from "@/components/shared/loading";
 
 export default function AdminsListPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -302,8 +302,11 @@ export default function AdminsListPage() {
                         }`.trim() || "---"}
                       </TableCell>
                       <TableCell>
-                        {`${admin.englishFirstName ?? ""}
-                        ${admin.englishLastName ?? ""}`.trim() || "---"}
+                        {admin.englishFirstName || admin.englishLastName
+                          ? `${admin.englishFirstName ?? ""} ${
+                              admin.englishLastName ?? ""
+                            }`.trim()
+                          : "---"}
                       </TableCell>
                       <TableCell>
                         <div className="flex justify-start space-x-2">
@@ -394,6 +397,16 @@ export default function AdminsListPage() {
         )}
       </div>
 
+      {!isLoading && data && (
+        <div className="mt-4 flex justify-end">
+          <PaginationPage
+            currentPage={data.pageNo}
+            totalPages={data.totalPages}
+            onPageChange={(page: number) => loadData({ pageNo: page })}
+          />
+        </div>
+      )}
+
       <AdminModalForm
         isOpen={isModalOpen}
         mode={modalMode}
@@ -421,16 +434,6 @@ export default function AdminsListPage() {
         itemName={selectedAdmin?.username}
         isSubmitting={isSubmitting}
       />
-
-      {!isLoading && data && (
-        <div className="mt-4 flex justify-end">
-          <PaginationPage
-            currentPage={data.pageNo}
-            totalPages={data.totalPages}
-            onPageChange={(page: number) => loadData({ pageNo: page })}
-          />
-        </div>
-      )}
     </div>
   );
 }

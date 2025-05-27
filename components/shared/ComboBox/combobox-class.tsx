@@ -23,6 +23,7 @@ import { StatusEnum } from "@/constants/constant";
 import { getAllDepartmentService } from "@/service/master-data/department.service";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
 import React from "react";
+import { getAllClassService } from "@/service/master-data/class.service";
 interface ComboboxSelectedProps {
   dataSelect: ClassModel | null;
   onChangeSelected: (item: ClassModel) => void; // Callback to notify parent about the selection change
@@ -49,7 +50,7 @@ export function ComboboxSelectClass({
     if (loading || (lastPage && newPage > 1)) return;
     setLoading(true);
     try {
-      const result = await getAllDepartmentService({
+      const result = await getAllClassService({
         search,
         pageSize: 10,
         pageNo: newPage,
