@@ -15,6 +15,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
+// Constants for limits
+const MAX_SIBLINGS = 20; // Maximum total siblings
+const MIN_SIBLINGS = 0; // Minimum siblings
+
 export default function StudentSibling() {
   const {
     control,
@@ -25,6 +29,7 @@ export default function StudentSibling() {
 
   const [totalSiblings, setTotalSiblings] = useState(1);
   const [femaleSiblings, setFemaleSiblings] = useState(0);
+  const [validationError, setValidationError] = useState("");
 
   const {} = useFieldArray({
     control,
@@ -41,41 +46,70 @@ export default function StudentSibling() {
     name: "studentSiblings",
   });
 
+  // Validation function
+  const validateSiblingInput = (total: number, female: number): string => {
+    if (total > MAX_SIBLINGS) {
+      return `ចំនួនបងប្អូនមិនអាចលើសពី ${MAX_SIBLINGS} នាក់ទេ`;
+    }
+    if (total < MIN_SIBLINGS) {
+      return `ចំនួនបងប្អូនមិនអាចតិចជាង ${MIN_SIBLINGS} នាក់ទេ`;
+    }
+    if (female > total) {
+      return "ចំនួនបងប្អូនស្រីមិនអាចលើសពីចំនួនបងប្អូនសរុបទេ";
+    }
+    return "";
+  };
+
   // Generate siblings based on totals
   useEffect(() => {
-    const validTotal = Math.max(0, totalSiblings);
+    const validTotal = Math.max(
+      MIN_SIBLINGS,
+      Math.min(totalSiblings, MAX_SIBLINGS)
+    );
     const validFemale = Math.min(femaleSiblings, validTotal);
     const maleSiblings = validTotal - validFemale;
 
-    const newSiblings = [];
+    // Validate input
+    const error = validateSiblingInput(validTotal, validFemale);
+    setValidationError(error);
 
-    for (let i = 0; i < validFemale; i++) {
-      newSiblings.push({
-        name: "",
-        gender: "FEMALE",
-        dateOfBirth: "",
-        occupation: "",
-        phoneNumber: "",
-      });
+    // Only proceed if validation passes
+    if (!error) {
+      const newSiblings = [];
+
+      for (let i = 0; i < validFemale; i++) {
+        newSiblings.push({
+          name: "",
+          gender: "FEMALE",
+          dateOfBirth: "",
+          occupation: "",
+          phoneNumber: "",
+        });
+      }
+
+      for (let i = 0; i < maleSiblings; i++) {
+        newSiblings.push({
+          name: "",
+          gender: "MALE",
+          dateOfBirth: "",
+          occupation: "",
+          phoneNumber: "",
+        });
+      }
+
+      replaceSiblings(newSiblings);
+
+      // Save the total as a string in the form
+      setValue("numberOfSiblings", String(validTotal));
     }
-
-    for (let i = 0; i < maleSiblings; i++) {
-      newSiblings.push({
-        name: "",
-        gender: "MALE",
-        dateOfBirth: "",
-        occupation: "",
-        phoneNumber: "",
-      });
-    }
-
-    replaceSiblings(newSiblings);
-
-    // Save the total as a string in the form
-    setValue("numberOfSiblings", String(validTotal));
   }, [totalSiblings, femaleSiblings, replaceSiblings, setValue]);
 
   const handleAddSibling = () => {
+    if (totalSiblings >= MAX_SIBLINGS) {
+      setValidationError(`ចំនួនបងប្អូនមិនអាចលើសពី ${MAX_SIBLINGS} នាក់ទេ`);
+      return;
+    }
+
     appendSibling({
       name: "",
       gender: "MALE",
@@ -83,7 +117,8 @@ export default function StudentSibling() {
       occupation: "",
       phoneNumber: "",
     });
-    setTotalSiblings((prev) => prev + 1);
+    setTotalSiblings((prev) => Math.min(prev + 1, MAX_SIBLINGS));
+    setValidationError("");
   };
 
   const handleRemoveSibling = () => {
@@ -100,11 +135,49 @@ export default function StudentSibling() {
       removeSibling(lastIndex);
 
       // Update counts
-      setTotalSiblings((prev) => prev - 1);
+      setTotalSiblings((prev) => Math.max(prev - 1, MIN_SIBLINGS));
 
       // Check if the removed sibling was female and update the female count
       if (lastSibling && lastSibling.gender === GenderEnum.FEMALE) {
-        setFemaleSiblings((prev) => prev - 1);
+        setFemaleSiblings((prev) => Math.max(prev - 1, MIN_SIBLINGS));
+      }
+
+      setValidationError("");
+    }
+  };
+
+  const handleMaleSiblingChange = (value: string) => {
+    if (/^\d*$/.test(value)) {
+      const male = Math.min(parseInt(value) || 0, MAX_SIBLINGS);
+      const newTotal = male + femaleSiblings;
+
+      if (newTotal <= MAX_SIBLINGS) {
+        setTotalSiblings(newTotal);
+        setValidationError("");
+      } else {
+        setValidationError(
+          `ចំនួនបងប្អូនសរុបមិនអាចលើសពី ${MAX_SIBLINGS} នាក់ទេ`
+        );
+      }
+    }
+  };
+
+  const handleFemaleSiblingChange = (value: string) => {
+    if (/^\d*$/.test(value)) {
+      const female = Math.min(parseInt(value) || 0, MAX_SIBLINGS);
+      const male = totalSiblings - femaleSiblings;
+      const newTotal = male + female;
+
+      if (newTotal <= MAX_SIBLINGS && female <= newTotal) {
+        setFemaleSiblings(female);
+        setTotalSiblings(newTotal);
+        setValidationError("");
+      } else if (newTotal > MAX_SIBLINGS) {
+        setValidationError(
+          `ចំនួនបងប្អូនសរុបមិនអាចលើសពី ${MAX_SIBLINGS} នាក់ទេ`
+        );
+      } else if (female > newTotal) {
+        setValidationError("ចំនួនបងប្អូនស្រីមិនអាចលើសពីចំនួនបងប្អូនសរុបទេ");
       }
     }
   };
@@ -113,45 +186,53 @@ export default function StudentSibling() {
     <div className="space-y-4">
       <div className="flex gap-4 mt-4">
         <div className="flex flex-col">
-          <label className="text-sm mb-2 font-semibold">ចំនួនបងប្អូន</label>
+          <label className="text-sm mb-2 font-semibold">
+            ចំនួនបងប្អូនប្រុស (អតិបរមា {MAX_SIBLINGS} នាក់)
+          </label>
           <Input
             type="text"
             pattern="\d*"
+            maxLength={2}
             value={
               totalSiblings - femaleSiblings === 0
                 ? ""
                 : String(totalSiblings - femaleSiblings)
             }
-            onChange={(e) => {
-              const raw = e.target.value;
-              if (/^\d*$/.test(raw)) {
-                const male = parseInt(raw) || 0;
-                setTotalSiblings(male + femaleSiblings);
-              }
-            }}
-            placeholder="ចំនួនបងប្អូន"
+            onChange={(e) => handleMaleSiblingChange(e.target.value)}
+            placeholder="ចំនួនបងប្អូនប្រុស"
+            className={validationError ? "border-red-500" : ""}
           />
         </div>
 
         <div className="flex flex-col">
-          <label className="text-sm mb-2 font-semibold">ចំនួនបងប្អូនស្រី</label>
+          <label className="text-sm mb-2 font-semibold">
+            ចំនួនបងប្អូនស្រី (អតិបរមា {MAX_SIBLINGS} នាក់)
+          </label>
           <Input
             type="text"
             pattern="\d*"
+            maxLength={2}
             value={femaleSiblings === 0 ? "" : String(femaleSiblings)}
-            onChange={(e) => {
-              const raw = e.target.value;
-              if (/^\d*$/.test(raw)) {
-                const female = parseInt(raw) || 0;
-                const male = totalSiblings - femaleSiblings;
-                setFemaleSiblings(female);
-                setTotalSiblings(male + female);
-              }
-            }}
+            onChange={(e) => handleFemaleSiblingChange(e.target.value)}
             placeholder="ចំនួនបងប្អូនស្រី"
+            className={validationError ? "border-red-500" : ""}
           />
         </div>
       </div>
+
+      {/* Validation Error Message */}
+      {validationError && (
+        <div className="text-red-500 text-sm font-medium bg-red-50 border border-red-200 rounded p-2">
+          {validationError}
+        </div>
+      )}
+
+      {/* Total Display */}
+      <div className="text-sm text-gray-600">
+        ចំនួនបងប្អូនសរុប:{" "}
+        <span className="font-semibold">{totalSiblings} នាក់</span>
+      </div>
+
       <Card className="overflow-x-auto p-1">
         <CardContent>
           <div className="grid grid-cols-5 mt-3 gap-4 font-semibold pb-2">
@@ -177,6 +258,7 @@ export default function StudentSibling() {
                       {...field}
                       className="border border-gray-300 bg-gray-100 rounded px-2 py-1 w-full"
                       placeholder="ឈ្មោះ"
+                      maxLength={50}
                     />
                   )}
                 />
@@ -250,6 +332,7 @@ export default function StudentSibling() {
                       {...field}
                       className="border border-gray-300 rounded bg-gray-100 px-2 py-1 w-full"
                       placeholder="មុខរបរ"
+                      maxLength={100}
                     />
                   )}
                 />
@@ -263,6 +346,8 @@ export default function StudentSibling() {
                       {...field}
                       className="border border-gray-300 bg-gray-100 rounded px-2 py-1 w-full"
                       placeholder="លេខទូរស័ព្ទ"
+                      maxLength={15}
+                      pattern="[0-9]*"
                     />
                   )}
                 />
@@ -276,16 +361,16 @@ export default function StudentSibling() {
         <Button
           type="button"
           onClick={handleAddSibling}
-          disabled={isSubmitting}
-          className="bg-black text-white hover:bg-gray-800"
+          disabled={isSubmitting || totalSiblings >= MAX_SIBLINGS}
+          className="bg-black text-white hover:bg-gray-800 disabled:opacity-50"
         >
-          Add Sibling
+          Add Sibling {totalSiblings >= MAX_SIBLINGS && "(Max reached)"}
         </Button>
         <Button
           type="button"
           onClick={handleRemoveSibling}
           disabled={isSubmitting || siblingFields.length === 0}
-          className="bg-black text-white hover:bg-gray-800"
+          className="bg-black text-white hover:bg-gray-800 disabled:opacity-50"
         >
           Remove Last Sibling
         </Button>

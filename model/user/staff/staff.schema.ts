@@ -146,21 +146,14 @@ const BaseStaffSchema = z.object({
   status: z.string().optional().nullable(),
 });
 
-// --- Password and Username validation regex patterns ---
-// Password must be at least 8 characters and include letters, numbers, and special characters
 const passwordRegex =
   /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
 
 // Username allows 3-20 characters: letters, numbers, and underscores only
 const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
 
-// --- Edit Staff Schema ---
-// Extends the base staff schema; customize validations here if needed for editing staff data
 export const EditStaffSchema = BaseStaffSchema.extend({});
 
-// --- Add Staff Schema ---
-// Extends the base staff schema and adds strict validation rules for:
-// password, username, departmentId, and identifyNumber fields
 export const AddStaffSchema = BaseStaffSchema.extend({
   password: z
     .string()
@@ -174,12 +167,7 @@ export const AddStaffSchema = BaseStaffSchema.extend({
   username: z
     .string()
     .min(3, "Username must be at least 3 characters")
-    .max(20, "Username must be at most 20 characters")
-    .regex(
-      usernameRegex,
-      "Username can only contain letters, numbers, and underscores"
-    ),
-
+    .max(20, "Username must be at most 20 characters"),
   departmentId: z
     .number()
     .int("Department ID must be an integer")
@@ -196,8 +184,6 @@ export const AddStaffSchema = BaseStaffSchema.extend({
 export type AddStaffFormData = z.infer<typeof AddStaffSchema>;
 export type EditStaffFormData = z.infer<typeof EditStaffSchema>;
 
-// --- Base Admin Schema ---
-// Pick common fields for both Add and Edit admin forms, extending with username and optional names
 const BaseAdminSchema = BaseStaffSchema.pick({
   email: true,
   status: true,
@@ -208,9 +194,6 @@ const BaseAdminSchema = BaseStaffSchema.pick({
   last_name: z.string().optional(),
 });
 
-// --- Unified Admin Form Schema ---
-// Used for both adding and editing admin data,
-// password and confirmPassword are optional but must match if provided
 export const AdminFormSchema = BaseAdminSchema.extend({
   password: z
     .string()

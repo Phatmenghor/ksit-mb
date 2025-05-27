@@ -3,6 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import InfoGrid from "../../shared/UserPersonalHistory";
 import { Card, CardContent } from "@/components/ui/card";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
+import { formatValue } from "@/utils/map-helper/student";
 
 interface TeacherProps {
   teacher: StaffRespondModel | null;
@@ -11,67 +12,67 @@ export default function TeacherProfessionalRank({ teacher }: TeacherProps) {
   const infoItems = [
     {
       label: "ឋាននន្តរស័ក្តិ និងថ្នាក់",
-      value: teacher?.rankAndClass,
+      value: formatValue(teacher?.rankAndClass),
     },
     {
       label: "យោង",
-      value: teacher?.referenceNote, //missing
+      value: formatValue(teacher?.referenceNote),
     },
     {
       label: "លេខរៀង",
-      value: teacher?.serialNumber, //missing
+      value: formatValue(teacher?.serialNumber),
     },
     {
       label: "ចុះថ្ងៃទី",
-      value: teacher?.issuedDate, // missing
+      value: formatValue(teacher?.issuedDate),
     },
     {
       label: "បង្រៀនភាសាអង់គ្លេស",
-      value: teacher?.taughtEnglish, // missing
+      value: formatValue(teacher?.taughtEnglish),
     },
     {
       label: "ប្រធានក្រុមបច្ចេកទេស",
-      value: teacher?.technicalTeamLeader, // missing
+      value: formatValue(teacher?.technicalTeamLeader),
     },
     {
       label: "ពីរថ្នាក់ណីរពេល",
-      value: teacher?.twoLevelClass, // missing
+      value: formatValue(teacher?.twoLevelClass),
     },
     {
       label: "បង្រៀនឆ្លងសាលា",
-      value: teacher?.teachAcrossSchools, // missing
+      value: formatValue(teacher?.teachAcrossSchools),
     },
     {
       label: "ថ្នាក់គួប",
-      value: teacher?.suitableClass, // missing
+      value: formatValue(teacher?.suitableClass),
     },
     {
       label: "ថ្ងៃខែឡើងការប្រាក់ចុងក្រោយ",
-      value: teacher?.lastSalaryIncrementDate, // missing
+      value: formatValue(teacher?.lastSalaryIncrementDate),
     },
     {
       label: "បង្រៀននៅឆ្នាំសិក្សា",
-      value: teacher?.academicYearTaught, // missing
+      value: formatValue(teacher?.academicYearTaught),
     },
     {
       label: "ថ្នាក់គួបបីកម្រិត",
-      value: teacher?.threeLevelClass, // missing
+      value: formatValue(teacher?.threeLevelClass),
     },
     {
       label: "ជួយបង្រៀន",
-      value: teacher?.assistInTeaching, // missing
+      value: formatValue(teacher?.assistInTeaching),
     },
     {
       label: "ទទួលបន្ទុកថ្នាក់",
-      value: teacher?.classResponsibility, // missing
+      value: formatValue(teacher?.classResponsibility),
     },
     {
       label: "ម៉ោងលើស",
-      value: teacher?.overtimeHours, // missing
+      value: formatValue(teacher?.overtimeHours),
     },
     {
       label: "ពីរភាសា",
-      value: teacher?.bilingual, // missing
+      value: formatValue(teacher?.bilingual),
     },
   ];
 

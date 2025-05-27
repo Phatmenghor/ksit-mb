@@ -38,12 +38,9 @@ export default function StudentForm({
   onDiscard,
   back,
 }: Props) {
-  // Local state to track if the form has unsaved changes (dirty)
   const [isFormDirty, setIsFormDirty] = useState(false);
-  // Local state to track if the form passes validation
   const [isFormValid, setIsFormValid] = useState(false);
 
-  // Initialize react-hook-form with validation schema depending on mode
   const methods = useForm({
     resolver: zodResolver(
       mode === "Add" ? AddStudentSchema : EditStudentSchema
@@ -52,7 +49,6 @@ export default function StudentForm({
     mode: "onChange",
   });
 
-  // Destructure methods and form state for easier access
   const {
     setValue,
     reset,
@@ -62,14 +58,11 @@ export default function StudentForm({
     handleSubmit,
   } = methods;
 
-  // Effect to reset form values when initialValues or mode changes
   useEffect(() => {
     if (initialValues && mode === "Edit") {
-      // Reset form with existing values for editing
       reset({
         ...initStudentFormData,
         ...Object.fromEntries(
-          // Convert null values to undefined for proper form handling
           Object.entries(initialValues).map(([key, value]) => [
             key,
             value === null ? undefined : value,
@@ -77,27 +70,21 @@ export default function StudentForm({
         ),
       });
     } else {
-      // Reset to default values on add mode or no initialValues
       reset(initStudentFormData);
     }
     setIsFormDirty(false);
   }, [initialValues, methods, mode]);
 
-  // Subscribe to form changes to track dirty and valid state
   useEffect(() => {
     const subscription = watch(() => {
       setIsFormDirty(isDirty);
       setIsFormValid(Object.keys(errors).length === 0 && isValid);
 
-      // Optional debug logs for development
       console.log("Dirty:", isDirty, "Valid:", isValid, "Errors:", errors);
     });
     return () => subscription.unsubscribe();
   }, [methods]);
 
-  /**
-   * Handler to confirm closing page if there are unsaved changes
-   */
   const handleClosePage = () => {
     if (isFormDirty) {
       const confirmed = window.confirm(
@@ -110,20 +97,14 @@ export default function StudentForm({
     }
   };
 
-  /**
-   * Main form submission handler wrapping the onSubmit prop
-   * with error handling
-   */
   const handleFormSubmit = async (data: any) => {
     try {
       await onSubmit(data);
     } catch (error) {
       console.error("Form submission error:", error);
-      // Consider showing user feedback here (toast, alert, etc.)
     }
   };
 
-  // Show loading indicator if in edit mode but initialValues not loaded yet
   if (!initialValues && mode === "Edit") {
     return (
       <div className="flex justify-center items-center h-[60vh]">
@@ -135,12 +116,6 @@ export default function StudentForm({
     );
   }
 
-  /**
-   * Determine if the form can be submitted based on mode, validity, and dirty state
-   * - Disables submit while submitting
-   * - For edit mode: allow submit if form is valid (dirty not required)
-   * - For add mode: require form to be valid and have required fields filled
-   */
   const canSubmitForm = () => {
     if (isSubmitting) return false;
 

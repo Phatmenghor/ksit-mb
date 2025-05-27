@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Bell, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,16 +14,44 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState, useEffect } from "react";
-import { MobileSidebar } from "@/components/layout/mobile-sidebar";
-import { getRoles } from "@/utils/local-storage/user-info/roles";
+import { useRouter } from "next/navigation";
+import { ROUTE } from "@/constants/routes";
+import { clearRoles, getRoles } from "@/utils/local-storage/user-info/roles";
+import { clearUserId, getUserId } from "@/utils/local-storage/user-info/userId";
+import { clearUsername } from "@/utils/local-storage/user-info/username";
+import { logoutUser } from "@/utils/local-storage/user-info/token";
+import { ConfirmDialog } from "../shared/custom-comfirm-diaglog";
+import { MobileSidebar } from "./mobile-sidebar";
 
 export function Header() {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [roles, setRoles] = useState<string[]>([]);
+  const [confirmOpen, setConfirmOpen] = useState(false); // state to open/close confirm dialog
+  const roles = getRoles();
+  const role = roles[0] || "";
+  const router = useRouter();
+  const userId = getUserId();
+  const primaryRole = roles[0] || "";
 
-  // Close mobile menu when switching from mobile to desktop
+  const getProfileUrl = () => {
+    switch (primaryRole) {
+      case "ADMIN":
+        return ROUTE.USERS.ADMIN_VIEW(userId ?? "");
+      case "STAFF":
+        return ROUTE.USERS.EDIT_STAFF(userId ?? "");
+      case "TEACHER":
+        return ROUTE.USERS.VIEW_TEACHER(userId ?? "");
+      case "STUDENT":
+        return ROUTE.STUDENTS.VIEW(userId ?? "");
+      case "DEVELOPER":
+        return ROUTE.USERS.VIEW_TEACHER(userId ?? "");
+      default:
+        return "/";
+    }
+  };
+
+  const profileUrl = getProfileUrl();
+
   useEffect(() => {
     if (!isMobile) {
       setMobileMenuOpen(false);
@@ -31,6 +60,14 @@ export function Header() {
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleLogout = () => {
+    clearUserId();
+    clearRoles();
+    clearUsername();
+    logoutUser();
+    router.push(ROUTE.AUTH.LOGIN);
   };
 
   return (
@@ -54,14 +91,8 @@ export function Header() {
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
               <Link href="/" className="flex items-center ml-2 gap-2">
-                <div className="rounded-full bg-white p-1">
-                  <img
-                    src="/placeholder.svg?height=40&width=40"
-                    alt="Logo"
-                    className="h-8 w-8"
-                  />
-                </div>
-                <span className="font-bold text-white text-lg">Admin</span>
+                <div className="rounded-full bg-white p-1"></div>
+                <span className="font-bold text-white text-lg">KSIT</span>
               </Link>
             </>
           )}
@@ -101,10 +132,19 @@ export function Header() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push(profileUrl)}>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.push(ROUTE.USERS.SETTING_CHANGE_PASSWORD)}
+              >
+                Settings
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              {/* Open confirm dialog on Logout click */}
+              <DropdownMenuItem onClick={() => setConfirmOpen(true)}>
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -128,6 +168,17 @@ export function Header() {
           <MobileSidebar isOpen={true} onClose={toggleMobileMenu} />
         </div>
       )}
+
+      {/* Confirm Logout Dialog */}
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Confirm Logout"
+        description="Are you sure you want to logout?"
+        onConfirm={handleLogout}
+        confirmText="Logout"
+        cancelText="Cancel"
+      />
     </>
   );
 }

@@ -2,13 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -16,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pencil, Trash2, Plus, RotateCcw, Check, X } from "lucide-react";
+import { Pencil, Trash2, Plus, RotateCcw, View, Eye } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -26,11 +19,11 @@ import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
 import {
   addStaffService,
+  deletedStaffService,
   getAllStaffService,
   updateStaffService,
 } from "@/service/user/user.service";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
-import Loading from "@/app/(dashboard)/permissions/loading";
 import AdminModalForm from "@/components/dashboard/users/admin/AdminModalForm";
 import { AdminTableHeader, StaffTableHeader } from "@/constants/table/user";
 import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
@@ -46,6 +39,14 @@ import {
   StaffModel,
 } from "@/model/user/staff/staff.respond.model";
 import { cleanField, cleanRequiredField } from "@/utils/map-helper/student";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useRouter } from "next/navigation";
+import Loading from "@/components/shared/loading";
 
 export default function AdminsListPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -64,8 +65,8 @@ export default function AdminsListPage() {
   const [statusFilter, setStatusFilter] = useState("ACTIVE");
 
   const iconColor = "text-black";
+  const route = useRouter();
 
-  // Debounces search query input to reduce unnecessary API calls
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,18 +74,15 @@ export default function AdminsListPage() {
   };
 
   const loadData = useCallback(
-    async (
-      data: StaffListRequest = {
-        pageNo: 1,
-        pageSize: 10,
-        roles: [RoleEnum.ADMIN],
-        search: searchQuery,
-        status: statusFilter,
-      }
-    ) => {
+    async (param: StaffListRequest) => {
       setIsLoading(true);
       try {
-        const response = await getAllStaffService(data);
+        const response = await getAllStaffService({
+          ...param,
+          roles: [RoleEnum.ADMIN],
+          search: searchQuery,
+          status: statusFilter,
+        });
         if (response) {
           setData(response);
         } else {
@@ -100,7 +98,7 @@ export default function AdminsListPage() {
   );
 
   useEffect(() => {
-    loadData();
+    loadData({});
   }, [debouncedSearchQuery, statusFilter, loadData]);
 
   const handleOpenAddModal = () => {
@@ -122,7 +120,6 @@ export default function AdminsListPage() {
     setIsModalOpen(true);
   };
 
-  // Handles add or edit form submission logic
   async function handleSubmit(formData: AdminFormData) {
     setIsSubmitting(true);
     try {
@@ -138,18 +135,16 @@ export default function AdminsListPage() {
         roles: formData.roles,
       };
 
-      // Payload for adding a new admin
       const addPayload: AddStaffModel = {
         ...basePayload,
-        roles: formData.roles ?? undefined, // Ensure roles is never null
-        password: cleanRequiredField(formData.password), // Ensure password is always a string
+        roles: formData.roles ?? undefined,
+        password: cleanRequiredField(formData.password),
       };
 
-      // Payload for updating an existing admin
       const updatePayload: EditStaffModel = {
         ...basePayload,
-        status: formData.status ?? undefined, // Ensure status is never null
-        roles: formData.roles ?? undefined, // Ensure roles is never null
+        status: formData.status ?? undefined,
+        roles: formData.roles ?? undefined,
       };
 
       if (modalMode === "add") {
@@ -202,7 +197,6 @@ export default function AdminsListPage() {
     }
   }
 
-  // Handles admin deletion by setting their status to INACTIVE
   async function handleDeleteAdmin() {
     if (!selectedAdmin) return;
 
@@ -221,9 +215,7 @@ export default function AdminsListPage() {
         };
       });
 
-      const response = await updateStaffService(selectedAdmin.id, {
-        status: StatusEnum.INACTIVE,
-      });
+      const response = await deletedStaffService(selectedAdmin.id);
 
       if (response) {
         toast.success(
@@ -250,26 +242,12 @@ export default function AdminsListPage() {
           { label: "Home", href: ROUTE.DASHBOARD },
           { label: "Admin List", href: ROUTE.USERS.ADMIN },
         ]}
-        title="Admins"
         searchValue={searchQuery}
         searchPlaceholder="Search..."
         onSearchChange={handleSearchChange}
         buttonText="Add New"
         openModal={handleOpenAddModal}
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
-        customSelect={
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="INACTIVE">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        }
       />
 
       <div className="overflow-x-auto">
@@ -305,63 +283,98 @@ export default function AdminsListPage() {
                   return (
                     <TableRow key={admin.id}>
                       <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{admin.username.trim() || "---"}</TableCell>
                       <TableCell>
-                        {admin.khmerFirstName} {admin.khmerLastName}
+                        {`${admin.khmerFirstName || ""} ${
+                          admin.khmerLastName || ""
+                        }`.trim() || "---"}
                       </TableCell>
                       <TableCell>
-                        {" "}
-                        {admin.englishFirstName ?? ""}{" "}
-                        {admin.englishLastName ?? ""}
+                        {admin.englishFirstName || admin.englishLastName
+                          ? `${admin.englishFirstName ?? ""} ${
+                              admin.englishLastName ?? ""
+                            }`.trim()
+                          : "---"}
                       </TableCell>
-                      <TableCell>{admin.username}</TableCell>
-                      <TableCell>
-                        {admin.status === "ACTIVE" ? (
-                          <div className="text-green-500 flex gap-2 items-center">
-                            <Check className="w-4 h-4" />
-                            <span>{admin.status}</span>
-                          </div>
-                        ) : (
-                          <div className="text-red-500 flex gap-2 items-center">
-                            <X className="w-4 h-4" />
-                            <span>{admin.status}</span>
-                          </div>
-                        )}
-                      </TableCell>
+                      <TableCell>{admin.gender || "---"}</TableCell>
                       <TableCell>
                         <div className="flex justify-start space-x-2">
-                          <Button
-                            onClick={() => handleOpenEditModal(admin)}
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-black hover:text-gray-900"
-                            title="Edit"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            onClick={() => {
-                              setIsChangePasswordDialogOpen(true);
-                              setSelectedAdmin(admin);
-                            }}
-                            className={iconColor}
-                            size="sm"
-                          >
-                            <RotateCcw />
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setSelectedAdmin(admin);
-                              setIsDeleteDialogOpen(true);
-                            }}
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-red-500 hover:text-red-600"
-                            disabled={isSubmitting}
-                            title="Delete"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => {
+                                    route.push(
+                                      `${ROUTE.USERS.ADMIN_VIEW(
+                                        String(admin.id)
+                                      )}`
+                                    );
+                                  }}
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                  disabled={isSubmitting}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Admin Detail</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => handleOpenEditModal(admin)}
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                  disabled={isSubmitting}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Edit</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() =>
+                                    setIsChangePasswordDialogOpen(true)
+                                  }
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                  disabled={isSubmitting}
+                                >
+                                  <RotateCcw className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Reset Password</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => {
+                                    setSelectedAdmin(admin);
+                                    setIsDeleteDialogOpen(true);
+                                  }}
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-red-500 text-white hover:text-gray-100 hover:bg-red-600"
+                                  disabled={isSubmitting}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Delete</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -372,6 +385,16 @@ export default function AdminsListPage() {
           </Table>
         )}
       </div>
+
+      {!isLoading && data && (
+        <div className="mt-4 flex justify-end">
+          <PaginationPage
+            currentPage={data.pageNo}
+            totalPages={data.totalPages}
+            onPageChange={(page: number) => loadData({ pageNo: page })}
+          />
+        </div>
+      )}
 
       <AdminModalForm
         isOpen={isModalOpen}
@@ -400,16 +423,6 @@ export default function AdminsListPage() {
         itemName={selectedAdmin?.username}
         isSubmitting={isSubmitting}
       />
-
-      {!isLoading && data && (
-        <div className="mt-4 flex justify-end">
-          <PaginationPage
-            currentPage={data.pageNo}
-            totalPages={data.totalPages}
-            onPageChange={(page: number) => loadData({ pageNo: page })}
-          />
-        </div>
-      )}
     </div>
   );
 }

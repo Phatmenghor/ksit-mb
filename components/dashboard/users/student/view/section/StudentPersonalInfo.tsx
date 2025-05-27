@@ -2,44 +2,59 @@
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import InfoGrid from "../../../shared/UserPersonalHistory";
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
+import { formatValue } from "@/utils/map-helper/student";
 
 interface StudentProfileProps {
   student: StudentByIdModel | null;
 }
 
 export default function StudentPersonalInfo({ student }: StudentProfileProps) {
+  // Helper function to combine names and handle empty values
+
   const infoItems = [
     {
       label: "គោត្តនាម និងនាម",
-      value: `${student?.khmerFirstName ?? ""} ${student?.khmerLastName ?? ""}`,
+      value: formatValue(
+        `${student?.khmerFirstName ?? ""} ${
+          student?.khmerLastName ?? ""
+        }`.trim()
+      ),
     },
     {
       label: "អក្សរឡាតាំង",
-      value: `${student?.englishFirstName ?? ""} ${
-        student?.englishLastName ?? ""
-      }`,
+      value: formatValue(
+        `${student?.englishFirstName ?? ""} ${
+          student?.englishLastName ?? ""
+        }`.trim()
+      ),
     },
     {
       label: "អត្តលេខនិស្សិត",
-      value: student?.id,
+      value: formatValue(student?.id),
     },
-    { label: "ភេទ", value: student?.gender },
-    { label: "ថ្ងៃខែឆ្នាំកំណើត", value: student?.dateOfBirth },
-    { label: "ជនជាតិ", value: student?.ethnicity },
-    { label: "សញ្ជាតិ", value: student?.nationality },
-    { label: "កម្រឺតសិក្សា", value: student?.studentClass?.degree },
+    { label: "ភេទ", value: formatValue(student?.gender) },
+    { label: "ថ្ងៃខែឆ្នាំកំណើត", value: formatValue(student?.dateOfBirth) },
+    { label: "ជនជាតិ", value: formatValue(student?.ethnicity) },
+    { label: "សញ្ជាតិ", value: formatValue(student?.nationality) },
+    {
+      label: "កម្រឺតសិក្សា",
+      value: formatValue(student?.studentClass?.degree),
+    },
     {
       label: "ដេប៉ាតឺម៉ង",
-      value: student?.studentClass?.major?.department?.name ?? "",
+      value: formatValue(student?.studentClass?.major?.department?.name),
     },
     {
       label: "ជំនាញសិក្សា",
-      value: student?.studentClass?.major?.name ?? "",
+      value: formatValue(student?.studentClass?.major?.name),
     },
-    { label: "លេខទូរស័ព្ទ", value: student?.phoneNumber },
-    { label: "អ៊ីមែល", value: student?.email },
-    { label: "ទីកន្លែងកំណើត", value: student?.placeOfBirth },
-    { label: "អាសយដ្ឋានបច្ចុប្បន្ន", value: student?.currentAddress },
+    { label: "លេខទូរស័ព្ទ", value: formatValue(student?.phoneNumber) },
+    { label: "អ៊ីមែល", value: formatValue(student?.email) },
+    { label: "ទីកន្លែងកំណើត", value: formatValue(student?.placeOfBirth) },
+    {
+      label: "អាសយដ្ឋានបច្ចុប្បន្ន",
+      value: formatValue(student?.currentAddress),
+    },
   ];
 
   return (

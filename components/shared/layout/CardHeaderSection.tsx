@@ -23,7 +23,7 @@ interface BreadcrumbItemType {
 
 interface CardHeaderSectionProps {
   breadcrumbs: BreadcrumbItemType[];
-  title: string;
+  title?: string;
   searchPlaceholder?: string;
   backHref?: string;
   searchValue?: string;
@@ -110,15 +110,13 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
             </div>
           )}
 
-          {/* Right side: Custom Select and Add Button */}
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div className="flex flex-col md:flex-row gap-4 w-full">
-              {customSelect && customSelect}
-            </div>
+          {/* Right side */}
+          <div className="flex flex-col md:flex-row md:items-center gap-4 w-full md:w-auto">
+            {customSelect && customSelect}
 
             {buttonText && buttonHref && (
               <Link href={buttonHref}>
-                <Button className="bg-green-900 text-white hover:bg-green-950 flex gap-1">
+                <Button className="bg-green-900 text-white hover:bg-green-950 flex gap-1 h-10">
                   {buttonIcon}
                   {buttonText}
                 </Button>
@@ -126,7 +124,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
             )}
             {buttonText && openModal && (
               <Button
-                className="bg-green-900 text-white hover:bg-green-950 flex gap-1"
+                className="bg-green-900 text-white hover:bg-green-950 flex gap-1 h-10"
                 onClick={openModal}
               >
                 {buttonIcon}

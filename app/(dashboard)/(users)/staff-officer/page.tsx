@@ -1,13 +1,15 @@
 "use client";
 
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import { Check, Pencil, Plus, RotateCcw, StopCircle, X } from "lucide-react";
+  Check,
+  Eye,
+  Pencil,
+  Plus,
+  RotateCcw,
+  StopCircle,
+  Trash2,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   Table,
@@ -22,10 +24,9 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
 import {
+  deletedStaffService,
   getAllStaffService,
-  updateStaffService,
 } from "@/service/user/user.service";
-import Loading from "../../permissions/loading";
 import { StaffTableHeader } from "@/constants/table/user";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
@@ -39,89 +40,93 @@ import {
   StaffModel,
 } from "@/model/user/staff/staff.respond.model";
 import { StaffListRequest } from "@/model/user/staff/staff.request.model";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function StuffOfficerListPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  // Local state management for component
-  const [isLoading, setIsLoading] = useState(true); // Tracks if data is currently loading
-  const [data, setData] = useState<AllStaffModel | null>(null); // Stores fetched staff data
-  const [isSubmitting, setIsSubmitting] = useState(false); // Tracks if a submission (e.g., update) is in progress
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState<AllStaffModel | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] =
-    useState(false); // Controls visibility of change password dialog
-  const [statusFilter, setStatusFilter] = useState("ACTIVE"); // Current status filter for staff list
-  const [selectedStaff, setSelectedStaff] = useState<StaffModel | null>(null); // Currently selected staff item for operations
-  const [isDisableDialogOpen, setIsDisableDialogOpen] = useState(false); // Controls visibility of disable confirmation dialog
+    useState(false);
+  const [statusFilter, setStatusFilter] = useState("ACTIVE");
+  const [selectedStaff, setSelectedStaff] = useState<StaffModel | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const router = useRouter();
-  const debouncedSearchQuery = useDebounce(searchQuery, 500); // Debounce search input to avoid excessive requests
-
-  /**
-   * Handler for search input changes
-   * Updates the searchQuery state on user input
-   */
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  /**
-   * Loads staff data from the backend API with filters and pagination
-   * Uses useCallback to memoize the function and avoid unnecessary re-creations
-   *
-   * @param data - Request parameters with pagination, roles, search term, and status filter
-   */
   const loadData = useCallback(
-    async (
-      data: StaffListRequest = {
-        pageNo: 1,
-        pageSize: 10,
-        roles: [RoleEnum.STAFF],
-        search: searchQuery,
-        status: statusFilter,
-      }
-    ) => {
+    async (param: StaffListRequest) => {
       setIsLoading(true);
       try {
-        const response = await getAllStaffService(data);
+        const response = await getAllStaffService({
+          ...param,
+          roles: [RoleEnum.STAFF],
+          search: searchQuery,
+          status: statusFilter,
+        });
         if (response) {
-          setData(response); // Update local data state with response
+          setData(response);
         } else {
           console.error("Failed to fetch staff:");
         }
       } catch (error) {
-        toast.error("An error occurred while loading staff"); // Show error notification on failure
+        toast.error("An error occurred while loading staff");
       } finally {
-        setIsLoading(false); // Always reset loading state after fetch attempt
+        setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, statusFilter] // Reload data when debounced search query or status filter changes
+    [debouncedSearchQuery, statusFilter]
   );
 
-  /**
-   * Effect to automatically reload data when search query, loadData, or status filter changes
-   */
   useEffect(() => {
-    loadData();
+    loadData({});
   }, [debouncedSearchQuery, loadData, statusFilter]);
 
-  /**
-   * Disables the selected staff member by updating their status to INACTIVE
-   * Provides user feedback via toast notifications
-   */
-  const handleDisableStaff = async () => {
-    setIsLoading(true);
+  const handleDeleteStaff = async () => {
+    if (!selectedStaff) return;
+
     setIsSubmitting(true);
     try {
-      await updateStaffService(Number(selectedStaff?.id), {
-        status: StatusEnum.INACTIVE,
+      const originalData = data;
+      setData((prevData) => {
+        if (!prevData) return null;
+        const updatedContent = prevData.content.filter(
+          (item) => item.id !== selectedStaff.id
+        );
+        return {
+          ...prevData,
+          content: updatedContent,
+          totalElements: prevData.totalElements - 1,
+        };
       });
 
-      toast.success("Teacher disabled successfully");
+      const response = await deletedStaffService(selectedStaff.id);
+
+      if (response) {
+        toast.success(
+          `Staff ${selectedStaff.username ?? ""} deleted successfully`
+        );
+      } else {
+        setData(originalData);
+        toast.error("Failed to delete staff");
+      }
     } catch (error) {
-      console.error("Failed to disable teacher:", error);
-      toast.error("Failed to disable teacher");
+      console.error("Error deleting teacher:", error);
+      toast.error("An error occurred while deleting the staff");
+      loadData({});
     } finally {
-      setIsLoading(false);
       setIsSubmitting(false);
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -132,31 +137,19 @@ export default function StuffOfficerListPage() {
           { label: "Home", href: ROUTE.DASHBOARD },
           { label: "Stuff-Officer-List", href: ROUTE.USERS.STUFF_OFFICER },
         ]}
-        title="Staff Officers"
         searchValue={searchQuery}
         buttonHref={ROUTE.USERS.ADD_STAFF}
         searchPlaceholder="Search..."
         onSearchChange={handleSearchChange}
         buttonText="Add New"
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
-        customSelect={
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="INACTIVE">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        }
       />
 
       <div className="overflow-x-auto">
         {isLoading ? (
-          <Loading />
+          <div className="flex justify-center py-8 text-muted-foreground">
+            Loading...
+          </div>
         ) : (
           <Table>
             <TableHeader>
@@ -187,68 +180,100 @@ export default function StuffOfficerListPage() {
                   return (
                     <TableRow key={staff.id}>
                       <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{staff.username.trim() || "---"}</TableCell>
                       <TableCell>
-                        {staff.khmerFirstName || ""} {staff.khmerLastName || ""}
+                        {`${staff.khmerFirstName || ""} ${
+                          staff.khmerLastName || ""
+                        }`.trim() || "---"}
                       </TableCell>
                       <TableCell>
-                        {" "}
-                        {staff.englishFirstName || ""}{" "}
-                        {staff.englishLastName || ""}
+                        {`${staff.englishFirstName ?? ""}
+                        ${staff.englishLastName ?? ""}`.trim() || "---"}
                       </TableCell>
-                      <TableCell>{staff.username || ""}</TableCell>
-                      <TableCell>
-                        {staff.status === "ACTIVE" ? (
-                          <div className="text-green-500 flex gap-2 items-center">
-                            <Check className="w-4 h-4" />
-                            <span>{staff.status}</span>
-                          </div>
-                        ) : (
-                          <div className="text-red-500 flex gap-2 items-center">
-                            <X className="w-4 h-4" />
-                            <span>{staff.status}</span>
-                          </div>
-                        )}
-                      </TableCell>
+                      <TableCell>{staff.gender || "---"}</TableCell>
+
                       <TableCell>
                         <div className="flex justify-start space-x-2">
-                          <Button
-                            onClick={() => {
-                              router.push(
-                                ROUTE.USERS.EDIT_STAFF(String(staff.id))
-                              );
-                            }}
-                            variant="ghost"
-                            size="icon"
-                            className="text-black"
-                            title="Edit"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => {
+                                    router.push(
+                                      `${ROUTE.USERS.VIEW_STAFF(
+                                        String(staff.id)
+                                      )}`
+                                    );
+                                  }}
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                  disabled={isSubmitting}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Staff Detail</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() =>
+                                    router.push(
+                                      ROUTE.USERS.EDIT_STAFF(String(staff.id))
+                                    )
+                                  }
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                  disabled={isSubmitting}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Edit</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() =>
+                                    setIsChangePasswordDialogOpen(true)
+                                  }
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                  disabled={isSubmitting}
+                                >
+                                  <RotateCcw className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Reset Password</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
 
-                          <Button
-                            variant="ghost"
-                            onClick={() => {
-                              setIsChangePasswordDialogOpen(true);
-                              setSelectedStaff(staff);
-                            }}
-                            className="text-black"
-                            size="sm"
-                          >
-                            <RotateCcw className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setIsDisableDialogOpen(true);
-                              setSelectedStaff(staff);
-                            }}
-                            variant="ghost"
-                            size="icon"
-                            className="text-black"
-                            disabled={isSubmitting}
-                            title="Delete"
-                          >
-                            <StopCircle className="h-4 w-4" />
-                          </Button>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => {
+                                    setSelectedStaff(staff);
+                                    setIsDeleteDialogOpen(true);
+                                  }}
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-red-500 text-white hover:text-gray-100 hover:bg-red-600"
+                                  disabled={isSubmitting}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Delete</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -270,12 +295,12 @@ export default function StuffOfficerListPage() {
       />
 
       <DeleteConfirmationDialog
-        isOpen={isDisableDialogOpen}
+        isOpen={isDeleteDialogOpen}
         onClose={() => {
-          setIsDisableDialogOpen(false);
+          setIsDeleteDialogOpen(false);
           setSelectedStaff(null);
         }}
-        onDelete={handleDisableStaff}
+        onDelete={handleDeleteStaff}
         title="Disable Staff"
         description={`Are you sure you want to disable the staff: ${selectedStaff?.username}?`}
         itemName={selectedStaff?.username}

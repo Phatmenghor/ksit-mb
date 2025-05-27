@@ -17,37 +17,37 @@ import TeacherFamilySection from "@/components/dashboard/users/teachers/view/Tea
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 import { getStaffByIdService } from "@/service/user/user.service";
 
-export default function TeacherViewPage() {
+export default function StaffViewPage() {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [teacher, setteacher] = React.useState<StaffRespondModel | null>(null);
+  const [staff, setStaff] = React.useState<StaffRespondModel | null>(null);
   const params = useParams();
-  const teacherId = params.id as string;
+  const staffId = params.id as string;
 
-  const loadTeacher = async () => {
+  const loadStaff = async () => {
     setIsLoading(true);
     try {
-      const response = await getStaffByIdService(teacherId);
+      const response = await getStaffByIdService(staffId);
       if (response) {
-        setteacher(response);
+        setStaff(response);
       } else {
-        toast.error("Error getting teacher data");
+        toast.error("Error getting staff data");
       }
     } catch (error) {
-      console.error("Error fetching teacher data:", error);
+      console.error("Error fetching staff data:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadTeacher();
-  }, [teacherId]);
+    loadStaff();
+  }, [staffId]);
 
-  const profile = teacher
+  const profile = staff
     ? {
-        id: teacher.identifyNumber,
-        username: teacher.username,
-        profileUrl: teacher.profileUrl,
+        id: staff.identifyNumber,
+        username: staff.username,
+        profileUrl: staff.profileUrl,
       }
     : null;
 
@@ -55,36 +55,32 @@ export default function TeacherViewPage() {
     <div>
       {/* Header with TabsList injected via prop */}
       <CardHeaderSection
-        title="Teacher View Details"
+        title="Staff View Details"
         back
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "View Teacher", href: ROUTE.USERS.VIEW_TEACHER(teacherId) },
+          { label: "View Staff", href: ROUTE.USERS.VIEW_STAFF(staffId) },
         ]}
       />
 
       {/* Tab Content outside the header */}
       <div className="mt-4 space-y-4">
         <UserProfileSection user={profile} />
-        <TeacherPersonal teacher={teacher} />
-        <TeacherProfessionalRank teacher={teacher} />
-        <TeacherExperienceSection
-          teacher={teacher?.teacherExperience || null}
-        />
+        <TeacherPersonal teacher={staff} />
+        <TeacherProfessionalRank teacher={staff} />
+        <TeacherExperienceSection teacher={staff?.teacherExperience || null} />
         <TeacherPraiseOrCriticismSection
-          teacher={teacher?.teacherPraiseOrCriticism || null}
+          teacher={staff?.teacherPraiseOrCriticism || null}
         />
-        <TeacherEducationSection teacher={teacher?.teacherEducation || null} />
-        <TeacherVocationalSection
-          teacher={teacher?.teacherVocational || null}
-        />
+        <TeacherEducationSection teacher={staff?.teacherEducation || null} />
+        <TeacherVocationalSection teacher={staff?.teacherVocational || null} />
         <TeacherShortCourseSection
-          teacher={teacher?.teacherShortCourse || null}
+          teacher={staff?.teacherShortCourse || null}
         />
-        <TeacherLanguageSection teacher={teacher?.teacherLanguage || null} />{" "}
+        <TeacherLanguageSection teacher={staff?.teacherLanguage || null} />{" "}
         <TeacherFamilySection
-          familyStatus={teacher}
-          teacher={teacher?.teacherFamily || null}
+          familyStatus={staff}
+          teacher={staff?.teacherFamily || null}
         />{" "}
       </div>
     </div>

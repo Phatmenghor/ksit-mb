@@ -12,19 +12,19 @@ export default function AdminPersonal({ admin }: AdminProps) {
   const infoItems = [
     {
       label: "នាមត្រកូល",
-      value: admin?.khmerFirstName || "",
+      value: admin?.khmerFirstName || "---",
     },
     {
       label: "ឈ្មោះ",
-      value: admin?.khmerLastName || "",
+      value: admin?.khmerLastName || "---",
     },
     {
       label: "ឈ្មោះអ្នកប្រើប្រាស់",
-      value: admin?.username || "",
+      value: admin?.username || "---",
     },
     {
       label: "អ៊ីមែល",
-      value: admin?.email || "",
+      value: admin?.email || "---",
     },
   ];
 
