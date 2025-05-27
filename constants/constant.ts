@@ -158,3 +158,10 @@ export const DAYS_OF_WEEK = [
     id: 0,
   },
 ];
+
+export enum TYPE {
+  FREE = "Free",
+  PAY ="Pay",
+  SCHOLArSHIP = "Scholarship"
+
+}
