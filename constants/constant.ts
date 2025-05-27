@@ -85,6 +85,15 @@ export enum SemesterEnum {
   SEMESTER_1 = "SEMESTER_1",
   SEMESTER_2 = "SEMESTER_2",
 }
+export enum DayEnum {
+  MONDAY = "Monday",
+  TUESDAY = "Tuesday",
+  WEDNESDAY = "Wednesday",
+  THURSDAY = "Thursday",
+  FRIDAY = "Friday",
+  SATURDAY = "Saturday",
+  SUNDAY = "Sunday",
+}
 
 export enum SemesterType {
   PROGRESS = "PROGRESS",
@@ -161,7 +170,12 @@ export const DAYS_OF_WEEK = [
 
 export enum TYPE {
   FREE = "Free",
-  PAY ="Pay",
-  SCHOLArSHIP = "Scholarship"
+  PAY = "Pay",
+  SCHOLArSHIP = "Scholarship",
+}
 
+export enum Mode {
+  VIEW = "VIEW",
+  ADD = "ADD",
+  EDIT = "EDIT",
 }

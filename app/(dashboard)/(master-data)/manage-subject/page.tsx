@@ -52,7 +52,7 @@ import {
 } from "@/service/master-data/subject.service";
 import { SubjectModal } from "@/components/dashboard/master-data/manage-subject/subject-form-model";
 
-export default function ManageRSubjectPage() {
+export default function ManageSubjectPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");

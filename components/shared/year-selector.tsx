@@ -22,18 +22,21 @@ interface YearSelectorProps {
 export function YearSelector({
   value,
   onChange,
-  minYear = 1900,
-  maxYear = 2040,
+  minYear = 2020,
+  maxYear = 2080,
   title = "Academy year",
 }: YearSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(value.toString());
+  const [inputValue, setInputValue] = useState(
+    value === 0 ? "" : value.toString()
+  );
   const [visibleYears, setVisibleYears] = useState<number[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Initialize visible years around the current value
   useEffect(() => {
-    const currentYear = value || new Date().getFullYear();
+    setInputValue(value === 0 ? "" : value.toString());
+    const currentYear = value !== 0 ? value : new Date().getFullYear();
     generateVisibleYears(currentYear);
   }, [value]);
 
@@ -99,11 +102,22 @@ export function YearSelector({
   };
 
   const handleInputBlur = () => {
+    // If input is empty, keep the current value (including 0 for "no selection")
+    if (inputValue.trim() === "") {
+      setInputValue(value === 0 ? "" : value.toString());
+      return;
+    }
+
     let yearValue = parseInt(inputValue, 10);
+
     if (isNaN(yearValue)) {
-      yearValue = value;
-    } else {
-      // Clamp to min/max
+      // Reset to current value if invalid input
+      setInputValue(value === 0 ? "" : value.toString());
+      return;
+    }
+
+    // Only apply min/max constraints if a valid year was entered
+    if (yearValue < minYear || yearValue > maxYear) {
       yearValue = Math.max(minYear, Math.min(maxYear, yearValue));
     }
 
@@ -147,7 +161,7 @@ export function YearSelector({
               aria-expanded={isOpen}
               className="w-full justify-between"
             >
-              {`${title}: ${value}`}
+              {value === 0 ? title : `${title}: ${value}`}
               <Calendar className="ml-2 h-4 w-4 opacity-50" />
             </Button>
           </PopoverTrigger>

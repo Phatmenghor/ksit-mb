@@ -26,22 +26,29 @@ export const ROUTE = {
 
   USERS: {
     ADMIN: "/admin",
-    STUFF_OFFICER: "/stuff-officer",
+    ADMIN_VIEW: (id: string) => `/admin/view/${id}`,
+    EDIT_STAFF: (id: string) => `/staff-officer/edit/${id}`,
+    VIEW_STAFF: (id: string) => `/staff-officer/view/${id}`,
+    ADD_STAFF: "/staff-officer/add",
+    STUFF_OFFICER: "/staff-officer",
     TEACHERS: "/teachers",
     ADD_TEACHER: "/teachers/add",
     EDIT_TEACHER: (id: string) => `/teachers/edit/${id}`,
     VIEW_TEACHER: (id: string) => `/teachers/view/${id}`,
+    SETTING_CHANGE_PASSWORD: "/change-password",
   },
 
   STUDENTS: {
     ADD_MULTIPLE: "/add-multiple",
     ADD_SINGLE: "/add-single",
-    LIST: "/list",
-    DROPOUT: "/dropout",
+    LIST: "/student-list",
+    VIEW: (id: string) => `/view/${id}`,
+    EDIT_STUDENT: (id: string) => `/edit/${id}`,
   },
 
   SCHEDULE: {
     MANAGE: "/schedule/manage",
+    DEPARTMENT: "/schedule/department",
     ROOT: "/schedule",
   },
 

@@ -12,6 +12,7 @@ export default function AddMultipleStudentsPage() {
           { label: "Add Students", href: ROUTE.STUDENTS.ADD_MULTIPLE },
         ]}
         backHref={ROUTE.STUDENTS.LIST}
+        back
       />
       <GenerateMultiStudentForm />
     </div>

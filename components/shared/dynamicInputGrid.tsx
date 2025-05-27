@@ -86,15 +86,8 @@ export default function DynamicInputGrid({
                       disabled={isSubmitting}
                       placeholder={field.placeholder}
                       {...register(inputName)}
-                      className={`w-full py-2 px-3 border rounded-md pr-10
-                      ${
-                        isSubmitting
-                          ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200"
-                          : "bg-white text-black border-gray-300"
-                      }
-                    `}
+                      className="w-full bg-gray-100 py-2 px-3 border rounded-md pr-10"
                     />
-                    <CalendarIcon className="absolute right-2 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
                   </div>
                 ) : field.type === "select" ? (
                   <select
@@ -123,7 +116,7 @@ export default function DynamicInputGrid({
                     type="text"
                     placeholder={field.placeholder}
                     {...register(inputName)}
-                    className="bg-gray-100 pr-10"
+                    className="pr-10"
                   />
                 )}
               </div>

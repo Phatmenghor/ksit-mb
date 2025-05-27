@@ -1,69 +1,85 @@
-import { PaginationResponse } from "./../../model/index-model";
-import { ApiResponse } from "@/model/index-model";
-import { GetStaffByIdResponseModel } from "@/model/user/staff/getById.staff.model";
-import { StaffModel } from "@/model/user/staff/stuff.model";
+import { axiosClientWithAuth } from "@/utils/axios";
 import {
   AddStaffModel,
-  RequestAllStuff,
-} from "@/model/user/staff/Add.staff.model";
-import { UpdateStaffRequest } from "@/model/user/staff/update.Request.staff";
-import { UpdateStaffResponse } from "@/model/user/staff/update.Response.staff.model";
-import { axiosClientWithAuth } from "@/utils/axios";
+  EditStaffModel,
+  StaffListRequest,
+} from "@/model/user/staff/staff.request.model";
 
-const endpoint = "/v1/staff";
-
-export async function getAllStuffService(data: RequestAllStuff) {
+export async function getAllStaffService(data: StaffListRequest) {
   try {
-    const response = await axiosClientWithAuth.post<
-      ApiResponse<PaginationResponse<StaffModel>>
-    >(`${endpoint}/all`, data);
-    return response.data.data;
+    // POST request to fetch all staff matching the filters
+    const response = await axiosClientWithAuth.post(`/v1/staff/all`, data);
+    return response.data.data; // Return the actual staff list data
   } catch (error: any) {
-    console.error("Error fetching all stuff:", error);
-    return null;
+    // Check if the error response contains a message, throw it as Error
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    console.error("Error get all staff:", error); // Log error for debugging
+    throw error; // Re-throw the error for further handling
   }
 }
 
-export async function getStuffByIdService(id: string) {
+export async function getStaffByIdService(id: string) {
   try {
-    console.log("🔍 Sending GET request to /api/staff/", id);
-
-    const response = await axiosClientWithAuth.get<GetStaffByIdResponseModel>(
-      `${endpoint}/${id}`
-    );
-    console.log(response.data.data);
-    return response.data.data;
+    // GET request to fetch a staff by ID
+    const response = await axiosClientWithAuth.get(`/v1/staff/${id}`);
+    return response.data.data; // Return staff detail data
   } catch (error: any) {
-    console.error("Error fetching stuff by id:", error);
-    return null;
+    // Extract and throw API error message if available
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    console.error("Error get staff by id:", error);
+    throw error;
   }
 }
 
-export async function addStaffService(data: Partial<AddStaffModel>) {
+export async function addStaffService(data: AddStaffModel) {
   try {
-    const response = await axiosClientWithAuth.post<ApiResponse<AddStaffModel>>(
-      `${endpoint}/register`,
-      data
-    );
-    return response.data.data;
+    // POST request to register/add a new staff
+    const response = await axiosClientWithAuth.post(`/v1/staff/register`, data);
+    return response.data.data; // Return created staff data
   } catch (error: any) {
+    // Extract error message from response and throw it
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
     console.error("Error adding staff:", error);
-    return null;
+    throw error;
   }
 }
 
 export async function updateStaffService(
   staffId: number,
-  data: Partial<UpdateStaffRequest>
+  data: EditStaffModel
 ) {
   try {
-    const response = await axiosClientWithAuth.put<UpdateStaffResponse>(
-      `${endpoint}/${staffId}`,
+    // PUT request to update staff by ID
+    const response = await axiosClientWithAuth.put(
+      `/v1/staff/${staffId}`,
       data
     );
+    return response.data.data; // Return updated staff data
+  } catch (error: any) {
+    // Handle and throw API error message if present
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    console.error("Error updating staff:", error);
+    throw error;
+  }
+}
+
+export async function deletedStaffService(id: number) {
+  try {
+    const response = await axiosClientWithAuth.delete(`/v1/staff/${id}`);
     return response.data.data;
   } catch (error: any) {
-    console.error("Error updating staff:", error);
-    return null;
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    console.error("Error deleting staff:", error);
+    throw error;
   }
 }

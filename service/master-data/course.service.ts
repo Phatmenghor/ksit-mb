@@ -3,11 +3,6 @@ import {
   CreateCourseModel,
   UpdatteCourseModel,
 } from "@/model/master-data/course/type-course-model";
-import {
-  AllDepartmentFilterModel,
-  CreateDepartmentModel,
-  UpdateDepartmentModel,
-} from "@/model/master-data/department/type-department-model";
 import { axiosClientWithAuth } from "@/utils/axios";
 
 export async function getAllCourseService(data: AllCourseFilterModel) {

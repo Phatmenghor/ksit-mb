@@ -1,30 +1,32 @@
 "use client";
+
 import { FormProvider, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Ban, Loader2, Save } from "lucide-react";
-import { ZodStaffModelType } from "@/model/user/staff/schema";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
-import { useEffect } from "react";
-import { Mode, StatusEnum } from "@/constants/constant";
-import { StudentBasicForm } from "../add -single-student/StuBasicForm";
-import StudentProfileUploadCard from "../add -single-student/StuProfileUploadCard";
+import { useEffect, useState } from "react";
+import { StatusEnum } from "@/constants/constant";
+import { StudentBasicForm } from "../add-single-student/StuBasicForm";
+import StudentProfileUploadCard from "../add-single-student/StuProfileUploadCard";
 import StudentFormDetail from "./StudentFormDetail";
-import { StudentModel } from "@/model/user/student/student.model";
 import {
-  initStudentFormData,
-  StudentFormData,
-} from "@/model/user/student/add.student.zod";
+  AddStudentSchema,
+  EditStudentFormData,
+  EditStudentSchema,
+} from "@/model/user/student/student.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { initStudentFormData } from "@/model/user/student/student.request.model";
 
 type Props = {
-  initialValues?: StudentFormData;
-  onSubmit: (data: StudentFormData) => Promise<void>;
+  initialValues?: EditStudentFormData;
+  onSubmit: (data: any) => Promise<void>;
   loading: boolean;
   title: string;
-  mode: Mode;
-  back: string | undefined;
-  onDiscard?: () => void;
+  mode: "Add" | "Edit";
+  onDiscard: () => void;
+  back?: string;
 };
 
 export default function StudentForm({
@@ -36,126 +38,177 @@ export default function StudentForm({
   onDiscard,
   back,
 }: Props) {
-  const methods = useForm<StudentFormData>({
-    defaultValues: initialValues ?? initStudentFormData,
+  const [isFormDirty, setIsFormDirty] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  const methods = useForm({
+    resolver: zodResolver(
+      mode === "Add" ? AddStudentSchema : EditStudentSchema
+    ),
+    defaultValues: initStudentFormData,
+    mode: "onChange",
   });
 
   const {
     setValue,
-    formState: { isSubmitting },
+    reset,
+    getValues,
+    watch,
+    formState: { isSubmitting, isDirty, isValid, errors },
+    handleSubmit,
   } = methods;
 
   useEffect(() => {
-    if (initialValues) {
-      methods.reset(initialValues);
+    if (initialValues && mode === "Edit") {
+      reset({
+        ...initStudentFormData,
+        ...Object.fromEntries(
+          Object.entries(initialValues).map(([key, value]) => [
+            key,
+            value === null ? undefined : value,
+          ])
+        ),
+      });
+    } else {
+      reset(initStudentFormData);
     }
-  }, [initialValues, methods]);
+    setIsFormDirty(false);
+  }, [initialValues, methods, mode]);
+
+  useEffect(() => {
+    const subscription = watch(() => {
+      setIsFormDirty(isDirty);
+      setIsFormValid(Object.keys(errors).length === 0 && isValid);
+
+      console.log("Dirty:", isDirty, "Valid:", isValid, "Errors:", errors);
+    });
+    return () => subscription.unsubscribe();
+  }, [methods]);
+
+  const handleClosePage = () => {
+    if (isFormDirty) {
+      const confirmed = window.confirm(
+        "You have unsaved changes. Are you sure you want to close?"
+      );
+      if (!confirmed) return;
+    }
+    if (onDiscard) {
+      onDiscard();
+    }
+  };
+
+  const handleFormSubmit = async (data: any) => {
+    try {
+      await onSubmit(data);
+    } catch (error) {
+      console.error("Form submission error:", error);
+    }
+  };
+
+  if (!initialValues && mode === "Edit") {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <span className="ml-2 text-sm text-muted-foreground">
+          Loading student data...
+        </span>
+      </div>
+    );
+  }
+
+  const canSubmitForm = () => {
+    if (isSubmitting) return false;
+
+    if (mode === "Edit") {
+      return isValid;
+    }
+
+    if (mode === "Add") {
+      return (
+        isFormValid ||
+        (!!getValues().username &&
+          !!getValues().password &&
+          !!getValues().classId)
+      );
+    }
+
+    return isFormDirty && isFormValid;
+  };
 
   return (
     <div className="space-y-6">
-      {!initialValues && (mode === Mode.EDIT || mode === Mode.VIEW) ? (
-        <div className="flex justify-center items-center h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <span className="ml-2 text-sm text-muted-foreground">
-            Loading teacher data...
-          </span>
-        </div>
-      ) : (
-        <FormProvider {...methods}>
-          {mode === Mode.VIEW ? (
-            // VIEW MODE: read-only, no form, no submit
-            <div className="space-y-4">
-              <CardHeaderSection
-                title={title}
-                backHref={ROUTE.STUDENTS.LIST}
-                breadcrumbs={[
-                  { label: "Dashboard", href: ROUTE.DASHBOARD },
-                  { label: "Add Student", href: ROUTE.STUDENTS.ADD_SINGLE },
-                ]}
-              />
-              <StudentBasicForm mode={mode} />
-              <StudentProfileUploadCard mode={mode} />
-              <StudentFormDetail />
-            </div>
-          ) : (
-            // EDIT / ADD MODE: form with submit
-            <form
-              onSubmit={methods.handleSubmit(onSubmit)}
-              className="space-y-4"
-              noValidate
-            >
-              <CardHeaderSection
-                title="Add New Student"
-                backHref={ROUTE.STUDENTS.LIST}
-                breadcrumbs={[
-                  { label: "Dashboard", href: ROUTE.DASHBOARD },
-                  { label: "Add Student", href: ROUTE.STUDENTS.ADD_SINGLE },
-                ]}
-              />
-              {mode === Mode.ADD && <StudentBasicForm mode={mode} />}
-              <StudentProfileUploadCard mode={mode} />
-              <div className="w-full mx-auto space-y-5">
-                <StudentFormDetail />
-                <Card>
-                  <CardContent>
-                    <div className="flex justify-between items-center pt-5 gap-3">
-                      {/* Left side: Disable User button */}
-                      {mode === Mode.EDIT && (
-                        <Button
-                          type="submit"
-                          disabled={loading || isSubmitting}
-                          onClick={() =>
-                            setValue("status", StatusEnum.INACTIVE)
-                          }
-                          className="flex items-center gap-2 bg-red-600 bg-opacity-30 text-red-600 hover:bg-red-700 hover:bg-opacity-40 disabled:pointer-events-none"
-                        >
-                          <span className="flex items-center justify-center w-6 h-6 rounded-full">
-                            <Ban
-                              size={18}
-                              strokeWidth={3}
-                              className="text-red-600"
-                            />
-                          </span>
-                          Disable User
-                        </Button>
-                      )}
+      <FormProvider {...methods}>
+        <form
+          onSubmit={handleSubmit(handleFormSubmit)}
+          className="space-y-4"
+          noValidate
+        >
+          <CardHeaderSection
+            back
+            title={title}
+            backHref={back ?? ROUTE.STUDENTS.LIST}
+            breadcrumbs={[{ label: "Dashboard", href: ROUTE.DASHBOARD }]}
+          />
+          {mode === "Add" && <StudentBasicForm />}
+          <StudentProfileUploadCard />
+          <div className="w-full mx-auto space-y-5">
+            <StudentFormDetail />
+            <Card>
+              <CardContent>
+                <div className="flex justify-between items-center pt-5 gap-3">
+                  {mode === "Edit" && (
+                    <Button
+                      type="submit"
+                      disabled={loading || isSubmitting}
+                      onClick={() =>
+                        setValue("status", StatusEnum.INACTIVE as any)
+                      }
+                      className="flex items-center gap-2 bg-red-600 bg-opacity-30 text-red-600 hover:bg-red-700 hover:bg-opacity-40 disabled:pointer-events-none"
+                    >
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full">
+                        <Ban
+                          size={18}
+                          strokeWidth={3}
+                          className="text-red-600"
+                        />
+                      </span>
+                      Disable User
+                    </Button>
+                  )}
 
-                      {/* Right side: Discard and Save buttons */}
-                      <div className="flex gap-3">
-                        <Button
-                          type="button"
-                          disabled={loading || isSubmitting}
-                          variant="outline"
-                          onClick={onDiscard}
-                        >
-                          Discard
-                        </Button>
-                        <Button
-                          type="submit"
-                          className="bg-emerald-800 hover:bg-emerald-900"
-                          disabled={loading || isSubmitting}
-                        >
-                          {loading || isSubmitting ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Saving...
-                            </>
-                          ) : (
-                            <>
-                              <Save className="mr-2 h-4 w-4" />
-                              Save
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </form>
-          )}
-        </FormProvider>
-      )}
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      disabled={loading || isSubmitting}
+                      variant="outline"
+                      onClick={handleClosePage}
+                    >
+                      Discard
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="bg-emerald-800 hover:bg-emerald-900"
+                      disabled={!canSubmitForm()}
+                    >
+                      {loading || isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          Save
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </form>
+      </FormProvider>
     </div>
   );
 }
