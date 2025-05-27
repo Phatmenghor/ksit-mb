@@ -268,7 +268,7 @@ export default function TeachersListPage() {
                                   }}
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
+                                  className="h-8 w-8 bg-red-500 text-white hover:text-gray-100 hover:bg-red-600"
                                   disabled={isSubmitting}
                                 >
                                   <Trash2 className="h-4 w-4" />

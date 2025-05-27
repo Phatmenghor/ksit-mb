@@ -76,6 +76,10 @@ export async function deletedStaffService(id: number) {
     const response = await axiosClientWithAuth.delete(`/v1/staff/${id}`);
     return response.data.data;
   } catch (error: any) {
-    return null;
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    console.error("Error deleting staff:", error);
+    throw error;
   }
 }

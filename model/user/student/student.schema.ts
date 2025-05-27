@@ -1,9 +1,5 @@
 import { z } from "zod";
 
-/**
- * Schema for validating a student's study history record.
- * All fields are optional and nullable, allowing partial data.
- */
 export const StudentStudiesHistorySchema = z.object({
   id: z.number().optional().nullable(),
   typeStudies: z.string().optional().nullable(),
@@ -15,10 +11,6 @@ export const StudentStudiesHistorySchema = z.object({
   overallGrade: z.string().optional().nullable(),
 });
 
-/**
- * Schema for validating a student’s parent information.
- * Fields are optional and nullable to support incomplete data during form submissions.
- */
 export const StudentParentSchema = z.object({
   id: z.number().optional().nullable(),
   name: z.string().optional().nullable(),
@@ -29,10 +21,6 @@ export const StudentParentSchema = z.object({
   parentType: z.string().optional().nullable(),
 });
 
-/**
- * Schema for validating student sibling information.
- * All fields are optional and nullable to support partial form input.
- */
 export const StudentSiblingSchema = z.object({
   id: z.number().optional().nullable(),
   name: z.string().optional().nullable(),
@@ -42,11 +30,6 @@ export const StudentSiblingSchema = z.object({
   phoneNumber: z.string().optional().nullable(),
 });
 
-/**
- * Base schema for student form data validation.
- * Includes personal details and nested arrays for studies, parents, and siblings.
- * Fields are optional and nullable to allow partial updates and empty form states.
- */
 export const StudentFormSchema = z.object({
   email: z.string().optional().nullable(),
   khmerFirstName: z.string().optional().nullable(),
@@ -72,20 +55,10 @@ export const StudentFormSchema = z.object({
   status: z.string().optional().nullable(),
 });
 
-// Regular expression to enforce strong password rules:
-// Minimum 8 characters, at least one letter, one number, and one special character.
 const passwordRegex =
   /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
 
-// Regular expression to validate usernames:
-// Allowed characters are letters, numbers, and underscores; length 3 to 20.
 const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
-
-/**
- * Schema for adding a new student.
- * Extends the base form schema and requires username, password, and classId.
- * Includes validation rules for username and password strength.
- */
 
 export const AddStudentSchema = StudentFormSchema.extend({
   classId: z
@@ -106,11 +79,6 @@ export const AddStudentSchema = StudentFormSchema.extend({
     .max(20, "Username must be at most 20 characters"),
 });
 
-/**
- * Schema for editing an existing student.
- * Inherits all fields as optional and nullable from the base schema.
- * Password is not required here, allowing updates without changing password.
- */
 export const EditStudentSchema = StudentFormSchema.extend({});
 
 // Types inferred from schemas for type-safe form data handling

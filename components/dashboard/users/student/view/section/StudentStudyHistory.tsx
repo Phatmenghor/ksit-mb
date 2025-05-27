@@ -38,13 +38,17 @@ export default function StudentStudyHistory({ student }: StudentProfileProps) {
                     <td className="p-2 border">{record?.location || "---"}</td>
                     <td className="p-2 border">
                       {record
-                        ? `${record.fromYear ?? ""} - ${record.endYear ?? ""}`
+                        ? `${record.fromYear ?? ""} - ${
+                            record.endYear ?? ""
+                          }`.trim()
                         : "---"}
                     </td>
                     <td className="p-2 border">
                       {record?.obtainedCertificate || "---"}
                     </td>
-                    <td className="p-2 border">{record?.overallGrade}</td>
+                    <td className="p-2 border">
+                      {record?.overallGrade || "---"}
+                    </td>
                   </tr>
                 );
               })}

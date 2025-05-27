@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { Eye, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Table,
   TableBody,
@@ -72,6 +78,7 @@ export default function StudentsListPage() {
       try {
         const response = await getAllStudentsService({
           ...param,
+          academicYear: selectAcademicYear,
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
           classId: selectedClass?.id,
@@ -88,7 +95,7 @@ export default function StudentsListPage() {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, selectedClass]
+    [debouncedSearchQuery, selectedClass, selectAcademicYear]
   );
 
   // Run fetch on mount and when filters change
@@ -167,15 +174,17 @@ export default function StudentsListPage() {
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
         customSelect={
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
-            <div className="w-full min-w-[150px] md:w-1/2">
-              <YearSelector
-                title="Select Year"
-                onChange={handleYearChange}
-                value={selectAcademicYear ?? 0}
-              />
+            <div className="w-full min-w-[200px] md:w-1/2">
+              <div className="w-full min-w-[200px]">
+                <YearSelector
+                  title="Select Year"
+                  onChange={handleYearChange}
+                  value={selectAcademicYear || 0}
+                />
+              </div>
             </div>
 
-            <div className="w-full min-w-[150px] md:w-1/2">
+            <div className="w-full min-w-[200px] md:w-1/2">
               <ComboboxSelectClass
                 dataSelect={selectedClass ?? null}
                 onChangeSelected={handleClassChange}
@@ -222,14 +231,14 @@ export default function StudentsListPage() {
                       <TableCell>{indexDisplay}</TableCell>
                       <TableCell>{student.username || "---"}</TableCell>
                       <TableCell>
-                        {(student.khmerFirstName || "") +
-                          " " +
-                          (student.khmerLastName || "") || "---"}
+                        {`${student.khmerFirstName || ""} ${
+                          student.khmerLastName || ""
+                        }`.trim() || "---"}
                       </TableCell>
                       <TableCell>
-                        {(student.englishFirstName || "") +
-                          " " +
-                          (student.englishLastName || "") || "---"}
+                        {`${student.englishFirstName || ""} ${
+                          student.englishLastName || ""
+                        }`.trim() || "---"}
                       </TableCell>
                       <TableCell>{student.id || "---"}</TableCell>
                       <TableCell>{student.gender || "---"}</TableCell>
@@ -240,45 +249,89 @@ export default function StudentsListPage() {
 
                       <TableCell>
                         <div className="flex justify-start space-x-2">
-                          <Button
-                            onClick={() =>
-                              router.push(
-                                `${ROUTE.STUDENTS.EDIT_STUDENT(
-                                  String(student.id)
-                                )}`
-                              )
-                            }
-                            variant="ghost"
-                            size="icon"
-                            className="text-black"
-                            title="Edit"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            onClick={() => {
-                              setIsChangePasswordDialogOpen(true);
-                              setSelectedStudent(student);
-                            }}
-                            className="text-black"
-                            size="sm"
-                          >
-                            <RotateCcw className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setSelectedStudent(student);
-                              setIsDeleteDialogOpen(true);
-                            }}
-                            variant="ghost"
-                            size="icon"
-                            className="text-black"
-                            disabled={isSubmitting}
-                            title="Delete"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => {
+                                    router.push(
+                                      `${ROUTE.STUDENTS.VIEW(
+                                        String(student.id)
+                                      )}`
+                                    );
+                                  }}
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                  disabled={isSubmitting}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Student Detail</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() =>
+                                    router.push(
+                                      `${ROUTE.STUDENTS.EDIT_STUDENT(
+                                        String(student.id)
+                                      )}`
+                                    )
+                                  }
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                  disabled={isSubmitting}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Edit</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => {
+                                    setIsChangePasswordDialogOpen(true);
+                                    setSelectedStudent(student);
+                                  }}
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                  disabled={isSubmitting}
+                                >
+                                  <RotateCcw className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Reset Password</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => {
+                                    setSelectedStudent(student);
+                                    setIsDeleteDialogOpen(true);
+                                  }}
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-red-500 text-white hover:text-gray-100 hover:bg-red-600"
+                                  disabled={isSubmitting}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Delete</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       </TableCell>
                     </TableRow>

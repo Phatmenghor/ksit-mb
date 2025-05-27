@@ -2,13 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -304,7 +297,6 @@ export default function AdminsListPage() {
                           : "---"}
                       </TableCell>
                       <TableCell>{admin.gender || "---"}</TableCell>
-
                       <TableCell>
                         <div className="flex justify-start space-x-2">
                           <TooltipProvider>
@@ -374,7 +366,7 @@ export default function AdminsListPage() {
                                   }}
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
+                                  className="h-8 w-8 bg-red-500 text-white hover:text-gray-100 hover:bg-red-600"
                                   disabled={isSubmitting}
                                 >
                                   <Trash2 className="h-4 w-4" />

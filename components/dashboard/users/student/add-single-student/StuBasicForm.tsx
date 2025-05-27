@@ -1,8 +1,4 @@
 "use client";
-<<<<<<< HEAD
-=======
-
->>>>>>> 7c249c72162fdee24deba5eb398c42127b582dc9
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 import { Card, CardContent } from "@/components/ui/card";
 import {

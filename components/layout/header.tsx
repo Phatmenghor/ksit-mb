@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Bell, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,18 +14,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState, useEffect } from "react";
-import { MobileSidebar } from "@/components/layout/mobile-sidebar";
-import { clearRoles, getRoles } from "@/utils/local-storage/user-info/roles";
-import { clearUserId, getUserId } from "@/utils/local-storage/user-info/userId";
 import { useRouter } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
+import { clearRoles, getRoles } from "@/utils/local-storage/user-info/roles";
+import { clearUserId, getUserId } from "@/utils/local-storage/user-info/userId";
 import { clearUsername } from "@/utils/local-storage/user-info/username";
 import { logoutUser } from "@/utils/local-storage/user-info/token";
+import { ConfirmDialog } from "../shared/custom-comfirm-diaglog";
+import { MobileSidebar } from "./mobile-sidebar";
 
 export function Header() {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false); // state to open/close confirm dialog
   const roles = getRoles();
   const role = roles[0] || "";
   const router = useRouter();
@@ -36,19 +38,20 @@ export function Header() {
       case "ADMIN":
         return ROUTE.USERS.ADMIN_VIEW(userId ?? "");
       case "STAFF":
-        // assuming staff-officer profile route uses view route
         return ROUTE.USERS.EDIT_STAFF(userId ?? "");
       case "TEACHER":
         return ROUTE.USERS.VIEW_TEACHER(userId ?? "");
       case "STUDENT":
         return ROUTE.STUDENTS.VIEW(userId ?? "");
+      case "DEVELOPER":
+        return ROUTE.USERS.VIEW_TEACHER(userId ?? "");
       default:
-        return "/"; // fallback
+        return "/";
     }
   };
 
   const profileUrl = getProfileUrl();
-  // Close mobile menu when switching from mobile to desktop
+
   useEffect(() => {
     if (!isMobile) {
       setMobileMenuOpen(false);
@@ -132,9 +135,16 @@ export function Header() {
               <DropdownMenuItem onClick={() => router.push(profileUrl)}>
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.push(ROUTE.USERS.SETTING_CHANGE_PASSWORD)}
+              >
+                Settings
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+              {/* Open confirm dialog on Logout click */}
+              <DropdownMenuItem onClick={() => setConfirmOpen(true)}>
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -158,6 +168,17 @@ export function Header() {
           <MobileSidebar isOpen={true} onClose={toggleMobileMenu} />
         </div>
       )}
+
+      {/* Confirm Logout Dialog */}
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Confirm Logout"
+        description="Are you sure you want to logout?"
+        onConfirm={handleLogout}
+        confirmText="Logout"
+        cancelText="Cancel"
+      />
     </>
   );
 }

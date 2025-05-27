@@ -35,6 +35,7 @@ export const ROUTE = {
     ADD_TEACHER: "/teachers/add",
     EDIT_TEACHER: (id: string) => `/teachers/edit/${id}`,
     VIEW_TEACHER: (id: string) => `/teachers/view/${id}`,
+    SETTING_CHANGE_PASSWORD: "/change-password",
   },
 
   STUDENTS: {
