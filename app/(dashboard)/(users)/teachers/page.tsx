@@ -52,9 +52,8 @@ export default function TeachersListPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const router = useRouter();
-  const debouncedSearchQuery = useDebounce(searchQuery, 500); // Debounced version of the searchQuery with 500ms delay to limit API calls
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  // Handler called when the search input changes
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
@@ -63,7 +62,6 @@ export default function TeachersListPage() {
     async (param: StaffListRequest) => {
       setIsLoading(true);
       try {
-        // Fetch teachers with role 'TEACHER', active status, and search filter
         const response = await getAllStaffService({
           roles: [RoleEnum.TEACHER],
           search: searchQuery,
@@ -82,15 +80,13 @@ export default function TeachersListPage() {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery] // Recreate function only when debouncedSearchQuery changes
+    [debouncedSearchQuery]
   );
 
-  // Effect to reload teachers whenever the debounced search query or loadTeachers changes
   useEffect(() => {
     loadTeachers({});
   }, [debouncedSearchQuery, loadTeachers]);
 
-  // Handles Teacher deletion by setting their status to INACTIVE
   async function handleDeleteTeacher() {
     if (!selectedTeacher) return;
 

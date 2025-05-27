@@ -49,19 +49,17 @@ import {
 
 export default function StuffOfficerListPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  // Local state management for component
-  const [isLoading, setIsLoading] = useState(true); // Tracks if data is currently loading
-  const [data, setData] = useState<AllStaffModel | null>(null); // Stores fetched staff data
-  const [isSubmitting, setIsSubmitting] = useState(false); // Tracks if a submission (e.g., update) is in progress
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState<AllStaffModel | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] =
-    useState(false); // Controls visibility of change password dialog
-  const [statusFilter, setStatusFilter] = useState("ACTIVE"); // Current status filter for staff list
-  const [selectedStaff, setSelectedStaff] = useState<StaffModel | null>(null); // Currently selected staff item for operations
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // Controls visibility of disable confirmation dialog
+    useState(false);
+  const [statusFilter, setStatusFilter] = useState("ACTIVE");
+  const [selectedStaff, setSelectedStaff] = useState<StaffModel | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const router = useRouter();
-  const debouncedSearchQuery = useDebounce(searchQuery, 500); // Debounce search input to avoid excessive requests
-
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
@@ -77,22 +75,19 @@ export default function StuffOfficerListPage() {
           status: statusFilter,
         });
         if (response) {
-          setData(response); // Update local data state with response
+          setData(response);
         } else {
           console.error("Failed to fetch staff:");
         }
       } catch (error) {
-        toast.error("An error occurred while loading staff"); // Show error notification on failure
+        toast.error("An error occurred while loading staff");
       } finally {
-        setIsLoading(false); // Always reset loading state after fetch attempt
+        setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, statusFilter] // Reload data when debounced search query or status filter changes
+    [debouncedSearchQuery, statusFilter]
   );
 
-  /**
-   * Effect to automatically reload data when search query, loadData, or status filter changes
-   */
   useEffect(() => {
     loadData({});
   }, [debouncedSearchQuery, loadData, statusFilter]);
@@ -195,6 +190,8 @@ export default function StuffOfficerListPage() {
                         {`${staff.englishFirstName ?? ""}
                         ${staff.englishLastName ?? ""}`.trim() || "---"}
                       </TableCell>
+                      <TableCell>{staff.gender || "---"}</TableCell>
+
                       <TableCell>
                         <div className="flex justify-start space-x-2">
                           <TooltipProvider>
@@ -203,7 +200,7 @@ export default function StuffOfficerListPage() {
                                 <Button
                                   onClick={() => {
                                     router.push(
-                                      `${ROUTE.USERS.VIEW_TEACHER(
+                                      `${ROUTE.USERS.VIEW_STAFF(
                                         String(staff.id)
                                       )}`
                                     );

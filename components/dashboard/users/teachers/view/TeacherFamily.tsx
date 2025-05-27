@@ -5,6 +5,7 @@ import React from "react";
 import InfoGrid from "../../shared/UserPersonalHistory";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 import { TeacherFamily } from "@/model/user/staff/staff.request.model";
+import { formatValue } from "@/utils/map-helper/student";
 
 interface TeacherProps {
   teacher: TeacherFamily[] | null;
@@ -18,43 +19,43 @@ export default function TeacherFamilySection({
   const infoItems = [
     {
       label: "ស្ថានភាពគ្រួស",
-      value: familyStatus?.maritalStatus,
+      value: formatValue(familyStatus?.maritalStatus),
     },
     {
       label: "ត្រូវជា",
-      value: familyStatus?.mustBe,
+      value: formatValue(familyStatus?.mustBe),
     },
     {
       label: "មុខរបរសហព័ទ្ធ",
-      value: familyStatus?.affiliatedProfession,
+      value: formatValue(familyStatus?.affiliatedProfession),
     },
     {
       label: "ឈ្មោះសហព័ទ្ធ",
-      value: familyStatus?.federationName,
+      value: formatValue(familyStatus?.federationName),
     },
     {
       label: "អង្គភាពសហព័ទ្ធ",
-      value: familyStatus?.affiliatedOrganization,
+      value: formatValue(familyStatus?.affiliatedOrganization),
     },
     {
       label: "ថ្ងៃខែឆ្នាំកំណើតសហព័ទ្ធ",
-      value: familyStatus?.federationEstablishmentDate,
+      value: formatValue(familyStatus?.federationEstablishmentDate),
     },
     {
       label: "ប្រាក់ខែប្រពន្ធ",
-      value: familyStatus?.wivesSalary,
+      value: formatValue(familyStatus?.wivesSalary),
     },
     {
       label: "លេខទូរស័ព្ទផ្ទាល់ខ្លួន",
-      value: familyStatus?.phoneNumber,
+      value: formatValue(familyStatus?.phoneNumber),
     },
     {
       label: "អ៊ីមែល",
-      value: familyStatus?.email,
+      value: formatValue(familyStatus?.email),
     },
     {
       label: "អាសយដ្ឋានបច្ចុប្បន្ន",
-      value: familyStatus?.currentAddress,
+      value: formatValue(familyStatus?.currentAddress),
     },
   ];
 

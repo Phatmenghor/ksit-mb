@@ -37,7 +37,7 @@ export const UserProfileSection: React.FC<ProfileProps> = ({
           {user?.username || "Unknown"}
         </h3>
         <div className="text-sm text-muted-foreground">
-          <Badge className="bg-green-100 text-green-900 p-2">
+          <Badge className="bg-green-100 hover:bg-green-200 text-green-900 p-2">
             ID: {user?.id ?? "N/A"}
           </Badge>
         </div>

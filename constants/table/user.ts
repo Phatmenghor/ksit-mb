@@ -3,6 +3,7 @@ export const StaffTableHeader = [
   { label: "Username", className: "w-[20%]" },
   { label: "Fullname (KH)", className: "w-[30%]" },
   { label: "Fullname (EN)", className: "w-[30%]" },
+  { label: "Gender", className: "w-[20%]" },
   { label: "Actions", className: "w-[10%]" },
 ];
 
@@ -11,6 +12,7 @@ export const AdminTableHeader = [
   { label: "Username", className: "w-[20%]" },
   { label: "Fullname (KH)", className: "w-[30%]" },
   { label: "Fullname (EN)", className: "w-[30%]" },
+  { label: "Gender", className: "w-[20%]" },
   { label: "Actions", className: "w-[10%]" },
 ];
 

@@ -21,13 +21,13 @@ import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection"
 import { initialStaffValues } from "@/model/user/staff/staff.request.model";
 
 type Props = {
-  mode: "Add" | "Edit"; // Form mode: Add or Edit teacher
-  initialValues?: EditStaffFormData; // Optional initial values for editing
-  onSubmit: (data: any) => Promise<void>; // Submit handler passed as prop
-  loading: boolean; // Loading state to disable inputs or show spinner
-  title: string; // Title of the form/page
-  back: string | undefined; // URL or route to go back to
-  onDiscard?: () => void; // Optional callback for discard/cancel action
+  mode: "Add" | "Edit";
+  initialValues?: EditStaffFormData;
+  onSubmit: (data: any) => Promise<void>;
+  loading: boolean;
+  title: string;
+  back: string | undefined;
+  onDiscard?: () => void;
 };
 
 export default function TeacherForm({
@@ -39,19 +39,15 @@ export default function TeacherForm({
   onDiscard,
   back,
 }: Props) {
-  // Local state to track if the form has unsaved changes (dirty)
   const [isFormDirty, setIsFormDirty] = useState(false);
-  // Local state to track if the form passes validation
   const [isFormValid, setIsFormValid] = useState(false);
 
-  // Initialize react-hook-form with validation schema depending on mode
   const methods = useForm({
     resolver: zodResolver(mode === "Add" ? AddStaffSchema : EditStaffSchema),
     defaultValues: initialStaffValues,
-    mode: "onChange", // Validate on every change
+    mode: "onChange",
   });
 
-  // Destructure methods and form state for easier access
   const {
     setValue,
     reset,
@@ -61,14 +57,11 @@ export default function TeacherForm({
     handleSubmit,
   } = methods;
 
-  // Effect to reset form values when initialValues or mode changes
   useEffect(() => {
     if (initialValues && mode === "Edit") {
-      // Reset form with existing values for editing
       reset({
         ...initialStaffValues,
         ...Object.fromEntries(
-          // Convert null values to undefined for proper form handling
           Object.entries(initialValues).map(([key, value]) => [
             key,
             value === null ? undefined : value,
@@ -76,44 +69,32 @@ export default function TeacherForm({
         ),
       });
     } else {
-      // Reset to default values on add mode or no initialValues
       reset(initialStaffValues);
     }
   }, [initialValues, methods, mode]);
 
-  /**
-   * Disable user handler
-   * Sets status field to INACTIVE and triggers form submission
-   */
   const handleDisableUser = async () => {
     try {
-      // Mark status as inactive and mark form as dirty
       setValue("status", StatusEnum.INACTIVE, {
         shouldDirty: true,
       });
 
-      // Submit the form programmatically
       await handleSubmit(onSubmit)();
     } catch (error) {
       console.error("Error disabling user:", error);
     }
   };
 
-  // Subscribe to form changes to track dirty and valid state
   useEffect(() => {
     const subscription = watch(() => {
       setIsFormDirty(isDirty);
       setIsFormValid(Object.keys(errors).length === 0 && isValid);
 
-      // Optional debug logs for development
       console.log("Dirty:", isDirty, "Valid:", isValid, "Errors:", errors);
     });
     return () => subscription.unsubscribe();
   }, [methods]);
 
-  /**
-   * Handler to confirm closing page if there are unsaved changes
-   */
   const handleClosePage = () => {
     if (isFormDirty) {
       const confirmed = window.confirm(
@@ -126,20 +107,14 @@ export default function TeacherForm({
     }
   };
 
-  /**
-   * Main form submission handler wrapping the onSubmit prop
-   * with error handling
-   */
   const handleFormSubmit = async (data: any) => {
     try {
       await onSubmit(data);
     } catch (error) {
       console.error("Form submission error:", error);
-      // Consider showing user feedback here (toast, alert, etc.)
     }
   };
 
-  // Show loading indicator if in edit mode but initialValues not loaded yet
   if (!initialValues && mode === "Edit") {
     return (
       <div className="flex justify-center items-center h-[60vh]">
@@ -151,12 +126,6 @@ export default function TeacherForm({
     );
   }
 
-  /**
-   * Determine if the form can be submitted based on mode, validity, and dirty state
-   * - Disables submit while submitting
-   * - For edit mode: allow submit if form is valid (dirty not required)
-   * - For add mode: require form to be valid and have required fields filled
-   */
   const canSubmitForm = () => {
     if (isSubmitting) return false;
 

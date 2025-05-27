@@ -74,7 +74,6 @@ export default function AdminsListPage() {
   const iconColor = "text-black";
   const route = useRouter();
 
-  // Debounces search query input to reduce unnecessary API calls
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,7 +127,6 @@ export default function AdminsListPage() {
     setIsModalOpen(true);
   };
 
-  // Handles add or edit form submission logic
   async function handleSubmit(formData: AdminFormData) {
     setIsSubmitting(true);
     try {
@@ -144,14 +142,12 @@ export default function AdminsListPage() {
         roles: formData.roles,
       };
 
-      // Payload for adding a new admin
       const addPayload: AddStaffModel = {
         ...basePayload,
         roles: formData.roles ?? undefined,
         password: cleanRequiredField(formData.password),
       };
 
-      // Payload for updating an existing admin
       const updatePayload: EditStaffModel = {
         ...basePayload,
         status: formData.status ?? undefined,
@@ -208,7 +204,6 @@ export default function AdminsListPage() {
     }
   }
 
-  // Handles admin deletion by setting their status to INACTIVE
   async function handleDeleteAdmin() {
     if (!selectedAdmin) return;
 
@@ -308,6 +303,8 @@ export default function AdminsListPage() {
                             }`.trim()
                           : "---"}
                       </TableCell>
+                      <TableCell>{admin.gender || "---"}</TableCell>
+
                       <TableCell>
                         <div className="flex justify-start space-x-2">
                           <TooltipProvider>

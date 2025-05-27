@@ -13,34 +13,46 @@ export default function TeacherPersonal({ teacher }: TeacherProfileProps) {
   const infoItems = [
     {
       label: "គោត្តនាម និងនាម",
-      value: `${teacher?.khmerFirstName ?? ""} ${teacher?.khmerLastName ?? ""}`,
+      value:
+        teacher?.khmerFirstName || teacher?.khmerLastName
+          ? `${teacher?.khmerFirstName ?? ""} ${teacher?.khmerLastName ?? ""}`
+          : "---",
     },
     {
       label: "អក្សរឡាតាំង",
-      value: `${teacher?.englishFirstName ?? ""} ${
-        teacher?.englishLastName ?? ""
-      }`,
+      value:
+        teacher?.englishFirstName || teacher?.englishLastName
+          ? `${teacher?.englishFirstName ?? ""} ${
+              teacher?.englishLastName ?? ""
+            }`
+          : "---",
     },
     {
       label: "អត្តលេខនិស្សិត",
-      value: teacher?.id,
+      value: teacher?.id || "---",
     },
-    { label: "ភេទ", value: teacher?.gender },
-    { label: "ថ្ងៃខែឆ្នាំកំណើត", value: teacher?.dateOfBirth },
-    { label: "ពិការភាព", value: teacher?.disability },
-    { label: "លេខអត្តសញ្ញាណបណ្ណ", value: teacher?.nationalId },
-    { label: "លេខសមាជិកបសបខ", value: teacher?.cppMembershipNumber },
-    { label: "ថ្ងៃខែឆ្នាំតែងតាំងស៊ុប", value: teacher?.currentPositionDate },
-    { label: "អាសយដ្ឋានអង្គភាព", value: teacher?.currentAddress },
-    { label: "មុខតំណែង", value: teacher?.currentPosition },
-    { label: "អត្តលេខមន្ត្រី", value: teacher?.staffId },
-    { label: "ជនជាតិ", value: teacher?.ethnicity },
-    { label: "ទីកន្លែងកំណើត", value: teacher?.placeOfBirth },
-    { label: "លេខគណនីបៀវត្ស", value: teacher?.payrollAccountNumber },
-    { label: "ថ្ងៃខែឆ្នាំចូលបម្រើការងារ", value: teacher?.startWorkDate },
-    { label: "អង្គភាពបម្រើការងារ", value: teacher?.employeeWork },
-    { label: "ការិយាល័យ", value: teacher?.officeName },
-    { label: "ប្រកាស", value: teacher?.decreeFinal },
+    { label: "ភេទ", value: teacher?.gender || "---" },
+    { label: "ថ្ងៃខែឆ្នាំកំណើត", value: teacher?.dateOfBirth || "---" },
+    { label: "ពិការភាព", value: teacher?.disability || "---" },
+    { label: "លេខអត្តសញ្ញាណបណ្ណ", value: teacher?.nationalId || "---" },
+    { label: "លេខសមាជិកបសបខ", value: teacher?.cppMembershipNumber || "---" },
+    {
+      label: "ថ្ងៃខែឆ្នាំតែងតាំងស៊ុប",
+      value: teacher?.currentPositionDate || "---",
+    },
+    { label: "អាសយដ្ឋានអង្គភាព", value: teacher?.currentAddress || "---" },
+    { label: "មុខតំណែង", value: teacher?.currentPosition || "---" },
+    { label: "អត្តលេខមន្ត្រី", value: teacher?.staffId || "---" },
+    { label: "ជនជាតិ", value: teacher?.ethnicity || "---" },
+    { label: "ទីកន្លែងកំណើត", value: teacher?.placeOfBirth || "---" },
+    { label: "លេខគណនីបៀវត្ស", value: teacher?.payrollAccountNumber || "---" },
+    {
+      label: "ថ្ងៃខែឆ្នាំចូលបម្រើការងារ",
+      value: teacher?.startWorkDate || "---",
+    },
+    { label: "អង្គភាពបម្រើការងារ", value: teacher?.employeeWork || "---" },
+    { label: "ការិយាល័យ", value: teacher?.officeName || "---" },
+    { label: "ប្រកាស", value: teacher?.decreeFinal || "---" },
   ];
 
   return (
