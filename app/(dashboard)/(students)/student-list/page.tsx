@@ -223,19 +223,24 @@ export default function StudentsListPage() {
                   return (
                     <TableRow key={student.id}>
                       <TableCell>{indexDisplay}</TableCell>
-                      <TableCell>{student.username}</TableCell>
+                      <TableCell>{student.username || "---"}</TableCell>
                       <TableCell>
-                        {student.khmerFirstName} {student.khmerLastName}
+                        {(student.khmerFirstName || "") +
+                          " " +
+                          (student.khmerLastName || "") || "---"}
                       </TableCell>
                       <TableCell>
-                        {" "}
-                        {student.englishFirstName ?? ""}{" "}
-                        {student.englishLastName ?? ""}
+                        {(student.englishFirstName || "") +
+                          " " +
+                          (student.englishLastName || "") || "---"}
                       </TableCell>
-                      <TableCell>{student.id}</TableCell>
-                      <TableCell>{student.gender}</TableCell>
-                      <TableCell>{student.dateOfBirth}</TableCell>
-                      <TableCell>{student.studentClass.code}</TableCell>
+                      <TableCell>{student.id || "---"}</TableCell>
+                      <TableCell>{student.gender || "---"}</TableCell>
+                      <TableCell>{student.dateOfBirth || "---"}</TableCell>
+                      <TableCell>
+                        {student.studentClass?.code || "---"}
+                      </TableCell>
+
                       <TableCell>
                         <div className="flex justify-start space-x-2">
                           <Button

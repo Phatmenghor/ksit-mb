@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pencil, Trash2, Plus, RotateCcw } from "lucide-react";
+import { Pencil, Trash2, Plus, RotateCcw, View, Eye } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -26,6 +26,7 @@ import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
 import {
   addStaffService,
+  deletedStaffService,
   getAllStaffService,
   updateStaffService,
 } from "@/service/user/user.service";
@@ -46,6 +47,13 @@ import {
   StaffModel,
 } from "@/model/user/staff/staff.respond.model";
 import { cleanField, cleanRequiredField } from "@/utils/map-helper/student";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useRouter } from "next/navigation";
 
 export default function AdminsListPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -64,6 +72,7 @@ export default function AdminsListPage() {
   const [statusFilter, setStatusFilter] = useState("ACTIVE");
 
   const iconColor = "text-black";
+  const route = useRouter();
 
   // Debounces search query input to reduce unnecessary API calls
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -218,9 +227,7 @@ export default function AdminsListPage() {
         };
       });
 
-      const response = await updateStaffService(selectedAdmin.id, {
-        status: StatusEnum.INACTIVE,
-      });
+      const response = await deletedStaffService(selectedAdmin.id);
 
       if (response) {
         toast.success(
@@ -253,19 +260,6 @@ export default function AdminsListPage() {
         buttonText="Add New"
         openModal={handleOpenAddModal}
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
-        customSelect={
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="INACTIVE">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        }
       />
 
       <div className="overflow-x-auto">
@@ -301,7 +295,7 @@ export default function AdminsListPage() {
                   return (
                     <TableRow key={admin.id}>
                       <TableCell>{indexDisplay}</TableCell>
-                      <TableCell>{admin.username}</TableCell>
+                      <TableCell>{admin.username.trim() || "---"}</TableCell>
                       <TableCell>
                         {`${admin.khmerFirstName || ""} ${
                           admin.khmerLastName || ""
@@ -313,39 +307,82 @@ export default function AdminsListPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex justify-start space-x-2">
-                          <Button
-                            onClick={() => handleOpenEditModal(admin)}
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-black hover:text-gray-900"
-                            title="Edit"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            onClick={() => {
-                              setIsChangePasswordDialogOpen(true);
-                              setSelectedAdmin(admin);
-                            }}
-                            className={iconColor}
-                            size="sm"
-                          >
-                            <RotateCcw />
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setSelectedAdmin(admin);
-                              setIsDeleteDialogOpen(true);
-                            }}
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-red-500 hover:text-red-600"
-                            disabled={isSubmitting}
-                            title="Delete"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => {
+                                    route.push(
+                                      `${ROUTE.USERS.ADMIN_VIEW(
+                                        String(admin.id)
+                                      )}`
+                                    );
+                                  }}
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                  disabled={isSubmitting}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Admin Detail</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => handleOpenEditModal(admin)}
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                  disabled={isSubmitting}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Edit</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() =>
+                                    setIsChangePasswordDialogOpen(true)
+                                  }
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                  disabled={isSubmitting}
+                                >
+                                  <RotateCcw className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Reset Password</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => {
+                                    setSelectedAdmin(admin);
+                                    setIsDeleteDialogOpen(true);
+                                  }}
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 bg-red-500 text-white hover:bg-red-600"
+                                  disabled={isSubmitting}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Delete</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       </TableCell>
                     </TableRow>

@@ -1,7 +1,7 @@
 import React from "react";
 import StudentPersonalDetailSection from "../add-single-student/StuPersonalDetail";
-import { StudentStudiesHistorySection } from "../add-single-student/studentStudiesHistories";
 import StudentFamilyBackgroundSection from "../add-single-student/StuFamilyBackground";
+import { StudentStudiesHistorySection } from "../add-single-student/studentStudiesHistories";
 
 export default function StudentFormDetail() {
   return (
