@@ -68,7 +68,7 @@ export function ComboboxSelectSemester({
       setPage(result.pageNo);
       setLastPage(result.last);
     } catch (error) {
-      console.error("Error fetching majors:", error);
+      console.error("Error fetching semesters:", error);
     } finally {
       setLoading(false);
     }
@@ -127,14 +127,14 @@ export function ComboboxSelectSemester({
           disabled={disabled}
         >
           {/* Always show the name from the dataSelect prop if available */}
-          {dataSelect ? dataSelect.semester : "Select a major..."}
+          {dataSelect ? dataSelect.semester : "Select a semester..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full flex p-0">
         <Command>
           <CommandInput
-            placeholder="Search major..."
+            placeholder="Search semester..."
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
