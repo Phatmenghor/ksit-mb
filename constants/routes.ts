@@ -75,12 +75,10 @@ export const ROUTE = {
   },
 
   PERMISSIONS: "/permissions",
-  PAYMENT :{
-    LIST :'/payment-list',  // student-payment
-    VIEW_PAYMENT : '/view-payment',
-    ADD_NEW_PAYMENT : '/add-new',  // payment
-    
-  }
+  PAYMENT: {
+    LIST: "/student-payment", // student-payment
+    VIEW_PAYMENT: (id: string) => `/view-payment/${id}`, // payment view
+  },
 };
 
 export const sidebarRoutes = [

@@ -168,11 +168,11 @@ export const DAYS_OF_WEEK = [
   },
 ];
 
-export enum TYPE {
-  FREE = "Free",
-  PAY = "Pay",
-  SCHOLArSHIP = "Scholarship",
-}
+export const paymentTypes = [
+  { label: "Free", value: "FREE" },
+  { label: "Pay", value: "PAY" },
+  { label: "Scholarship", value: "SCHOLARSHIP" },
+];
 
 export enum Mode {
   VIEW = "VIEW",
