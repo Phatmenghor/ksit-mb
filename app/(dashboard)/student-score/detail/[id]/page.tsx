@@ -14,11 +14,22 @@ import { Button } from "@/components/ui/button";
 import {
   AlertCircle,
   CheckCircle,
+  Download,
+  Edit,
   Eye,
   Loader2,
+  Pencil,
+  Save,
   Upload,
   X,
 } from "lucide-react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -43,23 +54,30 @@ import { Badge } from "@/components/ui/badge";
 import { getDetailScheduleService } from "@/service/schedule/schedule.service";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 import Loading from "@/app/(dashboard)/requests/loading";
+import { ConfirmDialog } from "@/components/shared/custom-comfirm-diaglog";
+import { ScoreSubmitConfirmDialog } from "@/components/dashboard/student-scores/layout/submit-comfirm-dialog";
+import { GradeSelect } from "@/constants/constant";
 
 export default function StudentScoreDetailsPage() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshProgress, setRefreshProgress] = useState(0);
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [isSubmittedDialogOpen, setIsSubmittedDialogOpen] = useState(false);
+  const [isSubmittingToStaff, setIsSubmittingToStaff] = useState(true);
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [unsavedChanges, setUnsavedChanges] = useState<Set<number>>(new Set());
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = useState(true);
   const [isSavingAll, setIsSavingAll] = useState(false);
 
   const [scheduleDetail, setScheduleDetail] = useState<ScheduleModel | null>(
     null
   );
   const [students, setStudents] = useState<SessionScoreModel | null>(null);
-  const [mode, setMode] = useState<"view" | "edit">("view");
+  const [mode, setMode] = useState<"view" | "edit-score" | "edit-grade">(
+    "view"
+  );
   const [studentScoreDetail, setStudentScoreDetail] =
     useState<StudentScoreModel | null>(null);
   const [originalData, setOriginalData] = useState<Map<number, any>>(new Map());
@@ -70,6 +88,7 @@ export default function StudentScoreDetailsPage() {
   const tableRef = useRef<HTMLDivElement>(null);
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   // Auto-refresh timing constants
   const REFRESH_INTERVAL = 30; // 30 seconds
@@ -240,28 +259,53 @@ export default function StudentScoreDetailsPage() {
     [originalData, students, isSubmitted]
   );
 
-  const updateScore = (
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
     studentId: number,
-    field: keyof Pick<
-      StudentScoreModel,
-      "attendanceScore" | "assignmentScore" | "midtermScore" | "finalScore"
-    >,
-    value: number
-  ) => {
-    setStudents((prev) => {
-      if (!prev) return prev;
+    field: string
+  ): void => {
+    const currentIndex = students?.studentScores.findIndex(
+      (s) => s.id === studentId
+    );
+    const fields = ["assignmentScore", "midtermScore", "finalScore"];
+    const currentFieldIndex = fields.indexOf(field);
 
-      return {
-        ...prev,
-        studentScores: prev.studentScores.map((student) => {
-          if (student.id === studentId) {
-            const updatedStudent = { ...student, [field]: value };
-            return updatedStudent;
-          }
-          return student;
-        }),
-      };
-    });
+    switch (e.key) {
+      case "Enter":
+      case "ArrowDown":
+        e.preventDefault();
+        if (
+          typeof currentIndex === "number" &&
+          students &&
+          currentIndex < students.studentScores.length - 1
+        ) {
+          const nextStudent = students?.studentScores[currentIndex + 1];
+          const nextRef = inputRefs.current[`${nextStudent.id}-${field}`];
+          nextRef?.focus();
+        }
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        if (typeof currentIndex === "number" && currentIndex > 0 && students) {
+          const prevStudent = students.studentScores[currentIndex - 1];
+          const prevRef = inputRefs.current[`${prevStudent.id}-${field}`];
+          prevRef?.focus();
+        }
+        break;
+      case "Tab":
+        if (!e.shiftKey && currentFieldIndex < fields.length - 1) {
+          e.preventDefault();
+          const nextField = fields[currentFieldIndex + 1];
+          const nextRef = inputRefs.current[`${studentId}-${nextField}`];
+          nextRef?.focus();
+        } else if (e.shiftKey && currentFieldIndex > 0) {
+          e.preventDefault();
+          const prevField = fields[currentFieldIndex - 1];
+          const prevRef = inputRefs.current[`${studentId}-${prevField}`];
+          prevRef?.focus();
+        }
+        break;
+    }
   };
 
   // Smooth progress animation for auto-refresh
@@ -462,8 +506,60 @@ export default function StudentScoreDetailsPage() {
               <CardTitle className="font-bold text-xl">Student List</CardTitle>
             </div>
             <div>
-              {mode === "view" && (
-                <Button onClick={() => setMode("edit")}>Edit score</Button>
+              {mode === "view" && isSubmittingToStaff && (
+                <div className="flex items-center gap-4">
+                  {/* Label */}
+                  <span className="text-muted-foreground font-medium">
+                    Export Data By Class:
+                  </span>
+
+                  {/* Excel Export Button */}
+                  <Button variant="outline" className="gap-2">
+                    <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">X</span>
+                    </div>
+                    <span>Excel</span>
+                    <Download className="w-4 h-4" />
+                  </Button>
+
+                  {/* PDF Export Button */}
+                  <Button variant="outline" className="gap-2">
+                    <div className="w-5 h-5 border-2 border-red-500 rounded flex items-center justify-center">
+                      <span className="text-red-500 text-[10px] font-bold">
+                        PDF
+                      </span>
+                    </div>
+                    <span>PDF</span>
+                    <Download className="w-4 h-4" />
+                  </Button>
+
+                  {/* Edit Grade Button */}
+                  <Button
+                    onClick={() => setMode("edit-grade")}
+                    className="gap-2 bg-orange-400 hover:bg-orange-500"
+                  >
+                    <Edit className="w-4 h-4" />
+                    <span>Edit Grade</span>
+                  </Button>
+                </div>
+              )}
+
+              {mode === "view" && !isSubmittingToStaff && (
+                <div className="flex flex-row gap-2">
+                  <Button
+                    className=" bg-orange-400 hover:bg-orange-500"
+                    onClick={() => setMode("edit-score")}
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit score
+                  </Button>
+                  {!isSubmittingToStaff && (
+                    <Button onClick={() => setIsSubmittedDialogOpen(true)}>
+                      <Save className="w-4 h-4" />
+                      Submit score
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
           </CardHeader>
@@ -488,31 +584,43 @@ export default function StudentScoreDetailsPage() {
                     <TableHead className="text-white w-12">#</TableHead>
                     <TableHead className="text-white">Student ID</TableHead>
                     <TableHead className="text-white">Fullname</TableHead>
-                    <TableHead className="text-white text-center">
-                      Att. (10%)
-                    </TableHead>
-                    <TableHead className="text-white text-center">
-                      Ass. (30%)
-                    </TableHead>
-                    <TableHead className="text-white text-center">
-                      Mid. (30%)
-                    </TableHead>
-                    <TableHead className="text-white text-center">
-                      Final (30%)
-                    </TableHead>
+                    {mode !== "edit-grade" && (
+                      <TableHead className="text-white text-center">
+                        Att. (10%)
+                      </TableHead>
+                    )}
+                    {mode !== "edit-grade" && (
+                      <TableHead className="text-white text-center">
+                        Ass. (30%)
+                      </TableHead>
+                    )}
+
+                    {mode !== "edit-grade" && (
+                      <TableHead className="text-white text-center">
+                        Mid. (30%)
+                      </TableHead>
+                    )}
+                    {mode !== "edit-grade" && (
+                      <TableHead className="text-white text-center">
+                        Final (30%)
+                      </TableHead>
+                    )}
+
                     {mode === "view" && (
                       <TableHead className="text-white text-center">
                         Total
                       </TableHead>
                     )}
-                    {mode === "view" && (
+                    {mode !== "edit-score" && (
                       <TableHead className="text-white text-center">
                         Grade
                       </TableHead>
                     )}
-                    <TableHead className="text-white text-center">
-                      Action
-                    </TableHead>
+                    {mode !== "edit-grade" && (
+                      <TableHead className="text-white text-center">
+                        Action
+                      </TableHead>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -528,86 +636,125 @@ export default function StudentScoreDetailsPage() {
                         <TableCell className="font-medium">
                           {student.studentName}
                         </TableCell>
-                        <TableCell className="text-center">
-                          {student.attendanceScore}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {mode === "edit" ? (
-                            <Input
-                              type="number"
-                              value={student.assignmentScore}
-                              className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
-                                unsavedChanges.has(student.id)
-                                  ? "border-yellow-300 ring-1 ring-yellow-200"
-                                  : ""
-                              } ${isSubmitted ? "cursor-not-allowed" : ""}`}
-                              onChange={(e) =>
-                                handleFieldChange(
-                                  student.id,
-                                  "assignmentScore",
-                                  e.target.value
-                                )
-                              }
-                              min="0"
-                              max="100"
-                            />
-                          ) : (
-                            <span>{student.assignmentScore}</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {mode === "edit" ? (
-                            <Input
-                              type="number"
-                              value={student.midtermScore}
-                              className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
-                                unsavedChanges.has(student.id)
-                                  ? "border-yellow-300 ring-1 ring-yellow-200"
-                                  : ""
-                              } ${isSubmitted ? "cursor-not-allowed" : ""}`}
-                              onChange={(e) =>
-                                handleFieldChange(
-                                  student.id,
-                                  "midtermScore",
-                                  e.target.value
-                                )
-                              }
-                              min="0"
-                              max="100"
-                            />
-                          ) : (
-                            <span>{student.midtermScore}</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {mode === "edit" ? (
-                            <Input
-                              type="number"
-                              value={student.finalScore}
-                              className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
-                                unsavedChanges.has(student.id)
-                                  ? "border-yellow-300 ring-1 ring-yellow-200"
-                                  : ""
-                              } ${isSubmitted ? "cursor-not-allowed" : ""}`}
-                              onChange={(e) =>
-                                handleFieldChange(
-                                  student.id,
-                                  "finalScore",
-                                  e.target.value
-                                )
-                              }
-                              min="0"
-                              max="100"
-                            />
-                          ) : (
-                            <span>{student.finalScore}</span>
-                          )}
-                        </TableCell>
+                        {mode !== "edit-grade" && (
+                          <TableCell className="text-center">
+                            {student.attendanceScore}
+                          </TableCell>
+                        )}
+                        {mode !== "edit-grade" && (
+                          <TableCell className="text-center">
+                            {mode === "edit-score" ? (
+                              <Input
+                                type="number"
+                                value={student.assignmentScore}
+                                className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
+                                  unsavedChanges.has(student.id)
+                                    ? "border-yellow-300 ring-1 ring-yellow-200"
+                                    : ""
+                                } ${isSubmitted ? "cursor-not-allowed" : ""}`}
+                                ref={(el) => {
+                                  inputRefs.current[
+                                    `${student.id}-assignmentScore`
+                                  ] = el;
+                                }}
+                                onKeyDown={(e) =>
+                                  handleKeyDown(
+                                    e,
+                                    student.id,
+                                    "assignmentScore"
+                                  )
+                                }
+                                onChange={(e) =>
+                                  handleFieldChange(
+                                    student.id,
+                                    "assignmentScore",
+                                    e.target.value
+                                  )
+                                }
+                                min="0"
+                                max="100"
+                              />
+                            ) : (
+                              <span>{student.assignmentScore}</span>
+                            )}
+                          </TableCell>
+                        )}
+                        {mode !== "edit-grade" && (
+                          <TableCell className="text-center">
+                            {mode === "edit-score" ? (
+                              <Input
+                                type="number"
+                                value={student.midtermScore}
+                                ref={(el) => {
+                                  inputRefs.current[
+                                    `${student.id}-midtermScore`
+                                  ] = el;
+                                }}
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, student.id, "midtermScore")
+                                }
+                                className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
+                                  unsavedChanges.has(student.id)
+                                    ? "border-yellow-300 ring-1 ring-yellow-200"
+                                    : ""
+                                } ${isSubmitted ? "cursor-not-allowed" : ""}`}
+                                onChange={(e) =>
+                                  handleFieldChange(
+                                    student.id,
+                                    "midtermScore",
+                                    e.target.value
+                                  )
+                                }
+                                min="0"
+                                max="100"
+                              />
+                            ) : (
+                              <span>{student.midtermScore}</span>
+                            )}
+                          </TableCell>
+                        )}
+
+                        {mode !== "edit-grade" && (
+                          <TableCell className="text-center">
+                            {mode === "edit-score" ? (
+                              <Input
+                                type="number"
+                                value={student.finalScore}
+                                ref={(el) => {
+                                  inputRefs.current[
+                                    `${student.id}-finalScore`
+                                  ] = el;
+                                }}
+                                onKeyDown={(e) =>
+                                  handleKeyDown(e, student.id, "finalScore")
+                                }
+                                className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
+                                  unsavedChanges.has(student.id)
+                                    ? "border-yellow-300 ring-1 ring-yellow-200"
+                                    : ""
+                                } ${isSubmitted ? "cursor-not-allowed" : ""}`}
+                                onChange={(e) =>
+                                  handleFieldChange(
+                                    student.id,
+                                    "finalScore",
+                                    e.target.value
+                                  )
+                                }
+                                min="0"
+                                max="100"
+                              />
+                            ) : (
+                              <span>{student.finalScore}</span>
+                            )}
+                          </TableCell>
+                        )}
+
                         {mode === "view" && (
                           <TableCell className="text-center font-bold">
                             <span>{student.totalScore}</span>
                           </TableCell>
                         )}
+
                         {mode === "view" && (
                           <TableCell className="text-center">
                             <span
@@ -625,6 +772,31 @@ export default function StudentScoreDetailsPage() {
                             >
                               {student.grade}
                             </span>
+                          </TableCell>
+                        )}
+
+                        {mode === "edit-grade" && (
+                          <TableCell className="text-center">
+                            <Select
+                              value={student.grade}
+                              onValueChange={(value) =>
+                                handleFieldChange(student.id, "grade", value)
+                              }
+                            >
+                              <SelectTrigger className="w-[120px]">
+                                <SelectValue placeholder="Select grade" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {GradeSelect.map((grade) => (
+                                  <SelectItem
+                                    value={grade.value}
+                                    key={grade.value}
+                                  >
+                                    {grade.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </TableCell>
                         )}
 
@@ -653,7 +825,7 @@ export default function StudentScoreDetailsPage() {
                               </Tooltip>
                             </TooltipProvider>
                           </TableCell>
-                        ) : (
+                        ) : mode === "edit-score" ? (
                           <TableCell>
                             {isSubmitted ? (
                               <Badge variant="secondary" className="text-xs">
@@ -677,6 +849,8 @@ export default function StudentScoreDetailsPage() {
                               </Badge>
                             )}
                           </TableCell>
+                        ) : (
+                          <></>
                         )}
                       </TableRow>
                     );
@@ -694,21 +868,22 @@ export default function StudentScoreDetailsPage() {
           </CardContent>
         </Card>
       </div>
-      {mode === "edit" && (
-        <Card className="w-full">
-          <CardContent className="flex justify-end gap-2 p-4">
-            <Button variant="outline" onClick={() => setMode("view")}>
-              Discard
-            </Button>
-            <Button
-              className="bg-green-700 hover:bg-green-800"
-              onClick={handleSaveScores}
-            >
-              {isSubmitting ? "Save" : "Saving..."}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      {mode === "edit-score" ||
+        (mode === "edit-grade" && (
+          <Card className="w-full">
+            <CardContent className="flex justify-end gap-2 p-4">
+              <Button variant="outline" onClick={() => setMode("view")}>
+                Discard
+              </Button>
+              <Button
+                className=" bg-orange-400 hover:bg-orange-500"
+                onClick={handleSaveScores}
+              >
+                {isSubmitting ? "Save" : "Saving..."}
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
 
       {/* Quick Actions Panel - Only show when not submitted */}
       {students && unsavedChanges.size > 0 && !isSubmitted && (
@@ -757,6 +932,18 @@ export default function StudentScoreDetailsPage() {
           </CardContent>
         </Card>
       )}
+
+      <ScoreSubmitConfirmDialog
+        open={isSubmittedDialogOpen}
+        title="Comfirm Submit!"
+        description="Are u sure u want to submit student score?"
+        onConfirm={() => {}}
+        cancelText="Discard"
+        subDescription="Student score will submit to staff officer."
+        onOpenChange={() => {
+          setIsSubmittedDialogOpen(false);
+        }}
+      />
 
       {students && unsavedChanges.size > 0 && (
         <Card className="border-orange-200 bg-orange-50">

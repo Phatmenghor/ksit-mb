@@ -179,3 +179,11 @@ export enum Mode {
   ADD = "ADD",
   EDIT = "EDIT",
 }
+
+export const GradeSelect = [
+  { label: "A", value: "A" },
+  { label: "B	", value: "B" },
+  { label: "C", value: "C" },
+  { label: "E", value: "E" },
+  { label: "F", value: "F" },
+];
