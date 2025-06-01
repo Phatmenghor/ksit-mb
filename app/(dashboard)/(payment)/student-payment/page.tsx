@@ -2,22 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Eye,
-  Pencil,
-  Plus,
-  RotateCcw,
-  Search,
-  TextCursor,
-  Trash2,
-  User,
-} from "lucide-react";
-import PaginationPage from "@/components/shared/pagination";
-import {
-  AllStudentModel,
-  RequestAllStudent,
-  StudentModel,
-} from "@/model/user/student/student.model";
+import { Eye } from "lucide-react";
 import { toast } from "sonner";
 import { getAllStudentsService } from "@/service/user/student.service";
 import { StatusEnum } from "@/constants/constant";
@@ -25,11 +10,17 @@ import { Column, CustomTable } from "@/components/shared/layout/TableSection";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 import { YearSelector } from "@/components/shared/year-selector";
-import { ComboboxSelect } from "@/components/shared/custom-comboBox";
-import ComboBoxClass from "@/components/shared/ComboBox/combobox-class";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
 import { BreadcrumbLink } from "@/components/ui/breadcrumb";
-import { Funnel } from "recharts";
+import PaginationPage from "@/components/shared/pagination-page";
+import {
+  AllStudentModel,
+  RequestAllStudent,
+  StudentModel,
+} from "@/model/user/student/student.request.model";
+import { useDebounce } from "@/utils/debounce/debounce";
+import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
+import Loading from "@/components/shared/loading";
 
 export default function StudentsListPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -42,21 +33,23 @@ export default function StudentsListPage() {
   const [allStudentData, setAllStudentData] = useState<AllStudentModel | null>(
     null
   );
-
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const loadStudents = useCallback(
     async (param: RequestAllStudent) => {
       setIsLoading(true);
 
       try {
         const response = await getAllStudentsService({
-          search: searchQuery,
-          status: StatusEnum.ACTIVE,
           ...param,
+          academicYear: selectAcademicYear,
+          search: debouncedSearchQuery,
+          status: StatusEnum.ACTIVE,
+          classId: selectedClass?.id,
         });
 
         if (response) {
           setAllStudentData(response);
-          console.log('>>>',response)
+          console.log(">>>", response);
         } else {
           console.error("Failed to fetch departments:");
         }
@@ -71,7 +64,7 @@ export default function StudentsListPage() {
 
   useEffect(() => {
     loadStudents({});
-  }, [searchQuery, loadStudents, selectAcademicYear]);
+  }, [searchQuery, loadStudents, debouncedSearchQuery, selectAcademicYear]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -102,31 +95,20 @@ export default function StudentsListPage() {
       key: "fullname (kh)",
       header: "Fullname (KH)",
       render: (student: StudentModel) =>
-        `${student.khmerFirstName ?? ""} ${student.khmerLastName ?? ""}`,
+        `${student.khmerFirstName ?? "---"} ${student.khmerLastName ?? ""}`,
     },
     {
       key: "fullname (en)",
       header: "Fullname (EN)",
       render: (student: StudentModel) =>
-        `${student.englishFirstName ?? ""} ${student.englishLastName ?? ""}`,
-    },
-
-    {
-      key: "historyRecord",
-      header: "History Records",
+        `${student.englishFirstName ?? "---"} ${student.englishLastName ?? ""}`,
     },
     {
-      key: "lastUpdate",
-      header: "Last Updated",
+      key: "gender",
+      header: "Gender",
       render: (student: any) => (
-        <span
-          className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-            student.status === StatusEnum.ACTIVE
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {student.status}
+        <span className={`inline-flex rounded-full px-2 py-1  text-center`}>
+          {student.gender ?? "---"}
         </span>
       ),
     },
@@ -135,14 +117,14 @@ export default function StudentsListPage() {
       header: "Actions",
       render: (student: any) => (
         <>
-          <BreadcrumbLink href={ROUTE.PAYMENT.ADD_NEW_PAYMENT}>
+          <BreadcrumbLink href={ROUTE.PAYMENT.VIEW_PAYMENT(String(student.id))}>
             <Button
               variant="link"
               size="icon"
-              className={`${iconColor} underline hover:text-blue-600`}
+              className={`${iconColor} underline hover:text-blue-600 flex items-center`}
             >
-              <Eye  size="sm" />
-              <span> Detail</span>
+              <Eye size="h-4 w-4" />
+              <span className="text-sm"> Detail</span>
             </Button>
           </BreadcrumbLink>
         </>
@@ -161,41 +143,40 @@ export default function StudentsListPage() {
         searchValue={searchQuery}
         searchPlaceholder="Search..."
         onSearchChange={handleSearchChange}
-        // buttonText="Add New"
-        // buttonHref={ROUTE.STUDENTS.ADD_SINGLE}
-        // buttonIcon={<Plus className="mr-2 h-2 w-2" />}
         customSelect={
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
-            <div className="w-full min-w-[150px] md:w-1/2">
-            
-              <YearSelector
-                title="ឆ្នាំសិក្សា"
-                onChange={handleYearChange}
-                value={selectAcademicYear ?? 2024}
-                maxYear={2040}
-                minYear={2020}
-                
-              />
+            <div className="w-full min-w-[200px] md:w-1/2">
+              <div className="w-full min-w-[200px]">
+                <YearSelector
+                  title="Select Year"
+                  onChange={handleYearChange}
+                  value={selectAcademicYear || 0}
+                />
+              </div>
             </div>
 
-            <div className="w-full min-w-[150px] md:w-1/2">
-              <ComboBoxClass
-                title="ថ្នាក់:"
+            <div className="w-full min-w-[200px] md:w-1/2">
+              <ComboboxSelectClass
+                dataSelect={selectedClass ?? null}
+                onChangeSelected={handleClassChange}
                 disabled={isSubmitting}
-                onChange={handleClassChange}
-                selectedClass={selectedClass ?? null}
               />
             </div>
           </div>
         }
       />
 
-      <CustomTable
-        columns={columns}
-        isLoading={isLoading}
-        data={allStudentData?.content ?? []}
-      />
-      
+      <div className="overflow-x-auto">
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <CustomTable
+            columns={columns}
+            isLoading={isLoading}
+            data={allStudentData?.content ?? []}
+          />
+        )}
+      </div>
 
       {!isLoading && allStudentData && (
         <div className="mt-4 flex justify-end ">

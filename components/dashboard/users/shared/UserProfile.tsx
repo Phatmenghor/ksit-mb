@@ -28,6 +28,7 @@ export const UserProfileSection: React.FC<ProfileProps> = ({
       <CardContent className="flex flex-col items-center justify-center py-6">
         <Avatar className="h-24 w-24">
           <AvatarImage src={profileUrl} alt={user?.username || "User"} />
+           <AvatarImage src={'/assets/profile.png'} alt={user?.username || "User"} />
           <AvatarFallback>
             {user?.username ? user.username.charAt(0).toUpperCase() : "?"}
           </AvatarFallback>

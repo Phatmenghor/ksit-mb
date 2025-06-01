@@ -1,52 +1,58 @@
-import { ComboboxSelectMajor } from "@/components/shared/ComboBox/combobox-major";
-import { YearSelector } from "@/components/shared/year-selector";
-import { DialogHeader, DialogFooter } from "@/components/ui/dialog";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import { DegreeEnum, TYPE, YearLevelEnum } from "@/constants/constant";
-import { Constants } from "@/constants/text-string";
+import { paymentTypes } from "@/constants/constant";
 import { MajorModel } from "@/model/master-data/major/all-major-model";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@radix-ui/react-dialog";
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
-} from "@radix-ui/react-select";
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useState, useEffect } from "react";
-import { Button } from "react-day-picker";
-import { useForm, Form } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
-import { Type } from "lucide-react";
-
 export const paymentFormSchema = z.object({
   item: z.string().min(1, { message: "Item is required" }),
-  type: z.nativeEnum(TYPE, {
-    required_error: "Type is required",
-  }),
-  percentage: z.number().min(1, { message: "Percentage is required" }),
-  amount: z.number().min(1, { message: "Amount is required" }),
+  type: z.string().min(1, { message: "Type is required" }),
+  // percentage: z.string().min(1, { message: "Percentage is required" }),
+  // amount: z.string().min(1, { message: "Amount is required" }),
+   percentage: z
+    .string()
+    .min(1, { message: "Percentage is required" })
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Percentage must be a non-negative number",
+    }),
+  amount: z
+    .string()
+    .min(1, { message: "Amount is required" })
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Amount must be a non-negative number",
+    }),
   comment: z.string().min(1, { message: "Comment is required" }),
 });
 
 // Export the type for use across your application
 export type PaymentFormData = z.infer<typeof paymentFormSchema> & {
   id?: number;
-  selectedMajor?: MajorModel; // Add the selected major for edit mode
 };
 
 interface PaymentFormModalProps {
@@ -67,20 +73,19 @@ export function PaymentFormModal({
   isSubmitting = false,
 }: PaymentFormModalProps) {
   // Initialize selectedMajor with initialData.selectedMajor if available
-  const [selectedMajor, setSelectedMajor] = useState<MajorModel | null>(
-    initialData?.selectedMajor || null
-  );
+  const [selectedMajor, setSelectedMajor] = useState<MajorModel | null>(null);
   const [isFormDirty, setIsFormDirty] = useState(false);
-  const currentYear = new Date().getFullYear();
+  const [isUploading, setIsUploading] = useState(false);
+  //const currentYear = new Date().getFullYear();
 
   // Initialize the form with Zod validation
   const form = useForm<PaymentFormData>({
     resolver: zodResolver(paymentFormSchema),
     defaultValues: {
       item: "",
-      type: TYPE.FREE,
-      percentage: 0,
-      amount: 0,
+      type: "",
+      percentage: "0",
+      amount: "0",
       comment: "",
     },
     mode: "onChange", // Validate on change for better UX
@@ -94,29 +99,24 @@ export function PaymentFormModal({
         form.reset({
           item: initialData.item || "",
           type: initialData.type || "",
-          percentage: initialData.percentage || 0,
-          amount: initialData.amount || 0,
+          percentage: initialData.percentage || "0",
+          amount: initialData.amount || "0",
           comment: initialData.comment || "",
         });
-
-        // Set the selected major if it was passed from the parent
-        if (initialData.selectedMajor) {
-          setSelectedMajor(initialData.selectedMajor);
-        }
       } else {
         // Reset for add mode
         form.reset({
           item: "",
-          type: TYPE.FREE,
-          percentage: 0,
-          amount: 0,
+          type: "",
+          percentage: "0",
+          amount: "0",
           comment: "",
         });
         setSelectedMajor(null);
       }
       setIsFormDirty(false);
     }
-  }, [isOpen, initialData, mode, form, currentYear]);
+  }, [isOpen, initialData, mode, form]);
 
   // Track form changes
   useEffect(() => {
@@ -155,23 +155,13 @@ export function PaymentFormModal({
       toast.error("An error occurred while saving class");
     }
   };
-
-  // Handle academy year change
-  //   const handleYearChange = (year: number) => {
-  //     form.setValue("academyYear", year, {
-  //       shouldValidate: true,
-  //       shouldDirty: true,
-  //     });
-  //   };
-
   return (
     <Dialog open={isOpen} onOpenChange={handleCloseModal}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode === "add" ? "AAdd New Record" : "Edit Record"}
+            {mode === "add" ? "Add New Record" : "Edit Record"}
           </DialogTitle>
-        
         </DialogHeader>
 
         <Form {...form}>
@@ -210,7 +200,7 @@ export function PaymentFormModal({
                   </FormLabel>
                   <FormControl>
                     <Select
-                      onValueChange={(value) => field.onChange(value as TYPE)}
+                      onValueChange={(value) => field.onChange(value)}
                       value={field.value}
                       disabled={isSubmitting}
                     >
@@ -218,11 +208,11 @@ export function PaymentFormModal({
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={TYPE.FREE}>Free</SelectItem>
-                        <SelectItem value={TYPE.PAY}>Pay</SelectItem>
-                        <SelectItem value={TYPE.SCHOLArSHIP}>
-                          Scholarship
-                        </SelectItem>
+                        {paymentTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -230,58 +220,54 @@ export function PaymentFormModal({
                 </FormItem>
               )}
             />
+            <div className="flex gap-4">
+              <div className="w-1/2">
+                <FormField
+                  control={form.control}
+                  name="percentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Percentage (%) <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter percentage" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            
+              <div className="w-1/2">
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Amount ($) <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter amount" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
             <FormField
-              control={form.control}
-              name="percentage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Percentage (%) <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                  <Input
-                      placeholder="Enter percentage"
-                      {...field}
-                      autoFocus
-                      maxLength={50}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Amount ($) <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                  <Input
-                      placeholder="Enter amount"
-                      {...field}
-                      autoFocus
-                      maxLength={50}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
               control={form.control}
               name="comment"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Comment  <span className="text-red-500">*</span>
+                    Comment <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                  <Input
+                    <Input
                       placeholder="Enter comment"
                       {...field}
                       autoFocus
@@ -297,6 +283,7 @@ export function PaymentFormModal({
               <Button
                 type="button"
                 // variant="outline"
+                className="bg-white border text-gray-700 border-gray-300 hover:bg-transparent"
                 onClick={handleCloseModal}
                 disabled={isSubmitting}
               >
@@ -304,11 +291,7 @@ export function PaymentFormModal({
               </Button>
               <Button
                 type="submit"
-                disabled={
-                  isSubmitting ||
-                  !form.formState.isDirty ||
-                  !form.formState.isValid
-                }
+                disabled={isSubmitting || !form.formState.isValid}
                 className="bg-green-900 text-white hover:bg-green-950"
               >
                 {isSubmitting ? (
@@ -317,7 +300,7 @@ export function PaymentFormModal({
                     {mode === "add" ? "Creating..." : "Updating..."}
                   </>
                 ) : (
-                  `${mode === "add" ? "Create" : "Update"} Class`
+                  `${mode === "add" ? "Save" : "Update"} `
                 )}
               </Button>
             </DialogFooter>
