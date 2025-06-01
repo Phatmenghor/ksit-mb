@@ -75,6 +75,10 @@ export const ROUTE = {
   },
 
   PERMISSIONS: "/permissions",
+  PAYMENT: {
+    LIST: "/student-payment", // student-payment
+    VIEW_PAYMENT: (id: string) => `/view-payment/${id}`, // payment view
+  },
 };
 
 export const sidebarRoutes = [
@@ -154,6 +158,11 @@ export const sidebarRoutes = [
   {
     title: "Schedule",
     href: ROUTE.SCHEDULE.ROOT,
+    icon: Calendar,
+  },
+  {
+    title: "Payment",
+    href: ROUTE.PAYMENT.LIST,
     icon: Calendar,
   },
   {

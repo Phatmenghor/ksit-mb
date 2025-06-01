@@ -2,7 +2,7 @@ import { DateTimeFormatter } from "@/utils/date/date-time-format";
 import { saveAs } from "file-saver";
 // utils/excel.util.ts
 import ExcelJS from "exceljs";
-import { StudentResponse } from "@/model/user/student/student.model";
+import { StudentResponse } from "@/model/user/student/student.respond.model";
 
 export const exportStudentsToExcel = async (
   students: StudentResponse[],
