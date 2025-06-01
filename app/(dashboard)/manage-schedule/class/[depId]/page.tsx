@@ -11,18 +11,70 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { ROUTE } from "@/constants/routes";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  BookOpen,
+  Users,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { AllMajorFilterModel } from "@/model/master-data/major/type-major-model";
 import { getAllMajorService } from "@/service/master-data/major.service";
 import { Constants } from "@/constants/text-string";
 import { toast } from "sonner";
 import { AllMajorModel } from "@/model/master-data/major/all-major-model";
-import { AllClassModel } from "@/model/master-data/class/all-class-model";
+import {
+  AllClassModel,
+  ClassModel,
+} from "@/model/master-data/class/all-class-model";
 import { getAllClassService } from "@/service/master-data/class.service";
-import { ClassCard } from "@/components/dashboard/schedule/class/classCard";
+import { ClassCard } from "@/components/dashboard/schedule/class/class-card";
+import Loading from "@/components/shared/loading";
+
+// Empty state components
+const EmptyMajorsState = ({ searchQuery }: { searchQuery: string }) => (
+  <Card className="mt-6">
+    <CardContent className="p-12">
+      <div className="text-center space-y-4">
+        <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+          <BookOpen className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold">No Majors Found</h3>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            {searchQuery
+              ? `No majors match your search "${searchQuery}". Try adjusting your search criteria.`
+              : "No majors are available for this department at the moment."}
+          </p>
+        </div>
+        {searchQuery && (
+          <Button variant="outline" onClick={() => window.location.reload()}>
+            Clear Search
+          </Button>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const EmptyClassesState = ({ majorName }: { majorName?: string }) => (
+  <div className="text-center py-12 space-y-4">
+    <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+      <Users className="h-8 w-8 text-muted-foreground" />
+    </div>
+    <div className="space-y-2">
+      <h3 className="text-lg font-semibold">No Classes Available</h3>
+      <p className="text-muted-foreground max-w-md mx-auto">
+        {majorName
+          ? `No classes are currently available for ${majorName}. Classes may be added later.`
+          : "No classes are available for the selected major at this time."}
+      </p>
+    </div>
+  </div>
+);
 
 const ClassSchedulePage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -30,14 +82,21 @@ const ClassSchedulePage = () => {
   const [allMajorData, setAllMajorData] = useState<AllMajorModel | null>(null);
   const [selectedMajor, setSelectedMajor] = useState<number | null>(null);
   const [allClassData, setAllClassData] = useState<AllClassModel | null>(null);
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   const [isLoadingClasses, setIsLoadingClasses] = useState<boolean>(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState<boolean>(false);
   const params = useParams();
   const depId = params?.depId ? Number(params.depId) : null;
+  const router = useRouter();
 
   const loadMajors = useCallback(
     async (param: AllMajorFilterModel) => {
-      console.log("#", param);
       try {
+        // Only show initial loading on first load
+        if (!hasLoadedOnce) {
+          setIsInitialLoading(true);
+        }
+
         const response = await getAllMajorService({
           search: searchQuery,
           status: Constants.ACTIVE,
@@ -53,7 +112,6 @@ const ClassSchedulePage = () => {
             response.content.length > 0
           ) {
             setSelectedMajor(response.content[0].id);
-            console.log("####", response.content[0].id);
 
             setIsLoadingClasses(true);
             try {
@@ -62,23 +120,23 @@ const ClassSchedulePage = () => {
                 majorId: response.content[0].id || undefined,
               });
               setAllClassData(responseListClass);
-              console.log("##hi", responseListClass);
             } catch (error) {
-              console.error("Failed to fetch initial classes", error);
               toast.error("Failed to load classes");
             } finally {
               setIsLoadingClasses(false);
             }
           }
         } else {
-          console.error("Failed to fetch majors:");
           toast.error("Failed to load majors");
         }
       } catch (error) {
         toast.error("An error occurred while loading majors");
+      } finally {
+        setIsInitialLoading(false);
+        setHasLoadedOnce(true);
       }
     },
-    [searchQuery, selectedMajor, depId]
+    [searchQuery, selectedMajor, depId, hasLoadedOnce]
   );
 
   useEffect(() => {
@@ -103,7 +161,6 @@ const ClassSchedulePage = () => {
 
   const handleMajorSelect = async (majorId: number) => {
     setSelectedMajor(majorId);
-    console.log(`Selected major ID: ${majorId}`);
 
     setIsLoadingClasses(true);
     try {
@@ -112,35 +169,29 @@ const ClassSchedulePage = () => {
         majorId: majorId || undefined,
       });
       setAllClassData(responseListClass);
-      console.log("##hi", responseListClass);
     } catch (error) {
-      console.error("Failed to fetch classes", error);
       toast.error("Failed to load classes for selected major");
     } finally {
       setIsLoadingClasses(false);
     }
   };
 
-  const handleViewSchedule = (classData: any) => {
-    console.log("View schedule for class:", classData);
-    toast.info(`Viewing schedule for Class ${classData.code}`);
+  const handleViewSchedule = (classData: ClassModel) => {
+    router.push(`/manage-schedule/all-schedule/${classData.id}`);
   };
 
-  const handleAddSchedule = (classData: any) => {
-    console.log("Add schedule for class:", classData);
-    toast.info(`Adding schedule for Class ${classData.code}`);
+  const handleAddSchedule = (classData: ClassModel) => {
+    router.push(`/manage-schedule/create-schedule/${classData.id}`);
   };
 
-  const formatYearLevel = (yearLevel: string) => {
-    return yearLevel
-      .replace("_", " ")
-      .toLowerCase()
-      .replace(/\b\w/g, (l) => l.toUpperCase());
-  };
-
-  const formatDegree = (degree: string) => {
-    return degree.charAt(0).toUpperCase() + degree.slice(1).toLowerCase();
-  };
+  // Show single loading screen during initial load
+  if (isInitialLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Loading />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -184,101 +235,86 @@ const ClassSchedulePage = () => {
       </Card>
 
       {/* Majors Selection */}
-      <div className="relative flex items-center my-6">
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute left-0 z-10 rounded-full"
-          onClick={scrollLeft}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
+      {allMajorData?.content && allMajorData.content.length > 0 ? (
+        <div className="relative flex items-center my-6">
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute left-0 z-10 rounded-full"
+            onClick={scrollLeft}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
 
-        <div
-          ref={scrollContainerRef}
-          className="flex overflow-x-auto scrollbar-hide gap-2 px-16 scroll-smooth"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          {allMajorData?.content?.map((major) => (
-            <Button
-              key={major.id}
-              variant={selectedMajor === major.id ? "default" : "outline"}
-              className="whitespace-nowrap"
-              onClick={() => handleMajorSelect(major.id)}
-            >
-              {major.name}
-            </Button>
-          ))}
+          <div
+            ref={scrollContainerRef}
+            className="flex overflow-x-auto scrollbar-hide gap-2 px-16 scroll-smooth"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {allMajorData.content.map((major) => (
+              <Button
+                key={major.id}
+                variant={selectedMajor === major.id ? "default" : "outline"}
+                className="whitespace-nowrap"
+                onClick={() => handleMajorSelect(major.id)}
+              >
+                {major.name}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute right-0 z-10 rounded-full"
+            onClick={scrollRight}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
-
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute right-0 z-10 rounded-full"
-          onClick={scrollRight}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
+      ) : (
+        // Only show empty state if we've loaded at least once and there's actually no data
+        hasLoadedOnce && <EmptyMajorsState searchQuery={searchQuery} />
+      )}
 
       {/* Display Classes */}
       {selectedMajor && (
         <Card className="mt-6">
           <CardContent className="p-6">
             <div className="space-y-4">
-              <h4 className="text-lg font-semibold">
-                Classes for{" "}
-                {allMajorData?.content?.find((m) => m.id === selectedMajor)
-                  ?.name || "Selected Major"}
-              </h4>
+              <div className="mb-6">
+                <p className="text-muted-foreground font-bold">
+                  Total Class: {allClassData?.totalElements || 0}
+                </p>
+              </div>
 
               {isLoadingClasses ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="text-sm text-muted-foreground">
-                    Loading classes...
-                  </div>
+                <div className="flex justify-center py-8">
+                  <Loading />
                 </div>
               ) : allClassData?.content && allClassData.content.length > 0 ? (
                 <div className="space-y-4">
-                  {allClassData.content.map((classItem: any) => (
+                  {allClassData.content.map((classItem: ClassModel) => (
                     <ClassCard
                       key={classItem.id}
-                      classNumber={classItem.code}
-                      degree={formatDegree(classItem.degree)}
-                      year={formatYearLevel(classItem.yearLevel)}
-                      academyYear={classItem.academyYear.toString()}
+                      classData={classItem}
                       onViewSchedule={() => handleViewSchedule(classItem)}
                       onAddSchedule={() => handleAddSchedule(classItem)}
                     />
                   ))}
                 </div>
               ) : (
-                <div className="flex items-center justify-center py-8">
-                  <div className="text-sm text-muted-foreground">
-                    No classes found for this major. Try selecting a different
-                    major.
-                  </div>
-                </div>
+                <EmptyClassesState
+                  majorName={
+                    allMajorData?.content?.find((m) => m.id === selectedMajor)
+                      ?.name
+                  }
+                />
               )}
             </div>
           </CardContent>
         </Card>
       )}
-
-      {/* Show message when no major is selected */}
-      {!selectedMajor &&
-        allMajorData?.content &&
-        allMajorData.content.length === 0 && (
-          <Card className="mt-6">
-            <CardContent className="p-6">
-              <div className="text-center py-8">
-                <div className="text-sm text-muted-foreground">
-                  No majors found. Try adjusting your search criteria.
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
     </div>
   );
 };

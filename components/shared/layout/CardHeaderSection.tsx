@@ -84,13 +84,19 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
 
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-start gap-4">
           {backHref ? (
-            <Link href={backHref}>
-              <ArrowLeft />
+            <Link
+              href={backHref}
+              className="text-black hover:text-black focus:outline-none"
+            >
+              <ArrowLeft className="w-5 h-5" />
             </Link>
           ) : back ? (
-            <Button variant="ghost" onClick={() => router.back()}>
-              <ArrowLeft />
-            </Button>
+            <button
+              onClick={() => router.back()}
+              className="text-black hover:text-black focus:outline-none"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
           ) : null}
           <h3 className="text-xl font-bold">{title}</h3>
         </div>

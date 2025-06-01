@@ -46,9 +46,14 @@ export const ROUTE = {
     EDIT_STUDENT: (id: string) => `/edit/${id}`,
   },
 
+  MANAGE_SCHEDULE: {
+    DEPARTMENT: "/manage-schedule/department",
+    DEPARTMENT_CLASS: "/manage-schedule/class",
+    ROOT: "/schedule",
+  },
+
   SCHEDULE: {
-    MANAGE: "/schedule/manage",
-    DEPARTMENT: "/schedule/department",
+    DEPARTMENT: "/manage-schedule/department",
     ROOT: "/schedule",
   },
 
@@ -70,17 +75,19 @@ export const ROUTE = {
 
   REQUESTS: "/requests",
 
+  REQUESTS_LIST: "/request-list",
+  STUDENT_DETAIL: "/student-detail",
+
   SETTINGS: {
     THEME: "/settings/theme",
   },
 
   PERMISSIONS: "/permissions",
-  PAYMENT :{
-    LIST :'/payment-list',  // student-payment
-    VIEW_PAYMENT : '/view-payment',
-    ADD_NEW_PAYMENT : '/add-new',  // payment
-    
-  }
+  PAYMENT: {
+    ADD_NEW_PAYMENT: "/add-new",
+    LIST: "/student-payment",
+    VIEW_PAYMENT: (id: string) => `/view-payment/${id}`,
+  },
 };
 
 export const sidebarRoutes = [
@@ -123,11 +130,7 @@ export const sidebarRoutes = [
       { title: "Students list", href: ROUTE.STUDENTS.LIST },
     ],
   },
-  {
-    title: "Manage schedule",
-    href: ROUTE.SCHEDULE.MANAGE,
-    icon: Calendar,
-  },
+
   {
     title: "Attendance",
     icon: Users,
@@ -136,6 +139,11 @@ export const sidebarRoutes = [
       { title: "Class Schedule", href: ROUTE.ATTENDANCE.CLASS_SCHEDULE },
       { title: "History Records", href: ROUTE.ATTENDANCE.HISTORY_RECORD },
     ],
+  },
+  {
+    title: "Manage schedule",
+    href: ROUTE.MANAGE_SCHEDULE.DEPARTMENT,
+    icon: Calendar,
   },
   {
     title: "Student score",

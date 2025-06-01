@@ -1,5 +1,9 @@
 export const PaymentTableHeader = [
   {
+    label: "#",
+    className: "",
+  },
+  {
     label: "Item",
     className: "",
   },
@@ -19,7 +23,7 @@ export const PaymentTableHeader = [
     label: "Date",
     className: "text-left",
   },
-   {
+  {
     label: "Comment",
     className: "text-left",
   },
@@ -46,10 +50,10 @@ export const PaymentTableHeaderList = [
     label: "Date",
     className: "text-left",
   },
-   {
+  {
     label: "Comment",
     className: "text-left",
   },
-
- 
 ];
+
+
