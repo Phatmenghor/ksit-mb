@@ -12,7 +12,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { DepartmentIcon } from "@/components/dashboard/schedule/department/department-icon";
 import DepartmentCard from "@/components/dashboard/schedule/department/department-card";
 import { AllDepartmentModel } from "@/model/master-data/department/all-department-model";
 import { useCallback, useEffect, useState } from "react";

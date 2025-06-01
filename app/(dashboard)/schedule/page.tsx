@@ -26,46 +26,47 @@ import { Button } from "@/components/ui/button";
 import {
   DAYS_OF_WEEK,
   DayType,
-  SemesterEnum,
-  SemesterEnumFilter,
   SemesterFilter,
   StatusEnum,
 } from "@/constants/constant";
 import Loading from "@/components/shared/loading";
 import { toast } from "sonner";
-import { getAllScheduleService } from "@/service/schedule/schedule.service";
+import {
+  getAllMyScheduleService,
+  getAllScheduleService,
+} from "@/service/schedule/schedule.service";
 import { AllScheduleModel } from "@/model/schedule/schedule/schedule-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
 import PaginationPage from "@/components/shared/pagination-page";
-import { ScheduleFilterModel } from "@/model/schedule/schedule/schedule-filter";
 import { useRouter } from "next/navigation";
-import { YearSelector } from "../../shared/year-selector";
+
+import { AllScheduleFilterModel } from "@/model/schedules/type-schedule-model";
+import { YearSelector } from "@/components/shared/year-selector";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../ui/select";
-import { AllScheduleFilterModel } from "@/model/schedules/type-schedule-model";
-import { set } from "date-fns";
+} from "@/components/ui/select";
 
-const ScheduleListPage = () => {
+const ScheduleAllPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [selectedDay, setSelectedDay] = useState<DayType | null>(null);
+  const [selectedDay, setSelectedDay] = useState<DayType>({
+    label: "All",
+    value: "ALL",
+  });
   const [scheduleData, setScheduleData] = useState<AllScheduleModel | null>(
     null
   );
   const [selectedSemester, setSelectedSemester] = useState<string>("ALL");
-
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear()
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [initialLoadDone, setInitialLoadDone] = useState<boolean>(false);
   const router = useRouter();
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -74,19 +75,17 @@ const ScheduleListPage = () => {
     async (filters: AllScheduleFilterModel) => {
       setIsLoading(true);
       try {
-        // Create base filters object
         const baseFilters = {
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
           academyYear: selectedYear,
-          semester: selectedSemester != "ALL" ? selectedSemester : undefined,
+          semester: selectedSemester !== "ALL" ? selectedSemester : undefined,
           dayOfWeek:
             selectedDay?.value !== "ALL" ? selectedDay?.value : undefined,
           ...filters,
         };
 
-        const response = await getAllScheduleService(baseFilters);
-
+        const response = await getAllMyScheduleService(baseFilters);
         setScheduleData(response);
       } catch (error) {
         console.error("Error fetching schedule data:", error);
@@ -99,33 +98,32 @@ const ScheduleListPage = () => {
     [debouncedSearchQuery, selectedDay, selectedYear, selectedSemester]
   );
 
+  // Fetch schedule when any filter changes
   useEffect(() => {
-    if (!initialLoadDone) {
-      const currentDay = DAYS_OF_WEEK.find((day) => day.value === "ALL");
-
-      if (currentDay) {
-        setSelectedDay(currentDay);
-      } else {
-        setSelectedDay(DAYS_OF_WEEK[0]);
-      }
-      setInitialLoadDone(true);
-    }
-  }, [initialLoadDone]);
-
-  useEffect(() => {
-    if (selectedDay && initialLoadDone) {
+    if (selectedDay) {
       fetchSchedule({ pageNo: currentPage });
     }
   }, [
     selectedDay,
+    selectedYear,
+    selectedSemester,
     debouncedSearchQuery,
     currentPage,
     fetchSchedule,
-    initialLoadDone,
   ]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleYearChange = (year: number) => {
+    setSelectedYear(year);
+    setCurrentPage(1);
+  };
+
+  const handleSemesterChange = (semester: string) => {
+    setSelectedSemester(semester);
     setCurrentPage(1);
   };
 
@@ -151,8 +149,7 @@ const ScheduleListPage = () => {
   };
 
   const handleCardClick = (scheduleId: number) => {
-    // Navigate to the class detail page with the schedule ID
-    router.push(`/manage-schedule/all-schedule/update/${scheduleId}`);
+    toast.info("Push to student list");
   };
 
   return (
@@ -170,12 +167,12 @@ const ScheduleListPage = () => {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Class</BreadcrumbPage>
+                <BreadcrumbPage>All Schedule</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
 
-          <h3 className="text-xl font-bold">Class Schedule List</h3>
+          <h3 className="text-xl font-bold">All Schedule</h3>
 
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="relative w-full md:w-1/2">
@@ -189,9 +186,9 @@ const ScheduleListPage = () => {
               />
             </div>
             <div className="flex items-center gap-2">
-              <YearSelector value={selectedYear} onChange={setSelectedYear} />
+              <YearSelector value={selectedYear} onChange={handleYearChange} />
               <Select
-                onValueChange={setSelectedSemester}
+                onValueChange={handleSemesterChange}
                 value={selectedSemester}
               >
                 <SelectTrigger>
@@ -285,7 +282,7 @@ const ScheduleListPage = () => {
                               </div>
                               <div className="text-sm font-medium">
                                 {sche.course.nameKH ||
-                                  sche.course.nameKH ||
+                                  sche.course.nameEn ||
                                   "- - -"}
                               </div>
                             </div>
@@ -293,53 +290,34 @@ const ScheduleListPage = () => {
 
                           <Separator className="my-2" />
 
-                          <div className="flex flex-wrap mt-3 ">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                <span>
-                                  {sche.startTime} - {sche.endTime}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Users className="h-4 w-4" />
-                                <span>
-                                  {(sche.teacher &&
-                                    (sche.teacher.englishFirstName ||
-                                    sche.teacher.englishLastName
-                                      ? `${
-                                          sche.teacher.englishFirstName || ""
-                                        } ${
-                                          sche.teacher.englishLastName || ""
-                                        }`.trim()
-                                      : sche.teacher.khmerFirstName ||
-                                        sche.teacher.khmerLastName
-                                      ? `${sche.teacher.khmerFirstName || ""} ${
-                                          sche.teacher.khmerLastName || ""
-                                        }`.trim()
-                                      : "- - -")) ||
-                                    "- - -"}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-4 w-4" />
-                                <span>{sche.room.name || "- - -"}</span>
-                              </div>
+                          <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              <span>
+                                {sche.startTime} - {sche.endTime}
+                              </span>
                             </div>
-
-                            <div className="ml-auto">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-amber-500 hover:bg-amber-50 hover:text-amber-600 hover:underline p-0 h-auto"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCardClick(sche.id);
-                                }}
-                              >
-                                <Pen className="h-4 w-4" />
-                                Edit
-                              </Button>
+                            <div className="flex items-center gap-1">
+                              <Users className="h-4 w-4" />
+                              <span>
+                                {(sche.teacher &&
+                                  (sche.teacher.englishFirstName ||
+                                  sche.teacher.englishLastName
+                                    ? `${sche.teacher.englishFirstName || ""} ${
+                                        sche.teacher.englishLastName || ""
+                                      }`.trim()
+                                    : sche.teacher.khmerFirstName ||
+                                      sche.teacher.khmerLastName
+                                    ? `${sche.teacher.khmerFirstName || ""} ${
+                                        sche.teacher.khmerLastName || ""
+                                      }`.trim()
+                                    : "- - -")) ||
+                                  "- - -"}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              <span>{sche.room.name || "- - -"}</span>
                             </div>
                           </div>
                         </div>
@@ -356,8 +334,8 @@ const ScheduleListPage = () => {
           </div>
         )}
 
-        {/* Pagination - FIXED to use handlePageChange */}
-        {!isLoading && scheduleData && (
+        {/* Pagination */}
+        {!isLoading && scheduleData && scheduleData.totalPages > 1 && (
           <div className="mt-8 flex justify-end">
             <PaginationPage
               currentPage={scheduleData.pageNo}
@@ -371,4 +349,4 @@ const ScheduleListPage = () => {
   );
 };
 
-export default ScheduleListPage;
+export default ScheduleAllPage;

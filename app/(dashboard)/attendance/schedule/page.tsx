@@ -24,7 +24,10 @@ import { Button } from "@/components/ui/button";
 import { DAYS_OF_WEEK, DayType, StatusEnum } from "@/constants/constant";
 import Loading from "@/components/shared/loading";
 import { toast } from "sonner";
-import { getAllScheduleService } from "@/service/schedule/schedule.service";
+import {
+  getAllMyScheduleService,
+  getAllScheduleService,
+} from "@/service/schedule/schedule.service";
 import { AllScheduleModel } from "@/model/schedule/schedule/schedule-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
@@ -35,13 +38,15 @@ import { useRouter } from "next/navigation";
 const ClassSchedulePage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [selectedDay, setSelectedDay] = useState<DayType | null>(null);
+  const [selectedDay, setSelectedDay] = useState<DayType>({
+    label: "All",
+    value: "ALL",
+  });
   const [scheduleData, setScheduleData] = useState<AllScheduleModel | null>(
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [initialLoadDone, setInitialLoadDone] = useState<boolean>(false);
   const router = useRouter();
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -50,15 +55,13 @@ const ClassSchedulePage = () => {
     async (filters: ScheduleFilterModel) => {
       setIsLoading(true);
       try {
-        // Always ensure dayOfWeek is included if selectedDay exists
-        const dayFilter = selectedDay?.name
-          ? { dayOfWeek: selectedDay.name }
-          : {};
-
-        const response = await getAllScheduleService({
+        const response = await getAllMyScheduleService({
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
-          ...dayFilter,
+          dayOfWeek:
+            selectedDay && selectedDay.value !== "ALL"
+              ? selectedDay.value
+              : undefined,
           ...filters,
         });
         setScheduleData(response);
@@ -73,32 +76,12 @@ const ClassSchedulePage = () => {
     [debouncedSearchQuery, selectedDay]
   );
 
+  // Fetch schedule when selectedDay, search query, or page changes
   useEffect(() => {
-    if (!initialLoadDone) {
-      const currentDate = new Date();
-      const currentDayId = currentDate.getDay();
-      const currentDay = DAYS_OF_WEEK.find((day) => day.id === currentDayId);
-
-      if (currentDay) {
-        setSelectedDay(currentDay);
-      } else {
-        setSelectedDay(DAYS_OF_WEEK[0]);
-      }
-      setInitialLoadDone(true);
-    }
-  }, [initialLoadDone]);
-
-  useEffect(() => {
-    if (selectedDay && initialLoadDone) {
+    if (selectedDay) {
       fetchSchedule({ pageNo: currentPage });
     }
-  }, [
-    selectedDay,
-    debouncedSearchQuery,
-    currentPage,
-    fetchSchedule,
-    initialLoadDone,
-  ]);
+  }, [selectedDay, debouncedSearchQuery, currentPage, fetchSchedule]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -185,12 +168,12 @@ const ClassSchedulePage = () => {
         >
           {DAYS_OF_WEEK.map((day) => (
             <Button
-              key={day.id}
-              variant={selectedDay?.id === day.id ? "default" : "outline"}
+              key={day.label}
+              variant={selectedDay?.value === day.value ? "default" : "outline"}
               className="whitespace-nowrap"
               onClick={() => handleDaySelect(day)}
             >
-              {day.displayName}
+              {day.label}
             </Button>
           ))}
         </div>
@@ -208,7 +191,7 @@ const ClassSchedulePage = () => {
       <div className="bg-white rounded-lg p-6 shadow-sm border">
         <div className="mb-4">
           <h2 className="text-lg font-bold">
-            {selectedDay ? `${selectedDay.displayName}` : ""}
+            {selectedDay ? `${selectedDay.label}` : ""}
           </h2>
           <p className="text-sm text-muted-foreground">
             Total Schedule: {scheduleData?.totalElements || 0}
@@ -242,9 +225,7 @@ const ClassSchedulePage = () => {
                                 </span>
                               </div>
                               <div className="text-sm font-medium">
-                                {sche.course.nameKH ||
-                                  sche.course.nameKH ||
-                                  "- - -"}
+                                {sche.course.nameKH || "- - -"}
                               </div>
                             </div>
                           </div>
@@ -289,14 +270,14 @@ const ClassSchedulePage = () => {
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                No classes scheduled for {selectedDay?.displayName}
+                No classes scheduled for {selectedDay?.label}
               </div>
             )}
           </div>
         )}
 
-        {/* Pagination - FIXED to use handlePageChange */}
-        {!isLoading && scheduleData && (
+        {/* Pagination */}
+        {!isLoading && scheduleData && scheduleData.totalPages > 1 && (
           <div className="mt-8 flex justify-end">
             <PaginationPage
               currentPage={scheduleData.pageNo}

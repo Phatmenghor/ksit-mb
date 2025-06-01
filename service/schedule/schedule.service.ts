@@ -13,6 +13,19 @@ export async function getAllScheduleService(data: ScheduleFilterModel) {
   }
 }
 
+export async function getAllMyScheduleService(data: ScheduleFilterModel) {
+  try {
+    const response = await axiosClientWithAuth.post(
+      `/v1/schedules/my-schedules`,
+      data
+    );
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching all my schedule:", error);
+    return null;
+  }
+}
+
 export async function getDetailScheduleService(scheduleId: number) {
   try {
     const response = await axiosClientWithAuth.get(
