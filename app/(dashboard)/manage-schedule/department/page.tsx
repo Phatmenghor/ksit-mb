@@ -1,10 +1,8 @@
 "use client";
-import Link from "next/link";
-import Image from "next/image";
-import { Search, ChevronRight } from "lucide-react";
+
+import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Breadcrumb,
@@ -14,7 +12,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { DepartmentIcon } from "@/components/dashboard/schedule/department/department-icon";
 import DepartmentCard from "@/components/dashboard/schedule/department/department-card";
 import { AllDepartmentModel } from "@/model/master-data/department/all-department-model";
 import { useCallback, useEffect, useState } from "react";
@@ -24,12 +21,15 @@ import { ROUTE } from "@/constants/routes";
 import { AllDepartmentFilterModel } from "@/model/master-data/department/type-department-model";
 import { Constants } from "@/constants/text-string";
 import PaginationPage from "@/components/shared/pagination-page";
+import { useRouter } from "next/navigation";
+import Loading from "@/components/shared/loading";
 
 export default function DepartmentListPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [allDepartmentData, setAllDepartmentData] =
     useState<AllDepartmentModel | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const router = useRouter();
 
   const loadDepartments = useCallback(
     async (param: AllDepartmentFilterModel) => {
@@ -63,8 +63,12 @@ export default function DepartmentListPage() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
+
+  function onClickDepartmentCard(departmentId: number) {
+    router.push(ROUTE.MANAGE_SCHEDULE.DEPARTMENT_CLASS + `/${departmentId}`);
+  }
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div>
       <Card>
         <CardContent className="p-6 space-y-2">
           <Breadcrumb>
@@ -94,28 +98,33 @@ export default function DepartmentListPage() {
         </CardContent>
       </Card>
 
-      <div className="bg-white rounded-lg p-6 shadow-sm border">
-        {/* <div className="mb-6">
-          <p className="text-muted-foreground">
-            Total Department: {allDepartmentData?.content.length}
-          </p>
-        </div> */}
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <div className="bg-white rounded-lg p-6 shadow-sm border mt-4">
+          <div className="mb-6">
+            <p className="text-muted-foreground font-bold">
+              Total Department: {allDepartmentData?.totalElements || 0}
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {allDepartmentData?.content?.length === 0 ? (
-            <p>No Department found</p>
-          ) : (
-            allDepartmentData?.content?.map((department) => (
-              <DepartmentCard
-                key={department.id}
-                name={department.name}
-                imageUrl={department.urlLogo}
-                imageName={department.name}
-              />
-            ))
-          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {allDepartmentData?.content?.length === 0 ? (
+              <p>No Department found</p>
+            ) : (
+              allDepartmentData?.content?.map((department) => (
+                <DepartmentCard
+                  onClick={() => onClickDepartmentCard(department.id)}
+                  key={department.id}
+                  name={department.name}
+                  imageUrl={department.urlLogo}
+                  imageName={department.name}
+                />
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      )}
       {!isLoading && allDepartmentData && (
         <div className="mt-4 flex justify-end">
           <PaginationPage

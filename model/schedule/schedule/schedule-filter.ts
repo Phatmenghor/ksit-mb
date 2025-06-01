@@ -3,6 +3,7 @@ export interface ScheduleFilterModel {
   classId?: number;
   roomId?: number;
   teacherId?: number;
+  studentId?: number;
   academyYear?: number;
   semester?: string;
   dayOfWeek?: string;

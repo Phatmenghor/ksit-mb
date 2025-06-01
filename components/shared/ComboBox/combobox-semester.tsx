@@ -57,6 +57,7 @@ export function ComboboxSelectSemester({
         search,
         pageSize: 10,
         pageNo: newPage,
+        academyYear: 2025,
         status: StatusEnum.ACTIVE,
       });
 

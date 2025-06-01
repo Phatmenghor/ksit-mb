@@ -17,7 +17,7 @@ export interface AllPaymentModel {
 }
 
 export interface PaymentModel {
-  id: string;
+  id: number;
   item: string;
   type: string;
   amount: string;
@@ -30,12 +30,12 @@ export interface PaymentModel {
 }
 
 export interface PaymentRequest {
-  item: string;              // required
-  type: string;         // required, use enum
-  amount?: string;           // optional
-  percentage?: string;       // optional
-  date: string;              // required, format: $date (ISO string)
-  status?: string;    // optional, use enum
-  commend?: string;          // optional
-  userId: number;            // required, integer
+  item: string;
+  type: string;
+  amount?: string;
+  percentage?: string;
+  date: string;
+  status?: string;
+  commend?: string;
+  userId: number;
 }

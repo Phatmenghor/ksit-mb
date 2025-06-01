@@ -18,10 +18,17 @@ import {
   Clock,
   Users,
   MapPin,
+  Edit,
+  Pen,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { DAYS_OF_WEEK, DayType, StatusEnum } from "@/constants/constant";
+import {
+  DAYS_OF_WEEK,
+  DayType,
+  SemesterFilter,
+  StatusEnum,
+} from "@/constants/constant";
 import Loading from "@/components/shared/loading";
 import { toast } from "sonner";
 import {
@@ -32,10 +39,19 @@ import { AllScheduleModel } from "@/model/schedule/schedule/schedule-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
 import PaginationPage from "@/components/shared/pagination-page";
-import { ScheduleFilterModel } from "@/model/schedule/schedule/schedule-filter";
 import { useRouter } from "next/navigation";
 
-const ClassSchedulePage = () => {
+import { AllScheduleFilterModel } from "@/model/schedules/type-schedule-model";
+import { YearSelector } from "@/components/shared/year-selector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const ScheduleAllPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [selectedDay, setSelectedDay] = useState<DayType>({
@@ -45,6 +61,10 @@ const ClassSchedulePage = () => {
   const [scheduleData, setScheduleData] = useState<AllScheduleModel | null>(
     null
   );
+  const [selectedSemester, setSelectedSemester] = useState<string>("ALL");
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const router = useRouter();
@@ -52,18 +72,20 @@ const ClassSchedulePage = () => {
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const fetchSchedule = useCallback(
-    async (filters: ScheduleFilterModel) => {
+    async (filters: AllScheduleFilterModel) => {
       setIsLoading(true);
       try {
-        const response = await getAllMyScheduleService({
+        const baseFilters = {
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
+          academyYear: selectedYear,
+          semester: selectedSemester !== "ALL" ? selectedSemester : undefined,
           dayOfWeek:
-            selectedDay && selectedDay.value !== "ALL"
-              ? selectedDay.value
-              : undefined,
+            selectedDay?.value !== "ALL" ? selectedDay?.value : undefined,
           ...filters,
-        });
+        };
+
+        const response = await getAllMyScheduleService(baseFilters);
         setScheduleData(response);
       } catch (error) {
         console.error("Error fetching schedule data:", error);
@@ -73,18 +95,35 @@ const ClassSchedulePage = () => {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, selectedDay]
+    [debouncedSearchQuery, selectedDay, selectedYear, selectedSemester]
   );
 
-  // Fetch schedule when selectedDay, search query, or page changes
+  // Fetch schedule when any filter changes
   useEffect(() => {
     if (selectedDay) {
       fetchSchedule({ pageNo: currentPage });
     }
-  }, [selectedDay, debouncedSearchQuery, currentPage, fetchSchedule]);
+  }, [
+    selectedDay,
+    selectedYear,
+    selectedSemester,
+    debouncedSearchQuery,
+    currentPage,
+    fetchSchedule,
+  ]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleYearChange = (year: number) => {
+    setSelectedYear(year);
+    setCurrentPage(1);
+  };
+
+  const handleSemesterChange = (semester: string) => {
+    setSelectedSemester(semester);
     setCurrentPage(1);
   };
 
@@ -110,8 +149,7 @@ const ClassSchedulePage = () => {
   };
 
   const handleCardClick = (scheduleId: number) => {
-    // Navigate to the class detail page with the schedule ID
-    router.push(`${ROUTE.ATTENDANCE.ATTENDANCE_CHECK}/${scheduleId}`);
+    toast.info("Push to student list");
   };
 
   return (
@@ -129,12 +167,12 @@ const ClassSchedulePage = () => {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Class</BreadcrumbPage>
+                <BreadcrumbPage>All Schedule</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
 
-          <h3 className="text-xl font-bold">Class Schedule List</h3>
+          <h3 className="text-xl font-bold">All Schedule</h3>
 
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="relative w-full md:w-1/2">
@@ -146,6 +184,24 @@ const ClassSchedulePage = () => {
                 value={searchQuery}
                 onChange={handleSearchChange}
               />
+            </div>
+            <div className="flex items-center gap-2">
+              <YearSelector value={selectedYear} onChange={handleYearChange} />
+              <Select
+                onValueChange={handleSemesterChange}
+                value={selectedSemester}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a semester" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SemesterFilter.map((semester) => (
+                    <SelectItem key={semester.value} value={semester.value}>
+                      {semester.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>
@@ -168,7 +224,7 @@ const ClassSchedulePage = () => {
         >
           {DAYS_OF_WEEK.map((day) => (
             <Button
-              key={day.label}
+              key={day.value}
               variant={selectedDay?.value === day.value ? "default" : "outline"}
               className="whitespace-nowrap"
               onClick={() => handleDaySelect(day)}
@@ -225,7 +281,9 @@ const ClassSchedulePage = () => {
                                 </span>
                               </div>
                               <div className="text-sm font-medium">
-                                {sche.course.nameKH || "- - -"}
+                                {sche.course.nameKH ||
+                                  sche.course.nameEn ||
+                                  "- - -"}
                               </div>
                             </div>
                           </div>
@@ -270,7 +328,7 @@ const ClassSchedulePage = () => {
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                No classes scheduled for {selectedDay?.label}
+                No classes scheduled for {selectedDay?.label || "this day"}.
               </div>
             )}
           </div>
@@ -291,4 +349,4 @@ const ClassSchedulePage = () => {
   );
 };
 
-export default ClassSchedulePage;
+export default ScheduleAllPage;

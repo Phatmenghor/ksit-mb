@@ -8,13 +8,18 @@ function DepartmentCard({
   name,
   imageUrl,
   imageName,
+  onClick,
 }: {
   name: string;
   imageUrl: string;
   imageName: string;
+  onClick?: () => void;
 }) {
   return (
-    <Card className="flex items-center justify-between p-4 hover:bg-muted/20 transition-colors">
+    <Card
+      onClick={onClick}
+      className="flex items-center justify-between p-4 hover:bg-muted/20 transition-colors cursor-pointer"
+    >
       <div className="flex items-center gap-4">
         <DepartmentIcon imageUrl={imageUrl} imageName={imageName} />
         <div>
@@ -36,4 +41,5 @@ function DepartmentCard({
     </Card>
   );
 }
+
 export default DepartmentCard;

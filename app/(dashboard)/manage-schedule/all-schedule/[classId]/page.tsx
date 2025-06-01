@@ -18,10 +18,17 @@ import {
   Clock,
   Users,
   MapPin,
+  Edit,
+  Pen,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { DAYS_OF_WEEK, DayType, StatusEnum } from "@/constants/constant";
+import {
+  DAYS_OF_WEEK,
+  DayType,
+  SemesterFilter,
+  StatusEnum,
+} from "@/constants/constant";
 import Loading from "@/components/shared/loading";
 import { toast } from "sonner";
 import { getAllScheduleService } from "@/service/schedule/schedule.service";
@@ -29,15 +36,32 @@ import { AllScheduleModel } from "@/model/schedule/schedule/schedule-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
 import PaginationPage from "@/components/shared/pagination-page";
-import { ScheduleFilterModel } from "@/model/schedule/schedule/schedule-filter";
 import { useRouter } from "next/navigation";
 
-const ClassSchedulePage = () => {
+import { AllScheduleFilterModel } from "@/model/schedules/type-schedule-model";
+import { YearSelector } from "@/components/shared/year-selector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const AllSchedulePage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [selectedDay, setSelectedDay] = useState<DayType | null>(null);
+  const [selectedDay, setSelectedDay] = useState<DayType>({
+    label: "All",
+    value: "ALL",
+  });
   const [scheduleData, setScheduleData] = useState<AllScheduleModel | null>(
     null
+  );
+  const [selectedSemester, setSelectedSemester] = useState<string>("ALL");
+
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -47,20 +71,22 @@ const ClassSchedulePage = () => {
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const fetchSchedule = useCallback(
-    async (filters: ScheduleFilterModel) => {
+    async (filters: AllScheduleFilterModel) => {
       setIsLoading(true);
       try {
-        // Always ensure dayOfWeek is included if selectedDay exists
-        const dayFilter = selectedDay?.name
-          ? { dayOfWeek: selectedDay.name }
-          : {};
-
-        const response = await getAllScheduleService({
+        // Create base filters object
+        const baseFilters = {
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
-          ...dayFilter,
+          academyYear: selectedYear,
+          semester: selectedSemester != "ALL" ? selectedSemester : undefined,
+          dayOfWeek:
+            selectedDay?.value !== "ALL" ? selectedDay?.value : undefined,
           ...filters,
-        });
+        };
+
+        const response = await getAllScheduleService(baseFilters);
+
         setScheduleData(response);
       } catch (error) {
         console.error("Error fetching schedule data:", error);
@@ -70,23 +96,8 @@ const ClassSchedulePage = () => {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, selectedDay]
+    [debouncedSearchQuery, selectedDay, selectedYear, selectedSemester]
   );
-
-  useEffect(() => {
-    if (!initialLoadDone) {
-      const currentDate = new Date();
-      const currentDayId = currentDate.getDay();
-      const currentDay = DAYS_OF_WEEK.find((day) => day.id === currentDayId);
-
-      if (currentDay) {
-        setSelectedDay(currentDay);
-      } else {
-        setSelectedDay(DAYS_OF_WEEK[0]);
-      }
-      setInitialLoadDone(true);
-    }
-  }, [initialLoadDone]);
 
   useEffect(() => {
     if (selectedDay && initialLoadDone) {
@@ -128,7 +139,8 @@ const ClassSchedulePage = () => {
 
   const handleCardClick = (scheduleId: number) => {
     // Navigate to the class detail page with the schedule ID
-    router.push(`${ROUTE.ATTENDANCE.ATTENDANCE_CHECK}/${scheduleId}`);
+    toast.success("Navigating to page score makara");
+    router.push(`/manage-schedule/all-schedule/update/${scheduleId}`);
   };
 
   return (
@@ -164,6 +176,24 @@ const ClassSchedulePage = () => {
                 onChange={handleSearchChange}
               />
             </div>
+            <div className="flex items-center gap-2">
+              <YearSelector value={selectedYear} onChange={setSelectedYear} />
+              <Select
+                onValueChange={setSelectedSemester}
+                value={selectedSemester}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a semester" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SemesterFilter.map((semester) => (
+                    <SelectItem key={semester.value} value={semester.value}>
+                      {semester.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -185,12 +215,12 @@ const ClassSchedulePage = () => {
         >
           {DAYS_OF_WEEK.map((day) => (
             <Button
-              key={day.id}
-              variant={selectedDay?.id === day.id ? "default" : "outline"}
+              key={day.value}
+              variant={selectedDay?.value === day.value ? "default" : "outline"}
               className="whitespace-nowrap"
               onClick={() => handleDaySelect(day)}
             >
-              {day.displayName}
+              {day.label}
             </Button>
           ))}
         </div>
@@ -208,7 +238,7 @@ const ClassSchedulePage = () => {
       <div className="bg-white rounded-lg p-6 shadow-sm border">
         <div className="mb-4">
           <h2 className="text-lg font-bold">
-            {selectedDay ? `${selectedDay.displayName}` : ""}
+            {selectedDay ? `${selectedDay.label}` : ""}
           </h2>
           <p className="text-sm text-muted-foreground">
             Total Schedule: {scheduleData?.totalElements || 0}
@@ -231,7 +261,7 @@ const ClassSchedulePage = () => {
                       <div>
                         <div className="p-4 flex-1">
                           <div className="flex gap-4">
-                            <div className="flex border-l-4 border-amber-500 rounded-xl" />
+                            <div className="flex border-l-[2px] my-1 border-amber-500 rounded-xl " />
                             <div className="flex flex-col flex-1">
                               <div className="flex items-center gap-1 justify-between">
                                 <div className="text-sm font-medium text-amber-500">
@@ -251,34 +281,53 @@ const ClassSchedulePage = () => {
 
                           <Separator className="my-2" />
 
-                          <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              <span>
-                                {sche.startTime} - {sche.endTime}
-                              </span>
+                          <div className="flex flex-wrap mt-3 ">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                <span>
+                                  {sche.startTime} - {sche.endTime}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Users className="h-4 w-4" />
+                                <span>
+                                  {(sche.teacher &&
+                                    (sche.teacher.englishFirstName ||
+                                    sche.teacher.englishLastName
+                                      ? `${
+                                          sche.teacher.englishFirstName || ""
+                                        } ${
+                                          sche.teacher.englishLastName || ""
+                                        }`.trim()
+                                      : sche.teacher.khmerFirstName ||
+                                        sche.teacher.khmerLastName
+                                      ? `${sche.teacher.khmerFirstName || ""} ${
+                                          sche.teacher.khmerLastName || ""
+                                        }`.trim()
+                                      : "- - -")) ||
+                                    "- - -"}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-4 w-4" />
+                                <span>{sche.room.name || "- - -"}</span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Users className="h-4 w-4" />
-                              <span>
-                                {(sche.teacher &&
-                                  (sche.teacher.englishFirstName ||
-                                  sche.teacher.englishLastName
-                                    ? `${sche.teacher.englishFirstName || ""} ${
-                                        sche.teacher.englishLastName || ""
-                                      }`.trim()
-                                    : sche.teacher.khmerFirstName ||
-                                      sche.teacher.khmerLastName
-                                    ? `${sche.teacher.khmerFirstName || ""} ${
-                                        sche.teacher.khmerLastName || ""
-                                      }`.trim()
-                                    : "- - -")) ||
-                                  "- - -"}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
-                              <span>{sche.room.name || "- - -"}</span>
+
+                            <div className="ml-auto">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-amber-500 hover:bg-amber-50 hover:text-amber-600 hover:underline p-0 h-auto"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCardClick(sche.id);
+                                }}
+                              >
+                                <Pen className="h-4 w-4" />
+                                Edit
+                              </Button>
                             </div>
                           </div>
                         </div>
@@ -289,7 +338,7 @@ const ClassSchedulePage = () => {
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                No classes scheduled for {selectedDay?.displayName}
+                No classes scheduled for {selectedDay?.label || "this day"}.
               </div>
             )}
           </div>
@@ -310,4 +359,4 @@ const ClassSchedulePage = () => {
   );
 };
 
-export default ClassSchedulePage;
+export default AllSchedulePage;

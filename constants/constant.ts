@@ -1,4 +1,12 @@
-import { AlertCircle, Archive, Check, CheckCircle, Clock, Logs, X } from "lucide-react";
+import {
+  AlertCircle,
+  Archive,
+  Check,
+  CheckCircle,
+  Clock,
+  Logs,
+  X,
+} from "lucide-react";
 
 //Major
 export const majors = [
@@ -87,6 +95,13 @@ export enum SemesterEnum {
   SEMESTER_1 = "SEMESTER_1",
   SEMESTER_2 = "SEMESTER_2",
 }
+
+export enum SemesterEnumFilter {
+  All_SEMESTER = "All_SEMESTER",
+  SEMESTER_1 = "SEMESTER_1",
+  SEMESTER_2 = "SEMESTER_2",
+}
+
 export enum DayEnum {
   MONDAY = "Monday",
   TUESDAY = "Tuesday",
@@ -127,54 +142,50 @@ export const educationLevels = [
 ];
 
 export interface DayType {
-  displayName: string;
-  name: string;
-  id: number;
+  label: string;
+  value: string;
 }
 
-export const DAYS_OF_WEEK = [
+export const DAYS_OF_WEEK: DayType[] = [
   {
-    displayName: "Monday",
-    name: "MONDAY",
-    id: 1,
+    label: "All",
+    value: "ALL",
   },
   {
-    displayName: "Tuesday",
-    name: "TUESDAY",
-    id: 2,
+    label: "Monday",
+    value: "MONDAY",
   },
   {
-    displayName: "Wednesday",
-    name: "WEDNESDAY",
-    id: 3,
+    label: "Tuesday",
+    value: "TUESDAY",
   },
   {
-    displayName: "Thursday",
-    name: "THURSDAY",
-    id: 4,
+    label: "Wednesday",
+    value: "WEDNESDAY",
   },
   {
-    displayName: "Friday",
-    name: "FRIDAY",
-    id: 5,
+    label: "Thursday",
+    value: "THURSDAY",
   },
   {
-    displayName: "Saturday",
-    name: "SATURDAY",
-    id: 6,
+    label: "Friday",
+    value: "FRIDAY",
   },
   {
-    displayName: "Sunday",
-    name: "SUNDAY",
-    id: 0,
+    label: "Saturday",
+    value: "SATURDAY",
+  },
+  {
+    label: "Sunday",
+    value: "SUNDAY",
   },
 ];
 
-export enum TYPE {
-  FREE = "Free",
-  PAY = "Pay",
-  SCHOLArSHIP = "Scholarship",
-}
+export const paymentTypes = [
+  { label: "Free", value: "FREE" },
+  { label: "Pay", value: "PAY" },
+  { label: "Scholarship", value: "SCHOLARSHIP" },
+];
 
 export enum Mode {
   VIEW = "VIEW",
@@ -223,3 +234,9 @@ export interface RequestListType {
   id: number;
   icon: React.ComponentType<{ className?: string }>;
 }
+
+export const SemesterFilter = [
+  { value: "ALL", label: "All Semeter" },
+  { value: "SEMESTER_1", label: "Semeter 1" },
+  { value: "SEMESTER_2", label: "Semeter 2" },
+];
