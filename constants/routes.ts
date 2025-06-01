@@ -46,9 +46,14 @@ export const ROUTE = {
     EDIT_STUDENT: (id: string) => `/edit/${id}`,
   },
 
+  MANAGE_SCHEDULE: {
+    DEPARTMENT: "/manage-schedule/department",
+    DEPARTMENT_CLASS: "/manage-schedule/class",
+    ROOT: "/schedule",
+  },
+
   SCHEDULE: {
-    MANAGE: "/schedule/manage",
-    DEPARTMENT: "/schedule/department",
+    DEPARTMENT: "/manage-schedule/department",
     ROOT: "/schedule",
   },
 
@@ -123,7 +128,7 @@ export const sidebarRoutes = [
   },
   {
     title: "Manage schedule",
-    href: ROUTE.SCHEDULE.MANAGE,
+    href: ROUTE.MANAGE_SCHEDULE.DEPARTMENT,
     icon: Calendar,
   },
   {

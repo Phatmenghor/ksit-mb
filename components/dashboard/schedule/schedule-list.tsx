@@ -18,6 +18,8 @@ import {
   Clock,
   Users,
   MapPin,
+  Edit,
+  Pen,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,6 +28,7 @@ import {
   DayType,
   SemesterEnum,
   SemesterEnumFilter,
+  SemesterFilter,
   StatusEnum,
 } from "@/constants/constant";
 import Loading from "@/components/shared/loading";
@@ -37,15 +40,16 @@ import { Separator } from "@/components/ui/separator";
 import PaginationPage from "@/components/shared/pagination-page";
 import { ScheduleFilterModel } from "@/model/schedule/schedule/schedule-filter";
 import { useRouter } from "next/navigation";
-import { YearSelector } from "./year-selector";
+import { YearSelector } from "../../shared/year-selector";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
+} from "../../ui/select";
 import { AllScheduleFilterModel } from "@/model/schedules/type-schedule-model";
+import { set } from "date-fns";
 
 const ScheduleListPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -54,8 +58,8 @@ const ScheduleListPage = () => {
   const [scheduleData, setScheduleData] = useState<AllScheduleModel | null>(
     null
   );
-  const [selectedSemester, setSelectedSemester] =
-    useState<SemesterEnumFilter | null>(null);
+  const [selectedSemester, setSelectedSemester] = useState<string>("ALL");
+
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear()
   );
@@ -70,28 +74,18 @@ const ScheduleListPage = () => {
     async (filters: AllScheduleFilterModel) => {
       setIsLoading(true);
       try {
-        // Always ensure dayOfWeek is included if selectedDay exists
-        let response;
-        const dayFilter = selectedDay?.name
-          ? { dayOfWeek: selectedDay.name }
-          : {};
-        if (selectedDay?.id === 7) {
-          response = await getAllScheduleService({
-            search: debouncedSearchQuery,
-            status: StatusEnum.ACTIVE,
-            academyYear: selectedYear,
-            // semester: selectedSemester.
-          });
-        } else {
-          response = await getAllScheduleService({
-            search: debouncedSearchQuery,
-            status: StatusEnum.ACTIVE,
-            // academyYear: selectedYear,
-            // ...(selectedSemester && { semester: selectedSemester }),
-            ...dayFilter,
-            ...filters,
-          });
-        }
+        // Create base filters object
+        const baseFilters = {
+          search: debouncedSearchQuery,
+          status: StatusEnum.ACTIVE,
+          academyYear: selectedYear,
+          semester: selectedSemester != "ALL" ? selectedSemester : undefined,
+          dayOfWeek:
+            selectedDay?.value !== "ALL" ? selectedDay?.value : undefined,
+          ...filters,
+        };
+
+        const response = await getAllScheduleService(baseFilters);
 
         setScheduleData(response);
       } catch (error) {
@@ -107,7 +101,7 @@ const ScheduleListPage = () => {
 
   useEffect(() => {
     if (!initialLoadDone) {
-      const currentDay = DAYS_OF_WEEK.find((day) => day.id === 7);
+      const currentDay = DAYS_OF_WEEK.find((day) => day.value === "ALL");
 
       if (currentDay) {
         setSelectedDay(currentDay);
@@ -158,7 +152,7 @@ const ScheduleListPage = () => {
 
   const handleCardClick = (scheduleId: number) => {
     // Navigate to the class detail page with the schedule ID
-    router.push(`${ROUTE.ATTENDANCE.ATTENDANCE_CHECK}/${scheduleId}`);
+    router.push(`/manage-schedule/all-schedule/update/${scheduleId}`);
   };
 
   return (
@@ -197,28 +191,18 @@ const ScheduleListPage = () => {
             <div className="flex items-center gap-2">
               <YearSelector value={selectedYear} onChange={setSelectedYear} />
               <Select
-                onValueChange={(value) => {
-                  if (value === SemesterEnumFilter.All_SEMESTER) {
-                    setSelectedSemester(null);
-                  } else {
-                    setSelectedSemester(value as SemesterEnumFilter);
-                  }
-                }}
-                value={selectedSemester || SemesterEnumFilter.All_SEMESTER}
+                onValueChange={setSelectedSemester}
+                value={selectedSemester}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a semester" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={SemesterEnumFilter.All_SEMESTER}>
-                    All Semester
-                  </SelectItem>
-                  <SelectItem value={SemesterEnumFilter.SEMESTER_1}>
-                    Semester 1
-                  </SelectItem>
-                  <SelectItem value={SemesterEnumFilter.SEMESTER_2}>
-                    Semester 2
-                  </SelectItem>
+                  {SemesterFilter.map((semester) => (
+                    <SelectItem key={semester.value} value={semester.value}>
+                      {semester.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -243,12 +227,12 @@ const ScheduleListPage = () => {
         >
           {DAYS_OF_WEEK.map((day) => (
             <Button
-              key={day.id}
-              variant={selectedDay?.id === day.id ? "default" : "outline"}
+              key={day.value}
+              variant={selectedDay?.value === day.value ? "default" : "outline"}
               className="whitespace-nowrap"
               onClick={() => handleDaySelect(day)}
             >
-              {day.displayName}
+              {day.label}
             </Button>
           ))}
         </div>
@@ -266,7 +250,7 @@ const ScheduleListPage = () => {
       <div className="bg-white rounded-lg p-6 shadow-sm border">
         <div className="mb-4">
           <h2 className="text-lg font-bold">
-            {selectedDay ? `${selectedDay.displayName}` : ""}
+            {selectedDay ? `${selectedDay.label}` : ""}
           </h2>
           <p className="text-sm text-muted-foreground">
             Total Schedule: {scheduleData?.totalElements || 0}
@@ -309,34 +293,53 @@ const ScheduleListPage = () => {
 
                           <Separator className="my-2" />
 
-                          <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              <span>
-                                {sche.startTime} - {sche.endTime}
-                              </span>
+                          <div className="flex flex-wrap mt-3 ">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                <span>
+                                  {sche.startTime} - {sche.endTime}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Users className="h-4 w-4" />
+                                <span>
+                                  {(sche.teacher &&
+                                    (sche.teacher.englishFirstName ||
+                                    sche.teacher.englishLastName
+                                      ? `${
+                                          sche.teacher.englishFirstName || ""
+                                        } ${
+                                          sche.teacher.englishLastName || ""
+                                        }`.trim()
+                                      : sche.teacher.khmerFirstName ||
+                                        sche.teacher.khmerLastName
+                                      ? `${sche.teacher.khmerFirstName || ""} ${
+                                          sche.teacher.khmerLastName || ""
+                                        }`.trim()
+                                      : "- - -")) ||
+                                    "- - -"}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-4 w-4" />
+                                <span>{sche.room.name || "- - -"}</span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Users className="h-4 w-4" />
-                              <span>
-                                {(sche.teacher &&
-                                  (sche.teacher.englishFirstName ||
-                                  sche.teacher.englishLastName
-                                    ? `${sche.teacher.englishFirstName || ""} ${
-                                        sche.teacher.englishLastName || ""
-                                      }`.trim()
-                                    : sche.teacher.khmerFirstName ||
-                                      sche.teacher.khmerLastName
-                                    ? `${sche.teacher.khmerFirstName || ""} ${
-                                        sche.teacher.khmerLastName || ""
-                                      }`.trim()
-                                    : "- - -")) ||
-                                  "- - -"}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
-                              <span>{sche.room.name || "- - -"}</span>
+
+                            <div className="ml-auto">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-amber-500 hover:bg-amber-50 hover:text-amber-600 hover:underline p-0 h-auto"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCardClick(sche.id);
+                                }}
+                              >
+                                <Pen className="h-4 w-4" />
+                                Edit
+                              </Button>
                             </div>
                           </div>
                         </div>
@@ -347,7 +350,7 @@ const ScheduleListPage = () => {
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                No classes scheduled for {selectedDay?.displayName}
+                No classes scheduled for {selectedDay?.label || "this day"}.
               </div>
             )}
           </div>

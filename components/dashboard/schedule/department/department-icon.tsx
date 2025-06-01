@@ -16,9 +16,9 @@ export function DepartmentIcon({
       <Avatar className="h-12 w-12">
         <AvatarImage
           src={imageUrl ? `${baseAPI.BASE_IMAGE}${imageUrl}` : baseAPI.NO_IMAGE}
-          //   alt={dept.name}
+          alt={imageName}
         />
-        <AvatarFallback>{imageName}</AvatarFallback>
+        <AvatarFallback>{imageName?.charAt(0)}</AvatarFallback>
       </Avatar>
     </div>
   );

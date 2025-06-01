@@ -1,4 +1,4 @@
-import ScheduleListPage from "@/components/shared/schedule-list";
+import ScheduleListPage from "@/components/dashboard/schedule/schedule-list";
 
 export default function ScheduleListpage() {
   return (

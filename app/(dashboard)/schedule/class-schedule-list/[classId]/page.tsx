@@ -1,9 +1,0 @@
-import ScheduleListPage from "@/components/shared/schedule-list";
-
-export default function ClassScheduleListPage() {
-  return (
-    <div>
-      <ScheduleListPage />
-    </div>
-  );
-}

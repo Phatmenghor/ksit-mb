@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,17 +25,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { ROUTE } from "@/constants/routes";
-import { ComboboxSelectDepartment } from "@/components/shared/ComboBox/combobox-department";
-import { ComboboxSelectSubject } from "@/components/shared/ComboBox/combobox-subject-type";
-import { ComboboxSelectInstructor } from "@/components/shared/ComboBox/combobox-instructor";
-import { DepartmentModel } from "@/model/master-data/department/all-department-model";
-import { SubjectModel } from "@/model/master-data/subject/all-subject-model";
-import { YearSelector } from "@/components/shared/year-selector";
-import { ComboboxSelectRoom } from "@/components/shared/ComboBox/combobox-room";
-import { RoomModel } from "@/model/master-data/room/all-room-model";
-import { ClassModel } from "@/model/master-data/class/all-class-model";
-import { SemesterModel } from "@/model/master-data/semester/semester-model";
 import {
   Select,
   SelectContent,
@@ -43,23 +32,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DayEnum, SemesterEnum } from "@/constants/constant";
+import { ROUTE } from "@/constants/routes";
+import { ComboboxSelectDepartment } from "@/components/shared/ComboBox/combobox-department";
+import { ComboboxSelectSubject } from "@/components/shared/ComboBox/combobox-subject-type";
+import { ComboboxSelectInstructor } from "@/components/shared/ComboBox/combobox-instructor";
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
+import { ComboboxSelectRoom } from "@/components/shared/ComboBox/combobox-room";
+import { YearSelector } from "@/components/shared/year-selector";
+import { DepartmentModel } from "@/model/master-data/department/all-department-model";
+import { SubjectModel } from "@/model/master-data/subject/all-subject-model";
+import { RoomModel } from "@/model/master-data/room/all-room-model";
+import { ClassModel } from "@/model/master-data/class/all-class-model";
+import { SemesterModel } from "@/model/master-data/semester/semester-model";
+import { StaffModel } from "@/model/user/staff/staff.respond.model";
+import { DayEnum, StatusEnum } from "@/constants/constant";
+import { Constants } from "@/constants/text-string";
 import { createScheduleService } from "@/service/schedule/schedule.service";
 import { toast } from "sonner";
-
-import { ComboboxSelectSemester } from "@/components/shared/ComboBox/combobox-semester";
-import { Constants } from "@/constants/text-string";
 import { useRouter } from "next/navigation";
-import { StaffModel } from "@/model/user/staff/staff.respond.model";
-
-interface DayModel {
-  id: string;
-  name: string;
-}
+import { getAllSemesterService } from "@/service/master-data/semester.service";
 
 const formSchema = z.object({
-  classId: z.number().min(1, "Department is required"),
+  classId: z.number().min(1, "Class is required"),
   departmentId: z.number().min(1, "Department is required"),
   instructorId: z.number().min(1, "Instructor is required"),
   subjectTypeId: z.number().min(1, "Subject type is required"),
@@ -69,25 +63,26 @@ const formSchema = z.object({
   }),
   startTime: z.string().min(1, "Please select start time"),
   endTime: z.string().min(1, "Please select end time"),
-  semesterId: z.number().min(1, "Subject type is required"),
-  roomId: z.number().min(1, "Subject type is required"),
+  semesterId: z.number().min(1, "Semester is required"),
+  roomId: z.number().min(1, "Room is required"),
   status: z.literal(Constants.ACTIVE),
 });
 
 export default function AddSchedule() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingSemesters, setIsLoadingSemesters] = useState(false);
   const [selectedDepartment, setSelectedDepartment] =
     useState<DepartmentModel | null>(null);
-  const [selectedSemester, setSelectedSemester] =
-    useState<SemesterModel | null>(null);
   const [selectedSubjectType, setSelectedSubjectType] =
     useState<SubjectModel | null>(null);
   const [selectedInstructor, setSelectedInstructor] =
     useState<StaffModel | null>(null);
   const [selectedClass, setSelectedClass] = useState<ClassModel | null>(null);
-  const [selectedDay, setSelectedDay] = useState<DayModel | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<RoomModel | null>(null);
+  const [semesters, setSemesters] = useState<SemesterModel[]>([]);
+
   const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -105,11 +100,40 @@ export default function AddSchedule() {
     },
   });
 
+  const watchedAcademyYear = form.watch("academyYear");
+
+  // Fetch semesters when academy year changes
+  useEffect(() => {
+    const fetchSemesters = async () => {
+      if (!watchedAcademyYear) return;
+
+      setIsLoadingSemesters(true);
+      try {
+        const result = await getAllSemesterService({
+          academyYear: watchedAcademyYear,
+          status: StatusEnum.ACTIVE,
+        });
+
+        if (result?.content) {
+          setSemesters(result.content);
+        }
+      } catch (error) {
+        console.error("Error fetching semesters:", error);
+        toast.error("Failed to load semesters");
+      } finally {
+        setIsLoadingSemesters(false);
+      }
+    };
+
+    fetchSemesters();
+
+    // Reset semester selection when academy year changes
+    form.setValue("semesterId", 0);
+  }, [watchedAcademyYear, form]);
+
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
 
-    console.log(values);
-    // return 0;
     try {
       const scheduleData = {
         startTime: values.startTime,
@@ -123,82 +147,54 @@ export default function AddSchedule() {
         semesterId: values.semesterId,
         status: values.status,
       };
-      console.log(scheduleData);
-      return;
-      await createScheduleService(scheduleData);
-      toast.success("Schedule created successfully");
-      // router.replace(ROUTE.COURSES.INDEX);
+
+      const response = await createScheduleService(scheduleData);
+
+      if (response) {
+        toast.success("Schedule created successfully");
+        router.back();
+      } else {
+        toast.error("Failed to create schedule");
+      }
     } catch (error: any) {
       toast.error(error.message || "Failed to create schedule");
-      console.error("Error submitting course:", error);
+      console.error("Error creating schedule:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDiscard = () => {
-    form.reset();
-    setSelectedDepartment(null);
-    setSelectedSubjectType(null);
-    setSelectedInstructor(null);
-    setSelectedClass(null);
-    setSelectedDay(null);
-    setSelectedRoom(null);
-  };
-
   const handleDepartmentChange = (department: DepartmentModel) => {
     setSelectedDepartment(department);
-    form.setValue("departmentId", department.id, {
-      shouldValidate: true,
-    });
-  };
-
-  const handleSemesterChange = (semester: SemesterModel) => {
-    setSelectedSemester(semester);
-    form.setValue("semesterId", semester.id, {
-      shouldValidate: true,
-    });
+    form.setValue("departmentId", department.id, { shouldValidate: true });
   };
 
   const handleSubjectTypeChange = (subjectType: SubjectModel) => {
     setSelectedSubjectType(subjectType);
-    form.setValue("subjectTypeId", subjectType.id, {
-      shouldValidate: true,
-    });
+    form.setValue("subjectTypeId", subjectType.id, { shouldValidate: true });
   };
 
   const handleInstructorChange = (instructor: StaffModel) => {
     setSelectedInstructor(instructor);
-    form.setValue("instructorId", instructor.id, {
-      shouldValidate: true,
-    });
+    form.setValue("instructorId", instructor.id, { shouldValidate: true });
   };
 
   const handleClassChange = (classData: ClassModel) => {
     setSelectedClass(classData);
-    form.setValue("classId", classData.id, {
-      shouldValidate: true,
-    });
-  };
-
-  const handleDayChange = (day: DayModel) => {
-    setSelectedDay(day);
-    form.setValue("day", day.id, {
-      shouldValidate: true,
-    });
+    form.setValue("classId", classData.id, { shouldValidate: true });
   };
 
   const handleRoomChange = (room: RoomModel) => {
     setSelectedRoom(room);
-    form.setValue("roomId", room.id, {
-      shouldValidate: true,
-    });
+    form.setValue("roomId", room.id, { shouldValidate: true });
   };
 
   const handleYearChange = (year: number) => {
-    form.setValue("academyYear", year, {
-      shouldValidate: true,
-    });
+    form.setValue("academyYear", year, { shouldValidate: true });
+  };
+
+  const handleBackNavigation = () => {
+    router.back();
   };
 
   return (
@@ -231,8 +227,14 @@ export default function AddSchedule() {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+
           <div className="flex items-center gap-3 mb-6">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleBackNavigation}
+            >
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <h1 className="text-2xl font-semibold text-gray-900">
@@ -247,7 +249,7 @@ export default function AddSchedule() {
                 <div className="text-lg font-semibold text-gray-900">
                   Class 2504fsdfsfds
                 </div>
-                <div className=" gap-6 text-sm text-gray-600">
+                <div className="gap-6 text-sm text-gray-600">
                   <div>
                     <span className="font-medium">Degree:</span> Associate
                     Degree
@@ -279,7 +281,7 @@ export default function AddSchedule() {
                   <FormField
                     control={form.control}
                     name="classId"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormLabel>
                           Select Class <span className="text-red-500">*</span>
@@ -298,7 +300,7 @@ export default function AddSchedule() {
                   <FormField
                     control={form.control}
                     name="departmentId"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormLabel>
                           Department <span className="text-red-500">*</span>
@@ -317,10 +319,10 @@ export default function AddSchedule() {
                   <FormField
                     control={form.control}
                     name="subjectTypeId"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormLabel>
-                          Subject type <span className="text-red-500">*</span>
+                          Subject Type <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <ComboboxSelectSubject
@@ -360,12 +362,39 @@ export default function AddSchedule() {
                         <FormLabel>
                           Semester <span className="text-red-500">*</span>
                         </FormLabel>
-                        <FormControl>
-                          <ComboboxSelectSemester
-                            dataSelect={selectedSemester}
-                            onChangeSelected={handleSemesterChange}
-                          />
-                        </FormControl>
+                        <Select
+                          onValueChange={(value) =>
+                            field.onChange(parseInt(value))
+                          }
+                          value={field.value ? field.value.toString() : ""}
+                          disabled={
+                            isLoadingSemesters || semesters.length === 0
+                          }
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={
+                                  isLoadingSemesters
+                                    ? "Loading semesters..."
+                                    : semesters.length === 0
+                                    ? "No semesters available"
+                                    : "Select a semester"
+                                }
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {semesters.map((semester) => (
+                              <SelectItem
+                                key={semester.id}
+                                value={semester.id.toString()}
+                              >
+                                {semester.semester}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -377,7 +406,7 @@ export default function AddSchedule() {
                   <FormField
                     control={form.control}
                     name="instructorId"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormLabel>
                           Instructor <span className="text-red-500">*</span>
@@ -402,8 +431,7 @@ export default function AddSchedule() {
                           Day <span className="text-red-500">*</span>
                         </FormLabel>
                         <Select
-                          onValueChange={(key) => field.onChange(key)} // Remove the cast, store the key directly
-                          defaultValue={field.value}
+                          onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
@@ -414,9 +442,7 @@ export default function AddSchedule() {
                           <SelectContent>
                             {Object.entries(DayEnum).map(([key, value]) => (
                               <SelectItem key={key} value={key}>
-                                {" "}
-                                {/* Use key as value instead of value */}
-                                {value} {/* Display the readable value */}
+                                {value}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -463,7 +489,7 @@ export default function AddSchedule() {
                   <FormField
                     control={form.control}
                     name="roomId"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormLabel>
                           Room <span className="text-red-500">*</span>
@@ -482,30 +508,19 @@ export default function AddSchedule() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-end gap-3 pt-6 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleDiscard}
-                  disabled={isSubmitting}
-                >
-                  Discard
-                </Button>
+              <div className="flex justify-end gap-3 pt-6">
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-green-700 hover:bg-green-800 text-white"
+                  className="bg-green-700 hover:bg-green-800 text-white px-6"
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      Adding...
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      Creating...
                     </>
                   ) : (
-                    <>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add
-                    </>
+                    "Create"
                   )}
                 </Button>
               </div>
