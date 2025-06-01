@@ -126,11 +126,7 @@ export const sidebarRoutes = [
       { title: "Students list", href: ROUTE.STUDENTS.LIST },
     ],
   },
-  {
-    title: "Manage schedule",
-    href: ROUTE.MANAGE_SCHEDULE.DEPARTMENT,
-    icon: Calendar,
-  },
+
   {
     title: "Attendance",
     icon: Users,
@@ -139,6 +135,11 @@ export const sidebarRoutes = [
       { title: "Class Schedule", href: ROUTE.ATTENDANCE.CLASS_SCHEDULE },
       { title: "History Records", href: ROUTE.ATTENDANCE.HISTORY_RECORD },
     ],
+  },
+  {
+    title: "Manage schedule",
+    href: ROUTE.MANAGE_SCHEDULE.DEPARTMENT,
+    icon: Calendar,
   },
   {
     title: "Student score",
