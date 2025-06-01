@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -46,37 +47,35 @@ import {
 } from "@/components/ui/select";
 import { DayEnum, SemesterEnum } from "@/constants/constant";
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
-import { createScheduleService } from "@/service/schedule/schedule.service";
+import {
+  updateScheduleService,
+  getDetailScheduleService,
+} from "@/service/schedule/schedule.service";
 import { toast } from "sonner";
-
 import { ComboboxSelectSemester } from "@/components/shared/ComboBox/combobox-semester";
 import { Constants } from "@/constants/text-string";
-import { useRouter } from "next/navigation";
 import { StaffModel } from "@/model/user/staff/staff.respond.model";
 
-interface DayModel {
-  id: string;
-  name: string;
-}
-
 const formSchema = z.object({
-  classId: z.number().min(1, "Department is required"),
+  classId: z.number().min(1, "Class is required"),
   departmentId: z.number().min(1, "Department is required"),
   instructorId: z.number().min(1, "Instructor is required"),
   subjectTypeId: z.number().min(1, "Subject type is required"),
+  courseId: z.number().min(1, "Course is required"),
   day: z.string().min(1, "Please select a day"),
   academyYear: z.number({
     required_error: "Academy year is required",
   }),
   startTime: z.string().min(1, "Please select start time"),
   endTime: z.string().min(1, "Please select end time"),
-  semesterId: z.number().min(1, "Subject type is required"),
-  roomId: z.number().min(1, "Subject type is required"),
+  semesterId: z.number().min(1, "Semester is required"),
+  roomId: z.number().min(1, "Room is required"),
   status: z.literal(Constants.ACTIVE),
 });
 
-export default function AddSchedule() {
+export default function UpdateSchedule() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedDepartment, setSelectedDepartment] =
     useState<DepartmentModel | null>(null);
   const [selectedSemester, setSelectedSemester] =
@@ -86,9 +85,12 @@ export default function AddSchedule() {
   const [selectedInstructor, setSelectedInstructor] =
     useState<StaffModel | null>(null);
   const [selectedClass, setSelectedClass] = useState<ClassModel | null>(null);
-  const [selectedDay, setSelectedDay] = useState<DayModel | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<RoomModel | null>(null);
+
+  const params = useParams();
   const router = useRouter();
+  const scheduleId = Number(params.classId); // Changed from params.classId to params.id
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -96,6 +98,7 @@ export default function AddSchedule() {
       departmentId: 0,
       instructorId: 0,
       subjectTypeId: 0,
+      courseId: 0,
       day: "",
       academyYear: new Date().getFullYear(),
       startTime: "",
@@ -106,45 +109,87 @@ export default function AddSchedule() {
     },
   });
 
+  // Fetch existing schedule data
+  useEffect(() => {
+    const fetchScheduleData = async () => {
+      if (!scheduleId) return;
+
+      try {
+        setIsLoading(true);
+        const scheduleData = await getDetailScheduleService(scheduleId);
+
+        if (scheduleData) {
+          // Populate form with existing data
+          form.reset({
+            classId: scheduleData.classes?.id || 0,
+            departmentId: scheduleData.course?.department?.id || 0,
+            instructorId: scheduleData.teacher?.id || 0,
+            subjectTypeId: scheduleData.course?.subject?.id || 0,
+            courseId: scheduleData.course?.id || 0,
+            day: scheduleData.day || "",
+            academyYear:
+              scheduleData.classes?.academyYear ||
+              scheduleData.semester?.academyYear ||
+              new Date().getFullYear(),
+            startTime: scheduleData.startTime || "",
+            endTime: scheduleData.endTime || "",
+            semesterId: scheduleData.semester?.id || 0,
+            roomId: scheduleData.room?.id || 0,
+            status: scheduleData.status || Constants.ACTIVE,
+          });
+
+          // Set selected items for comboboxes
+          setSelectedClass(scheduleData.classes || null);
+          setSelectedDepartment(scheduleData.course?.department || null);
+          setSelectedInstructor(scheduleData.teacher || null);
+          setSelectedSubjectType(scheduleData.course?.subject || null);
+          setSelectedSemester(scheduleData.semester || null);
+          setSelectedRoom(scheduleData.room || null);
+        } else {
+          toast.error("Schedule not found");
+          // router.replace(ROUTE.SCHEDULE.DEPARTMENT);
+        }
+      } catch (error: any) {
+        toast.error(error.message || "Failed to load schedule data");
+        console.error("Error fetching schedule:", error);
+        // router.replace(ROUTE.SCHEDULE.DEPARTMENT);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchScheduleData();
+  }, [scheduleId, form, router]);
+
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
 
-    console.log(values);
-    // return 0;
     try {
       const scheduleData = {
         startTime: values.startTime,
         endTime: values.endTime,
         day: values.day,
-        academyYear: values.academyYear,
         classId: values.classId,
         teacherId: values.instructorId,
-        courseId: values.subjectTypeId,
+        courseId: values.courseId,
         roomId: values.roomId,
         semesterId: values.semesterId,
         status: values.status,
       };
-      console.log(scheduleData);
-      return;
-      await createScheduleService(scheduleData);
-      toast.success("Schedule created successfully");
-      // router.replace(ROUTE.COURSES.INDEX);
+
+      await updateScheduleService(scheduleId, scheduleData);
+      toast.success("Schedule updated successfully");
+      router.replace(ROUTE.SCHEDULE.DEPARTMENT);
     } catch (error: any) {
-      toast.error(error.message || "Failed to create schedule");
-      console.error("Error submitting course:", error);
+      toast.error(error.message || "Failed to update schedule");
+      console.error("Error updating schedule:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDiscard = () => {
-    form.reset();
-    setSelectedDepartment(null);
-    setSelectedSubjectType(null);
-    setSelectedInstructor(null);
-    setSelectedClass(null);
-    setSelectedDay(null);
-    setSelectedRoom(null);
+    router.back();
   };
 
   const handleDepartmentChange = (department: DepartmentModel) => {
@@ -182,13 +227,6 @@ export default function AddSchedule() {
     });
   };
 
-  const handleDayChange = (day: DayModel) => {
-    setSelectedDay(day);
-    form.setValue("day", day.id, {
-      shouldValidate: true,
-    });
-  };
-
   const handleRoomChange = (room: RoomModel) => {
     setSelectedRoom(room);
     form.setValue("roomId", room.id, {
@@ -202,77 +240,58 @@ export default function AddSchedule() {
     });
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex h-[70vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+        <span className="ml-2">Loading schedule details...</span>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      {/* Breadcrumb */}
-      <Card className="mb-6">
-        <CardContent className="p-6 space-y-2">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.DASHBOARD}>
-                  Dashboard
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.SCHEDULE.DEPARTMENT}>
-                  Department List
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.DASHBOARD}>
-                  Class List
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Add Schedule</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div className="flex items-center gap-3 mb-6">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Add Schedule
-            </h1>
-          </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Update Schedule</h1>
+          <p className="text-muted-foreground">Institute Management System</p>
+        </div>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href={ROUTE.SCHEDULE.DEPARTMENT}>
+                Schedules
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Update Schedule</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
 
-          {/* Class Info Card */}
-          <Card className="mb-6 bg-orange-50 border-orange-200">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-8">
-                <div className="text-lg font-semibold text-gray-900">
-                  Class 2504fsdfsfds
-                </div>
-                <div className=" gap-6 text-sm text-gray-600">
-                  <div>
-                    <span className="font-medium">Degree:</span> Associate
-                    Degree
-                  </div>
-                  <div>
-                    <span className="font-medium">Year:</span> 2025
-                  </div>
-                  <div>
-                    <span className="font-medium">Academy Year:</span> 2025
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </CardContent>
-      </Card>
+      <div className="mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="h-4 w-4" /> BACK
+        </Button>
+      </div>
 
-      {/* Form */}
       <Card>
         <CardContent className="p-6">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-6"
+              className="space-y-4"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left Column */}
@@ -403,8 +422,7 @@ export default function AddSchedule() {
                           Day <span className="text-red-500">*</span>
                         </FormLabel>
                         <Select
-                          onValueChange={(key) => field.onChange(key)} // Remove the cast, store the key directly
-                          defaultValue={field.value}
+                          onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
@@ -415,9 +433,7 @@ export default function AddSchedule() {
                           <SelectContent>
                             {Object.entries(DayEnum).map(([key, value]) => (
                               <SelectItem key={key} value={key}>
-                                {" "}
-                                {/* Use key as value instead of value */}
-                                {value} {/* Display the readable value */}
+                                {value}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -482,31 +498,19 @@ export default function AddSchedule() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-3 pt-6 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleDiscard}
-                  disabled={isSubmitting}
-                >
-                  Discard
-                </Button>
+              <div className="flex justify-end mt-4">
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-green-700 hover:bg-green-800 text-white"
+                  className="bg-green-900 text-white  hover:bg-green-950 "
                 >
                   {isSubmitting ? (
                     <>
                       <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      Adding...
+                      Updating...
                     </>
                   ) : (
-                    <>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add
-                    </>
+                    "Update Schedule"
                   )}
                 </Button>
               </div>

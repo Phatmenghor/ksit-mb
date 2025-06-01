@@ -1,6 +1,6 @@
 import ScheduleListPage from "@/components/shared/schedule-list";
 
-export default function ClassScheduleListPage() {
+export default function ScheduleListpage() {
   return (
     <div>
       <ScheduleListPage />

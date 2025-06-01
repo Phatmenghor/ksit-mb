@@ -1,3 +1,4 @@
+import { UpdateSemesterModel } from "@/model/master-data/semester/type-semester-model";
 import { ScheduleFilterModel } from "@/model/schedule/schedule/schedule-filter";
 import { CreateScheduleModel } from "@/model/schedules/type-schedule-model";
 import { axiosClientWithAuth } from "@/utils/axios";
@@ -34,5 +35,37 @@ export async function createScheduleService(data: CreateScheduleModel) {
     }
     console.error("Error creating course:", error);
     throw error;
+  }
+}
+
+export async function updateScheduleService(
+  scheduleId: number,
+  data: UpdateSemesterModel
+) {
+  try {
+    const response = await axiosClientWithAuth.post(
+      `/v1/schedules/updateById/${scheduleId}`,
+      data
+    );
+    return response.data.data;
+  } catch (error: any) {
+    // Extract error message from response if available
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+
+    console.error("Error updating schedule:", error);
+    throw error;
+  }
+}
+
+export async function DetailScheduleService(scheduleId: number) {
+  try {
+    const response = await axiosClientWithAuth.get(
+      `/v1/schedules/${scheduleId}`
+    );
+    return response.data.data;
+  } catch (error: any) {
+    return null;
   }
 }

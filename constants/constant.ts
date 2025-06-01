@@ -85,6 +85,11 @@ export enum SemesterEnum {
   SEMESTER_1 = "SEMESTER_1",
   SEMESTER_2 = "SEMESTER_2",
 }
+export enum SemesterEnumFilter {
+  All_SEMESTER = "All_SEMESTER",
+  SEMESTER_1 = "SEMESTER_1",
+  SEMESTER_2 = "SEMESTER_2",
+}
 export enum DayEnum {
   MONDAY = "Monday",
   TUESDAY = "Tuesday",
@@ -131,6 +136,11 @@ export interface DayType {
 }
 
 export const DAYS_OF_WEEK = [
+  {
+    displayName: "All",
+    name: "ALL",
+    id: 7,
+  },
   {
     displayName: "Monday",
     name: "MONDAY",
