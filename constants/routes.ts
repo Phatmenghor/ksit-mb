@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   Users,
   Palette,
+  ListCheck,
 } from "lucide-react";
 
 export const ROUTE = {
@@ -70,7 +71,8 @@ export const ROUTE = {
 
   SCORES: {
     STUDENT_SCORE: "/student-score",
-    SUBMITTED: "/scores-submitted",
+    SUBMITTED: "/submitted-list",
+    SETTINGS: "/score-setting",
   },
 
   REQUESTS: "/requests",
@@ -152,8 +154,12 @@ export const sidebarRoutes = [
   },
   {
     title: "Score submitted",
-    href: ROUTE.SCORES.SUBMITTED,
-    icon: FileCheck,
+    section: "Score Submitted",
+    icon: ListCheck,
+    subroutes: [
+      { title: "Submitted List", href: ROUTE.SCORES.SUBMITTED },
+      { title: "Score Setting", href: ROUTE.SCORES.SETTINGS },
+    ],
   },
   {
     title: "Request",

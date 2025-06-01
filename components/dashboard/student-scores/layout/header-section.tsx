@@ -43,7 +43,7 @@ export default function StudentScoreHeader({ title, schedule }: Props) {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold text-foreground">
-            {schedule?.course?.subject.name || "Attendance Check"}
+            {schedule?.course?.subject.name || "---"}
           </h1>
         </div>
 

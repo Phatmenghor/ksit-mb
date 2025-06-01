@@ -37,11 +37,12 @@ import { useParams, useRouter } from "next/navigation";
 import {
   SessionScoreModel,
   StudentScoreModel,
-} from "@/model/student-score/student-score.response";
+} from "@/model/score/student-score/student-score.response";
 import {
   intiStudentsScoreService,
+  submittedScoreService,
   updateStudentsScoreService,
-} from "@/service/student-score/student-score.service";
+} from "@/service/score/score.service";
 import { toast } from "sonner";
 import {
   Tooltip,
@@ -56,7 +57,7 @@ import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 import Loading from "@/app/(dashboard)/requests/loading";
 import { ConfirmDialog } from "@/components/shared/custom-comfirm-diaglog";
 import { ScoreSubmitConfirmDialog } from "@/components/dashboard/student-scores/layout/submit-comfirm-dialog";
-import { GradeSelect } from "@/constants/constant";
+import { GradeSelect, SubmissionEnum } from "@/constants/constant";
 
 export default function StudentScoreDetailsPage() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -64,7 +65,7 @@ export default function StudentScoreDetailsPage() {
   const [refreshProgress, setRefreshProgress] = useState(0);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [isSubmittedDialogOpen, setIsSubmittedDialogOpen] = useState(false);
-  const [isSubmittingToStaff, setIsSubmittingToStaff] = useState(true);
+  const [isSubmittingToStaff, setIsSubmittingToStaff] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
   const [unsavedChanges, setUnsavedChanges] = useState<Set<number>>(new Set());
@@ -143,6 +144,7 @@ export default function StudentScoreDetailsPage() {
             assignmentScore: score.assignmentScore,
             midtermScore: score.midtermScore,
             finalScore: score.finalScore,
+            grade: score.grade,
           });
         });
         setOriginalData(originalMap);
@@ -171,22 +173,28 @@ export default function StudentScoreDetailsPage() {
     }
 
     setIsSubmitting(true);
+
     try {
-      // await submitAttendanceToStaffService({
-      //   sessionId: attendanceGenerate.id,
-      //   scheduleId: scheduleDetail?.id,
-      // });
-
-      // Disable auto-refresh after submission
-      setAutoRefresh(false);
-
-      toast.success("Attendance successfully submitted to staff!", {
-        duration: 3000,
-        icon: <CheckCircle className="h-4 w-4" />,
+      const response = await submittedScoreService({
+        id: scheduleDetail!.id,
+        status: SubmissionEnum.SUBMITTED.toString(),
       });
+
+      console.log("##submit score: ", response);
+      if (response) {
+        setAutoRefresh(false);
+        setIsSubmittingToStaff(true);
+        toast.success("Score successfully submitted to staff officer!", {
+          duration: 3000,
+          icon: <CheckCircle className="h-4 w-4" />,
+        });
+      } else {
+        toast.error("Failed to submit score");
+      }
+      // Disable auto-refresh after submission
     } catch (error) {
-      toast.error("Failed to submit attendance to staff");
-      console.error("Error submitting attendance:", error);
+      toast.error("Failed to submit score to staff");
+      console.error("Error submitting score:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -422,7 +430,7 @@ export default function StudentScoreDetailsPage() {
         { duration: 2000 }
       );
     } catch (error) {
-      toast.error("Failed to save attendance records");
+      toast.error("Failed to save score records");
       console.error("Error saving records:", error);
     } finally {
       setIsSavingAll(false);
@@ -937,7 +945,7 @@ export default function StudentScoreDetailsPage() {
         open={isSubmittedDialogOpen}
         title="Comfirm Submit!"
         description="Are u sure u want to submit student score?"
-        onConfirm={() => {}}
+        onConfirm={handleSubmit}
         cancelText="Discard"
         subDescription="Student score will submit to staff officer."
         onOpenChange={() => {

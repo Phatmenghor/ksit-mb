@@ -14,3 +14,10 @@ export interface CreateScoreModel {
   studentId: number;
   scoreSessionId: number;
 }
+
+export interface SubmitScoreModel {
+  id: number;
+  status: string;
+  teacherComments?: string;
+  staffComments?: string;
+}

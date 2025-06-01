@@ -3,7 +3,12 @@ import { ComboboxSelectSemester } from "@/components/shared/ComboBox/combobox-se
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { YearSelector } from "@/components/shared/year-selector";
 import { Card, CardContent } from "@/components/ui/card";
-import { DAYS_OF_WEEK, DayType, StatusEnum } from "@/constants/constant";
+import {
+  DAYS_OF_WEEK,
+  DAYS_OF_WEEK_V1,
+  DayType,
+  StatusEnum,
+} from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
 import { SemesterModel } from "@/model/master-data/semester/semester-model";
 import { ScheduleFilterModel } from "@/model/schedule/schedule/schedule-filter";
@@ -15,6 +20,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { groupBy } from "lodash";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
+import { Button } from "@/components/ui/button";
 
 export default function StudentScorePage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,7 +49,7 @@ export default function StudentScorePage() {
           search: debouncedSearchQuery,
           academyYear: selectAcademicYear,
           semester: selectedSemester?.semester,
-          dayOfWeek: selectedDay?.name,
+          dayOfWeek: selectedDay?.value,
           status: StatusEnum.ACTIVE,
         };
 
@@ -65,9 +71,9 @@ export default function StudentScorePage() {
     if (!initialLoadDone) {
       const currentDate = new Date();
       const currentDayId = currentDate.getDay();
-      const currentDay = DAYS_OF_WEEK.find((day) => day.id === currentDayId);
+      const currentDay = DAYS_OF_WEEK_V1.find((day) => day.id === currentDayId);
 
-      setSelectedDay(currentDay || DAYS_OF_WEEK[0]);
+      setSelectedDay(currentDay || DAYS_OF_WEEK_V1[0]);
       setInitialLoadDone(true);
     }
   }, [initialLoadDone]);
@@ -137,18 +143,18 @@ export default function StudentScorePage() {
 
   const renderDayTabs = () => (
     <div className="flex flex-wrap gap-2">
-      {DAYS_OF_WEEK.map((day) => (
-        <button
+      {DAYS_OF_WEEK_V1.map((day) => (
+        <Button
           key={day.id}
           onClick={() => handleDayChange(day)}
           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-            selectedDay?.id === day.id
+            selectedDay?.value === day.value
               ? "bg-teal-600 text-white"
               : "bg-white text-gray-700 hover:bg-gray-200"
           }`}
         >
-          {day.displayName}
-        </button>
+          {day.label}
+        </Button>
       ))}
     </div>
   );
@@ -233,7 +239,7 @@ export default function StudentScorePage() {
                     Year {academyYear} - {semesterName}
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {scheduleArr.map((schedule, index) => (
+                    {scheduleArr.map((schedule) => (
                       <div
                         key={schedule.id}
                         className="flex flex-col border-l-4 rounded-lg bg-orange-50 border-yellow-500 p-4"
