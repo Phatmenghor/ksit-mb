@@ -31,7 +31,6 @@ import { ComboboxSelectSubject } from "@/components/shared/ComboBox/combobox-sub
 import { ComboboxSelectInstructor } from "@/components/shared/ComboBox/combobox-instructor";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
 import { SubjectModel } from "@/model/master-data/subject/all-subject-model";
-import { StaffModel } from "@/model/user/staff/stuff.model";
 import { YearSelector } from "@/components/shared/year-selector";
 import { ComboboxSelectRoom } from "@/components/shared/ComboBox/combobox-room";
 import { RoomModel } from "@/model/master-data/room/all-room-model";
@@ -52,6 +51,7 @@ import { toast } from "sonner";
 import { ComboboxSelectSemester } from "@/components/shared/ComboBox/combobox-semester";
 import { Constants } from "@/constants/text-string";
 import { useRouter } from "next/navigation";
+import { StaffModel } from "@/model/user/staff/staff.respond.model";
 
 interface DayModel {
   id: string;
