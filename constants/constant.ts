@@ -1,3 +1,5 @@
+import { AlertCircle, Archive, Check, CheckCircle, Clock, Logs, X } from "lucide-react";
+
 //Major
 export const majors = [
   { value: "Computer Science", label: "វិទ្យាសាស្ត្រកុំព្យូទ័រ" },
@@ -178,4 +180,46 @@ export enum Mode {
   VIEW = "VIEW",
   ADD = "ADD",
   EDIT = "EDIT",
+}
+
+export enum RequestType {
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  REJECTED = "REJECTED",
+  DONE = "DONE",
+  DELETED = "DELETED",
+}
+
+export const REQUEST_TYPE = [
+  {
+    displayName: "All Requests",
+    name: "PENDING",
+    id: 1,
+    icon: Logs, // For pending/waiting
+  },
+  {
+    displayName: "Accepted List",
+    name: "ACCEPTED",
+    id: 2,
+    icon: Check,
+  },
+  {
+    displayName: "Rejected List",
+    name: "REJECTED",
+    id: 3,
+    icon: X, // or XCircle
+  },
+  {
+    displayName: "Done List",
+    name: "DONE",
+    id: 4,
+    icon: CheckCircle, // For completed/archived
+  },
+];
+
+export interface RequestListType {
+  displayName: string;
+  name: string;
+  id: number;
+  icon: React.ComponentType<{ className?: string }>;
 }
