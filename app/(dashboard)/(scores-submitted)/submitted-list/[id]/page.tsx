@@ -35,6 +35,7 @@ import { SubmitScoreModel } from "@/model/score/student-score/student-score.requ
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "date-fns";
 import { ROUTE } from "@/constants/routes";
+import { useExportHandlers } from "@/components/dashboard/scores-submitted/export-handler";
 
 export default function ScoreSubmissionDetailPage() {
   const [submission, setSubmissions] = useState<ScoreSubmittedModel | null>(
@@ -49,6 +50,8 @@ export default function ScoreSubmissionDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
+  const { handleQuickPDFExport, handleQuickExcelExport } =
+    useExportHandlers(submission);
 
   const loadStudentSubmittedScore = useCallback(async () => {
     setIsLoading(true);
@@ -126,7 +129,7 @@ export default function ScoreSubmissionDetailPage() {
   };
 
   return (
-    <div className="container space-y-4 p-4">
+    <div className="container space-y-4">
       <StudentScoreHeader title="View Score Submitted Detail" />
 
       {!isScoreApproval ||
@@ -168,7 +171,11 @@ export default function ScoreSubmissionDetailPage() {
                   </span>
 
                   {/* Excel Export Button */}
-                  <Button variant="outline" className="gap-2">
+                  <Button
+                    onClick={handleQuickExcelExport}
+                    variant="outline"
+                    className="gap-2"
+                  >
                     <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
                       <span className="text-white text-xs font-bold">X</span>
                     </div>
@@ -177,7 +184,11 @@ export default function ScoreSubmissionDetailPage() {
                   </Button>
 
                   {/* PDF Export Button */}
-                  <Button variant="outline" className="gap-2">
+                  <Button
+                    onClick={handleQuickPDFExport}
+                    variant="outline"
+                    className="gap-2"
+                  >
                     <div className="w-5 h-5 border-2 border-red-500 rounded flex items-center justify-center">
                       <span className="text-red-500 text-[10px] font-bold">
                         PDF

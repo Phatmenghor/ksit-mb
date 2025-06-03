@@ -55,9 +55,8 @@ import { Badge } from "@/components/ui/badge";
 import { getDetailScheduleService } from "@/service/schedule/schedule.service";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 import Loading from "@/app/(dashboard)/requests/loading";
-import { ConfirmDialog } from "@/components/shared/custom-comfirm-diaglog";
 import { ScoreSubmitConfirmDialog } from "@/components/dashboard/student-scores/layout/submit-confirm-dialog";
-import { GradeSelect, SubmissionEnum } from "@/constants/constant";
+import { SubmissionEnum } from "@/constants/constant";
 import { formatDate } from "date-fns";
 
 export default function StudentScoreDetailsPage() {
@@ -755,7 +754,7 @@ export default function StudentScoreDetailsPage() {
 
       {mode === "edit-score" && (
         <Card className="w-full">
-          <CardContent className="flex justify-end gap-3 p-4 border-t">
+          <CardContent className="flex justify-end gap-3 p-4">
             <Button
               disabled={isSubmitting}
               variant="outline"

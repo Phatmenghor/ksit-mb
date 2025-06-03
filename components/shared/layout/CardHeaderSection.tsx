@@ -91,12 +91,12 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
               <ArrowLeft className="w-5 h-5" />
             </Link>
           ) : back ? (
-            <button
+            <Button
               onClick={() => router.back()}
               className="text-black hover:text-black focus:outline-none"
             >
               <ArrowLeft className="w-5 h-5" />
-            </button>
+            </Button>
           ) : null}
           <h3 className="text-xl font-bold">{title}</h3>
         </div>

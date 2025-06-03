@@ -64,8 +64,6 @@ export default function ScoreSubmittedPage() {
           search: debouncedSearchQuery,
         });
 
-        console.log("##DATA: ", response);
-
         if (response) {
           setSubmissions(response);
         } else {

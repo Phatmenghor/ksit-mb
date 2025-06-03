@@ -20,7 +20,7 @@ import { clearRoles, getRoles } from "@/utils/local-storage/user-info/roles";
 import { clearUserId, getUserId } from "@/utils/local-storage/user-info/userId";
 import { clearUsername } from "@/utils/local-storage/user-info/username";
 import { logoutUser } from "@/utils/local-storage/user-info/token";
-import { ConfirmDialog } from "../shared/custom-comfirm-diaglog";
+import { ConfirmDialog } from "../shared/custom-confirm-dialog";
 import { MobileSidebar } from "./mobile-sidebar";
 
 export function Header() {
