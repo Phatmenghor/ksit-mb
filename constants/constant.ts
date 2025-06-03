@@ -5,6 +5,7 @@ import {
   CheckCircle,
   Clock,
   Logs,
+  MenuIcon,
   X,
 } from "lucide-react";
 
@@ -298,9 +299,24 @@ export const SemesterFilter = [
 ];
 
 export enum SubmissionEnum {
-  DRAFT,
-  PENDING,
-  SUBMITTED,
-  APPROVED,
-  REJECTED,
+  DRAFT = "DRAFT",
+  PENDING = "PENDING",
+  SUBMITTED = "SUBMITTED",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
 }
+
+export const tabs = [
+  {
+    value: "all",
+    label: "All Submitted",
+    icon: MenuIcon,
+    status: SubmissionEnum.SUBMITTED,
+  },
+  {
+    value: "accept",
+    label: "Accept List",
+    icon: Check,
+    status: SubmissionEnum.APPROVED, // Assuming you have this enum value
+  },
+];

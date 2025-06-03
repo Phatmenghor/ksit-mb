@@ -72,6 +72,7 @@ export const ROUTE = {
   SCORES: {
     STUDENT_SCORE: "/student-score",
     SUBMITTED: "/submitted-list",
+    SUBMITTED_DETAIL: (id: string) => `/submitted-list/${id}`,
     SETTINGS: "/score-setting",
   },
 

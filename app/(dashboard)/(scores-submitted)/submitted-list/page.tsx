@@ -11,9 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Plus, Eye, Download, Trash2, Check, MenuIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Eye } from "lucide-react";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 import { YearSelector } from "@/components/shared/year-selector";
@@ -26,20 +24,9 @@ import { SubmittedScoreParam } from "@/model/score/submitted-score/submitted-sco
 import { useDebounce } from "@/utils/debounce/debounce";
 import { AllScoreSubmittedModel } from "@/model/score/submitted-score/submitted-score.response.model";
 import { getAllSubmittedScoreService } from "@/service/score/score.service";
-import { SubmissionEnum } from "@/constants/constant";
-
-const tabs = [
-  {
-    value: "all",
-    label: "All Submitted",
-    icon: MenuIcon,
-  },
-  {
-    value: "accept",
-    label: "Accept List",
-    icon: Check,
-  },
-];
+import { SubmissionEnum, tabs } from "@/constants/constant";
+import { useRouter } from "next/navigation";
+import PaginationPage from "@/components/shared/pagination-page";
 
 export default function ScoreSubmittedPage() {
   const [year, setYear] = useState("2025");
@@ -56,36 +43,59 @@ export default function ScoreSubmittedPage() {
   const [selectedSemester, setSelectedSemester] = useState<
     SemesterModel | undefined
   >(undefined);
-
+  const router = useRouter();
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  // Get current tab's status
+  const getCurrentTabStatus = useCallback(() => {
+    const currentTab = tabs.find((tab) => tab.value === activeTab);
+    return currentTab?.status || SubmissionEnum.SUBMITTED;
+  }, [activeTab]);
 
   const loadSubmittedScore = useCallback(
     async (param: SubmittedScoreParam) => {
       setIsLoading(true);
 
       try {
+        const currentStatus = getCurrentTabStatus();
         const response = await getAllSubmittedScoreService({
-          status: SubmissionEnum.SUBMITTED.toString(),
+          ...param,
+          status: currentStatus,
           search: debouncedSearchQuery,
         });
+
+        console.log("##DATA: ", response);
 
         if (response) {
           setSubmissions(response);
         } else {
-          console.error("Failed to fetch student:");
+          console.error("Failed to fetch submissions:");
         }
       } catch (error) {
-        toast.error("An error occurred while loading student");
+        console.error("Error loading submissions:", error);
+        toast.error("An error occurred while loading submissions");
       } finally {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery]
+    [
+      debouncedSearchQuery,
+      getCurrentTabStatus,
+      selectAcademicYear,
+      selectedSemester,
+    ]
   );
 
+  // Load data when dependencies change
   useEffect(() => {
     loadSubmittedScore({});
-  }, [submissions, debouncedSearchQuery]);
+  }, [loadSubmittedScore]);
+
+  // Reset pagination when tab changes
+  useEffect(() => {
+    setSubmissions(null); // Clear current data
+    loadSubmittedScore({ pageNo: 1 }); // Load first page of new tab
+  }, [activeTab]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -95,29 +105,96 @@ export default function ScoreSubmittedPage() {
     setSelectAcademicYear(e);
   };
 
-  const handleSmesterChange = (e: SemesterModel | null) => {
+  const handleSemesterChange = (e: SemesterModel | null) => {
     setSelectedSemester(e ?? undefined);
   };
 
-  // Function to handle new submission
-  const handleNewSubmission = () => {
-    // Navigate to score input page
-    console.log("Navigate to new score submission page");
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
   };
 
-  // Function to handle accept list
-  const handleAcceptList = () => {
-    // Logic to accept selected submissions
-    console.log("Accept selected submissions");
+  // Get table content based on active tab
+  const renderTableContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-700"></div>
+        </div>
+      );
+    }
+
+    if ((submissions?.content?.length ?? 0) === 0) {
+      const emptyMessage =
+        activeTab === "all"
+          ? "No submitted scores found."
+          : "No approved scores found.";
+
+      return (
+        <div className="w-full flex justify-center items-center text-center p-4 text-gray-500">
+          <p>{emptyMessage}</p>
+        </div>
+      );
+    }
+
+    return (
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-gray-100">
+            {ScoreSubmittedTableHeader.map((header) => (
+              <TableHead key={header.id} className={header.className}>
+                {header.label}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {submissions?.content.map((submission, index) => {
+            const indexDisplay =
+              ((submissions.pageNo || 1) - 1) * (submissions.pageSize || 10) +
+              index +
+              1;
+
+            return (
+              <TableRow key={submission.id}>
+                <TableCell>{indexDisplay}</TableCell>
+                <TableCell>{submission.teacherId}</TableCell>
+                <TableCell className="font-medium">
+                  {submission.teacherName}
+                </TableCell>
+                <TableCell>{submission.courseName}</TableCell>
+                <TableCell>{submission.semester.semester}</TableCell>
+                <TableCell>{submission.classCode}</TableCell>
+                <TableCell>{submission.submissionDate}</TableCell>
+                <TableCell>
+                  <Button
+                    onClick={() =>
+                      router.push(
+                        ROUTE.SCORES.SUBMITTED_DETAIL(
+                          String(submission.teacherId)
+                        )
+                      )
+                    }
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    );
   };
 
   return (
     <Tabs
       value={activeTab}
-      onValueChange={setActiveTab}
+      onValueChange={handleTabChange}
       className="w-full space-y-4"
     >
-      {" "}
       <CardHeaderSection
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
@@ -126,25 +203,19 @@ export default function ScoreSubmittedPage() {
         searchValue={searchQuery}
         searchPlaceholder="Search..."
         onSearchChange={handleSearchChange}
-        buttonText="Submitted List"
-        buttonHref={ROUTE.STUDENTS.ADD_SINGLE}
-        buttonIcon={<Plus className="mr-2 h-2 w-2" />}
         customSelect={
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
             <div className="w-full min-w-[200px] md:w-1/2">
-              <div className="w-full min-w-[200px]">
-                <YearSelector
-                  title="Select Year"
-                  onChange={handleYearChange}
-                  value={selectAcademicYear || 0}
-                />
-              </div>
+              <YearSelector
+                title="Select Year"
+                onChange={handleYearChange}
+                value={selectAcademicYear || 0}
+              />
             </div>
-
             <div className="w-full min-w-[200px] md:w-1/2">
               <ComboboxSelectSemester
                 dataSelect={selectedSemester ?? null}
-                onChangeSelected={handleSmesterChange}
+                onChangeSelected={handleSemesterChange}
               />
             </div>
           </div>
@@ -173,88 +244,43 @@ export default function ScoreSubmittedPage() {
           </div>
         }
       />
+
+      {/* All Submitted Tab */}
       <TabsContent value="all" className="space-y-4 w-full">
         <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-100">
-                  {ScoreSubmittedTableHeader.map((header) => (
-                    <TableHead key={header.id} className={header.className}>
-                      {header.label}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              {isLoading ? (
-                <div className="flex justify-center items-center py-20">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-700"></div>
-                </div>
-              ) : (submissions?.content?.length ?? 0) > 0 ? (
-                <TableBody>
-                  {submissions?.content.map((submission) => (
-                    <TableRow key={submission.id}>
-                      <TableCell>
-                        <Input type="checkbox" className="rounded" />
-                      </TableCell>
-                      <TableCell>{submission.teacherId}</TableCell>
-                      <TableCell className="font-medium text-blue-600">
-                        {submission.teacherName}
-                      </TableCell>
-                      <TableCell>{submission.courseName}</TableCell>
-                      <TableCell>{submission.semester.semester}</TableCell>
-                      <TableCell>{submission.classCode}</TableCell>
-                      <TableCell>{submission.submissionDate}</TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            submission.status === "approved"
-                              ? "bg-green-100 text-green-800"
-                              : submission.status === "rejected"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }
-                        >
-                          {submission.status.charAt(0).toUpperCase() +
-                            submission.status.slice(1)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              ) : (
-                <div className="w-full flex justify-center items-center text-center p-4 text-gray-500">
-                  <p>Score submitted no record.</p>
-                </div>
-              )}
-            </Table>
-          </CardContent>
+          <CardContent className="p-0">{renderTableContent()}</CardContent>
         </Card>
+
+        {!isLoading && submissions && (
+          <div className="mt-4 flex justify-end">
+            <PaginationPage
+              currentPage={submissions.pageNo}
+              totalPages={submissions.totalPages}
+              onPageChange={(page: number) =>
+                loadSubmittedScore({ pageNo: page })
+              }
+            />
+          </div>
+        )}
+      </TabsContent>
+
+      {/* Accept List Tab */}
+      <TabsContent value="accept" className="space-y-4 w-full">
+        <Card>
+          <CardContent className="p-0">{renderTableContent()}</CardContent>
+        </Card>
+
+        {!isLoading && submissions && (
+          <div className="mt-4 flex justify-end">
+            <PaginationPage
+              currentPage={submissions.pageNo}
+              totalPages={submissions.totalPages}
+              onPageChange={(page: number) =>
+                loadSubmittedScore({ pageNo: page })
+              }
+            />
+          </div>
+        )}
       </TabsContent>
     </Tabs>
   );

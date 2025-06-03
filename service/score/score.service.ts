@@ -5,10 +5,7 @@ import {
 } from "@/model/score/student-score/student-score.request";
 import { StudentScoreInitModel } from "@/model/score/student-score/student-score.response";
 import { SubmittedScoreParam } from "@/model/score/submitted-score/submitted-score.request.model";
-import {
-  AllScoreSubmittedAPI,
-  AllScoreSubmittedModel,
-} from "@/model/score/submitted-score/submitted-score.response.model";
+import { AllScoreSubmittedAPI } from "@/model/score/submitted-score/submitted-score.response.model";
 import { axiosClientWithAuth } from "@/utils/axios";
 
 export async function intiStudentsScoreService(data: RequestStudentScoreModel) {
@@ -72,6 +69,19 @@ export async function submittedScoreService(data: SubmitScoreModel) {
       throw new Error(error.response.data.message);
     }
     console.error("Error submitted score:", error); // Log error for debugging
+    throw error; // Re-throw the error for further handling
+  }
+}
+
+export async function getSubmissionScoreByIdService(id: number) {
+  try {
+    const response = await axiosClientWithAuth.get(`/v1/score/session/${id}`);
+    return response.data.data;
+  } catch (error: any) {
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    console.error("Error get submission score by id:", error); // Log error for debugging
     throw error; // Re-throw the error for further handling
   }
 }

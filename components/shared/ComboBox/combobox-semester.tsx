@@ -62,7 +62,7 @@ export function ComboboxSelectSemester({
       });
 
       if (newPage === 1) {
-        setData(result.content);
+        setData(result?.content);
       } else {
         setData((prev) => [...prev, ...result.content]);
       }

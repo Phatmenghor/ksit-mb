@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -11,136 +11,214 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import {
-  ChevronLeft,
-  FileSpreadsheet,
   FileIcon as FilePdf,
   Check,
   X,
   AlertTriangle,
-  ArrowLeft,
+  CheckCircle,
+  Download,
 } from "lucide-react";
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import StudentScoreHeader from "@/components/dashboard/student-scores/layout/header-section";
-import { Input } from "@/components/ui/input";
+import { ScoreSubmittedModel } from "@/model/score/submitted-score/submitted-score.response.model";
+import {
+  getSubmissionScoreByIdService,
+  submittedScoreService,
+} from "@/service/score/score.service";
+import { useDebounce } from "@/utils/debounce/debounce";
+import { toast } from "sonner";
+import { SubmissionEnum } from "@/constants/constant";
+import { ScoreSubmitConfirmDialog } from "@/components/dashboard/student-scores/layout/submit-confirm-dialog";
+import { ReturnDialog } from "@/components/dashboard/scores-submitted/return-dialog";
+import { SubmitScoreModel } from "@/model/score/student-score/student-score.request";
 import { Separator } from "@/components/ui/separator";
+import { formatDate } from "date-fns";
+import { ROUTE } from "@/constants/routes";
 
 export default function ScoreSubmissionDetailPage() {
+  const [submission, setSubmissions] = useState<ScoreSubmittedModel | null>(
+    null
+  );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [approveDialog, setApproveDialog] = useState(false);
+  const [returnDialog, setReturnDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const [isScoreApproval, setIsScoreApproval] = useState(false);
   const params = useParams();
   const id = params.id as string;
+  const router = useRouter();
 
-  // In a real app, you would fetch the submission details based on the ID
-  const [submission] = useState({
-    id,
-    subjectCode: "401101",
-    subjectName: "Computer Assembly and Software Installation",
-    subjectDetails: "3(2.1.0)",
-    classId: "254013",
-    department: "Computer Science",
-    major: "បច្ចេកវិទ្យាព័ត៌មាន",
-    semester: "1",
-    academicYear: "2025",
-    submittedBy: "Tong Vuthea",
-    submittedDate: "2025-05-03 16:42:10",
-    status: "pending",
-    totalStudents: 3,
-    students: [
-      {
-        id: "234012001",
-        fullnameKh: "រ៉ូ វិសាល",
-        fullnameEn: "KAO VISAL",
-        gender: "Male",
-        birthDate: "13-Jun-2002",
-        attendance: 90,
-        assignment: 85,
-        midterm: 78,
-        final: 82,
-        total: 82.5,
-        grade: "B",
-      },
-      {
-        id: "234012002",
-        fullnameKh: "ខន កុសល",
-        fullnameEn: "KHORN KOSORL",
-        gender: "Male",
-        birthDate: "20-Jun-2005",
-        attendance: 95,
-        assignment: 88,
-        midterm: 85,
-        final: 87,
-        total: 87.8,
-        grade: "B+",
-      },
-      {
-        id: "234012003",
-        fullnameKh: "ខាន ភារ៉ុម",
-        fullnameEn: "KHAN PHEARUM",
-        gender: "Male",
-        birthDate: "17-Jun-2005",
-        attendance: 92,
-        assignment: 90,
-        midterm: 82,
-        final: 88,
-        total: 87.2,
-        grade: "B+",
-      },
-    ],
-    formula: {
-      attendance: 10,
-      assignment: 20,
-      midterm: 30,
-      final: 40,
-    },
-  });
+  const loadStudentSubmittedScore = useCallback(async () => {
+    setIsLoading(true);
 
-  const handleApprove = () => {
-    // Logic to approve the submission
-    console.log("Approve submission", id);
+    try {
+      const response = await getSubmissionScoreByIdService(Number(id));
+
+      if (response) {
+        setSubmissions(response);
+      } else {
+        console.error("Failed to fetch student:");
+      }
+    } catch (error) {
+      toast.error("An error occurred while loading student");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [debouncedSearchQuery]);
+
+  useEffect(() => {
+    loadStudentSubmittedScore();
+  }, [loadStudentSubmittedScore]);
+
+  const handleReturn = async () => {
+    // Logic to reject the submission
+    try {
+      const response = await submittedScoreService({
+        id: submission?.teacherId ?? 0,
+        status: SubmissionEnum.DRAFT,
+      });
+
+      if (response) {
+        setIsScoreApproval(true);
+        setReturnDialog(false);
+
+        toast.success("Score successfully return!", {
+          duration: 3000,
+          icon: <CheckCircle className="h-4 w-4" />,
+        });
+        router.push(ROUTE.SCORES.SUBMITTED);
+      } else {
+        toast.error("Failed to return score");
+      }
+    } catch (error) {
+      toast.error("Failed to return score");
+      console.error("Error return score:", error);
+    }
   };
 
-  const handleReject = () => {
+  const handleApproval = async () => {
     // Logic to reject the submission
-    console.log("Reject submission", id);
+    try {
+      const payload: SubmitScoreModel = {
+        id: submission?.teacherId ?? 0,
+        status: SubmissionEnum.APPROVED,
+      };
+
+      const response = await submittedScoreService(payload);
+
+      if (response) {
+        setIsScoreApproval(true);
+        setApproveDialog(false);
+        toast.success("Score successfully approved to staff officer!", {
+          duration: 3000,
+          icon: <CheckCircle className="h-4 w-4" />,
+        });
+        router.push(ROUTE.SCORES.SUBMITTED);
+      } else {
+        toast.error("Failed to approve score");
+      }
+    } catch (error) {
+      toast.error("Failed to approve score to staff");
+      console.error("Error approving score:", error);
+    }
   };
 
   return (
     <div className="container space-y-4 p-4">
       <StudentScoreHeader title="View Score Submitted Detail" />
 
-      <Card>
-        <CardHeader className="flex flex-row justify-between items-center">
-          <CardTitle className="text-lg font-bold">
-            Submitting Approval
-          </CardTitle>
-          <div className="flex gap-2">
-            <Button variant="outline">Return</Button>
-            <Button>Accept</Button>
-          </div>
-        </CardHeader>
-      </Card>
+      {!isScoreApproval ||
+        (submission?.status === SubmissionEnum.SUBMITTED && (
+          <Card>
+            <CardHeader className="flex flex-row justify-between items-center">
+              <CardTitle className="text-lg font-bold">
+                Submitting Approval
+              </CardTitle>
+              <div className="flex gap-2">
+                <>
+                  <Button
+                    onClick={() => setReturnDialog(true)}
+                    variant="outline"
+                  >
+                    Return
+                  </Button>
+                  <Button onClick={() => setApproveDialog(true)}>
+                    Approve
+                  </Button>
+                </>
+              </div>
+            </CardHeader>
+          </Card>
+        ))}
 
       <Card>
-        <CardHeader className="flex flex-row justify-between w-full">
+        <CardHeader className="flex flex-row items-center justify-between w-full">
           <div>
             <CardTitle className="font-bold text-xl">Student List</CardTitle>
           </div>
+          {isScoreApproval ||
+            (submission?.status !== SubmissionEnum.SUBMITTED && (
+              <>
+                <div className="flex items-center gap-4">
+                  {/* Label */}
+                  <span className="text-muted-foreground font-medium">
+                    Export Data By Class:
+                  </span>
+
+                  {/* Excel Export Button */}
+                  <Button variant="outline" className="gap-2">
+                    <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">X</span>
+                    </div>
+                    <span>Excel</span>
+                    <Download className="w-4 h-4" />
+                  </Button>
+
+                  {/* PDF Export Button */}
+                  <Button variant="outline" className="gap-2">
+                    <div className="w-5 h-5 border-2 border-red-500 rounded flex items-center justify-center">
+                      <span className="text-red-500 text-[10px] font-bold">
+                        PDF
+                      </span>
+                    </div>
+                    <span>PDF</span>
+                    <Download className="w-4 h-4" />
+                  </Button>
+                </div>
+              </>
+            ))}
         </CardHeader>
+        <div className="w-full px-4">
+          <Separator className="bg-gray-300" />
+        </div>
         <CardContent className="p-4">
-          <p className="text-muted-foreground mb-4">
-            Total Students:{" "}
-            <span className="font-bold">
-              {students?.studentScores.length || 0}
-            </span>
-          </p>
+          <div className="flex flex-row gap-2">
+            <p className="mb-4">
+              <span className="text-gray-500">Total Students: </span>
+              <span className="font-semibold">
+                {submission?.studentScores.length || 0}
+              </span>
+            </p>
+            <span className="text-gray-500">|</span>
+            <p className="mb-4">
+              <span className="text-gray-500">Submit Date:</span>{" "}
+              <span className="font-semibold">
+                {submission?.submissionDate
+                  ? formatDate(new Date(submission.submissionDate), "PP")
+                  : "N/A"}
+              </span>
+            </p>
+          </div>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-black hover:bg-black">
                   <TableHead className="text-white w-12">#</TableHead>
                   <TableHead className="text-white">Student ID</TableHead>
-                  <TableHead className="text-white">Fullname</TableHead>
+                  <TableHead className="text-white">Fullname (KH)</TableHead>
+                  <TableHead className="text-white">Fullname (EN)</TableHead>
                   <TableHead className="text-white text-center">
                     Att. (10%)
                   </TableHead>
@@ -162,7 +240,7 @@ export default function ScoreSubmissionDetailPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {students?.studentScores.map((student, index) => {
+                {submission?.studentScores?.map((student, index) => {
                   const indexDisplay = index + 1;
 
                   return (
@@ -172,43 +250,22 @@ export default function ScoreSubmissionDetailPage() {
                       </TableCell>
                       <TableCell>{student.studentId}</TableCell>
                       <TableCell className="font-medium">
-                        {student.studentName}
+                        {student.studentNameKhmer}
                       </TableCell>
-                      <TableCell>
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            value={student.attendanceScore}
-                            className="w-20 text-center"
-                            min="0"
-                            max="100"
-                          />
-                        </div>
+                      <TableCell className="font-medium">
+                        {student.studentNameEnglish}
                       </TableCell>
-                      <TableCell>
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            value={student.assignmentScore}
-                            className="w-20 text-center"
-                            min="0"
-                            max="100"
-                          />
-                        </div>
+                      <TableCell className="font-medium">
+                        {student.attendanceScore}
                       </TableCell>
-                      <TableCell>
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            value={student.midtermScore}
-                            className="w-20 text-center"
-                            min="0"
-                            max="100"
-                          />
-                        </div>
+                      <TableCell className="font-medium">
+                        {student.assignmentScore}
                       </TableCell>
-                      <TableCell>
-                        <div className="relative"></div>
+                      <TableCell className="font-medium">
+                        {student.midtermScore}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {student.finalScore}
                       </TableCell>
                       <TableCell className="text-center font-bold">
                         {student.totalScore}
@@ -239,27 +296,7 @@ export default function ScoreSubmissionDetailPage() {
         </CardContent>
       </Card>
 
-      {submission.status === "pending" && (
-        <div className="flex justify-end gap-2 mt-6">
-          <Button
-            variant="outline"
-            className="gap-1 border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600"
-            onClick={handleReject}
-          >
-            <X className="h-4 w-4" />
-            REJECT
-          </Button>
-          <Button
-            className="bg-emerald-700 hover:bg-emerald-800 gap-1"
-            onClick={handleApprove}
-          >
-            <Check className="h-4 w-4" />
-            APPROVE
-          </Button>
-        </div>
-      )}
-
-      {submission.status === "approved" && (
+      {submission?.status === "approved" && (
         <div className="flex justify-center bg-green-50 p-4 rounded-md mt-6">
           <div className="flex items-center gap-2 text-green-700">
             <Check className="h-5 w-5" />
@@ -271,7 +308,29 @@ export default function ScoreSubmissionDetailPage() {
         </div>
       )}
 
-      {submission.status === "rejected" && (
+      <ScoreSubmitConfirmDialog
+        open={approveDialog}
+        title="Confirm Approve!"
+        description="Are u sure u want to approve the students score?"
+        onConfirm={handleApproval}
+        cancelText="Discard"
+        onOpenChange={() => {
+          setApproveDialog(false);
+        }}
+      />
+
+      <ReturnDialog
+        open={returnDialog}
+        title="Confirm Return!"
+        description="Are u sure u want to return the students score?"
+        onConfirm={handleReturn}
+        cancelText="Discard"
+        onOpenChange={() => {
+          setReturnDialog(false);
+        }}
+      />
+
+      {submission?.status === "rejected" && (
         <div className="flex justify-center bg-red-50 p-4 rounded-md mt-6">
           <div className="flex items-center gap-2 text-red-700">
             <AlertTriangle className="h-5 w-5" />

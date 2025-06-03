@@ -29,7 +29,7 @@ export interface ScoreSubmittedModel {
   createdAt: string;
   updatedAt: string;
   semester: Semester;
-  studentScores: StudentScoreModel[];
+  studentScores: SubmittedScoreModel[];
 }
 
 interface Semester {
@@ -43,7 +43,7 @@ interface Semester {
   createdAt: string;
 }
 
-interface StudentScore {
+export interface SubmittedScoreModel {
   id: number;
   studentId: string;
   studentNameKhmer: string;
