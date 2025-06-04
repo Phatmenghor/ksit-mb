@@ -163,11 +163,9 @@ const ScheduleAllPage = () => {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Schedule</BreadcrumbPage>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>All Schedule</BreadcrumbPage>
+                <BreadcrumbLink href={ROUTE.SCHEDULE.ROOT}>
+                  Schedule
+                </BreadcrumbLink>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
