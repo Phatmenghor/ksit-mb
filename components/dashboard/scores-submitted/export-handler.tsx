@@ -11,9 +11,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { exportSubmissionStudentsToPDF } from "@/utils/generate-file/score/pdf-submission-score";
 import { exportApprovedStudentsToExcelAdvanced } from "@/utils/generate-file/score/excel-submission-score";
+import { ScoreSubmittedModel } from "@/model/score/submitted-score/submitted-score.response.model";
+import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 
 // Enhanced export handlers with improved functionality
-export const useExportHandlers = (submission: any) => {
+export const useExportHandlers = (
+  submission: ScoreSubmittedModel | null,
+  schedule: ScheduleModel | null
+) => {
   const [isExporting, setIsExporting] = useState(false);
   const [exportType, setExportType] = useState<"excel" | "pdf" | null>(null);
 
@@ -54,7 +59,7 @@ export const useExportHandlers = (submission: any) => {
       toast.loading("Preparing Excel export...", { id: "excel-export" });
 
       await exportApprovedStudentsToExcelAdvanced(
-        submission.studentScores,
+        submission?.studentScores ?? [],
         fileName,
         {
           includeComments: options?.includeComments ?? true,
@@ -65,7 +70,7 @@ export const useExportHandlers = (submission: any) => {
       );
 
       toast.success(
-        `Excel file exported successfully! (${submission.studentScores.length} students)`,
+        `Excel file exported successfully! (${submission?.studentScores.length} students)`,
         { id: "excel-export" }
       );
     } catch (error) {
@@ -97,24 +102,36 @@ export const useExportHandlers = (submission: any) => {
 
       toast.loading("Generating PDF report...", { id: "pdf-export" });
 
-      await exportSubmissionStudentsToPDF(submission.studentScores, fileName, {
-        title: `${submission?.courseName || "Course"} Score Report`,
-        subtitle: `Class: ${submission?.classCode || "N/A"} | Semester: ${
-          submission?.semester?.semester || "N/A"
-        }`,
-        teacherName: submission?.teacherName,
-        courseName: submission?.courseName,
-        semester: submission?.semester?.semester,
-        classCode: submission?.classCode,
-        orientation: options?.orientation || "landscape",
-        pageSize: options?.pageSize || "a4",
-        includeComments: options?.includeComments ?? true,
-        includeCreatedAt: options?.includeCreatedAt ?? false,
-        showGradeColors: true,
-      });
+      await exportSubmissionStudentsToPDF(
+        submission?.studentScores ?? [],
+        fileName,
+        {
+          title: `${submission?.courseName || "Course"} Score Report`,
+          subtitle: `Class: ${submission?.classCode || "N/A"} | Semester: ${
+            submission?.semester?.semester || "N/A"
+          }`,
+          teacherName: submission?.teacherName || "N/A",
+          courseName: submission?.courseName || "N/A",
+          semester: submission?.semester?.semester || "N/A",
+          classCode: submission?.classCode || "N/A",
+          credit: schedule?.course?.credit ?? 0,
+          degree: schedule?.classes?.degree || "N/A",
+          department: schedule?.classes?.major?.department?.name || "N/A",
+          levelYear: schedule?.academyYear || "N/A",
+          major: schedule?.classes?.major?.name || "N/A",
+          subjectName: schedule?.course?.subject?.name || "N/A",
+          subjectCode: schedule?.course?.subject?.code || "N/A", // <-- added subjectCode fallback
+          yearOfStudy: new Date().getFullYear().toString(),
+          orientation: options?.orientation || "landscape",
+          pageSize: options?.pageSize || "a4",
+          includeComments: options?.includeComments ?? true,
+          includeCreatedAt: options?.includeCreatedAt ?? false,
+          showGradeColors: true,
+        }
+      );
 
       toast.success(
-        `PDF report generated successfully! (${submission.studentScores.length} students)`,
+        `PDF report generated successfully! (${submission?.studentScores.length} students)`,
         { id: "pdf-export" }
       );
     } catch (error) {
@@ -166,12 +183,18 @@ export const useExportHandlers = (submission: any) => {
     handleQuickExcelExport,
     handleQuickPDFExport,
     handleExportBoth,
-    hasData: submission?.studentScores?.length > 0,
+    hasData: (submission?.studentScores?.length ?? 0) > 0,
   };
 };
 
 // Export Button Component with Dropdown Options
-export const ExportButtonGroup = ({ submission }: { submission: any }) => {
+export const ExportButtonGroup = ({
+  submission,
+  schedule,
+}: {
+  submission: ScoreSubmittedModel;
+  schedule: ScheduleModel;
+}) => {
   const {
     isExporting,
     exportType,
@@ -179,7 +202,7 @@ export const ExportButtonGroup = ({ submission }: { submission: any }) => {
     handleExportToPDF,
     handleExportBoth,
     hasData,
-  } = useExportHandlers(submission);
+  } = useExportHandlers(submission, schedule);
 
   if (!hasData) {
     return (
@@ -279,14 +302,20 @@ export const ExportButtonGroup = ({ submission }: { submission: any }) => {
 };
 
 // Simple Export Buttons (Alternative Implementation)
-export const SimpleExportButtons = ({ submission }: { submission: any }) => {
+export const SimpleExportButtons = ({
+  submission,
+  schedule,
+}: {
+  submission: ScoreSubmittedModel;
+  schedule: ScheduleModel;
+}) => {
   const {
     isExporting,
     exportType,
     handleQuickExcelExport,
     handleQuickPDFExport,
     hasData,
-  } = useExportHandlers(submission);
+  } = useExportHandlers(submission, schedule);
 
   if (!hasData) return null;
 

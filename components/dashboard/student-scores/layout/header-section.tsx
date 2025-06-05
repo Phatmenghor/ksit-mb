@@ -10,7 +10,7 @@ import React from "react";
 
 interface Props {
   title: string;
-  schedule?: ScheduleModel | null;
+  schedule: ScheduleModel | null;
 }
 
 export default function StudentScoreHeader({ title, schedule }: Props) {

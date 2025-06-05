@@ -24,7 +24,8 @@ export interface SessionScoreModel {
 export interface StudentScoreModel {
   id: number;
   studentId: number;
-  studentName: string;
+  studentNameKhmer: string;
+  studentNameEnglish: string;
   studentCode: string;
   attendanceScore: number;
   assignmentScore: number;

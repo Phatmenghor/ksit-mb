@@ -535,7 +535,8 @@ export default function StudentScoreDetailsPage() {
                   <TableRow className="bg-black hover:bg-black">
                     <TableHead className="text-white w-12">#</TableHead>
                     <TableHead className="text-white">Student ID</TableHead>
-                    <TableHead className="text-white">Fullname</TableHead>
+                    <TableHead className="text-white">Fullname (KH)</TableHead>
+                    <TableHead className="text-white">Fullname (EN)</TableHead>
                     <TableHead className="text-white text-center">
                       Att. (10%)
                     </TableHead>
@@ -575,7 +576,10 @@ export default function StudentScoreDetailsPage() {
                         </TableCell>
                         <TableCell>{student.studentId}</TableCell>
                         <TableCell className="font-medium">
-                          {student.studentName}
+                          {student.studentNameKhmer}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {student.studentNameEnglish}
                         </TableCell>
                         <TableCell className="text-center">
                           {student.attendanceScore}

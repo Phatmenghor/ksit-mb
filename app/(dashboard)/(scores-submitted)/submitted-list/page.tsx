@@ -63,6 +63,7 @@ export default function ScoreSubmittedPage() {
           status: currentStatus,
           search: debouncedSearchQuery,
         });
+        console.log("Submission: ", response);
 
         if (response) {
           setSubmissions(response);
@@ -167,9 +168,7 @@ export default function ScoreSubmittedPage() {
                   <Button
                     onClick={() =>
                       router.push(
-                        ROUTE.SCORES.SUBMITTED_DETAIL(
-                          String(submission.teacherId)
-                        )
+                        ROUTE.SCORES.SUBMITTED_DETAIL(String(submission.id))
                       )
                     }
                     variant="outline"

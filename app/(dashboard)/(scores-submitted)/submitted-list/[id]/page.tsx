@@ -26,7 +26,6 @@ import {
   getSubmissionScoreByIdService,
   submittedScoreService,
 } from "@/service/score/score.service";
-import { useDebounce } from "@/utils/debounce/debounce";
 import { toast } from "sonner";
 import { SubmissionEnum } from "@/constants/constant";
 import { ScoreSubmitConfirmDialog } from "@/components/dashboard/student-scores/layout/submit-confirm-dialog";
@@ -36,28 +35,35 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "date-fns";
 import { ROUTE } from "@/constants/routes";
 import { useExportHandlers } from "@/components/dashboard/scores-submitted/export-handler";
+import { getDetailScheduleService } from "@/service/schedule/schedule.service";
+import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 
 export default function ScoreSubmissionDetailPage() {
   const [submission, setSubmissions] = useState<ScoreSubmittedModel | null>(
     null
   );
-  const [searchQuery, setSearchQuery] = useState("");
+  const [scheduleDetail, setScheduleDetail] = useState<ScheduleModel | null>(
+    null
+  );
+
   const [approveDialog, setApproveDialog] = useState(false);
   const [returnDialog, setReturnDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [isScoreApproval, setIsScoreApproval] = useState(false);
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
-  const { handleQuickPDFExport, handleQuickExcelExport } =
-    useExportHandlers(submission);
+  const { handleExportToPDF, handleExportToExcel } = useExportHandlers(
+    submission,
+    scheduleDetail
+  );
 
   const loadStudentSubmittedScore = useCallback(async () => {
     setIsLoading(true);
 
     try {
       const response = await getSubmissionScoreByIdService(Number(id));
+      console.log("##Submission detail: ", response);
 
       if (response) {
         setSubmissions(response);
@@ -69,17 +75,37 @@ export default function ScoreSubmissionDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [debouncedSearchQuery]);
+  }, [id]);
+
+  const loadSchedule = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await getDetailScheduleService(
+        Number(submission?.scheduleId)
+      );
+      setScheduleDetail(response);
+    } catch (error) {
+      console.error("Error fetching schedule data:", error);
+      toast.error("An error occurred while loading schedule");
+      setScheduleDetail(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [submission?.scheduleId]);
 
   useEffect(() => {
     loadStudentSubmittedScore();
   }, [loadStudentSubmittedScore]);
 
+  useEffect(() => {
+    loadSchedule();
+  }, [loadSchedule]);
+
   const handleReturn = async () => {
     // Logic to reject the submission
     try {
       const response = await submittedScoreService({
-        id: submission?.teacherId ?? 0,
+        id: submission?.id ?? 0,
         status: SubmissionEnum.DRAFT,
       });
 
@@ -105,7 +131,7 @@ export default function ScoreSubmissionDetailPage() {
     // Logic to reject the submission
     try {
       const payload: SubmitScoreModel = {
-        id: submission?.teacherId ?? 0,
+        id: submission?.id ?? 0,
         status: SubmissionEnum.APPROVED,
       };
 
@@ -130,31 +156,28 @@ export default function ScoreSubmissionDetailPage() {
 
   return (
     <div className="container space-y-4">
-      <StudentScoreHeader title="View Score Submitted Detail" />
+      <StudentScoreHeader
+        schedule={scheduleDetail}
+        title="View Score Submitted Detail"
+      />
 
-      {!isScoreApproval ||
-        (submission?.status === SubmissionEnum.SUBMITTED && (
-          <Card>
-            <CardHeader className="flex flex-row justify-between items-center">
-              <CardTitle className="text-lg font-bold">
-                Submitting Approval
-              </CardTitle>
-              <div className="flex gap-2">
-                <>
-                  <Button
-                    onClick={() => setReturnDialog(true)}
-                    variant="outline"
-                  >
-                    Return
-                  </Button>
-                  <Button onClick={() => setApproveDialog(true)}>
-                    Approve
-                  </Button>
-                </>
-              </div>
-            </CardHeader>
-          </Card>
-        ))}
+      {!isScoreApproval && submission?.status === SubmissionEnum.SUBMITTED && (
+        <Card>
+          <CardHeader className="flex flex-row justify-between items-center">
+            <CardTitle className="text-lg font-bold">
+              Submitting Approval
+            </CardTitle>
+            <div className="flex gap-2">
+              <>
+                <Button onClick={() => setReturnDialog(true)} variant="outline">
+                  Return
+                </Button>
+                <Button onClick={() => setApproveDialog(true)}>Approve</Button>
+              </>
+            </div>
+          </CardHeader>
+        </Card>
+      )}
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between w-full">
@@ -172,7 +195,12 @@ export default function ScoreSubmissionDetailPage() {
 
                   {/* Excel Export Button */}
                   <Button
-                    onClick={handleQuickExcelExport}
+                    onClick={() =>
+                      handleExportToExcel({
+                        includeComments: false,
+                        includeCreatedAt: true,
+                      })
+                    }
                     variant="outline"
                     className="gap-2"
                   >
@@ -185,7 +213,11 @@ export default function ScoreSubmissionDetailPage() {
 
                   {/* PDF Export Button */}
                   <Button
-                    onClick={handleQuickPDFExport}
+                    onClick={() =>
+                      handleExportToPDF({
+                        includeComments: false,
+                      })
+                    }
                     variant="outline"
                     className="gap-2"
                   >
@@ -230,6 +262,7 @@ export default function ScoreSubmissionDetailPage() {
                   <TableHead className="text-white">Student ID</TableHead>
                   <TableHead className="text-white">Fullname (KH)</TableHead>
                   <TableHead className="text-white">Fullname (EN)</TableHead>
+
                   <TableHead className="text-white text-center">
                     Att. (10%)
                   </TableHead>
@@ -259,27 +292,29 @@ export default function ScoreSubmissionDetailPage() {
                       <TableCell className="font-medium">
                         {indexDisplay}
                       </TableCell>
-                      <TableCell>{student.studentId}</TableCell>
                       <TableCell className="font-medium">
-                        {student.studentNameKhmer}
+                        {student.studentId?.trim() || "---"}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {student.studentNameEnglish}
+                        {student.studentNameKhmer?.trim() || "---"}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {student.attendanceScore}
+                        {student.studentNameEnglish?.trim() || "---"}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {student.assignmentScore}
+                        {student.attendanceScore ?? "---"}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {student.midtermScore}
+                        {student.assignmentScore ?? "---"}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {student.finalScore}
+                        {student.midtermScore ?? "---"}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {student.finalScore ?? "---"}
                       </TableCell>
                       <TableCell className="text-center font-bold">
-                        {student.totalScore}
+                        {student.totalScore ?? "---"}
                       </TableCell>
                       <TableCell className="text-center">
                         <span
@@ -295,7 +330,7 @@ export default function ScoreSubmissionDetailPage() {
                               : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {student.grade}
+                          {student.grade ?? "---"}
                         </span>
                       </TableCell>
                     </TableRow>
