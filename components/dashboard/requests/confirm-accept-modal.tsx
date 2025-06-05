@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 
 interface ConfirmAcceptModalProps {
   open: boolean;
