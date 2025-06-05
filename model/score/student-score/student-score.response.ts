@@ -1,3 +1,5 @@
+import { SemesterModel } from "@/model/master-data/semester/semester-model";
+
 export interface StudentScoreInitModel {
   status: string;
   message: string;
@@ -7,26 +9,28 @@ export interface StudentScoreInitModel {
 export interface SessionScoreModel {
   id: number;
   scheduleId: number;
-  className: string;
+  classCode: string;
   courseName: string;
   teacherId: number;
   teacherName: string;
-  reviewerId: number;
-  reviewerName: string;
   status: string;
   teacherComments: string;
   staffComments: string;
   submissionDate: string;
-  reviewDate: string;
+  createdAt: string;
+  updatedAt: string;
+  semester: SemesterModel;
   studentScores: StudentScoreModel[];
 }
 
 export interface StudentScoreModel {
   id: number;
-  studentId: number;
   studentNameKhmer: string;
   studentNameEnglish: string;
-  studentCode: string;
+  studentIdentityNumber: number;
+  gender: string;
+  studentId: number;
+  dateOfBirth: string;
   attendanceScore: number;
   assignmentScore: number;
   midtermScore: number;
@@ -34,4 +38,5 @@ export interface StudentScoreModel {
   totalScore: number;
   grade: string;
   comments: string;
+  createdAt: string;
 }

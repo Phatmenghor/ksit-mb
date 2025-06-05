@@ -244,6 +244,7 @@ export default function ScoreSubmissionDetailPage() {
                 {submission?.studentScores.length || 0}
               </span>
             </p>
+
             <span className="text-gray-500">|</span>
             <p className="mb-4">
               <span className="text-gray-500">Submit Date:</span>{" "}
@@ -262,7 +263,8 @@ export default function ScoreSubmissionDetailPage() {
                   <TableHead className="text-white">Student ID</TableHead>
                   <TableHead className="text-white">Fullname (KH)</TableHead>
                   <TableHead className="text-white">Fullname (EN)</TableHead>
-
+                  <TableHead className="text-white">Gender</TableHead>
+                  <TableHead className="text-white">Birth Date</TableHead>
                   <TableHead className="text-white text-center">
                     Att. (10%)
                   </TableHead>
@@ -293,28 +295,34 @@ export default function ScoreSubmissionDetailPage() {
                         {indexDisplay}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {student.studentId?.trim() || "---"}
+                        {student?.studentId || "---"}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {student.studentNameKhmer?.trim() || "---"}
+                        {student?.studentNameKhmer?.trim() || "---"}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {student.studentNameEnglish?.trim() || "---"}
+                        {student?.studentNameEnglish?.trim() || "---"}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {student.attendanceScore ?? "---"}
+                        {student?.gender ?? "---"}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {student.assignmentScore ?? "---"}
+                        {student?.dateOfBirth ?? "---"}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {student.midtermScore ?? "---"}
+                        {student?.attendanceScore ?? "---"}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {student.finalScore ?? "---"}
+                        {student?.assignmentScore ?? "---"}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {student?.midtermScore ?? "---"}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {student?.finalScore ?? "---"}
                       </TableCell>
                       <TableCell className="text-center font-bold">
-                        {student.totalScore ?? "---"}
+                        {student?.totalScore ?? "---"}
                       </TableCell>
                       <TableCell className="text-center">
                         <span

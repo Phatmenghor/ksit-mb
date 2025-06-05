@@ -54,10 +54,11 @@ import { ROUTE } from "@/constants/routes";
 import { Badge } from "@/components/ui/badge";
 import { getDetailScheduleService } from "@/service/schedule/schedule.service";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
-import Loading from "@/app/(dashboard)/requests/loading";
 import { ScoreSubmitConfirmDialog } from "@/components/dashboard/student-scores/layout/submit-confirm-dialog";
 import { SubmissionEnum } from "@/constants/constant";
 import { formatDate } from "date-fns";
+import Loading from "@/app/(dashboard)/settings/theme/loading";
+import _ from "lodash";
 
 export default function StudentScoreDetailsPage() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -124,7 +125,6 @@ export default function StudentScoreDetailsPage() {
         const response = await intiStudentsScoreService({
           scheduleId: scheduleDetail?.id,
         });
-
         console.log("##data", response);
 
         setStudents(response);
@@ -142,8 +142,15 @@ export default function StudentScoreDetailsPage() {
         setOriginalData(originalMap);
         setUnsavedChanges(new Set());
         setIsSubmitted(false);
-      } catch (error) {
-        toast.error("An error occurred while loading student score");
+      } catch (error: any) {
+        const suppressedMessage =
+          "An unexpected error occurred. Please try again later or contact support if the problem persists.";
+
+        if (error.message !== suppressedMessage) {
+          toast.error("An error occurred while loading student score");
+        } else {
+          console.warn("Suppressed backend error:", error.message);
+        }
       } finally {
         if (showLoader) {
           // Add a small delay for smooth animation
@@ -168,7 +175,7 @@ export default function StudentScoreDetailsPage() {
 
     try {
       const response = await submittedScoreService({
-        id: scheduleDetail?.id ?? 0,
+        id: Number(id) ?? 0,
         status: SubmissionEnum.SUBMITTED ?? "SUBMITTED",
       });
 
@@ -519,15 +526,19 @@ export default function StudentScoreDetailsPage() {
                   {students?.studentScores.length || 0}
                 </span>
               </p>
-              <span className="text-gray-500">|</span>
-              <p className="mb-4">
-                <span className="text-gray-500">Submitted Date:</span>{" "}
-                <span className="font-semibold">
-                  {students?.submissionDate
-                    ? formatDate(new Date(students.submissionDate), "PP")
-                    : "N/A"}
-                </span>
-              </p>
+              {isSubmittingToStaff && (
+                <div>
+                  <span className="text-gray-500">|</span>
+                  <p className="mb-4">
+                    <span className="text-gray-500">Submitted Date:</span>{" "}
+                    <span className="font-semibold">
+                      {students?.submissionDate
+                        ? formatDate(new Date(students.submissionDate), "PP")
+                        : "N/A"}
+                    </span>
+                  </p>
+                </div>
+              )}
             </div>
             <div className="overflow-x-auto">
               <Table>
@@ -537,6 +548,8 @@ export default function StudentScoreDetailsPage() {
                     <TableHead className="text-white">Student ID</TableHead>
                     <TableHead className="text-white">Fullname (KH)</TableHead>
                     <TableHead className="text-white">Fullname (EN)</TableHead>
+                    <TableHead className="text-white">Gender</TableHead>
+                    <TableHead className="text-white">Birth Date</TableHead>
                     <TableHead className="text-white text-center">
                       Att. (10%)
                     </TableHead>
@@ -567,181 +580,198 @@ export default function StudentScoreDetailsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students?.studentScores?.map((student, index) => {
-                    const indexDisplay = index + 1;
-                    return (
-                      <TableRow key={student.id} className="hover:bg-gray-50">
-                        <TableCell className="font-medium">
-                          {indexDisplay}
-                        </TableCell>
-                        <TableCell>{student.studentId}</TableCell>
-                        <TableCell className="font-medium">
-                          {student.studentNameKhmer}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {student.studentNameEnglish}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {student.attendanceScore}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {mode === "edit-score" ? (
-                            <Input
-                              type="number"
-                              value={student.assignmentScore}
-                              disabled={isSubmitting}
-                              className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
-                                unsavedChanges.has(student.id)
-                                  ? "border-yellow-300 ring-1 ring-yellow-200"
-                                  : ""
-                              } ${isSubmitted ? "cursor-not-allowed" : ""}`}
-                              onChange={(e) =>
-                                handleFieldChange(
-                                  student.id,
-                                  "assignmentScore",
-                                  e.target.value
-                                )
-                              }
-                              min="0"
-                              max="100"
-                            />
-                          ) : (
-                            <span>{student.assignmentScore}</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {mode === "edit-score" ? (
-                            <Input
-                              type="number"
-                              disabled={isSubmitting}
-                              value={student.midtermScore}
-                              className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
-                                unsavedChanges.has(student.id)
-                                  ? "border-yellow-300 ring-1 ring-yellow-200"
-                                  : ""
-                              } ${isSubmitted ? "cursor-not-allowed" : ""}`}
-                              onChange={(e) =>
-                                handleFieldChange(
-                                  student.id,
-                                  "midtermScore",
-                                  e.target.value
-                                )
-                              }
-                              min="0"
-                              max="100"
-                            />
-                          ) : (
-                            <span>{student.midtermScore}</span>
-                          )}
-                        </TableCell>
-
-                        <TableCell className="text-center">
-                          {mode === "edit-score" ? (
-                            <Input
-                              type="number"
-                              value={student.finalScore}
-                              disabled={isSubmitting}
-                              className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
-                                unsavedChanges.has(student.id)
-                                  ? "border-yellow-300 ring-1 ring-yellow-200"
-                                  : ""
-                              } ${isSubmitted ? "cursor-not-allowed" : ""}`}
-                              onChange={(e) =>
-                                handleFieldChange(
-                                  student.id,
-                                  "finalScore",
-                                  e.target.value
-                                )
-                              }
-                              min="0"
-                              max="100"
-                            />
-                          ) : (
-                            <span>{student.finalScore}</span>
-                          )}
-                        </TableCell>
-
-                        {mode === "view" && (
-                          <TableCell className="text-center font-bold">
-                            <span>{student.totalScore}</span>
+                  {students?.studentScores.length === 0 || students === null ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={15}
+                        className="text-center italic text-gray-500"
+                      >
+                        No students found in this class.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    students?.studentScores?.map((student, index) => {
+                      const indexDisplay = index + 1;
+                      return (
+                        <TableRow key={student.id} className="hover:bg-gray-50">
+                          <TableCell className="font-medium">
+                            {indexDisplay}
                           </TableCell>
-                        )}
-
-                        {mode === "view" && (
+                          <TableCell>{student?.studentId}</TableCell>
+                          <TableCell className="font-medium">
+                            {student?.studentNameKhmer?.trim() ?? "---"}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {student?.studentNameEnglish?.trim() ?? "---"}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {student?.gender ?? "---"}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {student?.dateOfBirth ?? "---"}
+                          </TableCell>
                           <TableCell className="text-center">
-                            <span
-                              className={`font-bold px-2 py-1 rounded text-sm ${
-                                student.grade === "A"
-                                  ? "bg-green-100 text-green-800"
-                                  : student.grade === "B"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : student.grade === "C"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : student.grade === "D"
-                                  ? "bg-orange-100 text-orange-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {student.grade}
-                            </span>
+                            {student?.attendanceScore ?? 0}
                           </TableCell>
-                        )}
-
-                        {mode === "view" ? (
-                          <TableCell>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    onClick={() => {
-                                      router.push(
-                                        `${ROUTE.USERS.VIEW_TEACHER(
-                                          String(student.id)
-                                        )}`
-                                      );
-                                    }}
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
-                                    disabled={isSubmitting}
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Detail</TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </TableCell>
-                        ) : mode === "edit-score" ? (
-                          <TableCell>
-                            {isSubmitted ? (
-                              <Badge variant="secondary" className="text-xs">
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Submitted
-                              </Badge>
-                            ) : unsavedChanges.has(student.id) ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                  handleRemoveFromUnsaved(student.id)
+                          <TableCell className="text-center">
+                            {mode === "edit-score" ? (
+                              <Input
+                                type="number"
+                                value={student.assignmentScore}
+                                disabled={isSubmitting}
+                                className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
+                                  unsavedChanges.has(student.id)
+                                    ? "border-yellow-300 ring-1 ring-yellow-200"
+                                    : ""
+                                } ${isSubmitted ? "cursor-not-allowed" : ""}`}
+                                onChange={(e) =>
+                                  handleFieldChange(
+                                    student.id,
+                                    "assignmentScore",
+                                    e.target.value
+                                  )
                                 }
-                                className="text-red-500 hover:text-red-700"
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
+                                min="0"
+                                max="100"
+                              />
                             ) : (
-                              <Badge variant="secondary" className="text-xs">
-                                Saved
-                              </Badge>
+                              <span>{student?.assignmentScore ?? 0}</span>
                             )}
                           </TableCell>
-                        ) : (
-                          <></>
-                        )}
-                      </TableRow>
-                    );
-                  })}
+                          <TableCell className="text-center">
+                            {mode === "edit-score" ? (
+                              <Input
+                                type="number"
+                                disabled={isSubmitting}
+                                value={student.midtermScore}
+                                className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
+                                  unsavedChanges.has(student.id)
+                                    ? "border-yellow-300 ring-1 ring-yellow-200"
+                                    : ""
+                                } ${isSubmitted ? "cursor-not-allowed" : ""}`}
+                                onChange={(e) =>
+                                  handleFieldChange(
+                                    student.id,
+                                    "midtermScore",
+                                    e.target.value
+                                  )
+                                }
+                                min="0"
+                                max="100"
+                              />
+                            ) : (
+                              <span>{student?.midtermScore ?? 0}</span>
+                            )}
+                          </TableCell>
+
+                          <TableCell className="text-center">
+                            {mode === "edit-score" ? (
+                              <Input
+                                type="number"
+                                value={student.finalScore}
+                                disabled={isSubmitting}
+                                className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
+                                  unsavedChanges.has(student.id)
+                                    ? "border-yellow-300 ring-1 ring-yellow-200"
+                                    : ""
+                                } ${isSubmitted ? "cursor-not-allowed" : ""}`}
+                                onChange={(e) =>
+                                  handleFieldChange(
+                                    student.id,
+                                    "finalScore",
+                                    e.target.value
+                                  )
+                                }
+                                min="0"
+                                max="100"
+                              />
+                            ) : (
+                              <span>{student?.finalScore ?? 0}</span>
+                            )}
+                          </TableCell>
+
+                          {mode === "view" && (
+                            <TableCell className="text-center font-bold">
+                              <span>{student?.totalScore ?? 0}</span>
+                            </TableCell>
+                          )}
+
+                          {mode === "view" && (
+                            <TableCell className="text-center">
+                              <span
+                                className={`font-bold px-2 py-1 rounded text-sm ${
+                                  student.grade === "A"
+                                    ? "bg-green-100 text-green-800"
+                                    : student.grade === "B"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : student.grade === "C"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : student.grade === "D"
+                                    ? "bg-orange-100 text-orange-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {student?.grade ?? "---"}
+                              </span>
+                            </TableCell>
+                          )}
+
+                          {mode === "view" ? (
+                            <TableCell>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      onClick={() => {
+                                        router.push(
+                                          `${ROUTE.USERS.VIEW_TEACHER(
+                                            String(student.id)
+                                          )}`
+                                        );
+                                      }}
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                      disabled={isSubmitting}
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Detail</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </TableCell>
+                          ) : mode === "edit-score" ? (
+                            <TableCell>
+                              {isSubmitted ? (
+                                <Badge variant="secondary" className="text-xs">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Submitted
+                                </Badge>
+                              ) : unsavedChanges.has(student.id) ? (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleRemoveFromUnsaved(student.id)
+                                  }
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              ) : (
+                                <Badge variant="secondary" className="text-xs">
+                                  Saved
+                                </Badge>
+                              )}
+                            </TableCell>
+                          ) : (
+                            <></>
+                          )}
+                        </TableRow>
+                      );
+                    })
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -756,7 +786,7 @@ export default function StudentScoreDetailsPage() {
         </Card>
       </div>
 
-      {mode === "edit-score" && (
+      {mode === "edit-score" && students !== null && (
         <Card className="w-full">
           <CardContent className="flex justify-end gap-3 p-4">
             <Button

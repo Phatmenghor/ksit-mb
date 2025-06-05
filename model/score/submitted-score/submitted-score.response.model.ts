@@ -29,7 +29,7 @@ export interface ScoreSubmittedModel {
   createdAt: string;
   updatedAt: string;
   semester: Semester;
-  studentScores: SubmittedScoreModel[];
+  studentScores: StudentScoreModel[];
 }
 
 interface Semester {
@@ -40,20 +40,5 @@ interface Semester {
   academyYear: number;
   semesterType: string;
   status: string;
-  createdAt: string;
-}
-
-export interface SubmittedScoreModel {
-  id: number;
-  studentId: string;
-  studentNameKhmer: string;
-  studentNameEnglish: string;
-  attendanceScore: number;
-  assignmentScore: number;
-  midtermScore: number;
-  finalScore: number;
-  totalScore: number;
-  grade: string;
-  comments: string;
   createdAt: string;
 }

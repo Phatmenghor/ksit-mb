@@ -1,175 +1,157 @@
 "use client";
-import { ComboboxSelectSemester } from "@/components/shared/ComboBox/combobox-semester";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
-import { YearSelector } from "@/components/shared/year-selector";
+
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { ROUTE } from "@/constants/routes";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Clock,
+  Users,
+  MapPin,
+  Edit,
+  Pen,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
   DAYS_OF_WEEK,
-  DAYS_OF_WEEK_V1,
   DayType,
+  SemesterFilter,
   StatusEnum,
 } from "@/constants/constant";
-import { ROUTE } from "@/constants/routes";
-import { SemesterModel } from "@/model/master-data/semester/semester-model";
-import { ScheduleFilterModel } from "@/model/schedule/schedule/schedule-filter";
-import { AllScheduleModel } from "@/model/schedule/schedule/schedule-model";
-import { getAllScheduleService } from "@/service/schedule/schedule.service";
-import { useDebounce } from "@/utils/debounce/debounce";
-import { Clock, MapPin, Plus, User } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import Loading from "@/components/shared/loading";
 import { toast } from "sonner";
-import { groupBy } from "lodash";
-import { ScheduleModel } from "@/model/schedules/all-schedule-model";
-import { Button } from "@/components/ui/button";
+import {
+  getAllMyScheduleService,
+  getAllScheduleService,
+} from "@/service/schedule/schedule.service";
+import { AllScheduleModel } from "@/model/schedule/schedule/schedule-model";
+import { useDebounce } from "@/utils/debounce/debounce";
+import { Separator } from "@/components/ui/separator";
+import PaginationPage from "@/components/shared/pagination-page";
+import { useRouter } from "next/navigation";
 
-export default function StudentScorePage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectAcademicYear, setSelectAcademicYear] = useState<
-    number | undefined
-  >();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedSemester, setSelectedSemester] = useState<
-    SemesterModel | undefined
-  >();
-  const [selectedDay, setSelectedDay] = useState<DayType | null>(null);
+import { AllScheduleFilterModel } from "@/model/schedules/type-schedule-model";
+import { YearSelector } from "@/components/shared/year-selector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
+
+export default function AllSchedulePage() {
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [selectedDay, setSelectedDay] = useState<DayType>({
+    label: "All",
+    value: "ALL",
+  });
   const [scheduleData, setScheduleData] = useState<AllScheduleModel | null>(
     null
   );
-  const [initialLoadDone, setInitialLoadDone] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedSemester, setSelectedSemester] = useState<string>("ALL");
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const router = useRouter();
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const fetchSchedule = useCallback(
-    async (filters: ScheduleFilterModel = {}) => {
+    async (filters: AllScheduleFilterModel) => {
       setIsLoading(true);
       try {
-        const finalFilters: ScheduleFilterModel = {
-          ...filters,
+        const baseFilters = {
           search: debouncedSearchQuery,
-          academyYear: selectAcademicYear,
-          semester: selectedSemester?.semester,
-          dayOfWeek: selectedDay?.value,
           status: StatusEnum.ACTIVE,
+          academyYear: selectedYear,
+          semester: selectedSemester !== "ALL" ? selectedSemester : undefined,
+          dayOfWeek:
+            selectedDay?.value !== "ALL" ? selectedDay?.value : undefined,
+          ...filters,
         };
 
-        const response = await getAllScheduleService(finalFilters);
+        const response = await getAllMyScheduleService(baseFilters);
         setScheduleData(response);
       } catch (error) {
         console.error("Error fetching schedule data:", error);
-        toast.error("An error occurred while loading schedule");
+        toast.error("An error occurred while loading classes");
         setScheduleData(null);
       } finally {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, selectAcademicYear, selectedSemester, selectedDay]
+    [debouncedSearchQuery, selectedDay, selectedYear, selectedSemester]
   );
 
-  // Initialize selected day on component mount
+  // Fetch schedule when any filter changes
   useEffect(() => {
-    if (!initialLoadDone) {
-      const currentDate = new Date();
-      const currentDayId = currentDate.getDay();
-      const currentDay = DAYS_OF_WEEK_V1.find((day) => day.id === currentDayId);
-
-      setSelectedDay(currentDay || DAYS_OF_WEEK_V1[0]);
-      setInitialLoadDone(true);
-    }
-  }, [initialLoadDone]);
-
-  // Fetch schedule when filters change
-  useEffect(() => {
-    if (initialLoadDone) {
-      const hasActiveFilters = selectAcademicYear && selectedSemester;
-
-      if (hasActiveFilters) {
-        fetchSchedule({});
-      }
+    if (selectedDay) {
+      fetchSchedule({ pageNo: currentPage });
     }
   }, [
-    initialLoadDone,
-    debouncedSearchQuery,
-    selectAcademicYear,
-    selectedSemester,
     selectedDay,
+    selectedYear,
+    selectedSemester,
+    debouncedSearchQuery,
+    currentPage,
     fetchSchedule,
   ]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    setCurrentPage(1);
   };
 
   const handleYearChange = (year: number) => {
-    setSelectAcademicYear(year || undefined);
+    setSelectedYear(year);
+    setCurrentPage(1);
   };
 
-  const handleDayChange = (day: DayType) => {
+  const handleSemesterChange = (semester: string) => {
+    setSelectedSemester(semester);
+    setCurrentPage(1);
+  };
+
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -200, behavior: "smooth" });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 200, behavior: "smooth" });
+    }
+  };
+
+  const handleDaySelect = (day: DayType) => {
     setSelectedDay(day);
+    setCurrentPage(1);
   };
 
-  const handleSemesterChange = (semester: SemesterModel | null) => {
-    setSelectedSemester(semester ?? undefined);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
-
-  const formatTime = (time: string): string => {
-    return time.substring(0, 5); // Convert "08:00:00" to "08:00"
-  };
-
-  // Check if filters are applied
-  const hasFiltersApplied = Boolean(selectAcademicYear && selectedSemester);
-
-  // Group schedules by semester
-  const groupedBySemester = scheduleData
-    ? groupBy(scheduleData.content, (item: ScheduleModel) => item.semester.id)
-    : {};
-
-  const renderEmptyState = () => (
-    <Card>
-      <CardContent className="flex flex-col items-center space-y-4 justify-center text-center py-8">
-        <div className="w-full text-left">
-          <h3 className="text-base text-red-600">
-            No current schedule applied
-          </h3>
-        </div>
-        <Card className="rounded-lg w-full border-gray-400 p-4">
-          <div className="space-y-3">
-            <p className="text-sm text-gray-600">Empty Records</p>
-          </div>
-        </Card>
-      </CardContent>
-    </Card>
-  );
-
-  const renderDayTabs = () => (
-    <div className="flex flex-wrap gap-2">
-      {DAYS_OF_WEEK_V1.map((day) => (
-        <Button
-          key={day.id}
-          onClick={() => handleDayChange(day)}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-            selectedDay?.value === day.value
-              ? "bg-teal-600 text-white"
-              : "bg-white text-gray-700 hover:bg-gray-200"
-          }`}
-        >
-          {day.label}
-        </Button>
-      ))}
-    </div>
-  );
-
-  const renderLoadingState = () => (
-    <Card>
-      <CardContent className="text-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto"></div>
-        <p className="text-gray-500 mt-2">Loading schedules...</p>
-      </CardContent>
-    </Card>
-  );
 
   return (
-    <div className="space-y-4">
+    <div>
       <CardHeaderSection
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
@@ -179,108 +161,178 @@ export default function StudentScorePage() {
         searchPlaceholder="Search..."
         title="Student Score"
         onSearchChange={handleSearchChange}
-        buttonHref={ROUTE.STUDENTS.ADD_SINGLE}
-        buttonIcon={<Plus className="mr-2 h-2 w-2" />}
         customSelect={
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
             <div className="w-full min-w-[200px] md:w-1/2">
-              <YearSelector
-                title="Select Year"
-                onChange={handleYearChange}
-                value={selectAcademicYear || 0}
-              />
+              <div className="w-full min-w-[200px]">
+                <YearSelector
+                  title="Select Year"
+                  onChange={handleYearChange}
+                  value={selectedYear || 0}
+                />
+              </div>
             </div>
-            <div className="w-full min-w-[200px] md:w-1/2">
-              <ComboboxSelectSemester
-                dataSelect={selectedSemester ?? null}
-                onChangeSelected={handleSemesterChange}
-                disabled={isSubmitting}
-              />
-            </div>
+            <Select
+              onValueChange={handleSemesterChange}
+              value={selectedSemester}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a semester" />
+              </SelectTrigger>
+              <SelectContent>
+                {SemesterFilter.map((semester) => (
+                  <SelectItem key={semester.value} value={semester.value}>
+                    {semester.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         }
       />
 
-      {hasFiltersApplied ? (
-        <div className="space-y-6">
-          {renderDayTabs()}
+      <div className="relative flex items-center my-6 ">
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute left-0 z-10 rounded-full"
+          onClick={scrollLeft}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
 
-          {isLoading ? (
-            renderLoadingState()
-          ) : Object.keys(groupedBySemester).length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-8">
-                <p className="text-gray-500">
-                  No schedules found for the selected criteria.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            Object.entries(groupedBySemester).map(([semesterId, schedules]) => {
-              const scheduleArr: ScheduleModel[] = Array.isArray(schedules)
-                ? (schedules as unknown[]).filter(
-                    (item): item is ScheduleModel =>
-                      typeof item === "object" &&
-                      item !== null &&
-                      "course" in item &&
-                      "semester" in item &&
-                      "startTime" in item
-                  )
-                : [];
-              const semesterData = scheduleArr[0];
-              const semesterName =
-                semesterData?.semester.semester || `Semester ${semesterId}`;
-              const academyYear =
-                semesterData?.semester.academyYear || selectAcademicYear;
+        <div
+          ref={scrollContainerRef}
+          className="flex overflow-x-auto scrollbar-hide gap-2 px-16 scroll-smooth"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {DAYS_OF_WEEK.map((day) => (
+            <Button
+              key={day.value}
+              variant={selectedDay?.value === day.value ? "default" : "outline"}
+              className="whitespace-nowrap"
+              onClick={() => handleDaySelect(day)}
+            >
+              {day.label}
+            </Button>
+          ))}
+        </div>
 
-              return (
-                <div key={semesterId} className="rounded-xl border p-4 mb-6">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                    Year {academyYear} - {semesterName}
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {scheduleArr.map((schedule) => (
-                      <div
-                        key={schedule.id}
-                        className="flex flex-col border-l-4 rounded-lg bg-orange-50 border-yellow-500 p-4"
-                      >
-                        <h3 className="font-semibold text-gray-900">
-                          {schedule.course.code}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-2">
-                          {schedule.course.nameEn} - {schedule.course.credit}(
-                          {schedule.course.theory}, {schedule.course.execute},{" "}
-                          {schedule.course.apply})
-                        </p>
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute right-0 z-10 rounded-full"
+          onClick={scrollRight}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
 
-                        <div className="mt-auto flex flex-wrap gap-4 text-sm text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            <span>
-                              {formatTime(schedule.startTime)} -{" "}
-                              {formatTime(schedule.endTime)}
-                            </span>
+      <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="mb-4">
+          <h2 className="text-lg font-bold">
+            {selectedDay ? `${selectedDay.label}` : ""}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Total Schedule: {scheduleData?.totalElements || 0}
+          </p>
+        </div>
+
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <div>
+            {scheduleData && scheduleData.totalElements > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {scheduleData.content.map((sche) => (
+                  <Card
+                    key={sche.id}
+                    className="overflow-hidden bg-amber-50/50 transition-all hover:bg-amber-50 hover:shadow-md cursor-pointer"
+                    onClick={() =>
+                      router.push(
+                        ROUTE.SCORES.STUDENT_SCORE_DETAIL(String(sche.id))
+                      )
+                    }
+                  >
+                    <CardContent className="p-0">
+                      <div>
+                        <div className="p-4 flex-1">
+                          <div className="flex gap-4">
+                            <div className="flex border-l-4 border-amber-500 rounded-xl" />
+                            <div className="flex flex-col flex-1">
+                              <div className="flex items-center gap-1 justify-between">
+                                <div className="text-sm font-medium text-amber-500">
+                                  {sche.course.code}
+                                </div>
+                                <span className="text-sm font-medium text-muted-foreground">
+                                  {sche.day || "- - -"}
+                                </span>
+                              </div>
+                              <div className="text-sm font-medium">
+                                {sche.course.nameKH ||
+                                  sche.course.nameEn ||
+                                  "- - -"}
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <User className="w-4 h-4" />
-                            <span>{schedule.classes.degree}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            <span>{schedule.room.name}</span>
+
+                          <Separator className="my-2" />
+
+                          <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              <span>
+                                {sche.startTime} - {sche.endTime}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Users className="h-4 w-4" />
+                              <span>
+                                {(sche.teacher &&
+                                  (sche.teacher.englishFirstName ||
+                                  sche.teacher.englishLastName
+                                    ? `${sche.teacher.englishFirstName || ""} ${
+                                        sche.teacher.englishLastName || ""
+                                      }`.trim()
+                                    : sche.teacher.khmerFirstName ||
+                                      sche.teacher.khmerLastName
+                                    ? `${sche.teacher.khmerFirstName || ""} ${
+                                        sche.teacher.khmerLastName || ""
+                                      }`.trim()
+                                    : "- - -")) ||
+                                  "- - -"}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              <span>{sche.room.name || "- - -"}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      ) : (
-        renderEmptyState()
-      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No classes scheduled for {selectedDay?.label || "this day"}.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {!isLoading && scheduleData && scheduleData.totalPages > 1 && (
+          <div className="mt-8 flex justify-end">
+            <PaginationPage
+              currentPage={scheduleData.pageNo}
+              totalPages={scheduleData.totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
