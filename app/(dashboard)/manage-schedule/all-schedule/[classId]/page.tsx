@@ -154,7 +154,9 @@ const AllSchedulePage = () => {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Schedule</BreadcrumbPage>
+                <BreadcrumbLink href={ROUTE.SCHEDULE.DEPARTMENT}>
+                  Department List
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>

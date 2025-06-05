@@ -1,11 +1,12 @@
 import {
-  AlertCircle,
-  Archive,
   Check,
   CheckCircle,
-  Clock,
+  Clock4,
+  FileText,
+  Info,
   Logs,
   MenuIcon,
+  RotateCcw,
   X,
 } from "lucide-react";
 
@@ -243,54 +244,66 @@ export enum Mode {
   EDIT = "EDIT",
 }
 
-export const GradeSelect = [
-  { label: "A", value: "A" },
-  { label: "B	", value: "B" },
-  { label: "C", value: "C" },
-  { label: "E", value: "E" },
-  { label: "F", value: "F" },
-];
-export enum RequestType {
+export enum RequestEnum {
   PENDING = "PENDING",
   ACCEPTED = "ACCEPTED",
   REJECTED = "REJECTED",
   DONE = "DONE",
   DELETED = "DELETED",
+  RETURN = "RETURN",
 }
 
-export const REQUEST_TYPE = [
+export interface RequestType {
+  label: string;
+  value: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+export const REQUEST_TYPES: RequestType[] = [
   {
-    displayName: "All Requests",
-    name: "PENDING",
-    id: 1,
-    icon: Logs, // For pending/waiting
+    label: "All Requests",
+    value: "PENDING",
+    icon: Logs,
   },
   {
-    displayName: "Accepted List",
-    name: "ACCEPTED",
-    id: 2,
+    label: "Returned List",
+    value: "RETURN",
+    icon: RotateCcw,
+  },
+  {
+    label: "Accepted List",
+    value: "ACCEPTED",
     icon: Check,
   },
   {
-    displayName: "Rejected List",
-    name: "REJECTED",
-    id: 3,
-    icon: X, // or XCircle
+    label: "Rejected List",
+    value: "REJECTED",
+    icon: X,
   },
   {
-    displayName: "Done List",
-    name: "DONE",
-    id: 4,
-    icon: CheckCircle, // For completed/archived
+    label: "Done List",
+    value: "DONE",
+    icon: CheckCircle,
   },
 ];
 
-export interface RequestListType {
-  displayName: string;
-  name: string;
-  id: number;
-  icon: React.ComponentType<{ className?: string }>;
-}
+export const REQUEST_DETAIL: RequestType[] = [
+  {
+    label: "Information",
+    value: "INFORMATION",
+    icon: Info,
+  },
+  {
+    label: "History",
+    value: "HISTORY",
+    icon: Clock4,
+  },
+  {
+    label: "Transcript",
+    value: "TRANSCRIPT",
+    icon: FileText,
+  },
+];
 
 export const SemesterFilter = [
   { value: "ALL", label: "All Semeter" },

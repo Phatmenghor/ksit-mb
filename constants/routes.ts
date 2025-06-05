@@ -10,6 +10,7 @@ import {
   Palette,
   ListCheck,
 } from "lucide-react";
+import { REQUEST_DETAIL } from "./constant";
 
 export const ROUTE = {
   DASHBOARD: "/",
@@ -77,9 +78,11 @@ export const ROUTE = {
   },
 
   REQUESTS: "/requests",
+  REQUEST_DETAIL: (id: string) => `/requests/${id}`,
+  REQUEST_UPDATE: (id: string) => `/request/${id}`,
 
-  REQUESTS_LIST: "/request-list",
-  STUDENT_DETAIL: "/student-detail",
+  // REQUESTS_LIST: "/request-list",
+  // STUDENT_DETAIL: "/student-detail",
 
   SETTINGS: {
     THEME: "/settings/theme",
