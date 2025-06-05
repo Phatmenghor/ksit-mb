@@ -16,6 +16,19 @@ export async function getAllClassService(data: AllClassFilterModel) {
   }
 }
 
+export async function getMyClassService(data: AllClassFilterModel) {
+  try {
+    const response = await axiosClientWithAuth.post(
+      `/v1/classes/my-classes`,
+      data
+    );
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching all class:", error);
+    return null;
+  }
+}
+
 export async function createClassService(data: CreateClassModel) {
   try {
     const response = await axiosClientWithAuth.post(`/v1/classes`, data);

@@ -246,9 +246,7 @@ export default function AddSchedule() {
           <Card className="mb-6 bg-orange-50 border-orange-200">
             <CardContent className="p-4">
               <div className="flex items-center gap-8">
-                <div className="text-lg font-semibold text-gray-900">
-                  Class 2504fsdfsfds
-                </div>
+                <div className="text-lg font-semibold text-gray-900"></div>
                 <div className="gap-6 text-sm text-gray-600">
                   <div>
                     <span className="font-medium">Degree:</span> Associate
