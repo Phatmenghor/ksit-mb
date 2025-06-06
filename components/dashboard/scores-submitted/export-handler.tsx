@@ -102,28 +102,28 @@ export const useExportHandlers = (
 
       toast.loading("Generating PDF report...", { id: "pdf-export" });
 
+      console.log("##Schedule: ", schedule);
       await exportSubmissionStudentsToPDF(
         submission?.studentScores ?? [],
         fileName,
         {
-          title: `${submission?.courseName || "Course"} Score Report`,
-          subtitle: `Class: ${submission?.classCode || "N/A"} | Semester: ${
-            submission?.semester?.semester || "N/A"
+          title: `${submission?.courseName ?? "Course"} Score Report`,
+          subtitle: `Class: ${submission?.classCode ?? "N/A"} | Semester: ${
+            submission?.semester?.semester ?? "N/A"
           }`,
-          teacherName: submission?.teacherName || "N/A",
-          courseName: submission?.courseName || "N/A",
-          semester: submission?.semester?.semester || "N/A",
-          classCode: submission?.classCode || "N/A",
+          instructor: submission?.teacherName ?? "N/A",
+          courseName: submission?.courseName ?? "N/A",
+          courseCode: schedule?.course?.code ?? "N/A",
+          totalStudent: submission?.studentScores?.length ?? 0,
+          semester: submission?.semester?.semester ?? "N/A",
           credit: schedule?.course?.credit ?? 0,
-          degree: schedule?.classes?.degree || "N/A",
-          department: schedule?.classes?.major?.department?.name || "N/A",
-          levelYear: schedule?.academyYear || "N/A",
-          major: schedule?.classes?.major?.name || "N/A",
-          subjectName: schedule?.course?.subject?.name || "N/A",
-          subjectCode: schedule?.course?.subject?.code || "N/A", // <-- added subjectCode fallback
+          degree: schedule?.classes?.degree ?? "N/A",
+          department: schedule?.classes?.major?.department?.name ?? "N/A",
+          levelYear: schedule?.academyYear ?? "N/A",
+          major: schedule?.classes?.major?.name ?? "N/A",
           yearOfStudy: new Date().getFullYear().toString(),
-          orientation: options?.orientation || "landscape",
-          pageSize: options?.pageSize || "a4",
+          orientation: options?.orientation ?? "landscape",
+          pageSize: options?.pageSize ?? "a4",
           includeComments: options?.includeComments ?? true,
           includeCreatedAt: options?.includeCreatedAt ?? false,
           showGradeColors: true,

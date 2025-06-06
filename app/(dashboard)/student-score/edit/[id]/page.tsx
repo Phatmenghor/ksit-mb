@@ -457,7 +457,7 @@ export default function StudentScoreDetailsPage() {
     <div className="space-y-4">
       <StudentScoreHeader schedule={scheduleDetail} title="View Class Detail" />
       <div>
-        <Card>
+        <Card className="shadow-md">
           <CardHeader className="flex flex-row justify-between w-full">
             <div>
               <CardTitle className="font-bold text-xl">Student List</CardTitle>

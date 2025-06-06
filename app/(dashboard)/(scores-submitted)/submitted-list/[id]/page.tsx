@@ -80,10 +80,12 @@ export default function ScoreSubmissionDetailPage() {
   const loadSchedule = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await getDetailScheduleService(
-        Number(submission?.scheduleId)
-      );
-      setScheduleDetail(response);
+      if (submission?.scheduleId === undefined) {
+        setScheduleDetail(null);
+      } else {
+        const response = await getDetailScheduleService(submission?.scheduleId);
+        setScheduleDetail(response);
+      }
     } catch (error) {
       console.error("Error fetching schedule data:", error);
       toast.error("An error occurred while loading schedule");
@@ -162,7 +164,7 @@ export default function ScoreSubmissionDetailPage() {
       />
 
       {!isScoreApproval && submission?.status === SubmissionEnum.SUBMITTED && (
-        <Card>
+        <Card className="shadow-md">
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle className="text-lg font-bold">
               Submitting Approval

@@ -17,7 +17,7 @@ export default function StudentScoreHeader({ title, schedule }: Props) {
   const router = useRouter();
 
   return (
-    <Card className="shadow-md rounded-2xl">
+    <Card className="shadow-md">
       <CardContent className="p-6 space-y-3">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center text-sm text-muted-foreground space-x-2">
