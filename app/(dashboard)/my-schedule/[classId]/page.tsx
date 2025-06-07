@@ -18,7 +18,6 @@ import {
   Clock,
   Users,
   MapPin,
-  Edit,
   Pen,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -31,7 +30,10 @@ import {
 } from "@/constants/constant";
 import Loading from "@/components/shared/loading";
 import { toast } from "sonner";
-import { getAllScheduleService } from "@/service/schedule/schedule.service";
+import {
+  getAllMyScheduleService,
+  getAllScheduleService,
+} from "@/service/schedule/schedule.service";
 import { AllScheduleModel } from "@/model/schedule/schedule/schedule-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
@@ -48,7 +50,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const AllSchedulePage = () => {
+const MySchedulePage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [selectedDay, setSelectedDay] = useState<DayType>({
@@ -65,7 +67,6 @@ const AllSchedulePage = () => {
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
-
   const router = useRouter();
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -74,7 +75,6 @@ const AllSchedulePage = () => {
     async (filters: AllScheduleFilterModel) => {
       setIsLoading(true);
       try {
-        // Create base filters object
         const baseFilters = {
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
@@ -84,12 +84,9 @@ const AllSchedulePage = () => {
             selectedDay?.value !== "ALL" ? selectedDay?.value : undefined,
           ...filters,
         };
-
         const response = await getAllScheduleService(baseFilters);
-
         setScheduleData(response);
       } catch (error) {
-        console.error("Error fetching schedule data:", error);
         toast.error("An error occurred while loading classes");
         setScheduleData(null);
       } finally {
@@ -132,7 +129,12 @@ const AllSchedulePage = () => {
   };
 
   const handleCardClick = (scheduleId: number) => {
-    router.push(ROUTE.MANAGE_SCHEDULE.UPDATE_SCHEDULE + `${scheduleId}`);
+    // Navigate to the class detail page with the schedule ID
+    toast.success("Navigating to page score makara");
+    router.push(`/manage-schedule/all-schedule/update/${scheduleId}`);
+  };
+  const handleClassListClick = () => {
+    router.back();
   };
 
   return (
@@ -142,12 +144,17 @@ const AllSchedulePage = () => {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.DASHBOARD}>Home</BreadcrumbLink>
+                <BreadcrumbLink href={ROUTE.DASHBOARD}>
+                  Dashboard
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.MANAGE_SCHEDULE.DEPARTMENT}>
-                  Department List
+                <BreadcrumbLink
+                  onClick={handleClassListClick}
+                  style={{ cursor: "pointer" }}
+                >
+                  Class List
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -308,21 +315,6 @@ const AllSchedulePage = () => {
                                 <span>{sche.room.name || "- - -"}</span>
                               </div>
                             </div>
-
-                            <div className="ml-auto">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-amber-500 hover:bg-amber-50 hover:text-amber-600 hover:underline p-0 h-auto"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCardClick(sche.id);
-                                }}
-                              >
-                                <Pen className="h-4 w-4" />
-                                Edit
-                              </Button>
-                            </div>
                           </div>
                         </div>
                       </div>
@@ -353,4 +345,4 @@ const AllSchedulePage = () => {
   );
 };
 
-export default AllSchedulePage;
+export default MySchedulePage;

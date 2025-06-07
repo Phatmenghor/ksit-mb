@@ -298,6 +298,7 @@ const ClassSchedulePage = () => {
                 <div className="space-y-4">
                   {allClassData.content.map((classItem: ClassModel) => (
                     <ClassCard
+                      IsAdd={true}
                       key={classItem.id}
                       classData={classItem}
                       onViewSchedule={() => handleViewSchedule(classItem)}

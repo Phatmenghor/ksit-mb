@@ -38,7 +38,10 @@ import { AllDepartmentModel } from "@/model/master-data/department/all-departmen
 import { ROUTE } from "@/constants/routes";
 import { useRouter } from "next/navigation";
 import { AllDepartmentFilterModel } from "@/model/master-data/department/type-department-model";
-import { getAllDepartmentService } from "@/service/master-data/department.service";
+import {
+  getAllDepartmentService,
+  getMyDepartmentService,
+} from "@/service/master-data/department.service";
 import { Constants } from "@/constants/text-string";
 import { toast } from "sonner";
 import { getAllStatisticService } from "@/service/statistic/statistic.service";
@@ -94,7 +97,7 @@ export default function ManageClassPage() {
       setIsLoading(true);
 
       try {
-        const response = await getAllDepartmentService({
+        const response = await getMyDepartmentService({
           search: searchQuery,
           status: Constants.ACTIVE,
           ...param,
@@ -141,7 +144,7 @@ export default function ManageClassPage() {
   };
 
   function onClickDepartmentCard(departmentId: number) {
-    router.push(ROUTE.MANAGE_SCHEDULE.DEPARTMENT_CLASS + `/${departmentId}`);
+    router.push(ROUTE.MY_CLASS.CLASS + `/${departmentId}`);
   }
   return (
     <div className="">
@@ -189,34 +192,34 @@ export default function ManageClassPage() {
               />
               <MetricCard
                 title="Total Teacher"
-                value={mockOverviewData.totalTeacher}
+                value={statisticsData?.totalTeachers || 0}
                 borderColor="border-l-blue-400"
               />
               <MetricCard
-                title="Total Request"
-                value={mockOverviewData.totalRequest}
+                title="Total Room"
+                value={statisticsData?.totalRooms || 0}
                 borderColor="border-l-green-400"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <MetricCard
                 title="Total Courses"
-                value={mockOverviewData.totalCourses}
+                value={statisticsData?.totalCourses || 0}
                 borderColor="border-l-purple-400"
               />
               <MetricCard
                 title="Total Class"
-                value={mockOverviewData.totalClass}
+                value={statisticsData?.totalClasses || 0}
                 borderColor="border-l-red-400"
               />
               <MetricCard
                 title="Total Major"
-                value={mockOverviewData.totalMajor}
+                value={statisticsData?.totalMajors || 0}
                 borderColor="border-l-yellow-400"
               />
               <MetricCard
                 title="Total Department"
-                value={mockOverviewData.totalDepartment}
+                value={statisticsData?.totalDepartments || 0}
                 borderColor="border-l-indigo-400"
               />
             </div>

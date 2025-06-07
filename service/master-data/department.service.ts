@@ -63,3 +63,16 @@ export async function deletedDepartmentService(departmentId: number) {
     return null;
   }
 }
+
+export async function getMyDepartmentService(data: AllDepartmentFilterModel) {
+  try {
+    const response = await axiosClientWithAuth.post(
+      `/v1/departments/my-departments`,
+      data
+    );
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching all department:", error);
+    return null;
+  }
+}
