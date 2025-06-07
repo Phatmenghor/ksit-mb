@@ -1,33 +1,35 @@
-import { SemesterModel } from "@/model/master-data/semester/semester-model";
-
-export interface StudentScoreInitModel {
-  status: string;
-  message: string;
-  data: SessionScoreModel;
+export interface AllStudentScoreModel {
+  content: SubmissionScoreModel[];
+  pageNo: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
 }
 
-export interface SessionScoreModel {
+export interface SubmissionScoreModel {
   id: number;
   scheduleId: number;
-  classCode: string;
-  courseName: string;
   teacherId: number;
   teacherName: string;
+  classId: number;
+  classCode: string;
+  courseId: number;
+  courseName: string;
+  semester: string;
   status: string;
+  submissionDate: string;
   teacherComments: string;
   staffComments: string;
-  submissionDate: string;
-  createdAt: string;
-  updatedAt: string;
-  semester: SemesterModel;
   studentScores: StudentScoreModel[];
+  createdAt: string;
 }
 
 export interface StudentScoreModel {
   id: number;
   studentNameKhmer: string;
   studentNameEnglish: string;
-  studentIdentityNumber: number;
+  studentIdentityNumber: string;
   gender: string;
   studentId: number;
   dateOfBirth: string;

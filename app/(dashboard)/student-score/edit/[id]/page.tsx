@@ -18,27 +18,20 @@ import {
   Edit,
   Eye,
   Loader2,
-  Pencil,
   Save,
   Upload,
   X,
 } from "lucide-react";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useParams, useRouter } from "next/navigation";
 import {
-  SessionScoreModel,
   StudentScoreModel,
+  SubmissionScoreModel,
 } from "@/model/score/student-score/student-score.response";
 import {
+  getConfigurationScoreService,
   intiStudentsScoreService,
   submittedScoreService,
   updateStudentsScoreService,
@@ -60,7 +53,7 @@ import { formatDate } from "date-fns";
 import Loading from "@/app/(dashboard)/settings/theme/loading";
 import _ from "lodash";
 import { useExportHandlers } from "@/components/dashboard/scores-submitted/export-handler";
-import { ScoreSubmittedModel } from "@/model/score/submitted-score/submitted-score.response.model";
+import { ScoreConfigurationModel } from "@/model/score/submitted-score/submitted-score.response.model";
 
 export default function StudentScoreDetailsPage() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -70,6 +63,8 @@ export default function StudentScoreDetailsPage() {
   const [isSubmittedDialogOpen, setIsSubmittedDialogOpen] = useState(false);
   const [isSubmittingToStaff, setIsSubmittingToStaff] = useState(false);
 
+  const [configureScore, setConfigureScore] =
+    useState<ScoreConfigurationModel | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [unsavedChanges, setUnsavedChanges] = useState<Set<number>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,13 +73,13 @@ export default function StudentScoreDetailsPage() {
   const [scheduleDetail, setScheduleDetail] = useState<ScheduleModel | null>(
     null
   );
-  const [students, setStudents] = useState<ScoreSubmittedModel | null>(null);
+  const [score, setScore] = useState<SubmissionScoreModel | null>(null);
   const [mode, setMode] = useState<"view" | "edit-score">("view");
   const [originalData, setOriginalData] = useState<Map<number, any>>(new Map());
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const { handleExportToExcel, handleExportToPDF } = useExportHandlers(
-    students,
+    score,
     scheduleDetail
   );
 
@@ -114,6 +109,26 @@ export default function StudentScoreDetailsPage() {
       setIsLoading(false);
     }
   }, [id]);
+
+  const loadScoreConfigureData = useCallback(async () => {
+    if (!id) return;
+    setIsLoading(true);
+    try {
+      const response = await getConfigurationScoreService();
+
+      setConfigureScore(response);
+    } catch (error) {
+      toast.error("Error configure score data");
+      console.error("Error fetching configure score:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    loadScoreConfigureData();
+  }, []);
+
   // Helper function to determine if editing is allowed
   const isEditingAllowed = (status: string) => {
     return status === SubmissionEnum.DRAFT;
@@ -131,28 +146,31 @@ export default function StudentScoreDetailsPage() {
       if (!forceRefresh && unsavedChanges.size > 0) {
         return;
       }
+
       if (showLoader) {
         setIsRefreshing(true);
       }
+
       try {
         if (scheduleDetail?.id == null) {
           throw new Error("Schedule ID is required");
         }
+
         const response = await intiStudentsScoreService({
           scheduleId: scheduleDetail?.id,
         });
-        console.log("##data", response);
 
-        setStudents(response);
+        setScore(response);
         setIsInitialized(true);
 
-        // Use helper functions for cleaner logic
-        const currentMode = getModeFromStatus(response.status);
-        const editingAllowed = isEditingAllowed(response.status);
+        // Set mode based on status
+        const newMode = getModeFromStatus(response.status);
+        setMode(newMode);
 
-        setMode(currentMode);
-        setIsSubmitted(!editingAllowed);
+        // Set isSubmitted based on whether editing is allowed
+        setIsSubmitted(!isEditingAllowed(response.status));
 
+        // Update original data
         const originalMap = new Map();
         response.studentScores?.forEach((score: StudentScoreModel) => {
           originalMap.set(score.id, {
@@ -164,19 +182,10 @@ export default function StudentScoreDetailsPage() {
         });
         setOriginalData(originalMap);
         setUnsavedChanges(new Set());
-        setIsSubmitted(false);
       } catch (error: any) {
-        const suppressedMessage =
-          "An unexpected error occurred. Please try again later or contact support if the problem persists.";
-
-        if (error.message !== suppressedMessage) {
-          toast.error("An error occurred while loading student score");
-        } else {
-          console.warn("Suppressed backend error:", error.message);
-        }
+        // Error handling...
       } finally {
         if (showLoader) {
-          // Add a small delay for smooth animation
           setTimeout(() => {
             setIsRefreshing(false);
           }, 500);
@@ -186,16 +195,17 @@ export default function StudentScoreDetailsPage() {
     [scheduleDetail, unsavedChanges.size]
   );
 
+  // Add a useEffect to handle mode changes when status changes
   useEffect(() => {
-    if (students?.status === SubmissionEnum.DRAFT) {
-      setMode("edit-score");
-    } else {
-      setMode("view");
+    if (score?.status) {
+      const newMode = getModeFromStatus(score.status);
+      setMode(newMode);
+      setIsSubmitted(!isEditingAllowed(score.status));
     }
-  }, [students?.status]);
+  }, [score?.status]);
 
   const handleSubmit = useCallback(async () => {
-    if (!students) return;
+    if (!score) return;
 
     if (unsavedChanges.size > 0) {
       toast.error("Please save all changes before submitting");
@@ -206,14 +216,20 @@ export default function StudentScoreDetailsPage() {
 
     try {
       const response = await submittedScoreService({
-        id: Number(id) ?? 0,
+        id: score.id ?? 0,
         status: SubmissionEnum.SUBMITTED ?? "SUBMITTED",
       });
 
-      console.log("##submit score: ", response);
       if (response) {
+        // Update the score status and mode
+        setScore((prev) =>
+          prev ? { ...prev, status: SubmissionEnum.SUBMITTED } : prev
+        );
+        setMode("view"); // Switch to view mode after submission
+        setIsSubmitted(true);
         setAutoRefresh(false);
         setIsSubmittingToStaff(true);
+
         toast.success("Score successfully submitted to staff officer!", {
           duration: 3000,
           icon: <CheckCircle className="h-4 w-4" />,
@@ -221,14 +237,13 @@ export default function StudentScoreDetailsPage() {
       } else {
         toast.error("Failed to submit score");
       }
-      // Disable auto-refresh after submission
     } catch (error) {
       toast.error("Failed to submit score to staff");
       console.error("Error submitting score:", error);
     } finally {
       setIsSubmitting(false);
     }
-  }, [students, unsavedChanges.size]);
+  }, [score, unsavedChanges.size]);
 
   // Optimized field change handler with Set
   const handleFieldChange = useCallback(
@@ -239,7 +254,7 @@ export default function StudentScoreDetailsPage() {
       }
 
       // Update attendance data with optimistic update
-      setStudents((prev) => {
+      setScore((prev) => {
         if (!prev) return prev;
 
         return {
@@ -262,7 +277,7 @@ export default function StudentScoreDetailsPage() {
         }
 
         // Get current state to compare
-        const currentStudentScore = students?.studentScores.find(
+        const currentStudentScore = score?.studentScores.find(
           (a) => a.id === scoreId
         );
 
@@ -294,7 +309,7 @@ export default function StudentScoreDetailsPage() {
         return prevSet; // No change needed
       });
     },
-    [originalData, students, isSubmitted]
+    [originalData, score, isSubmitted]
   );
 
   // Smooth progress animation for auto-refresh
@@ -375,8 +390,8 @@ export default function StudentScoreDetailsPage() {
     setIsSavingAll(true);
     try {
       // Find all rows with unsaved changes using Set
-      const changedStudentScore = students?.studentScores.filter(
-        (studentScore) => unsavedChanges.has(studentScore.id)
+      const changedStudentScore = score?.studentScores.filter((studentScore) =>
+        unsavedChanges.has(studentScore.id)
       );
 
       // Perform bulk update
@@ -410,13 +425,15 @@ export default function StudentScoreDetailsPage() {
         `Successfully updated ${changedStudentScore?.length} student scores`,
         { duration: 2000 }
       );
-    } catch (error) {
-      toast.error("Failed to save score records");
+    } catch (error: any) {
+      const ErrMessage = error.message || "Failed to save score records";
+
+      toast.error(ErrMessage);
       console.error("Error saving records:", error);
     } finally {
       setIsSavingAll(false);
     }
-  }, [students, unsavedChanges, originalData, isSubmitted]);
+  }, [score, unsavedChanges, originalData, isSubmitted]);
 
   // Remove specific item from unsaved changes
   const handleRemoveFromUnsaved = useCallback((scoreId: number) => {
@@ -455,7 +472,7 @@ export default function StudentScoreDetailsPage() {
     setIsSubmitting(true);
     try {
       const promises =
-        students?.studentScores.map((student) => {
+        score?.studentScores.map((student) => {
           const payload = {
             id: student.id,
             assignmentScore: student.assignmentScore,
@@ -477,10 +494,77 @@ export default function StudentScoreDetailsPage() {
       }
       setMode("view");
     } catch (err: any) {
-      console.error("Failed to update scores:", err);
+      console.error("Failed to update scores:");
       toast.error(err.message || "Failed to update scores.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const renderModeBasedContent = () => {
+    if (mode === "edit-score") {
+      return (
+        <div className="flex flex-row gap-2">
+          <Button
+            className=" bg-orange-400 hover:bg-orange-500"
+            onClick={() => setMode("edit-score")}
+          >
+            <Edit className="w-4 h-4" />
+            Edit score
+          </Button>
+          {!isSubmittingToStaff && (
+            <Button onClick={() => setIsSubmittedDialogOpen(true)}>
+              <Save className="w-4 h-4" />
+              Submit score
+            </Button>
+          )}
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center gap-4">
+          {/* Label */}
+          <span className="text-muted-foreground font-medium">
+            Export Data By Class:
+          </span>
+
+          {/* Excel Export Button */}
+          <Button
+            onClick={() =>
+              handleExportToExcel({
+                includeComments: false,
+                customFileName: "Student Score",
+              })
+            }
+            variant="outline"
+            className="gap-2"
+          >
+            <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
+              <span className="text-white text-xs font-bold">X</span>
+            </div>
+            <span>Excel</span>
+            <Download className="w-4 h-4" />
+          </Button>
+
+          {/* PDF Export Button */}
+          <Button
+            onClick={() =>
+              handleExportToPDF({
+                customFileName: "Student Score",
+                includeComments: false,
+              })
+            }
+            variant="outline"
+            className="gap-2"
+          >
+            <div className="w-5 h-5 border-2 border-red-500 rounded flex items-center justify-center">
+              <span className="text-red-500 text-[10px] font-bold">PDF</span>
+            </div>
+            <span>PDF</span>
+            <Download className="w-4 h-4" />
+          </Button>
+        </div>
+      );
     }
   };
 
@@ -493,72 +577,7 @@ export default function StudentScoreDetailsPage() {
             <div>
               <CardTitle className="font-bold text-xl">Student List</CardTitle>
             </div>
-            <div>
-              {mode === "view" && isSubmittingToStaff && (
-                <div className="flex items-center gap-4">
-                  {/* Label */}
-                  <span className="text-muted-foreground font-medium">
-                    Export Data By Class:
-                  </span>
-
-                  {/* Excel Export Button */}
-                  <Button
-                    onClick={() =>
-                      handleExportToExcel({
-                        includeComments: false,
-                        customFileName: "Student Score",
-                      })
-                    }
-                    variant="outline"
-                    className="gap-2"
-                  >
-                    <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">X</span>
-                    </div>
-                    <span>Excel</span>
-                    <Download className="w-4 h-4" />
-                  </Button>
-
-                  {/* PDF Export Button */}
-                  <Button
-                    onClick={() =>
-                      handleExportToPDF({
-                        customFileName: "Student Score",
-                        includeComments: false,
-                      })
-                    }
-                    variant="outline"
-                    className="gap-2"
-                  >
-                    <div className="w-5 h-5 border-2 border-red-500 rounded flex items-center justify-center">
-                      <span className="text-red-500 text-[10px] font-bold">
-                        PDF
-                      </span>
-                    </div>
-                    <span>PDF</span>
-                    <Download className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
-
-              {mode === "view" && !isSubmittingToStaff && (
-                <div className="flex flex-row gap-2">
-                  <Button
-                    className=" bg-orange-400 hover:bg-orange-500"
-                    onClick={() => setMode("edit-score")}
-                  >
-                    <Edit className="w-4 h-4" />
-                    Edit score
-                  </Button>
-                  {!isSubmittingToStaff && (
-                    <Button onClick={() => setIsSubmittedDialogOpen(true)}>
-                      <Save className="w-4 h-4" />
-                      Submit score
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
+            <div>{renderModeBasedContent()}</div>
           </CardHeader>
 
           {/* Initialize Session Button */}
@@ -572,7 +591,7 @@ export default function StudentScoreDetailsPage() {
               <p className="mb-4">
                 <span className="text-gray-500">Total Students: </span>
                 <span className="font-semibold">
-                  {students?.studentScores.length || 0}
+                  {score?.studentScores.length || 0}
                 </span>
               </p>
               {isSubmittingToStaff && (
@@ -581,8 +600,8 @@ export default function StudentScoreDetailsPage() {
                   <p className="mb-4">
                     <span className="text-gray-500">Submitted Date:</span>{" "}
                     <span className="font-semibold">
-                      {students?.submissionDate
-                        ? formatDate(new Date(students.submissionDate), "PP")
+                      {score?.submissionDate
+                        ? formatDate(new Date(score.submissionDate), "PP")
                         : "---"}
                     </span>
                   </p>
@@ -629,7 +648,7 @@ export default function StudentScoreDetailsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students?.studentScores.length === 0 || students === null ? (
+                  {score?.studentScores.length === 0 || score === null ? (
                     <TableRow>
                       <TableCell
                         colSpan={15}
@@ -639,7 +658,7 @@ export default function StudentScoreDetailsPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    students?.studentScores?.map((student, index) => {
+                    score?.studentScores?.map((student, index) => {
                       const indexDisplay = index + 1;
                       return (
                         <TableRow key={student.id} className="hover:bg-gray-50">
@@ -681,7 +700,7 @@ export default function StudentScoreDetailsPage() {
                                   )
                                 }
                                 min="0"
-                                max="100"
+                                max={configureScore?.assignmentPercentage}
                               />
                             ) : (
                               <span>{student?.assignmentScore ?? 0}</span>
@@ -706,7 +725,7 @@ export default function StudentScoreDetailsPage() {
                                   )
                                 }
                                 min="0"
-                                max="100"
+                                max={configureScore?.midtermPercentage}
                               />
                             ) : (
                               <span>{student?.midtermScore ?? 0}</span>
@@ -732,7 +751,7 @@ export default function StudentScoreDetailsPage() {
                                   )
                                 }
                                 min="0"
-                                max="100"
+                                max={configureScore?.finalPercentage}
                               />
                             ) : (
                               <span>{student?.finalScore ?? 0}</span>
@@ -824,8 +843,7 @@ export default function StudentScoreDetailsPage() {
                 </TableBody>
               </Table>
             </div>
-            {(!students?.studentScores ||
-              students?.studentScores.length === 0) &&
+            {(!score?.studentScores || score?.studentScores.length === 0) &&
               isInitialized && (
                 <div className="text-center py-12 text-muted-foreground">
                   <p className="text-sm mt-1">No Record</p>
@@ -835,7 +853,7 @@ export default function StudentScoreDetailsPage() {
         </Card>
       </div>
 
-      {mode === "edit-score" && students !== null && (
+      {mode === "edit-score" && score !== null && (
         <Card className="w-full">
           <CardContent className="flex justify-end gap-3 p-4">
             <Button
@@ -858,7 +876,7 @@ export default function StudentScoreDetailsPage() {
       )}
 
       {/* Quick Actions Panel - Only show when not submitted */}
-      {students && unsavedChanges.size > 0 && !isSubmitted && (
+      {score && unsavedChanges.size > 0 && !isSubmitted && (
         <Card className="fixed bottom-4 right-4 w-80 shadow-lg border-yellow-300 bg-yellow-50 z-50 animate-in slide-in-from-bottom-4 duration-300">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
@@ -917,7 +935,7 @@ export default function StudentScoreDetailsPage() {
         }}
       />
 
-      {students && unsavedChanges.size > 0 && (
+      {score && unsavedChanges.size > 0 && (
         <Card className="border-orange-200 bg-orange-50">
           <CardContent className="p-4">
             <div className="flex items-center gap-2">

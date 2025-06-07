@@ -27,13 +27,14 @@ import { getAllSubmittedScoreService } from "@/service/score/score.service";
 import { SubmissionEnum, tabs } from "@/constants/constant";
 import { useRouter } from "next/navigation";
 import PaginationPage from "@/components/shared/pagination-page";
+import { AllStudentScoreModel } from "@/model/score/student-score/student-score.response";
 
 export default function ScoreSubmittedPage() {
   const [year, setYear] = useState("2025");
   const [activeTab, setActiveTab] = useState("all");
   const [semester, setSemester] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [submissions, setSubmissions] = useState<AllScoreSubmittedModel | null>(
+  const [submissions, setSubmissions] = useState<AllStudentScoreModel | null>(
     null
   );
   const [isLoading, setIsLoading] = useState(false);
@@ -161,7 +162,7 @@ export default function ScoreSubmittedPage() {
                   {submission.teacherName}
                 </TableCell>
                 <TableCell>{submission.courseName}</TableCell>
-                <TableCell>{submission.semester.semester}</TableCell>
+                <TableCell>{submission.semester}</TableCell>
                 <TableCell>{submission.classCode}</TableCell>
                 <TableCell>{submission.submissionDate}</TableCell>
                 <TableCell>

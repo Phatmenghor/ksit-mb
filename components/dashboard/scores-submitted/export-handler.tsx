@@ -13,10 +13,11 @@ import { exportSubmissionStudentsToPDF } from "@/utils/generate-file/score/pdf-s
 import { exportApprovedStudentsToExcelAdvanced } from "@/utils/generate-file/score/excel-submission-score";
 import { ScoreSubmittedModel } from "@/model/score/submitted-score/submitted-score.response.model";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
+import { SubmissionScoreModel } from "@/model/score/student-score/student-score.response";
 
 // Enhanced export handlers with improved functionality
 export const useExportHandlers = (
-  submission: ScoreSubmittedModel | null,
+  submission: SubmissionScoreModel | null,
   schedule: ScheduleModel | null
 ) => {
   const [isExporting, setIsExporting] = useState(false);
@@ -109,13 +110,13 @@ export const useExportHandlers = (
         {
           title: `${submission?.courseName ?? "Course"} Score Report`,
           subtitle: `Class: ${submission?.classCode ?? "N/A"} | Semester: ${
-            submission?.semester?.semester ?? "N/A"
+            schedule?.semester?.semester ?? "N/A"
           }`,
           instructor: submission?.teacherName ?? "N/A",
           courseName: submission?.courseName ?? "N/A",
           courseCode: schedule?.course?.code ?? "N/A",
           totalStudent: submission?.studentScores?.length ?? 0,
-          semester: submission?.semester?.semester ?? "N/A",
+          semester: schedule?.semester?.semester ?? "N/A",
           credit: schedule?.course?.credit ?? 0,
           degree: schedule?.classes?.degree ?? "N/A",
           department: schedule?.classes?.major?.department?.name ?? "N/A",
@@ -192,7 +193,7 @@ export const ExportButtonGroup = ({
   submission,
   schedule,
 }: {
-  submission: ScoreSubmittedModel;
+  submission: SubmissionScoreModel;
   schedule: ScheduleModel;
 }) => {
   const {
@@ -306,7 +307,7 @@ export const SimpleExportButtons = ({
   submission,
   schedule,
 }: {
-  submission: ScoreSubmittedModel;
+  submission: SubmissionScoreModel;
   schedule: ScheduleModel;
 }) => {
   const {

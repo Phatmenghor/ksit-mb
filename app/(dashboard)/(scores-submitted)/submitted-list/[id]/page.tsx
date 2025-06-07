@@ -37,9 +37,10 @@ import { ROUTE } from "@/constants/routes";
 import { useExportHandlers } from "@/components/dashboard/scores-submitted/export-handler";
 import { getDetailScheduleService } from "@/service/schedule/schedule.service";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
+import { SubmissionScoreModel } from "@/model/score/student-score/student-score.response";
 
 export default function ScoreSubmissionDetailPage() {
-  const [submission, setSubmissions] = useState<ScoreSubmittedModel | null>(
+  const [submission, setSubmissions] = useState<SubmissionScoreModel | null>(
     null
   );
   const [scheduleDetail, setScheduleDetail] = useState<ScheduleModel | null>(

@@ -3,15 +3,10 @@ import {
   SubmitScoreModel,
   UpdateScoreModel,
 } from "@/model/score/student-score/student-score.request";
-import { StudentScoreInitModel } from "@/model/score/student-score/student-score.response";
 import {
   ConfigureScoreModel,
   SubmittedScoreParam,
 } from "@/model/score/submitted-score/submitted-score.request.model";
-import {
-  AllScoreSubmittedAPI,
-  ScoreSubmittedModel,
-} from "@/model/score/submitted-score/submitted-score.response.model";
 import { axiosClientWithAuth } from "@/utils/axios";
 
 export async function intiStudentsScoreService(data: RequestStudentScoreModel) {
@@ -49,10 +44,7 @@ export async function updateStudentsScoreService(data: UpdateScoreModel) {
 
 export async function getAllSubmittedScoreService(data: SubmittedScoreParam) {
   try {
-    const response = await axiosClientWithAuth.post<AllScoreSubmittedAPI>(
-      `/v1/score/all`,
-      data
-    );
+    const response = await axiosClientWithAuth.post(`/v1/score/all`, data);
     return response.data.data;
   } catch (error: any) {
     if (error.response && error.response.data && error.response.data.message) {
@@ -65,7 +57,7 @@ export async function getAllSubmittedScoreService(data: SubmittedScoreParam) {
 
 export async function submittedScoreService(data: SubmitScoreModel) {
   try {
-    const response = await axiosClientWithAuth.put<StudentScoreInitModel>(
+    const response = await axiosClientWithAuth.put(
       `/v1/score/submission-update`,
       data
     );
