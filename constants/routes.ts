@@ -13,6 +13,7 @@ import { REQUEST_DETAIL } from "./constant";
 
 export const ROUTE = {
   DASHBOARD: "/",
+
   AUTH: {
     LOGIN: "/login",
   },
