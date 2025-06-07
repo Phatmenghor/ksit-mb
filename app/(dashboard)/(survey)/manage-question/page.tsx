@@ -21,8 +21,10 @@ import {
 import { useDebounce } from "@/utils/debounce/debounce";
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 import Loading from "@/components/shared/loading";
-
-export default function StudentsListPage() {
+import { Card } from "@/components/ui/card";
+import Component from "@/components/dashboard/survey/form-section-builder";
+import SurveyFormCard  from "@/components/dashboard/survey/survey-form";
+export default function ManageQAPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -34,6 +36,7 @@ export default function StudentsListPage() {
     null
   );
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const [isAddNew, setIsAddNew] = useState<boolean>(false);
   const loadStudents = useCallback(
     async (param: RequestAllStudent) => {
       setIsLoading(true);
@@ -59,9 +62,14 @@ export default function StudentsListPage() {
         setIsLoading(false);
       }
     },
-     [debouncedSearchQuery, selectedClass, selectAcademicYear]
+    [debouncedSearchQuery, selectedClass, selectAcademicYear]
   );
-
+ const questions = [
+    "1. The course materials were helpful and relevant.",
+    "2. The instructor communicated clearly.",
+    "3. The course met my expectations.",
+    // Add more questions as needed
+  ];
   useEffect(() => {
     loadStudents({});
   }, [searchQuery, loadStudents, debouncedSearchQuery, selectAcademicYear]);
@@ -77,8 +85,18 @@ export default function StudentsListPage() {
   const handleClassChange = (e: ClassModel | null) => {
     setSelectedClass(e ?? undefined);
   };
-
+  // const handleAddNew = ()=>{
+  //    setIsAddNew(true)
+  // }
   const iconColor = "text-black";
+  const [sections, setSections] = useState<number[]>([]);
+
+  const handleAddNew = () => {
+    setSections((prev) => [...prev, prev.length]);
+  };
+  const handleRemoveSection = (indexToRemove: number) => {
+    setSections((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
 
   const columns: Column<StudentModel>[] = [
     {
@@ -137,48 +155,36 @@ export default function StudentsListPage() {
       <CardHeaderSection
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "Payment", href: ROUTE.PAYMENT.LIST },
+          { label: "Manage Q&As", href: ROUTE.SURVEY.MANAGE_QA },
         ]}
-        title="Payment"
-        searchValue={searchQuery}
-        searchPlaceholder="Search..."
-        onSearchChange={handleSearchChange}
-        customSelect={
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
-            <div className="w-full min-w-[200px] md:w-1/2">
-              <div className="w-full min-w-[200px]">
-                <YearSelector
-                  title="Select Year"
-                  onChange={handleYearChange}
-                  value={selectAcademicYear || 0}
-                />
-              </div>
-            </div>
-
-            <div className="w-full min-w-[200px] md:w-1/2">
-              <ComboboxSelectClass
-                dataSelect={selectedClass ?? null}
-                onChangeSelected={handleClassChange}
-                disabled={isSubmitting}
-              />
-            </div>
-          </div>
-        }
+        title="Manage Q&As"
       />
 
-      <div className="overflow-x-auto">
-        {isLoading ? (
-          <Loading />
-        ) : (
-          <CustomTable
-            columns={columns}
-            isLoading={isLoading}
-            data={allStudentData?.content ?? []}
+      {sections.map((_, index) => (
+        <div key={index} className="mb-4">
+          <Component
+            key={index}
+            sectionNumber={index + 1}
+            totalSections={sections.length}
+            onRemove={() => handleRemoveSection(index)}
           />
-        )}
-      </div>
+        </div>
+      ))}
 
-      {!isLoading && allStudentData && (
+      <div className="overflow-x-auto">
+        <Card>
+          <Button
+            className="bg-transparent text-[#024D3E] border-gray-300 hover:bg-transparent underline"
+            onClick={handleAddNew}
+          >
+            + Add New Section
+          </Button>
+        </Card>
+      </div>
+       {questions.map((questionText, index) => (
+        <SurveyFormCard key={index} question={questionText} />
+      ))}
+      {/* {!isLoading && allStudentData && (
         <div className="mt-4 flex justify-end ">
           <PaginationPage
             currentPage={allStudentData.pageNo}
@@ -186,7 +192,7 @@ export default function StudentsListPage() {
             onPageChange={(page: number) => loadStudents({ pageNo: page })}
           />
         </div>
-      )}
+      )} */}
     </div>
   );
 }
