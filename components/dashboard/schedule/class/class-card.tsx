@@ -10,12 +10,14 @@ interface ClassCardProps {
   classData: ClassModel;
   onViewSchedule: () => void;
   onAddSchedule: () => void;
+  IsAdd: Boolean;
 }
 
 export function ClassCard({
   classData,
   onViewSchedule,
   onAddSchedule,
+  IsAdd,
 }: ClassCardProps) {
   return (
     <div className="rounded-md border border-gray-200 shadow-sm bg-white">
@@ -54,10 +56,15 @@ export function ClassCard({
               <Eye className="h-4 w-4" />
               View Schedule
             </Button>
-            <Button className="flex items-center gap-1" onClick={onAddSchedule}>
-              <Plus className="h-4 w-4" />
-              Add Schedule
-            </Button>
+            {IsAdd && (
+              <Button
+                className="flex items-center gap-1"
+                onClick={onAddSchedule}
+              >
+                <Plus className="h-4 w-4" />
+                Add Schedule
+              </Button>
+            )}
           </div>
         </div>
       </Card>

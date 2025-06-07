@@ -79,7 +79,7 @@ const EmptyClassesState = ({ majorName }: { majorName?: string }) => (
   </div>
 );
 
-const ClassListPage = () => {
+const MyClassPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [allMajorData, setAllMajorData] = useState<AllMajorModel | null>(null);
@@ -167,7 +167,7 @@ const ClassListPage = () => {
 
     setIsLoadingClasses(true);
     try {
-      const responseListClass = await getAllClassService({
+      const responseListClass = await getMyClassService({
         status: Constants.ACTIVE,
         majorId: majorId || undefined,
       });
@@ -180,7 +180,9 @@ const ClassListPage = () => {
   };
 
   const handleViewSchedule = (classData: ClassModel) => {
-    router.push(`/manage-schedule/all-schedule/${classData.id}`);
+    console.log("Class ID:", classData.id);
+
+    router.push(`/my-schedule/${classData.id}`);
   };
 
   const handleAddSchedule = (classData: ClassModel) => {
@@ -297,6 +299,7 @@ const ClassListPage = () => {
                 <div className="space-y-4">
                   {allClassData.content.map((classItem: ClassModel) => (
                     <ClassCard
+                      IsAdd={false}
                       key={classItem.id}
                       classData={classItem}
                       onViewSchedule={() => handleViewSchedule(classItem)}
@@ -320,4 +323,4 @@ const ClassListPage = () => {
   );
 };
 
-export default ClassListPage;
+export default MyClassPage;
