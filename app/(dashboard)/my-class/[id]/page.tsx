@@ -30,7 +30,10 @@ import {
   AllClassModel,
   ClassModel,
 } from "@/model/master-data/class/all-class-model";
-import { getAllClassService } from "@/service/master-data/class.service";
+import {
+  getAllClassService,
+  getMyClassService,
+} from "@/service/master-data/class.service";
 import { ClassCard } from "@/components/dashboard/schedule/class/class-card";
 import Loading from "@/components/shared/loading";
 
@@ -76,7 +79,7 @@ const EmptyClassesState = ({ majorName }: { majorName?: string }) => (
   </div>
 );
 
-const ClassSchedulePage = () => {
+const MyClassPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [allMajorData, setAllMajorData] = useState<AllMajorModel | null>(null);
@@ -115,7 +118,7 @@ const ClassSchedulePage = () => {
 
             setIsLoadingClasses(true);
             try {
-              const responseListClass = await getAllClassService({
+              const responseListClass = await getMyClassService({
                 status: Constants.ACTIVE,
                 majorId: response.content[0].id || undefined,
               });
@@ -164,7 +167,7 @@ const ClassSchedulePage = () => {
 
     setIsLoadingClasses(true);
     try {
-      const responseListClass = await getAllClassService({
+      const responseListClass = await getMyClassService({
         status: Constants.ACTIVE,
         majorId: majorId || undefined,
       });
@@ -177,7 +180,9 @@ const ClassSchedulePage = () => {
   };
 
   const handleViewSchedule = (classData: ClassModel) => {
-    router.push(`/manage-schedule/all-schedule/${classData.id}`);
+    console.log("Class ID:", classData.id);
+
+    router.push(`/my-schedule/${classData.id}`);
   };
 
   const handleAddSchedule = (classData: ClassModel) => {
@@ -200,12 +205,8 @@ const ClassSchedulePage = () => {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.DASHBOARD}>Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.SCHEDULE.DEPARTMENT}>
-                  Department List
+                <BreadcrumbLink href={ROUTE.DASHBOARD}>
+                  Dashboard
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -298,7 +299,7 @@ const ClassSchedulePage = () => {
                 <div className="space-y-4">
                   {allClassData.content.map((classItem: ClassModel) => (
                     <ClassCard
-                      IsAdd={true}
+                      IsAdd={false}
                       key={classItem.id}
                       classData={classItem}
                       onViewSchedule={() => handleViewSchedule(classItem)}
@@ -322,4 +323,4 @@ const ClassSchedulePage = () => {
   );
 };
 
-export default ClassSchedulePage;
+export default MyClassPage;

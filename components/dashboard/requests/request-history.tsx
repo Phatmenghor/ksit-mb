@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Table,
   TableBody,
@@ -7,45 +9,64 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Check } from "lucide-react";
 import Loading from "@/components/shared/loading";
+import { RequestHistoryTableHeader } from "@/constants/table/request";
+import { useCallback, useEffect, useState } from "react";
+import { AllHistoryReqModel } from "@/model/request/request-model";
+import { HistoryReqFilterModel } from "@/model/request/request-filter";
+import { getAllHistoryReqService } from "@/service/request/request.service";
+import { toast } from "sonner";
+import { formatDate } from "@/utils/date/dd-mm-yyyy-format";
+import PaginationPage from "@/components/shared/pagination-page";
+import { truncateText } from "@/utils/format/format-width-text";
 
-interface RequestHistoryItem {
-  id: number;
-  document1: boolean;
-  document2: boolean;
-  document3: boolean;
-  requestDate: string;
-  status: "Done" | "Rejected" | "Pending";
-  comment: string;
+interface RequestParam {
+  userId?: number;
 }
 
-interface RequestHistoryProps {
-  data?: RequestHistoryItem[];
-  isLoading?: boolean;
-}
+export function RequestHistory(param: RequestParam) {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [historyReqData, setHistoryReqData] =
+    useState<AllHistoryReqModel | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
+  console.log("## ==param.userId", param.userId);
 
-export function RequestHistory({
-  data = [],
-  isLoading = false,
-}: RequestHistoryProps) {
-  const requestTableHeader = [
-    { label: "#", className: "" },
-    { label: "ប្រតិបត្តិសិក្សា", className: "" },
-    { label: "ប្រតិប័ត្រ", className: "" },
-    { label: "សាលាបណ្ណាល័យ", className: "" },
-    { label: "Request Date", className: "" },
-    { label: "Status", className: "" },
-    { label: "Comment", className: "" },
-  ];
+  const fetchHistoryReq = useCallback(
+    async (filters: HistoryReqFilterModel = {}) => {
+      if (!param.userId) return;
+      setIsLoading(true);
+      try {
+        const response = await getAllHistoryReqService({
+          userId: param.userId ? param.userId : undefined,
+          ...filters,
+        });
+        setHistoryReqData(response);
+      } catch (error: any) {
+        console.error("Error fetching history requests:", error);
+        toast.error("error occurred while loading classes");
+        setHistoryReqData(null);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [param.userId]
+  );
+
+  useEffect(() => {
+    fetchHistoryReq({ pageNo: currentPage });
+  }, [currentPage, fetchHistoryReq, param.userId]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const getStatusBadge = (status: string) => {
     const baseBadgeClasses =
       "w-24 h-8 flex items-center justify-center text-sm font-medium rounded-full";
 
-    switch (status) {
-      case "Done":
+    switch (status.toUpperCase()) {
+      case "DONE":
         return (
           <Badge
             className={`bg-green-100 text-green-800 hover:bg-green-100 ${baseBadgeClasses}`}
@@ -53,7 +74,15 @@ export function RequestHistory({
             Done
           </Badge>
         );
-      case "Rejected":
+      case "ACCEPTED":
+        return (
+          <div
+            className={`bg-blue-100 text-blue-800 hover:bg-blue-100 ${baseBadgeClasses}`}
+          >
+            Accepted
+          </div>
+        );
+      case "REJECTED":
         return (
           <Badge
             className={`bg-red-100 text-red-800 hover:bg-red-100 ${baseBadgeClasses}`}
@@ -61,26 +90,33 @@ export function RequestHistory({
             Rejected
           </Badge>
         );
-      case "Pending":
+      case "PENDING":
         return (
           <Badge
-            className={`bg-orange-100 text-orange-800 hover:bg-orange-100 ${baseBadgeClasses}`}
+            className={`bg-orange-100 text-orange-800 hover:bg-orange-100 hover:text-orange-800 ${baseBadgeClasses}`}
           >
             Pending
+          </Badge>
+        );
+      case "RETURN":
+        return (
+          <Badge
+            className={`bg-yellow-100 text-yellow-800 hover:bg-yellow-100 hover:text-yellow-800 ${baseBadgeClasses}`}
+          >
+            Returned
           </Badge>
         );
       default:
         return (
           <Badge
-            className={`bg-gray-100 text-gray-800 hover:bg-gray-100 ${baseBadgeClasses}`}
+            variant="secondary"
+            className={`bg-gray-100 text-gray-800 hover:bg-gray-100 hover:text-gray-800 ${baseBadgeClasses}`}
           >
             {status}
           </Badge>
         );
     }
   };
-  
-  
 
   return (
     <div className="">
@@ -98,7 +134,7 @@ export function RequestHistory({
           <Table>
             <TableHeader>
               <TableRow>
-                {requestTableHeader.map((header, index) => (
+                {RequestHistoryTableHeader.map((header, index) => (
                   <TableHead key={index} className={header.className}>
                     {header.label}
                   </TableHead>
@@ -106,7 +142,7 @@ export function RequestHistory({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.length === 0 ? (
+              {historyReqData?.content.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={7}
@@ -116,28 +152,23 @@ export function RequestHistory({
                   </TableCell>
                 </TableRow>
               ) : (
-                data.map((item, index) => {
+                historyReqData?.content.map((item, index) => {
+                  const indexDisplay =
+                    ((historyReqData.pageNo || 1) - 1) * 10 + index + 1;
                   return (
                     <TableRow key={item.id}>
-                      <TableCell>{item.id}</TableCell>
-                      <TableCell>{item.document1 || "---"}</TableCell>
+                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{truncateText(item.title) || "---"}</TableCell>
                       <TableCell>
-                        {item.document2 ? (
-                          <Check className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <span className="text-gray-400">---</span>
-                        )}
+                        {truncateText(item.requestComment) || "---"}
                       </TableCell>
                       <TableCell>
-                        {item.document3 ? (
-                          <Check className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <span className="text-gray-400">---</span>
-                        )}
+                        {formatDate(item.createdAt || "---")}
                       </TableCell>
-                      <TableCell>{item.requestDate}</TableCell>
-                      <TableCell>{getStatusBadge(item.status)}</TableCell>
-                      <TableCell>{item.comment || "---"}</TableCell>
+                      <TableCell>{getStatusBadge(item.toStatus)}</TableCell>
+                      <TableCell>
+                        {truncateText(item.staffComment) || "---"}
+                      </TableCell>
                     </TableRow>
                   );
                 })
@@ -146,6 +177,17 @@ export function RequestHistory({
           </Table>
         )}
       </div>
+
+      {/* Pagination */}
+      {!isLoading && historyReqData && historyReqData.totalPages > 1 && (
+        <div className="mt-8 flex justify-end">
+          <PaginationPage
+            currentPage={historyReqData.pageNo}
+            totalPages={historyReqData.totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      )}
     </div>
   );
 }

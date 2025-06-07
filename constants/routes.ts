@@ -11,9 +11,11 @@ import {
   ScrollText,
   FileQuestion
 } from "lucide-react";
+import { REQUEST_DETAIL } from "./constant";
 
 export const ROUTE = {
   DASHBOARD: "/",
+
   AUTH: {
     LOGIN: "/login",
   },
@@ -51,6 +53,7 @@ export const ROUTE = {
   MANAGE_SCHEDULE: {
     DEPARTMENT: "/manage-schedule/department",
     DEPARTMENT_CLASS: "/manage-schedule/class",
+    UPDATE_SCHEDULE: "/manage-schedule/all-schedule/update",
     ROOT: "/schedule",
   },
 
@@ -76,12 +79,19 @@ export const ROUTE = {
   },
 
   REQUESTS: "/requests",
+  REQUEST_DETAIL: (id: string) => `/requests/${id}`,
+  REQUEST_UPDATE: (id: string) => `/request/${id}`,
 
-  REQUESTS_LIST: "/request-list",
-  STUDENT_DETAIL: "/student-detail",
+  // REQUESTS_LIST: "/request-list",
+  // STUDENT_DETAIL: "/student-detail",
 
   SETTINGS: {
     THEME: "/settings/theme",
+  },
+
+  MY_CLASS: {
+    CLASS: "/my-class",
+    MY_SCHEDULE: "/my-schedule",
   },
 
   PERMISSIONS: "/permissions",
