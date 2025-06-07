@@ -9,3 +9,10 @@ export interface SubmittedScoreParam {
   pageNo?: number;
   pageSize?: number;
 }
+export interface ConfigureScoreModel {
+  attendancePercentage?: number;
+  assignmentPercentage?: number;
+  midtermPercentage?: number;
+  finalPercentage?: number;
+  totalPercentage?: number;
+}

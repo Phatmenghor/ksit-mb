@@ -4,13 +4,19 @@ import {
   UpdateScoreModel,
 } from "@/model/score/student-score/student-score.request";
 import { StudentScoreInitModel } from "@/model/score/student-score/student-score.response";
-import { SubmittedScoreParam } from "@/model/score/submitted-score/submitted-score.request.model";
-import { AllScoreSubmittedAPI } from "@/model/score/submitted-score/submitted-score.response.model";
+import {
+  ConfigureScoreModel,
+  SubmittedScoreParam,
+} from "@/model/score/submitted-score/submitted-score.request.model";
+import {
+  AllScoreSubmittedAPI,
+  ScoreSubmittedModel,
+} from "@/model/score/submitted-score/submitted-score.response.model";
 import { axiosClientWithAuth } from "@/utils/axios";
 
 export async function intiStudentsScoreService(data: RequestStudentScoreModel) {
   try {
-    const response = await axiosClientWithAuth.post<StudentScoreInitModel>(
+    const response = await axiosClientWithAuth.post(
       `/v1/score/initialize`,
       data
     );
@@ -82,6 +88,35 @@ export async function getSubmissionScoreByIdService(id: number) {
       throw new Error(error.response.data.message);
     }
     console.error("Error get submission score by id:", error); // Log error for debugging
+    throw error; // Re-throw the error for further handling
+  }
+}
+
+export async function getConfigurationScoreService() {
+  try {
+    const response = await axiosClientWithAuth.get(`/v1/score/configuration`);
+    return response.data.data;
+  } catch (error: any) {
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    console.error("Error get configuration score:", error); // Log error for debugging
+    throw error; // Re-throw the error for further handling
+  }
+}
+
+export async function configureScoreService(config: ConfigureScoreModel) {
+  try {
+    const response = await axiosClientWithAuth.post(
+      `/v1/score/configuration`,
+      config
+    );
+    return response.data.data;
+  } catch (error: any) {
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    console.error("Error config configuration score:", error); // Log error for debugging
     throw error; // Re-throw the error for further handling
   }
 }

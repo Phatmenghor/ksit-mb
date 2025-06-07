@@ -42,3 +42,14 @@ interface Semester {
   status: string;
   createdAt: string;
 }
+
+export interface ScoreConfigurationModel {
+  id: number
+  attendancePercentage: number
+  assignmentPercentage: number
+  midtermPercentage: number
+  finalPercentage: number
+  totalPercentage: number
+  status: string
+  createdAt: string
+}

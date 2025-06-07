@@ -2,14 +2,6 @@
 
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { ROUTE } from "@/constants/routes";
 import {
   ChevronLeft,
@@ -51,7 +43,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
-import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 
 export default function AllSchedulePage() {
   const [searchQuery, setSearchQuery] = useState<string>("");

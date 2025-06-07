@@ -59,6 +59,8 @@ import { SubmissionEnum } from "@/constants/constant";
 import { formatDate } from "date-fns";
 import Loading from "@/app/(dashboard)/settings/theme/loading";
 import _ from "lodash";
+import { useExportHandlers } from "@/components/dashboard/scores-submitted/export-handler";
+import { ScoreSubmittedModel } from "@/model/score/submitted-score/submitted-score.response.model";
 
 export default function StudentScoreDetailsPage() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -76,10 +78,15 @@ export default function StudentScoreDetailsPage() {
   const [scheduleDetail, setScheduleDetail] = useState<ScheduleModel | null>(
     null
   );
-  const [students, setStudents] = useState<SessionScoreModel | null>(null);
-  const [mode, setMode] = useState<"view" | "edit-score">("edit-score");
+  const [students, setStudents] = useState<ScoreSubmittedModel | null>(null);
+  const [mode, setMode] = useState<"view" | "edit-score">("view");
   const [originalData, setOriginalData] = useState<Map<number, any>>(new Map());
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const { handleExportToExcel, handleExportToPDF } = useExportHandlers(
+    students,
+    scheduleDetail
+  );
 
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -107,6 +114,15 @@ export default function StudentScoreDetailsPage() {
       setIsLoading(false);
     }
   }, [id]);
+  // Helper function to determine if editing is allowed
+  const isEditingAllowed = (status: string) => {
+    return status === SubmissionEnum.DRAFT;
+  };
+
+  // Helper function to get mode based on status
+  const getModeFromStatus = (status: string) => {
+    return isEditingAllowed(status) ? "edit-score" : "view";
+  };
 
   const loadStudentScore = useCallback(
     async (forceRefresh = false, showLoader = true) => {
@@ -129,6 +145,13 @@ export default function StudentScoreDetailsPage() {
 
         setStudents(response);
         setIsInitialized(true);
+
+        // Use helper functions for cleaner logic
+        const currentMode = getModeFromStatus(response.status);
+        const editingAllowed = isEditingAllowed(response.status);
+
+        setMode(currentMode);
+        setIsSubmitted(!editingAllowed);
 
         const originalMap = new Map();
         response.studentScores?.forEach((score: StudentScoreModel) => {
@@ -162,6 +185,14 @@ export default function StudentScoreDetailsPage() {
     },
     [scheduleDetail, unsavedChanges.size]
   );
+
+  useEffect(() => {
+    if (students?.status === SubmissionEnum.DRAFT) {
+      setMode("edit-score");
+    } else {
+      setMode("view");
+    }
+  }, [students?.status]);
 
   const handleSubmit = useCallback(async () => {
     if (!students) return;
@@ -471,7 +502,16 @@ export default function StudentScoreDetailsPage() {
                   </span>
 
                   {/* Excel Export Button */}
-                  <Button variant="outline" className="gap-2">
+                  <Button
+                    onClick={() =>
+                      handleExportToExcel({
+                        includeComments: false,
+                        customFileName: "Student Score",
+                      })
+                    }
+                    variant="outline"
+                    className="gap-2"
+                  >
                     <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
                       <span className="text-white text-xs font-bold">X</span>
                     </div>
@@ -480,7 +520,16 @@ export default function StudentScoreDetailsPage() {
                   </Button>
 
                   {/* PDF Export Button */}
-                  <Button variant="outline" className="gap-2">
+                  <Button
+                    onClick={() =>
+                      handleExportToPDF({
+                        customFileName: "Student Score",
+                        includeComments: false,
+                      })
+                    }
+                    variant="outline"
+                    className="gap-2"
+                  >
                     <div className="w-5 h-5 border-2 border-red-500 rounded flex items-center justify-center">
                       <span className="text-red-500 text-[10px] font-bold">
                         PDF
@@ -534,7 +583,7 @@ export default function StudentScoreDetailsPage() {
                     <span className="font-semibold">
                       {students?.submissionDate
                         ? formatDate(new Date(students.submissionDate), "PP")
-                        : "N/A"}
+                        : "---"}
                     </span>
                   </p>
                 </div>
