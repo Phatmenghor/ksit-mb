@@ -23,7 +23,7 @@ import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class
 import Loading from "@/components/shared/loading";
 import { Card } from "@/components/ui/card";
 import Component from "@/components/dashboard/survey/form-section-builder";
-import SurveyFormCard  from "@/components/dashboard/survey/survey-form";
+import SurveyFormCard from "@/components/dashboard/survey/survey-form";
 export default function ManageQAPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -64,12 +64,6 @@ export default function ManageQAPage() {
     },
     [debouncedSearchQuery, selectedClass, selectAcademicYear]
   );
- const questions = [
-    "1. The course materials were helpful and relevant.",
-    "2. The instructor communicated clearly.",
-    "3. The course met my expectations.",
-    // Add more questions as needed
-  ];
   useEffect(() => {
     loadStudents({});
   }, [searchQuery, loadStudents, debouncedSearchQuery, selectAcademicYear]);
@@ -181,9 +175,6 @@ export default function ManageQAPage() {
           </Button>
         </Card>
       </div>
-       {questions.map((questionText, index) => (
-        <SurveyFormCard key={index} question={questionText} />
-      ))}
       {/* {!isLoading && allStudentData && (
         <div className="mt-4 flex justify-end ">
           <PaginationPage

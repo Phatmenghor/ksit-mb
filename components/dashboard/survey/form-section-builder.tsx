@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import FeedbackFormDisplay from "./add-question";
+import FeedbackFormDisplay from "./paragraph-question";
 import { SetStateAction, useState } from "react";
 import {
   DropdownMenu,
@@ -11,11 +11,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
-import addQuestion from "./add-question";
+import addQuestion from "./paragraph-question";
 import { tuple } from "zod";
-import AddQuestion from "./add-question";
-import LinarQuestion from "./paragraph_question";
-import ParagraphQuestion from "./add-question";
+import AddQuestion from "./paragraph-question";
+import LinarQuestion from "./linar-question";
+import ParagraphQuestion from "./paragraph-question";
 
 type FormSectionProps = {
   sectionNumber: number;

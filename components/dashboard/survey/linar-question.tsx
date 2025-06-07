@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 
 interface FeedbackFormDisplayProps {
   isDialogOpen: boolean;
@@ -24,20 +25,20 @@ type Question = {
   isEditing: boolean;
 };
 
-export default function ParagraphQuestion({
+export default function LinarQuestion({
   isDialogOpen,
   onClose,
 }: FeedbackFormDisplayProps) {
   const [questions, setQuestions] = useState([
     {
       id: 1,
-      type: "text" as const,
+      type: "rating",
       text: "What did you enjoy most about this class?",
       isEditing: false,
     },
     {
       id: 2,
-      type: "text",
+      type: "rating" as const,
       text: "The instructor communicated effectively.",
       isEditing: false,
     },
@@ -73,7 +74,7 @@ export default function ParagraphQuestion({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6 bg-white ">
+    <div className="w-full max-w-4xl mx-auto py-4 bg-white ">
       {/* Add Question Button and Dialog */}
 
       {questions.map((question, index) => (
@@ -84,24 +85,24 @@ export default function ParagraphQuestion({
           {/* Question Header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              {question.isEditing ? (
-                <input
-                  type="text"
-                  value={question.text}
-                  onChange={(e) =>
-                    updateQuestionText(question.id, e.target.value)
-                  }
-                  className="text-sm font-medium text-gray-900 w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your question here..."
-                />
-              ) : (
+              {/* {question.isEditing ? ( */}
+              <input
+                type="text"
+                value={question.text}
+                onChange={(e) =>
+                  updateQuestionText(question.id, e.target.value)
+                }
+                className="text-sm font-medium text-gray-900 w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter your question here..."
+              />
+              {/* ) : (
                 <h3
                   className="text-sm font-medium text-gray-900 mb-4 cursor-pointer hover:bg-gray-50 p-1 rounded"
                   onClick={() => toggleEdit(question.id)}
                 >
                   {index + 1}. {question.text}
                 </h3>
-              )}
+              )} */}
             </div>
             <div className="flex items-center gap-2 ml-4">
               <Button
@@ -133,17 +134,43 @@ export default function ParagraphQuestion({
               </Button>
             </div>
           </div>
-      
-          {/* Question Input Area */}
-          {question.type === "text" ? (
-            <input
-              type="text"
-              placeholder="Answer Text Input"
-              className="w-full border border-gray-300 rounded-md p-2 text-sm placeholder-gray-400 bg-gray-50"
-            />
-          ) : (
-            <p></p>
-          )}
+          <div className="bg-gray-50 p-4 rounded-md">
+            <RadioGroup
+              disabled
+              className="grid grid-cols-[1fr_auto_1fr] items-center gap-2"
+            >
+              {/* Very Disagree */}
+              <div className="flex gap-2 items-center justify-end">
+                <span className="text-sm font-medium text-muted-foreground">
+                  (1)
+                </span>
+                <Input
+                  id="section-name"
+                  placeholder="Very Disagree"
+                  className="w-full focus:border-none"
+                  readOnly
+                />
+              </div>
+
+              {/* Separator */}
+              <div className="flex justify-center items-center mb-3 text-gray-400">
+                ___
+              </div>
+
+              {/* Strongly Agree */}
+              <div className="flex gap-2 items-center justify-start">
+                <Input
+                  id="section-name"
+                  placeholder="Strongly Agree"
+                  className="w-full focus:border-none"
+                  readOnly
+                />
+                <span className="text-sm font-medium text-muted-foreground">
+                  (5)
+                </span>
+              </div>
+            </RadioGroup>
+          </div>
         </div>
       ))}
     </div>
