@@ -4,11 +4,18 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
-export default function SurveyFormCard({ question }) {
-  const [selectedValue, setSelectedValue] = useState("4");
-
+export default function SurveyFormCard({
+  question,
+  initialValue,
+  onValueChange,
+}) {
+  const [selectedValue, setSelectedValue] = useState(initialValue);
+  const handleRadioChange = (e) => {
+    setSelectedValue(e.target.value);
+    onValueChange?.(e.target.value);
+  };
   return (
-    <Card>
+    <Card className="mt-4">
       <div className="p-4 ">
         <div className="space-y-4">
           {/* Question */}
@@ -38,7 +45,7 @@ export default function SurveyFormCard({ question }) {
                     name="course-materials"
                     value={value.toString()}
                     checked={selectedValue === value.toString()}
-                    onChange={(e) => setSelectedValue(e.target.value)}
+                    onChange={handleRadioChange}
                     className="sr-only"
                   />
                   <div
@@ -77,4 +84,3 @@ export default function SurveyFormCard({ question }) {
     </Card>
   );
 }
-

@@ -21,6 +21,21 @@ import {
 import { useDebounce } from "@/utils/debounce/debounce";
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 import Loading from "@/components/shared/loading";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { StudentTablePaymentHeader } from "@/constants/payment/payment";
 
 export default function StudentsListPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -59,7 +74,7 @@ export default function StudentsListPage() {
         setIsLoading(false);
       }
     },
-     [debouncedSearchQuery, selectedClass, selectAcademicYear]
+    [debouncedSearchQuery, selectedClass, selectAcademicYear]
   );
 
   useEffect(() => {
@@ -79,58 +94,6 @@ export default function StudentsListPage() {
   };
 
   const iconColor = "text-black";
-
-  const columns: Column<StudentModel>[] = [
-    {
-      key: "student#",
-      header: "#",
-      render: (_: any, index: number) => index + 1,
-    },
-    {
-      key: "id",
-      header: "student ID",
-      render: (student: StudentModel) => `${student.id ?? ""}`,
-    },
-    {
-      key: "fullname (kh)",
-      header: "Fullname (KH)",
-      render: (student: StudentModel) =>
-        `${student.khmerFirstName ?? "---"} ${student.khmerLastName ?? ""}`,
-    },
-    {
-      key: "fullname (en)",
-      header: "Fullname (EN)",
-      render: (student: StudentModel) =>
-        `${student.englishFirstName ?? "---"} ${student.englishLastName ?? ""}`,
-    },
-    {
-      key: "gender",
-      header: "Gender",
-      render: (student: any) => (
-        <span className={`inline-flex rounded-full px-2 py-1  text-center`}>
-          {student.gender ?? "---"}
-        </span>
-      ),
-    },
-    {
-      key: "actions",
-      header: "Actions",
-      render: (student: any) => (
-        <>
-          <BreadcrumbLink href={ROUTE.PAYMENT.VIEW_PAYMENT(String(student.id))}>
-            <Button
-              variant="link"
-              size="icon"
-              className={`${iconColor} underline hover:text-blue-600 flex items-center`}
-            >
-              <Eye size="h-4 w-4" />
-              <span className="text-sm"> Detail</span>
-            </Button>
-          </BreadcrumbLink>
-        </>
-      ),
-    },
-  ];
 
   return (
     <div className="space-y-4">
@@ -170,11 +133,78 @@ export default function StudentsListPage() {
         {isLoading ? (
           <Loading />
         ) : (
-          <CustomTable
-            columns={columns}
-            isLoading={isLoading}
-            data={allStudentData?.content ?? []}
-          />
+          // <CustomTable
+          //   columns={columns}
+          //   isLoading={isLoading}
+          //   data={allStudentData?.content ?? []}
+          // />
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {StudentTablePaymentHeader.map((header, index) => (
+                  <TableHead key={index} className={header.className}>
+                    {header.label}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {allStudentData?.content.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={StudentTablePaymentHeader.length}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    No classes found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                allStudentData?.content.map((student, index) => {
+                  const indexDisplay =
+                    ((allStudentData.pageNo || 1) - 1) *
+                      (allStudentData.pageSize || 10) +
+                    index +
+                    1;
+                  return (
+                    <TableRow key={student.id}>
+                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{student.id || "---"}</TableCell>
+                      <TableCell>
+                        {`${student.khmerFirstName || ""} ${
+                          student.khmerLastName || ""
+                        }`.trim() || "---"}
+                      </TableCell>
+                      <TableCell>
+                        {`${student.englishFirstName || ""} ${
+                          student.englishLastName || ""
+                        }`.trim() || "---"}
+                      </TableCell>
+
+                      <TableCell>{student.gender || "---"}</TableCell>
+                      <TableCell>
+                        <div className="flex justify-start space-x-2">
+                          <BreadcrumbLink
+                            href={ROUTE.PAYMENT.VIEW_PAYMENT(
+                              String(student.id)
+                            )}
+                          >
+                            <Button
+                              variant="link"
+                              size="icon"
+                              className={`${iconColor} underline hover:text-blue-600 flex items-center`}
+                            >
+                              <Eye size="h-4 w-4" />
+                              <span className="text-sm"> Detail</span>
+                            </Button>
+                          </BreadcrumbLink>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
         )}
       </div>
 

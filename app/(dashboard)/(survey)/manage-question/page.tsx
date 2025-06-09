@@ -160,7 +160,7 @@ export default function ManageQAPage() {
             key={index}
             sectionNumber={index + 1}
             totalSections={sections.length}
-            onRemove={() => handleRemoveSection(index)}
+            onRemove={async () => handleRemoveSection(index)}
           />
         </div>
       ))}
