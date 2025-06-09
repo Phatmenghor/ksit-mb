@@ -16,7 +16,7 @@ import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 import { SubmissionScoreModel } from "@/model/score/student-score/student-score.response";
 
 // Enhanced export handlers with improved functionality
-export const useExportHandlers = (
+export const useExportScoreHandlers = (
   submission: SubmissionScoreModel | null,
   schedule: ScheduleModel | null
 ) => {

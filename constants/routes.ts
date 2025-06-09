@@ -10,7 +10,6 @@ import {
   Palette,
   ListCheck,
 } from "lucide-react";
-import { REQUEST_DETAIL } from "./constant";
 
 export const ROUTE = {
   DASHBOARD: "/",
@@ -65,6 +64,9 @@ export const ROUTE = {
     CLASS_SCHEDULE: "/attendance/schedule",
     ATTENDANCE_CHECK: "/attendance/schedule/check",
     HISTORY_RECORD: "/attendance/history-records",
+    STUDENT_RECORD: "/attendance/student-records",
+    HISTORY_RECORD_DETAIL: (id: string) =>
+      `/attendance/history-records/view/${id}`,
   },
 
   COURSES: {
@@ -152,6 +154,7 @@ export const sidebarRoutes = [
     subroutes: [
       { title: "Class Schedule", href: ROUTE.ATTENDANCE.CLASS_SCHEDULE },
       { title: "History Records", href: ROUTE.ATTENDANCE.HISTORY_RECORD },
+      { title: "Student Records", href: ROUTE.ATTENDANCE.STUDENT_RECORD },
     ],
   },
   {

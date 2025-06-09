@@ -34,7 +34,7 @@ import { SubmitScoreModel } from "@/model/score/student-score/student-score.requ
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "date-fns";
 import { ROUTE } from "@/constants/routes";
-import { useExportHandlers } from "@/components/dashboard/scores-submitted/export-handler";
+import { useExportHandlers } from "@/components/shared/export/score-export-handler";
 import { getDetailScheduleService } from "@/service/schedule/schedule.service";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 import { SubmissionScoreModel } from "@/model/score/student-score/student-score.response";

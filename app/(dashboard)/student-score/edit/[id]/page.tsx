@@ -52,7 +52,7 @@ import { SubmissionEnum } from "@/constants/constant";
 import { formatDate } from "date-fns";
 import Loading from "@/app/(dashboard)/settings/theme/loading";
 import _ from "lodash";
-import { useExportHandlers } from "@/components/dashboard/scores-submitted/export-handler";
+import { useExportHandlers } from "@/components/shared/export/score-export-handler";
 import { ScoreConfigurationModel } from "@/model/score/submitted-score/submitted-score.response.model";
 
 export default function StudentScoreDetailsPage() {
