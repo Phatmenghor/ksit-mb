@@ -8,6 +8,8 @@ import {
   ShieldCheck,
   Users,
   Palette,
+  ScrollText,
+  FileQuestion,
   ListCheck,
 } from "lucide-react";
 
@@ -104,6 +106,10 @@ export const ROUTE = {
     LIST: "/student-payment",
     VIEW_PAYMENT: (id: string) => `/view-payment/${id}`,
   },
+  SURVEY: {
+    RESULT_LIST: "/result-list",
+    MANAGE_QA: "/manage-question",
+  },
 };
 
 export const sidebarRoutes = [
@@ -194,7 +200,16 @@ export const sidebarRoutes = [
   {
     title: "Payment",
     href: ROUTE.PAYMENT.LIST,
-    icon: Calendar,
+    icon: ScrollText,
+  },
+  {
+    title: "Survey",
+    icon: FileQuestion,
+    section: "users",
+    subroutes: [
+      { title: "Result List", href: ROUTE.SURVEY.RESULT_LIST },
+      { title: "Manage Q&As", href: ROUTE.SURVEY.MANAGE_QA },
+    ],
   },
   {
     title: "Role&User permission",

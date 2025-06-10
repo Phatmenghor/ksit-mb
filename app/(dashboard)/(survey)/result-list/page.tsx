@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { toast } from "sonner";
 import { getAllStudentsService } from "@/service/user/student.service";
-import { StatusEnum } from "@/constants/constant";
+import { SemesterFilter, StatusEnum } from "@/constants/constant";
 import { Column, CustomTable } from "@/components/shared/layout/TableSection";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
@@ -21,8 +21,9 @@ import {
 import { useDebounce } from "@/utils/debounce/debounce";
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 import Loading from "@/components/shared/loading";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export default function StudentsListPage() {
+export default function ResultListPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -33,6 +34,7 @@ export default function StudentsListPage() {
   const [allStudentData, setAllStudentData] = useState<AllStudentModel | null>(
     null
   );
+  const [selectedSemester, setSelectedSemester] = useState<string>("ALL");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const loadStudents = useCallback(
     async (param: RequestAllStudent) => {
@@ -59,7 +61,7 @@ export default function StudentsListPage() {
         setIsLoading(false);
       }
     },
-     [debouncedSearchQuery, selectedClass, selectAcademicYear]
+    [debouncedSearchQuery, selectedClass, selectAcademicYear]
   );
 
   useEffect(() => {
@@ -87,48 +89,36 @@ export default function StudentsListPage() {
       render: (_: any, index: number) => index + 1,
     },
     {
-      key: "id",
-      header: "student ID",
+      key: "code",
+      header: "Class Code",
       render: (student: StudentModel) => `${student.id ?? ""}`,
     },
     {
-      key: "fullname (kh)",
-      header: "Fullname (KH)",
+      key: "subject",
+      header: "Subject",
       render: (student: StudentModel) =>
         `${student.khmerFirstName ?? "---"} ${student.khmerLastName ?? ""}`,
     },
     {
-      key: "fullname (en)",
-      header: "Fullname (EN)",
+      key: "teacher",
+      header: "Teacher",
       render: (student: StudentModel) =>
         `${student.englishFirstName ?? "---"} ${student.englishLastName ?? ""}`,
     },
     {
-      key: "gender",
-      header: "Gender",
+      key: "total",
+      header: "Total Submitted",
       render: (student: any) => (
         <span className={`inline-flex rounded-full px-2 py-1  text-center`}>
           {student.gender ?? "---"}
         </span>
       ),
     },
-    {
-      key: "actions",
-      header: "Actions",
-      render: (student: any) => (
-        <>
-          <BreadcrumbLink href={ROUTE.PAYMENT.VIEW_PAYMENT(String(student.id))}>
-            <Button
-              variant="link"
-              size="icon"
-              className={`${iconColor} underline hover:text-blue-600 flex items-center`}
-            >
-              <Eye size="h-4 w-4" />
-              <span className="text-sm"> Detail</span>
-            </Button>
-          </BreadcrumbLink>
-        </>
-      ),
+   {
+      key: "lastUpdate",
+      header: "Last Updated",
+      render: (student: StudentModel) =>
+        `${student.englishFirstName ?? "---"} ${student.englishLastName ?? ""}`,
     },
   ];
 
@@ -137,14 +127,21 @@ export default function StudentsListPage() {
       <CardHeaderSection
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "Payment", href: ROUTE.PAYMENT.LIST },
+          { label: "Survey Results", href: ROUTE.SURVEY.RESULT_LIST },
         ]}
-        title="Payment"
+        title="Survey Results"
         searchValue={searchQuery}
-        searchPlaceholder="Search..."
+        searchPlaceholder="Enter name or ID..."
         onSearchChange={handleSearchChange}
         customSelect={
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
+              <div className="w-full min-w-[200px] md:w-1/2">
+              <ComboboxSelectClass
+                dataSelect={selectedClass ?? null}
+                onChangeSelected={handleClassChange}
+                disabled={isSubmitting}
+              />
+            </div>
             <div className="w-full min-w-[200px] md:w-1/2">
               <div className="w-full min-w-[200px]">
                 <YearSelector
@@ -152,16 +149,25 @@ export default function StudentsListPage() {
                   onChange={handleYearChange}
                   value={selectAcademicYear || 0}
                 />
+               
               </div>
             </div>
 
-            <div className="w-full min-w-[200px] md:w-1/2">
-              <ComboboxSelectClass
-                dataSelect={selectedClass ?? null}
-                onChangeSelected={handleClassChange}
-                disabled={isSubmitting}
-              />
-            </div>
+             <Select
+                onValueChange={handleSearchChange}
+                value={selectedSemester}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a semester" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SemesterFilter.map((semester) => (
+                    <SelectItem key={semester.value} value={semester.value}>
+                      {semester.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
           </div>
         }
       />
