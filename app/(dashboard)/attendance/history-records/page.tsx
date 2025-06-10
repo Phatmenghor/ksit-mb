@@ -43,6 +43,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import {
+  getAllAttendanceGenerateService,
+  getAttendanceSessionByIdService,
+} from "@/service/schedule/attendance.service";
 
 export default function HistoryRecordPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");

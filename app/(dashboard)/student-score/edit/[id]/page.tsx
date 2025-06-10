@@ -52,7 +52,7 @@ import { SubmissionEnum } from "@/constants/constant";
 import { formatDate } from "date-fns";
 import Loading from "@/app/(dashboard)/settings/theme/loading";
 import _ from "lodash";
-import { useExportHandlers } from "@/components/shared/export/score-export-handler";
+import { useExportScoreHandlers } from "@/components/shared/export/score-export-handler";
 import { ScoreConfigurationModel } from "@/model/score/submitted-score/submitted-score.response.model";
 
 export default function StudentScoreDetailsPage() {
@@ -78,7 +78,7 @@ export default function StudentScoreDetailsPage() {
   const [originalData, setOriginalData] = useState<Map<number, any>>(new Map());
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const { handleExportToExcel, handleExportToPDF } = useExportHandlers(
+  const { handleExportToExcel, handleExportToPDF } = useExportScoreHandlers(
     score,
     scheduleDetail
   );

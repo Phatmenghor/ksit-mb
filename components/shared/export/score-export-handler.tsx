@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { exportSubmissionStudentsToPDF } from "@/utils/generate-file/score/pdf-submission-score";
 import { exportApprovedStudentsToExcelAdvanced } from "@/utils/generate-file/score/excel-submission-score";
-import { ScoreSubmittedModel } from "@/model/score/submitted-score/submitted-score.response.model";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 import { SubmissionScoreModel } from "@/model/score/student-score/student-score.response";
 
@@ -203,7 +202,7 @@ export const ExportButtonGroup = ({
     handleExportToPDF,
     handleExportBoth,
     hasData,
-  } = useExportHandlers(submission, schedule);
+  } = useExportScoreHandlers(submission, schedule);
 
   if (!hasData) {
     return (
@@ -316,7 +315,7 @@ export const SimpleExportButtons = ({
     handleQuickExcelExport,
     handleQuickPDFExport,
     hasData,
-  } = useExportHandlers(submission, schedule);
+  } = useExportScoreHandlers(submission, schedule);
 
   if (!hasData) return null;
 

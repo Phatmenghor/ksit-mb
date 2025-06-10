@@ -20,8 +20,15 @@ import { getDetailScheduleService } from "@/service/schedule/schedule.service";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 import Loading from "@/app/(dashboard)/settings/theme/loading";
 import _ from "lodash";
-import { getAttendanceSessionService } from "@/service/schedule/attendance.service";
-import { AllAttendanceModel } from "@/model/schedule/attendance/attendance-get";
+import {
+  getAllAttendanceGenerateService,
+  getAttendanceSessionByIdService,
+  getAttendanceSessionService,
+} from "@/service/schedule/attendance.service";
+import {
+  AllAttendanceModel,
+  AttendanceModel,
+} from "@/model/schedule/attendance/attendance-get";
 import { useExportAttendanceHandlers } from "@/components/shared/export/attendance-export-handler";
 
 export default function HistoryRecordDetailPage() {
@@ -62,30 +69,27 @@ export default function HistoryRecordDetailPage() {
     if (!id) return;
     setIsLoading(true);
     try {
-      const response = await getAttendanceSessionService(id);
+      const response = await getAllAttendanceGenerateService({
+        scheduleId: id,
+      });
+      console.log("Schedule detail response:", response);
+
       setAttendance(response);
     } catch (error) {
-      toast.error("Error configure score data");
-      console.error("Error fetching configure score:", error);
+      toast.error("Error fetching schedule data");
+      console.error("Error fetching class data:", error);
     } finally {
       setIsLoading(false);
     }
   }, [id]);
 
-  // Initial load
   useEffect(() => {
-    loadScheduleData();
-  }, [loadScheduleData]);
-
-  useEffect(() => {
-    loadAttendanceData();
-  }, []);
-
-  useEffect(() => {
-    if (scheduleDetail?.id) {
+    if (id && !isInitialized) {
+      loadScheduleData();
       loadAttendanceData();
+      setIsInitialized(true);
     }
-  }, [scheduleDetail?.id, loadAttendanceData]);
+  }, [id, isInitialized, loadScheduleData, loadAttendanceData]);
 
   return (
     <div className="space-y-4">

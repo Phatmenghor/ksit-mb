@@ -60,7 +60,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import {
-  getAllAttedanceGenerateService,
+  getAllAttendanceGenerateService,
+  submitAttendanceSessionService,
   updateAttendanceSessionService,
 } from "@/service/schedule/attendance.service";
 import { AttendanceGenerateModel } from "@/model/schedule/attendance/attendance-generate";
@@ -158,9 +159,11 @@ const AttendanceCheckPage = () => {
       }
 
       try {
-        const response = await getAllAttedanceGenerateService({
+        const response = await getAllAttendanceGenerateService({
           scheduleId: scheduleDetail.id,
         });
+        console.log("##init attendance: ", response);
+
         setAttendanceGenerate(response);
         setLastUpdated(new Date());
         setIsInitialized(true);
@@ -396,11 +399,10 @@ const AttendanceCheckPage = () => {
 
     setIsSubmittingToStaff(true);
     try {
-      // await submitAttendanceToStaffService({
-      //   sessionId: attendanceGenerate.id,
-      //   scheduleId: scheduleDetail?.id,
-      // });
-
+      const response = await submitAttendanceSessionService(
+        attendanceGenerate?.id
+      );
+      console.log("##after submit attendance: ", response);
       setIsSubmitted(true);
       setSubmissionTime(new Date());
 
