@@ -19,7 +19,6 @@ import { toast } from "sonner";
 import { getDetailScheduleService } from "@/service/schedule/schedule.service";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 import Loading from "@/app/(dashboard)/settings/theme/loading";
-import _ from "lodash";
 import {
   getAllAttendanceGenerateService,
   getAttendanceSessionByIdService,

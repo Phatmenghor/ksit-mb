@@ -110,7 +110,7 @@ export default function HistoryRecordsPage() {
     endDate,
   ]);
 
-  const getStatusAttendance = (status: string | null | undefined) => {
+  const getStatusAttendance = (status: string) => {
     if (!status) {
       return null;
     }
@@ -504,17 +504,15 @@ export default function HistoryRecordsPage() {
         )}
       </div>
 
-      {!isLoading &&
-        attendanceHistoryData &&
-        attendanceHistoryData.totalPages > 1 && (
-          <div className="mt-8 flex justify-end">
-            <PaginationPage
-              currentPage={attendanceHistoryData.pageNo}
-              totalPages={attendanceHistoryData.totalPages}
-              onPageChange={handlePageChange}
-            />
-          </div>
-        )}
+      {attendanceHistoryData && (
+        <div className="mt-8 flex justify-end">
+          <PaginationPage
+            currentPage={attendanceHistoryData.pageNo}
+            totalPages={attendanceHistoryData.totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      )}
     </div>
   );
 }
