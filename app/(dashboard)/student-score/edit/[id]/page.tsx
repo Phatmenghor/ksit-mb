@@ -1,0 +1,958 @@
+"use client";
+
+import StudentScoreHeader from "@/components/dashboard/student-scores/layout/header-section";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  AlertCircle,
+  CheckCircle,
+  Download,
+  Edit,
+  Eye,
+  Loader2,
+  Save,
+  Upload,
+  X,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useParams, useRouter } from "next/navigation";
+import {
+  StudentScoreModel,
+  SubmissionScoreModel,
+} from "@/model/score/student-score/student-score.response";
+import {
+  getConfigurationScoreService,
+  intiStudentsScoreService,
+  submittedScoreService,
+  updateStudentsScoreService,
+} from "@/service/score/score.service";
+import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ROUTE } from "@/constants/routes";
+import { Badge } from "@/components/ui/badge";
+import { getDetailScheduleService } from "@/service/schedule/schedule.service";
+import { ScheduleModel } from "@/model/schedules/all-schedule-model";
+import { ScoreSubmitConfirmDialog } from "@/components/dashboard/student-scores/layout/submit-confirm-dialog";
+import { SubmissionEnum } from "@/constants/constant";
+import { formatDate } from "date-fns";
+import Loading from "@/app/(dashboard)/settings/theme/loading";
+import _ from "lodash";
+import { useExportScoreHandlers } from "@/components/shared/export/score-export-handler";
+import { ScoreConfigurationModel } from "@/model/score/submitted-score/submitted-score.response.model";
+
+export default function StudentScoreDetailsPage() {
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshProgress, setRefreshProgress] = useState(0);
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [isSubmittedDialogOpen, setIsSubmittedDialogOpen] = useState(false);
+  const [isSubmittingToStaff, setIsSubmittingToStaff] = useState(false);
+
+  const [configureScore, setConfigureScore] =
+    useState<ScoreConfigurationModel | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [unsavedChanges, setUnsavedChanges] = useState<Set<number>>(new Set());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSavingAll, setIsSavingAll] = useState(false);
+
+  const [scheduleDetail, setScheduleDetail] = useState<ScheduleModel | null>(
+    null
+  );
+  const [score, setScore] = useState<SubmissionScoreModel | null>(null);
+  const [mode, setMode] = useState<"view" | "edit-score">("view");
+  const [originalData, setOriginalData] = useState<Map<number, any>>(new Map());
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const { handleExportToExcel, handleExportToPDF } = useExportScoreHandlers(
+    score,
+    scheduleDetail
+  );
+
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-refresh timing constants
+  const REFRESH_INTERVAL = 30; // 30 seconds
+  const PROGRESS_UPDATE_INTERVAL = 100; // Update progress every 100ms
+
+  const router = useRouter();
+  const params = useParams();
+  const id = params?.id ? Number(params.id) : null;
+
+  const loadScheduleData = useCallback(async () => {
+    if (!id) return;
+    setIsLoading(true);
+    try {
+      const response = await getDetailScheduleService(Number(id));
+      console.log("Schedule detail response:", response);
+
+      setScheduleDetail(response);
+    } catch (error) {
+      toast.error("Error fetching schedule data");
+      console.error("Error fetching class data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id]);
+
+  const loadScoreConfigureData = useCallback(async () => {
+    if (!id) return;
+    setIsLoading(true);
+    try {
+      const response = await getConfigurationScoreService();
+
+      setConfigureScore(response);
+    } catch (error) {
+      toast.error("Error configure score data");
+      console.error("Error fetching configure score:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    loadScoreConfigureData();
+  }, []);
+
+  // Helper function to determine if editing is allowed
+  const isEditingAllowed = (status: string) => {
+    return status === SubmissionEnum.DRAFT;
+  };
+
+  // Helper function to get mode based on status
+  const getModeFromStatus = (status: string) => {
+    return isEditingAllowed(status) ? "edit-score" : "view";
+  };
+
+  const loadStudentScore = useCallback(
+    async (forceRefresh = false, showLoader = true) => {
+      if (!scheduleDetail?.id) return;
+
+      if (!forceRefresh && unsavedChanges.size > 0) {
+        return;
+      }
+
+      if (showLoader) {
+        setIsRefreshing(true);
+      }
+
+      try {
+        if (scheduleDetail?.id == null) {
+          throw new Error("Schedule ID is required");
+        }
+
+        const response = await intiStudentsScoreService({
+          scheduleId: scheduleDetail?.id,
+        });
+
+        setScore(response);
+        setIsInitialized(true);
+
+        // Set mode based on status
+        const newMode = getModeFromStatus(response.status);
+        setMode(newMode);
+
+        // Set isSubmitted based on whether editing is allowed
+        setIsSubmitted(!isEditingAllowed(response.status));
+
+        // Update original data
+        const originalMap = new Map();
+        response.studentScores?.forEach((score: StudentScoreModel) => {
+          originalMap.set(score.id, {
+            assignmentScore: score.assignmentScore,
+            midtermScore: score.midtermScore,
+            finalScore: score.finalScore,
+            grade: score.grade,
+          });
+        });
+        setOriginalData(originalMap);
+        setUnsavedChanges(new Set());
+      } catch (error: any) {
+        // Error handling...
+      } finally {
+        if (showLoader) {
+          setTimeout(() => {
+            setIsRefreshing(false);
+          }, 500);
+        }
+      }
+    },
+    [scheduleDetail, unsavedChanges.size]
+  );
+
+  // Add a useEffect to handle mode changes when status changes
+  useEffect(() => {
+    if (score?.status) {
+      const newMode = getModeFromStatus(score.status);
+      setMode(newMode);
+      setIsSubmitted(!isEditingAllowed(score.status));
+    }
+  }, [score?.status]);
+
+  const handleSubmit = useCallback(async () => {
+    if (!score) return;
+
+    if (unsavedChanges.size > 0) {
+      toast.error("Please save all changes before submitting");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await submittedScoreService({
+        id: score.id ?? 0,
+        status: SubmissionEnum.SUBMITTED ?? "SUBMITTED",
+      });
+
+      if (response) {
+        // Update the score status and mode
+        setScore((prev) =>
+          prev ? { ...prev, status: SubmissionEnum.SUBMITTED } : prev
+        );
+        setMode("view"); // Switch to view mode after submission
+        setIsSubmitted(true);
+        setAutoRefresh(false);
+        setIsSubmittingToStaff(true);
+
+        toast.success("Score successfully submitted to staff officer!", {
+          duration: 3000,
+          icon: <CheckCircle className="h-4 w-4" />,
+        });
+      } else {
+        toast.error("Failed to submit score");
+      }
+    } catch (error) {
+      toast.error("Failed to submit score to staff");
+      console.error("Error submitting score:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [score, unsavedChanges.size]);
+
+  // Optimized field change handler with Set
+  const handleFieldChange = useCallback(
+    (scoreId: number, field: string, value: string) => {
+      if (isSubmitted) {
+        toast.error("Cannot modify student score after submission");
+        return;
+      }
+
+      // Update attendance data with optimistic update
+      setScore((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          studentScores: prev.studentScores.map((score) =>
+            score.id === scoreId ? { ...score, [field]: value } : score
+          ),
+        };
+      });
+
+      // Smart unsaved changes tracking with original data comparison
+      setUnsavedChanges((prevSet) => {
+        const original = originalData.get(scoreId);
+        if (!original) {
+          // If no original data, mark as unsaved
+          if (prevSet.has(scoreId)) return prevSet;
+          const newSet = new Set(prevSet);
+          newSet.add(scoreId);
+          return newSet;
+        }
+
+        // Get current state to compare
+        const currentStudentScore = score?.studentScores.find(
+          (a) => a.id === scoreId
+        );
+
+        if (!currentStudentScore) return prevSet;
+
+        // Create updated version
+        const updated = { ...currentStudentScore, [field]: value };
+
+        // Check if any field differs from original
+        const hasChanges =
+          updated.assignmentScore !== original.assignmentScore ||
+          updated.midtermScore !== original.midtermScore ||
+          updated.finalScore !== original.finalScore;
+
+        const isCurrentlyUnsaved = prevSet.has(scoreId);
+
+        if (hasChanges && !isCurrentlyUnsaved) {
+          // Add to unsaved
+          const newSet = new Set(prevSet);
+          newSet.add(scoreId);
+          return newSet;
+        } else if (!hasChanges && isCurrentlyUnsaved) {
+          // Remove from unsaved (reverted to original)
+          const newSet = new Set(prevSet);
+          newSet.delete(scoreId);
+          return newSet;
+        }
+
+        return prevSet; // No change needed
+      });
+    },
+    [originalData, score, isSubmitted]
+  );
+
+  // Smooth progress animation for auto-refresh
+  const startRefreshProgress = useCallback(() => {
+    setRefreshProgress(0);
+
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+
+    const startTime = Date.now();
+    progressIntervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min((elapsed / REFRESH_INTERVAL) * 100, 100);
+
+      setRefreshProgress(progress);
+
+      if (progress >= 100) {
+        if (progressIntervalRef.current) {
+          clearInterval(progressIntervalRef.current);
+        }
+      }
+    }, PROGRESS_UPDATE_INTERVAL);
+  }, []);
+
+  // Initial load
+  useEffect(() => {
+    loadScheduleData();
+  }, [loadScheduleData]);
+
+  // Smart auto-refresh with smooth progress animation
+  useEffect(() => {
+    if (autoRefresh && isInitialized && !isSubmitted) {
+      startRefreshProgress();
+
+      refreshIntervalRef.current = setInterval(() => {
+        if (unsavedChanges.size === 0) {
+          loadStudentScore(false, false); // Silent refresh
+          startRefreshProgress(); // Restart progress
+        }
+      }, REFRESH_INTERVAL);
+
+      return () => {
+        if (refreshIntervalRef.current) {
+          clearInterval(refreshIntervalRef.current);
+        }
+        if (progressIntervalRef.current) {
+          clearInterval(progressIntervalRef.current);
+        }
+      };
+    } else {
+      // Clean up intervals when auto-refresh is disabled
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+      setRefreshProgress(0);
+    }
+  }, [
+    autoRefresh,
+    isInitialized,
+    unsavedChanges.size,
+    isSubmitted,
+    loadStudentScore,
+    startRefreshProgress,
+  ]);
+
+  const handleSaveAllChanges = useCallback(async () => {
+    if (unsavedChanges.size === 0) return;
+
+    if (isSubmitted) {
+      toast.error("Cannot modify student score after submission");
+      return;
+    }
+
+    setIsSavingAll(true);
+    try {
+      // Find all rows with unsaved changes using Set
+      const changedStudentScore = score?.studentScores.filter((studentScore) =>
+        unsavedChanges.has(studentScore.id)
+      );
+
+      // Perform bulk update
+      await Promise.all(
+        (changedStudentScore ?? []).map((score) =>
+          updateStudentsScoreService({
+            id: score.id,
+            assignmentScore: score.assignmentScore,
+            midtermScore: score.midtermScore,
+            finalScore: score.finalScore,
+            comments: score.comments || "",
+          })
+        )
+      );
+
+      // Update original data with saved values
+      const newOriginalData = new Map(originalData);
+      (changedStudentScore ?? []).forEach((score) => {
+        newOriginalData.set(score.id, {
+          assignmentScore: score.assignmentScore,
+          midtermScore: score.midtermScore,
+          finalScore: score.finalScore,
+        });
+      });
+      setOriginalData(newOriginalData);
+
+      // Clear unsaved changes - create new empty Set
+      setUnsavedChanges(new Set());
+
+      toast.success(
+        `Successfully updated ${changedStudentScore?.length} student scores`,
+        { duration: 2000 }
+      );
+    } catch (error: any) {
+      const ErrMessage = error.message || "Failed to save score records";
+
+      toast.error(ErrMessage);
+      console.error("Error saving records:", error);
+    } finally {
+      setIsSavingAll(false);
+    }
+  }, [score, unsavedChanges, originalData, isSubmitted]);
+
+  // Remove specific item from unsaved changes
+  const handleRemoveFromUnsaved = useCallback((scoreId: number) => {
+    setUnsavedChanges((prevSet) => {
+      if (!prevSet.has(scoreId)) {
+        return prevSet; // No change needed
+      }
+      const newSet = new Set(prevSet);
+      newSet.delete(scoreId);
+      return newSet;
+    });
+  }, []);
+
+  useEffect(() => {
+    loadStudentScore(false, false);
+  }, []);
+
+  const handleResetChanges = useCallback(() => {
+    if (isSubmitted) {
+      toast.error("Cannot reset student score after submission");
+      return;
+    }
+    // Clear unsaved changes
+    setUnsavedChanges(new Set());
+    // Reload original data
+    loadStudentScore(true);
+  }, [loadStudentScore, isSubmitted]);
+
+  useEffect(() => {
+    if (scheduleDetail?.id) {
+      loadStudentScore();
+    }
+  }, [scheduleDetail?.id, loadStudentScore]);
+
+  const handleSaveScores = async () => {
+    setIsSubmitting(true);
+    try {
+      const promises =
+        score?.studentScores.map((student) => {
+          const payload = {
+            id: student.id,
+            assignmentScore: student.assignmentScore,
+            midtermScore: student.midtermScore,
+            finalScore: student.finalScore,
+            comments: student.comments || "",
+          };
+
+          return updateStudentsScoreService(payload);
+        }) || [];
+
+      const results = await Promise.allSettled(promises);
+      const hasFailures = results.some((r) => r.status === "rejected");
+
+      if (hasFailures) {
+        toast.error("Some scores failed to update.");
+      } else {
+        toast.success("All scores updated successfully!");
+      }
+      setMode("view");
+    } catch (err: any) {
+      console.error("Failed to update scores:");
+      toast.error(err.message || "Failed to update scores.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const renderModeBasedContent = () => {
+    if (mode === "edit-score") {
+      return (
+        <div className="flex flex-row gap-2">
+          <Button
+            className=" bg-orange-400 hover:bg-orange-500"
+            onClick={() => setMode("edit-score")}
+          >
+            <Edit className="w-4 h-4" />
+            Edit score
+          </Button>
+          {!isSubmittingToStaff && (
+            <Button onClick={() => setIsSubmittedDialogOpen(true)}>
+              <Save className="w-4 h-4" />
+              Submit score
+            </Button>
+          )}
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center gap-4">
+          {/* Label */}
+          <span className="text-muted-foreground font-medium">
+            Export Data By Class:
+          </span>
+
+          {/* Excel Export Button */}
+          <Button
+            onClick={() =>
+              handleExportToExcel({
+                includeComments: false,
+                customFileName: "Student Score",
+              })
+            }
+            variant="outline"
+            className="gap-2"
+          >
+            <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
+              <span className="text-white text-xs font-bold">X</span>
+            </div>
+            <span>Excel</span>
+            <Download className="w-4 h-4" />
+          </Button>
+
+          {/* PDF Export Button */}
+          <Button
+            onClick={() =>
+              handleExportToPDF({
+                customFileName: "Student Score",
+                includeComments: false,
+              })
+            }
+            variant="outline"
+            className="gap-2"
+          >
+            <div className="w-5 h-5 border-2 border-red-500 rounded flex items-center justify-center">
+              <span className="text-red-500 text-[10px] font-bold">PDF</span>
+            </div>
+            <span>PDF</span>
+            <Download className="w-4 h-4" />
+          </Button>
+        </div>
+      );
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <StudentScoreHeader schedule={scheduleDetail} title="View Class Detail" />
+      <div>
+        <Card className="shadow-md">
+          <CardHeader className="flex flex-row justify-between w-full">
+            <div>
+              <CardTitle className="font-bold text-xl">Student List</CardTitle>
+            </div>
+            <div>{renderModeBasedContent()}</div>
+          </CardHeader>
+
+          {/* Initialize Session Button */}
+          {!isInitialized && <Loading />}
+
+          <div className="w-full px-4">
+            <Separator className="bg-gray-300" />
+          </div>
+          <CardContent className="p-4">
+            <div className="flex flex-row gap-2">
+              <p className="mb-4">
+                <span className="text-gray-500">Total Students: </span>
+                <span className="font-semibold">
+                  {score?.studentScores.length || 0}
+                </span>
+              </p>
+              {isSubmittingToStaff && (
+                <div>
+                  <span className="text-gray-500">|</span>
+                  <p className="mb-4">
+                    <span className="text-gray-500">Submitted Date:</span>{" "}
+                    <span className="font-semibold">
+                      {score?.submissionDate
+                        ? formatDate(new Date(score.submissionDate), "PP")
+                        : "---"}
+                    </span>
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-black hover:bg-black">
+                    <TableHead className="text-white w-12">#</TableHead>
+                    <TableHead className="text-white">Student ID</TableHead>
+                    <TableHead className="text-white">Fullname (KH)</TableHead>
+                    <TableHead className="text-white">Fullname (EN)</TableHead>
+                    <TableHead className="text-white">Gender</TableHead>
+                    <TableHead className="text-white">Birth Date</TableHead>
+                    <TableHead className="text-white text-center">
+                      Att. (10%)
+                    </TableHead>
+                    <TableHead className="text-white text-center">
+                      Ass. (30%)
+                    </TableHead>
+
+                    <TableHead className="text-white text-center">
+                      Mid. (30%)
+                    </TableHead>
+                    <TableHead className="text-white text-center">
+                      Final (30%)
+                    </TableHead>
+
+                    {mode === "view" && (
+                      <TableHead className="text-white text-center">
+                        Total
+                      </TableHead>
+                    )}
+                    {mode !== "edit-score" && (
+                      <TableHead className="text-white text-center">
+                        Grade
+                      </TableHead>
+                    )}
+                    <TableHead className="text-white text-center">
+                      Action
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {score?.studentScores.length === 0 || score === null ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={15}
+                        className="text-center italic text-gray-500"
+                      >
+                        No students found in this class.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    score?.studentScores?.map((student, index) => {
+                      const indexDisplay = index + 1;
+                      return (
+                        <TableRow key={student.id} className="hover:bg-gray-50">
+                          <TableCell className="font-medium">
+                            {indexDisplay}
+                          </TableCell>
+                          <TableCell>{student?.studentId}</TableCell>
+                          <TableCell className="font-medium">
+                            {student?.studentNameKhmer?.trim() ?? "---"}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {student?.studentNameEnglish?.trim() ?? "---"}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {student?.gender ?? "---"}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {student?.dateOfBirth ?? "---"}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {student?.attendanceScore ?? 0}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {mode === "edit-score" ? (
+                              <Input
+                                type="number"
+                                value={student.assignmentScore}
+                                disabled={isSubmitting}
+                                className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
+                                  unsavedChanges.has(student.id)
+                                    ? "border-yellow-300 ring-1 ring-yellow-200"
+                                    : ""
+                                } ${isSubmitted ? "cursor-not-allowed" : ""}`}
+                                onChange={(e) =>
+                                  handleFieldChange(
+                                    student.id,
+                                    "assignmentScore",
+                                    e.target.value
+                                  )
+                                }
+                                min="0"
+                                max={configureScore?.assignmentPercentage}
+                              />
+                            ) : (
+                              <span>{student?.assignmentScore ?? 0}</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {mode === "edit-score" ? (
+                              <Input
+                                type="number"
+                                disabled={isSubmitting}
+                                value={student.midtermScore}
+                                className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
+                                  unsavedChanges.has(student.id)
+                                    ? "border-yellow-300 ring-1 ring-yellow-200"
+                                    : ""
+                                } ${isSubmitted ? "cursor-not-allowed" : ""}`}
+                                onChange={(e) =>
+                                  handleFieldChange(
+                                    student.id,
+                                    "midtermScore",
+                                    e.target.value
+                                  )
+                                }
+                                min="0"
+                                max={configureScore?.midtermPercentage}
+                              />
+                            ) : (
+                              <span>{student?.midtermScore ?? 0}</span>
+                            )}
+                          </TableCell>
+
+                          <TableCell className="text-center">
+                            {mode === "edit-score" ? (
+                              <Input
+                                type="number"
+                                value={student.finalScore}
+                                disabled={isSubmitting}
+                                className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
+                                  unsavedChanges.has(student.id)
+                                    ? "border-yellow-300 ring-1 ring-yellow-200"
+                                    : ""
+                                } ${isSubmitted ? "cursor-not-allowed" : ""}`}
+                                onChange={(e) =>
+                                  handleFieldChange(
+                                    student.id,
+                                    "finalScore",
+                                    e.target.value
+                                  )
+                                }
+                                min="0"
+                                max={configureScore?.finalPercentage}
+                              />
+                            ) : (
+                              <span>{student?.finalScore ?? 0}</span>
+                            )}
+                          </TableCell>
+
+                          {mode === "view" && (
+                            <TableCell className="text-center font-bold">
+                              <span>{student?.totalScore ?? 0}</span>
+                            </TableCell>
+                          )}
+
+                          {mode === "view" && (
+                            <TableCell className="text-center">
+                              <span
+                                className={`font-bold px-2 py-1 rounded text-sm ${
+                                  student.grade === "A"
+                                    ? "bg-green-100 text-green-800"
+                                    : student.grade === "B"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : student.grade === "C"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : student.grade === "D"
+                                    ? "bg-orange-100 text-orange-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {student?.grade ?? "---"}
+                              </span>
+                            </TableCell>
+                          )}
+
+                          {mode === "view" ? (
+                            <TableCell>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      onClick={() => {
+                                        router.push(
+                                          `${ROUTE.USERS.VIEW_TEACHER(
+                                            String(student.id)
+                                          )}`
+                                        );
+                                      }}
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                      disabled={isSubmitting}
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Detail</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </TableCell>
+                          ) : mode === "edit-score" ? (
+                            <TableCell>
+                              {isSubmitted ? (
+                                <Badge variant="secondary" className="text-xs">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Submitted
+                                </Badge>
+                              ) : unsavedChanges.has(student.id) ? (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleRemoveFromUnsaved(student.id)
+                                  }
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              ) : (
+                                <Badge variant="secondary" className="text-xs">
+                                  Saved
+                                </Badge>
+                              )}
+                            </TableCell>
+                          ) : (
+                            <></>
+                          )}
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            {(!score?.studentScores || score?.studentScores.length === 0) &&
+              isInitialized && (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p className="text-sm mt-1">No Record</p>
+                </div>
+              )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {mode === "edit-score" && score !== null && (
+        <Card className="w-full">
+          <CardContent className="flex justify-end gap-3 p-4">
+            <Button
+              disabled={isSubmitting}
+              variant="outline"
+              onClick={() => setMode("view")}
+            >
+              Discard
+            </Button>
+            <Button
+              variant="default"
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+              onClick={handleSaveScores}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Saving..." : "Save"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Quick Actions Panel - Only show when not submitted */}
+      {score && unsavedChanges.size > 0 && !isSubmitted && (
+        <Card className="fixed bottom-4 right-4 w-80 shadow-lg border-yellow-300 bg-yellow-50 z-50 animate-in slide-in-from-bottom-4 duration-300">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Badge variant="destructive" className="animate-pulse">
+                  {unsavedChanges.size}
+                </Badge>
+                <span className="text-sm font-medium">Pending Changes</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setUnsavedChanges(new Set())}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleResetChanges}
+                className="flex-1 hover:bg-red-100 text-red-600"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Reset
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSaveAllChanges}
+                disabled={isSavingAll}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {isSavingAll ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4 mr-1" />
+                )}
+                Save All
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <ScoreSubmitConfirmDialog
+        open={isSubmittedDialogOpen}
+        title="Confirm Submit!"
+        description="Are u sure u want to submit student score?"
+        onConfirm={handleSubmit}
+        cancelText="Discard"
+        subDescription="Student score will submit to staff officer."
+        onOpenChange={() => {
+          setIsSubmittedDialogOpen(false);
+        }}
+      />
+
+      {score && unsavedChanges.size > 0 && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-orange-600" />
+              <div className="flex-1">
+                <div className="text-sm font-medium text-orange-800">
+                  Save changes before submitting
+                </div>
+                <div className="text-xs text-orange-700">
+                  You have {unsavedChanges.size} unsaved changes. Please save
+                  all changes before submitting student score.
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ScoreSearchPage } from "./score-search-page";
 import { StudentScoreInput } from "./student-score-input";
-import type { SubjectType, StudentType } from "@/model/student/score-types";
+
 import Link from "next/link";
 // Sample data for demonstration
 const sampleSubjects2024 = [

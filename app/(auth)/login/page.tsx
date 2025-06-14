@@ -78,7 +78,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center justify-center">
           <div className="relative mb-4 h-32 w-32">
             <Image
-              src="/placeholder.svg?height=128&width=128"
+              src="/assets/KSIT.png"
               alt="KSIT Logo"
               fill
               className="rounded-full object-contain"
