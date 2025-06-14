@@ -56,4 +56,12 @@ export const PaymentTableHeaderList = [
   },
 ];
 
+export const StudentTablePaymentHeader = [
+  { label: "#", className: "w-[10%]" },
+    { label: "Student Id", className: "w-[10%]" },
+  { label: "Fullname (KH)", className: "w-[30%]" },
+  { label: "Fullname (EN)", className: "w-[30%]" },
+  { label: "Gender", className: "w-[20%]" },
+  { label: "Actions", className: "w-[10%]" },
+];
 

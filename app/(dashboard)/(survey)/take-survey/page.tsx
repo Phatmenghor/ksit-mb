@@ -27,7 +27,8 @@ import SurveyFormCard from "@/components/dashboard/survey/survey-form";
 import Image from "next/image";
 import { hrtime } from "process";
 import { CardHeaderSurvey } from "@/components/dashboard/survey/CardHeaderSurvey";
-import SuccessPopup from "@/components/dashboard/survey/surey-modal";
+import { CancelConfirmationDialog } from "@/components/dashboard/survey/cancel-modal";
+import SuccessPopup from "@/components/dashboard/survey/success-modal";
 export default function TakeSurvey() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -57,7 +58,20 @@ export default function TakeSurvey() {
   const handleRemoveSection = (indexToRemove: number) => {
     setSections((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const handleAnswerChange = useCallback(
+    (index: number, value: string): void => {
+      setAnswers((prev) => ({ ...prev, [index]: value }));
+    },
+    []
+  );
 
+  const [isCancel, setisCancel] = useState(false);
+  const [selectedValue, setSelectedValue] = useState("4");
+  const handleSubmit = (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    console.log("User chose:", answers);
+  };
   return (
     <div className="space-y-4">
       <CardHeaderSurvey
@@ -66,9 +80,9 @@ export default function TakeSurvey() {
         customSelect={
           <div className="w-full bg-[#fdf7ed] p-4 rounded-md flex items-center">
             <div className="relative h-10 w-10 mr-4 shrink-0">
-              <div className="absolute inset-0 rounded-full bg-[#8dc63f] border-2 border-[#8dc63f] flex items-center justify-center overflow-hidden">
+              <div className="absolute inset-0 rounded-full  border-2 border-[#024D3E] flex items-center justify-center overflow-hidden">
                 <Image
-                  src="../"
+                  src="./assets/profile.png"
                   alt="Course logo"
                   width={40}
                   height={40}
@@ -98,45 +112,69 @@ export default function TakeSurvey() {
           I. Please share your thoughts about your experience in this class
         </div>
       </Card>
-      {questions.map((questionText, index) => (
-        <SurveyFormCard key={index} question={questionText} />
-      ))}
-      <Card>
-        <div className="flex items-center justify-between p-3">
-          {/* Section Label */}
-          <div className="text-sm font-medium text-gray-700">
-            {currentSection === 1 ? "Section 1 of 2" : "Section 2 of 2"}
-          </div>
+      <form onSubmit={handleSubmit} className="">
+        {questions.map((questionText, idx) => (
+          <SurveyFormCard
+            key={idx}
+            question={questionText}
+            initialValue={answers[idx] ?? "4"}
+            onValueChange={(val: string) => handleAnswerChange(idx, val)}
+          />
+        ))}
 
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            {currentSection === 1 ? (
-              <>
-                <Button
-                  variant="outline"
-                  className="border border-gray-300 text-gray-700 bg-transparent hover:bg-gray-100"
-                >
-                  Cancel
-                </Button>
-                <Button className="">Next</Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="outline"
-                  className="border border-gray-300 text-gray-700 bg-transparent hover:bg-gray-100"
-                >
-                  Back
-                </Button>
-                <Button className="" onClick={() => setShowPopup(true)}>
-                  Submit
-                </Button>
-              </>
-            )}
+        <Card className="mt-4">
+          <div className="flex items-center justify-between p-3 ">
+            {/* Section Label */}
+            <div className="text-sm font-medium text-gray-700">
+              {currentSection === 1 ? "Section 1 of 2" : "Section 2 of 2"}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 ">
+              {currentSection === 1 ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setisCancel(true)}
+                    className="border border-gray-300 text-gray-700 bg-transparent hover:bg-gray-100"
+                  >
+                    Cancel
+                  </Button>
+                  <Button className="">Next</Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    className="border border-gray-300 text-gray-700 bg-transparent hover:bg-gray-100"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    type="submit"
+                    className=""
+                    onClick={() => setShowPopup(true)}
+                  >
+                    Submit
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </form>
       <SuccessPopup isOpen={showPopup} onClose={() => setShowPopup(false)} />
+      <CancelConfirmationDialog
+        isOpen={isCancel}
+        onClose={() => setisCancel(false)}
+        title="Confirm Cancel!"
+        description="Are you sure you want cancel this survey form?"
+        isSubmitting={isSubmitting}
+        onDelete={function (): Promise<void> {
+          throw new Error("Function not implemented.");
+        }}
+        isDelete={false}
+      />
       {/* {!isLoading && allStudentData && (
         <div className="mt-4 flex justify-end ">
           <PaginationPage

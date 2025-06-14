@@ -149,6 +149,7 @@ const ScheduleAllPage = () => {
   };
 
   const handleCardClick = (scheduleId: number) => {
+    console.log("#", scheduleId);
     toast.info("Push to student list");
   };
 

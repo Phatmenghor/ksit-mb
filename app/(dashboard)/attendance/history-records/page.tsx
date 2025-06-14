@@ -206,7 +206,7 @@ export default function HistoryRecordsPage() {
       const allDataResponse: AllAttendanceHistoryModel | null =
         await getAllAttedanceHistoryService(exportFilter);
 
-      console.log("Export response:", allDataResponse); 
+      console.log("Export response:", allDataResponse);
 
       // Check if we got valid data
       if (
