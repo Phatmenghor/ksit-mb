@@ -2,7 +2,7 @@ import { ClassModel } from "../master-data/class/all-class-model";
 import { CourseModel } from "../master-data/course/all-course-model";
 import { RoomModel } from "../master-data/room/all-room-model";
 import { SemesterModel } from "../master-data/semester/semester-model";
-import { StaffModel } from "../user/staff/stuff.model";
+import { StaffModel } from "../user/staff/staff.respond.model";
 
 export interface AllScheduleodel {
   content: RoomModel[];

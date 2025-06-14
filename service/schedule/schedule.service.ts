@@ -82,3 +82,15 @@ export async function DetailScheduleService(scheduleId: number) {
     return null;
   }
 }
+export async function getScheduleByIdService(scheduleId: number) {
+  try {
+    const response = await axiosClientWithAuth.get(
+      `/v1/schedules/${scheduleId}`
+    );
+    console.log("#", response.data.data);
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching get schedule by id:", error);
+    return null;
+  }
+}
