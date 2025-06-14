@@ -9,9 +9,9 @@ import {
   Users,
   Palette,
   ScrollText,
-  FileQuestion
+  FileQuestion,
+  ListCheck,
 } from "lucide-react";
-import { REQUEST_DETAIL } from "./constant";
 
 export const ROUTE = {
   DASHBOARD: "/",
@@ -66,6 +66,9 @@ export const ROUTE = {
     CLASS_SCHEDULE: "/attendance/schedule",
     ATTENDANCE_CHECK: "/attendance/schedule/check",
     HISTORY_RECORD: "/attendance/history-records",
+    STUDENT_RECORD: "/attendance/student-records",
+    HISTORY_RECORD_DETAIL: (id: string) =>
+      `/attendance/history-records/view/${id}`,
   },
 
   COURSES: {
@@ -75,7 +78,10 @@ export const ROUTE = {
 
   SCORES: {
     STUDENT_SCORE: "/student-score",
-    SUBMITTED: "/scores-submitted",
+    SUBMITTED: "/submitted-list",
+    SUBMITTED_DETAIL: (id: string) => `/submitted-list/${id}`,
+    STUDENT_SCORE_DETAIL: (id: string) => `/student-score/edit/${id}`,
+    SETTINGS: "/score-setting",
   },
 
   REQUESTS: "/requests",
@@ -102,9 +108,8 @@ export const ROUTE = {
   },
   SURVEY: {
     RESULT_LIST: "/result-list",
-    MANAGE_QA : "/manage-question",
-  }
-
+    MANAGE_QA: "/manage-question",
+  },
 };
 
 export const sidebarRoutes = [
@@ -155,6 +160,7 @@ export const sidebarRoutes = [
     subroutes: [
       { title: "Class Schedule", href: ROUTE.ATTENDANCE.CLASS_SCHEDULE },
       { title: "History Records", href: ROUTE.ATTENDANCE.HISTORY_RECORD },
+      { title: "Student Records", href: ROUTE.ATTENDANCE.STUDENT_RECORD },
     ],
   },
   {
@@ -169,8 +175,12 @@ export const sidebarRoutes = [
   },
   {
     title: "Score submitted",
-    href: ROUTE.SCORES.SUBMITTED,
-    icon: FileCheck,
+    section: "Score Submitted",
+    icon: ListCheck,
+    subroutes: [
+      { title: "Submitted List", href: ROUTE.SCORES.SUBMITTED },
+      { title: "Score Setting", href: ROUTE.SCORES.SETTINGS },
+    ],
   },
   {
     title: "Request",
@@ -192,7 +202,7 @@ export const sidebarRoutes = [
     href: ROUTE.PAYMENT.LIST,
     icon: ScrollText,
   },
-    {
+  {
     title: "Survey",
     icon: FileQuestion,
     section: "users",

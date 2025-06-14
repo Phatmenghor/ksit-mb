@@ -5,6 +5,7 @@ import {
   FileText,
   Info,
   Logs,
+  MenuIcon,
   RotateCcw,
   X,
 } from "lucide-react";
@@ -182,6 +183,55 @@ export const DAYS_OF_WEEK: DayType[] = [
   },
 ];
 
+export interface DayTypeV1 {
+  id: number;
+  label: string;
+  value: string;
+}
+
+export const DAYS_OF_WEEK_V1: DayTypeV1[] = [
+  {
+    id: 1,
+    label: "All",
+    value: "ALL",
+  },
+  {
+    id: 2,
+    label: "Monday",
+    value: "MONDAY",
+  },
+  {
+    id: 3,
+    label: "Tuesday",
+    value: "TUESDAY",
+  },
+  {
+    id: 4,
+    label: "Wednesday",
+    value: "WEDNESDAY",
+  },
+  {
+    id: 5,
+    label: "Thursday",
+    value: "THURSDAY",
+  },
+  {
+    id: 6,
+    label: "Friday",
+    value: "FRIDAY",
+  },
+  {
+    id: 7,
+    label: "Saturday",
+    value: "SATURDAY",
+  },
+  {
+    id: 8,
+    label: "Sunday",
+    value: "SUNDAY",
+  },
+];
+
 export const paymentTypes = [
   { label: "Free", value: "FREE" },
   { label: "Pay", value: "PAY" },
@@ -218,7 +268,7 @@ export const REQUEST_TYPES: RequestType[] = [
   {
     label: "Returned List",
     value: "RETURN",
-    icon: RotateCcw
+    icon: RotateCcw,
   },
   {
     label: "Accepted List",
@@ -259,4 +309,27 @@ export const SemesterFilter = [
   { value: "ALL", label: "All Semeter" },
   { value: "SEMESTER_1", label: "Semeter 1" },
   { value: "SEMESTER_2", label: "Semeter 2" },
+];
+
+export enum SubmissionEnum {
+  DRAFT = "DRAFT",
+  PENDING = "PENDING",
+  SUBMITTED = "SUBMITTED",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+}
+
+export const tabs = [
+  {
+    value: "all",
+    label: "All Submitted",
+    icon: MenuIcon,
+    status: SubmissionEnum.SUBMITTED,
+  },
+  {
+    value: "accept",
+    label: "Accept List",
+    icon: Check,
+    status: SubmissionEnum.APPROVED, // Assuming you have this enum value
+  },
 ];

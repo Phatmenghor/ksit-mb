@@ -60,7 +60,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import {
-  getAllAttedanceGenerateService,
+  getAllAttendanceGenerateService,
+  submitAttendanceSessionService,
   updateAttendanceSessionService,
 } from "@/service/schedule/attendance.service";
 import { AttendanceGenerateModel } from "@/model/schedule/attendance/attendance-generate";
@@ -158,9 +159,11 @@ const AttendanceCheckPage = () => {
       }
 
       try {
-        const response = await getAllAttedanceGenerateService({
+        const response = await getAllAttendanceGenerateService({
           scheduleId: scheduleDetail.id,
         });
+        console.log("##init attendance: ", response);
+
         setAttendanceGenerate(response);
         setLastUpdated(new Date());
         setIsInitialized(true);
@@ -396,11 +399,10 @@ const AttendanceCheckPage = () => {
 
     setIsSubmittingToStaff(true);
     try {
-      // await submitAttendanceToStaffService({
-      //   sessionId: attendanceGenerate.id,
-      //   scheduleId: scheduleDetail?.id,
-      // });
-
+      const response = await submitAttendanceSessionService(
+        attendanceGenerate?.id
+      );
+      console.log("##after submit attendance: ", response);
       setIsSubmitted(true);
       setSubmissionTime(new Date());
 
@@ -628,7 +630,8 @@ const AttendanceCheckPage = () => {
                   <div className="flex items-center gap-1 hover:scale-105 transition-transform duration-200">
                     <Clock className="h-4 w-4" />
                     <span>
-                      {scheduleDetail?.startTime} - {scheduleDetail?.endTime}
+                      {scheduleDetail?.startTime.hour} -{" "}
+                      {scheduleDetail?.endTime.hour}
                     </span>
                   </div>
                   <div className="flex items-center gap-1 hover:scale-105 transition-transform duration-200">
@@ -782,12 +785,12 @@ const AttendanceCheckPage = () => {
                     disabled={isSubmitted}
                   />
                   {searchQuery && (
-                    <button
+                    <Button
                       onClick={() => setSearchQuery("")}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-red-500 transition-colors duration-200"
                     >
                       <X className="h-4 w-4" />
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>

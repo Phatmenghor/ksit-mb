@@ -51,3 +51,13 @@ export const StudentListTableHeader = [
   { label: "Date Of Birth", className: "w-[10%]" },
   { label: "Class code", className: "w-[10%]" },
 ];
+
+export const StudentAttendanceTableHeader = [
+  { label: "#", className: "w-[10%]" },
+  { label: "Student ID", className: "w-[20%]" },
+  { label: "Student Name", className: "w-[30%]" },
+  { label: "Attendance", className: "w-[30%]" },
+  { label: "Type", className: "w-[20%]" },
+  { label: "Check-in Time", className: "w-[10%]" },
+  { label: "Comments", className: "w-[10%]" },
+];
