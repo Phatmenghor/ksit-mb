@@ -9,9 +9,9 @@ export interface AllScheduleModel {
 
 export interface ScheduleModel {
   id: number;
-  startTime: string;
-  endTime: string;
-  academyYear: any;
+  startTime: StartTime;
+  endTime: EndTime;
+  academyYear: number;
   day: string;
   status: string;
   classes: Classes;
@@ -19,10 +19,28 @@ export interface ScheduleModel {
   course: Course;
   room: Room;
   semester: Semester;
+  surveyStatus: string;
+  surveySubmittedAt: string;
+  surveyResponseId: number;
+  hasSurvey: boolean;
   createdAt: string;
 }
 
-interface Classes {
+export interface StartTime {
+  hour: number;
+  minute: number;
+  second: number;
+  nano: number;
+}
+
+export interface EndTime {
+  hour: number;
+  minute: number;
+  second: number;
+  nano: number;
+}
+
+export interface Classes {
   id: number;
   code: string;
   academyYear: number;
@@ -33,36 +51,54 @@ interface Classes {
   createdAt: string;
 }
 
-interface Major {
+export interface Major {
   id: number;
   code: string;
   name: string;
   status: string;
-  department: any;
+  department: Department;
   createdAt: string;
 }
 
-interface Teacher {
+export interface Department {
+  id: number;
+  code: string;
+  name: string;
+  urlLogo: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface Teacher {
   id: number;
   username: string;
   email: string;
   roles: string[];
   status: string;
-  department: any;
-  khmerFirstName: any;
-  profileUrl: any;
-  khmerLastName: any;
-  englishFirstName: any;
-  englishLastName: any;
-  gender: any;
-  dateOfBirth: any;
-  phoneNumber: any;
-  identifyNumber: any;
-  staffId: any;
+  department: Department2;
+  khmerFirstName: string;
+  profileUrl: string;
+  khmerLastName: string;
+  englishFirstName: string;
+  englishLastName: string;
+  gender: string;
+  dateOfBirth: string;
+  phoneNumber: string;
+  identifyNumber: string;
+  staffId: string;
   createdAt: string;
 }
 
-interface Course {
+export interface Department2 {
+  id: number;
+  code: string;
+  name: string;
+  urlLogo: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface Course {
   id: number;
   code: string;
   nameKH: string;
@@ -76,12 +112,12 @@ interface Course {
   purpose: string;
   expectedOutcome: string;
   status: string;
-  department: Department;
+  department: Department3;
   subject: Subject;
   createdAt: string;
 }
 
-interface Department {
+export interface Department3 {
   id: number;
   code: string;
   name: string;
@@ -90,21 +126,21 @@ interface Department {
   createdAt: string;
 }
 
-interface Subject {
+export interface Subject {
   id: number;
   name: string;
   status: string;
   createdAt: string;
 }
 
-interface Room {
+export interface Room {
   id: number;
   name: string;
   status: string;
   createdAt: string;
 }
 
-interface Semester {
+export interface Semester {
   id: number;
   semester: string;
   startDate: string;
@@ -112,4 +148,5 @@ interface Semester {
   academyYear: number;
   semesterType: string;
   status: string;
+  createdAt: string;
 }

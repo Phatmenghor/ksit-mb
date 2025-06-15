@@ -72,3 +72,14 @@ export async function deleteClassService(classId: number) {
     return null;
   }
 }
+
+export async function getClassByIdService(classId: number) {
+  try {
+    const response = await axiosClientWithAuth.get(`/v1/classes/${classId}`);
+    console.log("#", response.data.data);
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching get class by id:", error);
+    return null;
+  }
+}

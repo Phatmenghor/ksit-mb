@@ -130,8 +130,8 @@ const MySchedulePage = () => {
 
   const handleCardClick = (scheduleId: number) => {
     // Navigate to the class detail page with the schedule ID
-    toast.success("Navigating to page score makara");
-    router.push(`/manage-schedule/all-schedule/update/${scheduleId}`);
+    // toast.success("Navigating to page score makara");
+    router.push(`/student-list/${scheduleId}`);
   };
   const handleClassListClick = () => {
     router.back();
