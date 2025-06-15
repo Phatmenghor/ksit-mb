@@ -165,7 +165,7 @@ export function RequestHistory(param: RequestParam) {
                       <TableCell>
                         {formatDate(item.createdAt || "---")}
                       </TableCell>
-                      <TableCell>{getStatusBadge(item.toStatus)}</TableCell>
+                      <TableCell>{getStatusBadge(item.toStatus) || "---"}</TableCell>
                       <TableCell>
                         {truncateText(item.staffComment) || "---"}
                       </TableCell>

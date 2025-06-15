@@ -244,7 +244,7 @@ export default function ManageClassPage() {
               <Input
                 type="search"
                 placeholder="Search class..."
-                className="pl-8 w-full"
+                className="pl-8 w-[100%]"
                 value={searchQuery}
                 onChange={handleSearchChange}
               />

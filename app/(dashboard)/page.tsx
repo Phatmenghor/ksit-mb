@@ -53,17 +53,6 @@ interface MetricCardProps {
   borderColor?: string;
 }
 
-// Mock data for demonstration
-const mockOverviewData = {
-  totalStudent: 1247,
-  totalTeacher: 89,
-  totalRequest: 23,
-  totalCourses: 156,
-  totalClass: 45,
-  totalMajor: 12,
-  totalDepartment: 8,
-};
-
 const MetricCard = ({
   title,
   value,
@@ -147,9 +136,7 @@ export default function ManageClassPage() {
     router.push(ROUTE.MY_CLASS.CLASS + `/${departmentId}`);
   }
   return (
-    <div className="">
-      {/* Header Section */}
-
+    <div>
       {/* Manage Class Section */}
       <Card>
         <CardContent className="p-6 space-y-4">
@@ -227,9 +214,6 @@ export default function ManageClassPage() {
         </CardContent>
       </Card>
 
-      {/* Table Section */}
-      {/* <Card>
-        <CardContent className="p-0"> */}
       <div className="overflow-x-auto">
         {isLoading ? (
           <Loading />
@@ -266,8 +250,6 @@ export default function ManageClassPage() {
           </div>
         )}
       </div>
-      {/* </CardContent>
-      </Card> */}
     </div>
   );
 }
