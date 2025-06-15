@@ -1,7 +1,7 @@
 import {
   AllPaymentFilterModel,
-  PaymentRequest,
 } from "@/model/payment/payment-model";
+import { PaymentRequest } from "@/model/payment/payment-request-model";
 import { axiosClientWithAuth } from "@/utils/axios";
 const filterDto = {
   pageNo: 1,

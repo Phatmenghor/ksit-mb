@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import FeedbackFormDisplay from "./paragraph-question";
-import { SetStateAction, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,25 +18,104 @@ import LinarQuestion from "./linar-question";
 import ParagraphQuestion from "./paragraph-question";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import { CancelConfirmationDialog } from "./cancel-modal";
+import {
+  SurveyQuestionResponseDto,
+  SurveySectionResponseDto,
+} from "@/model/survey/survey-model";
+import { toRoman } from "@/utils/number/roman-number";
 
 type FormSectionProps = {
   sectionNumber: number;
   totalSections: number;
   onRemove: () => Promise<void>;
+  section: SurveySectionResponseDto;
 };
-export default function Component({
+export default function Section({
   sectionNumber,
   totalSections,
   onRemove,
+  section,
 }: FormSectionProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const handleAddQuestion = () => {
     setIsDialogOpen(true);
   };
-  const [selectedLinar, setSelectedLinar] = useState(false);
-  const [selectedParagraph, setSelectedParagraphe] = useState(false);
+const [selectedLinar, setSelectedLinar] = useState<SurveyQuestionResponseDto | null>(null);
+
+  const [selectedParagraph, setSelectedParagraphe] = useState<SurveyQuestionResponseDto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [sectionTitle, setSectionTitle] = useState(section.title || "");
+  const [question, setQuestion] = useState(section.questions || "");
+  const [questions, setQuestions] = useState<SurveyQuestionResponseDto[]>(
+    section.questions || []
+  );
+
+  useEffect(() => {
+    setSectionTitle(section.title || "");
+  }, [section.title]);
+  const handleDuplicate = (q: SurveyQuestionResponseDto) => {
+    const duplicated = {
+      ...q,
+      id: new Date().getTime(),
+      questionText: q.questionText + " (copy)",
+    };
+    setQuestions([...questions, duplicated]); // ✅ plural
+  };
+
+  //   setQuestions(questions.filter((q) => q.id !== id));
+  // };
+  const handleDeleteLinear = (id: number) => {
+    console.log("Deleting Linear");
+    setQuestions(questions.filter((q) => q.id !== id));
+  };
+
+  const handleDeleteParagraph = (id: number) => {
+    console.log("Deleting Paragraph");
+    setQuestions(questions.filter((q) => q.id !== id));
+  };
+
+  const handleUpdate = (updated: SurveyQuestionResponseDto) => {
+    setQuestions(questions.map((q) => (q.id === updated.id ? updated : q)));
+  };
+
+  // ✅ Add new linear question and open modal for it
+const handleAddLinearQuestion = () => {
+  const newQuestion: SurveyQuestionResponseDto = {
+    id: Date.now(), // unique!
+    questionText: "",
+    questionType: "RATING",
+    required: false,
+    displayOrder: questions.length,
+    minRating: 0,
+    maxRating: 0,
+    leftLabel: "",
+    rightLabel: "",
+    ratingOptions: [],
+  };
+  setQuestions(prev => [...prev, newQuestion]);
+  setSelectedLinar(newQuestion); // instead of `true` => save which question is being edited
+};
+const handleAddParagraphQuestion = () => {
+  const newQuestion: SurveyQuestionResponseDto = {
+    id: Date.now(),
+    questionText: "",
+    questionType: "TEXT",
+    required: false,
+    displayOrder: questions.length,
+    minRating: 0,
+    maxRating: 0,
+    leftLabel: "",
+    rightLabel: "",
+    ratingOptions: [],
+  };
+  setQuestions(prev => [...prev, newQuestion]);
+  setSelectedParagraphe(newQuestion);
+};
+
+
+  console.log(" this section", questions.length);
+  const prefix = `${toRoman(sectionNumber)}. `;
   return (
     <>
       <Card>
@@ -67,7 +146,7 @@ export default function Component({
                   <DropdownMenuItem
                     className="cursor-pointer p-3 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-0"
                     onClick={() => {
-                      setSelectedParagraphe(true);
+                       handleAddParagraphQuestion();
                       setIsDialogOpen(false);
                     }}
                   >
@@ -79,7 +158,7 @@ export default function Component({
                   <DropdownMenuItem
                     className="cursor-pointer p-3 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-0"
                     onClick={() => {
-                      setSelectedLinar(true);
+                      handleAddLinearQuestion();
                       setIsDialogOpen(false);
                     }}
                   >
@@ -104,16 +183,34 @@ export default function Component({
 
           {/* Form Section */}
           <div className="space-y-2">
-            <div className="flex gap-4">
+            <div className="flex gap-4 ">
               <div className="border-l-4 border-[#024D3E] rounded-lg "></div>
               <Input
                 id="section-name"
                 placeholder="Name Section..."
                 className="max-w-full "
+                value={prefix + sectionTitle}
+                onChange={(e) => {
+                  let input = e.target.value;
+                  if (input.startsWith(prefix)) {
+                    input = input.slice(prefix.length);
+                  }
+                  setSectionTitle(input);
+                }}
               />
+              {/* <div className="flex gap-2 items-center">
+                <span>{toRoman(sectionNumber)}.</span>
+                  <Input
+                id="section-name"
+                placeholder="Name Section..."
+                className="max-w-full "
+                value={`${toRoman(sectionNumber)}. ${sectionTitle}}`}
+                onChange={(e) => setSectionTitle(e.target.value)}
+              />
+              </div> */}
             </div>
           </div>
-          {selectedLinar && (
+          {/* {selectedLinar && (
             <LinarQuestion
               isDialogOpen={selectedLinar}
               onClose={setSelectedLinar}
@@ -124,7 +221,83 @@ export default function Component({
               isDialogOpen={selectedParagraph}
               onClose={setSelectedParagraphe}
             />
+          )} */}
+          {/* Existing questions */}
+          {/* {section.questions?.map((q, index) => {
+            if (q.questionType === "RATING") {
+              return (
+                <LinarQuestion
+                  key={q.id || index}
+                  isDialogOpen={true}
+                  onClose={() => {}}
+                  questions={q}
+                  onDuplicate={handleDuplicate}
+                />
+              );
+            } else if (q.questionType === "TEXT") {
+              return (
+                <ParagraphQuestion
+                  key={q.id || index}
+                  isDialogOpen={true}
+                  onClose={() => {}}
+                  question={q}
+                />
+              );
+            } else {
+              return null;
+            }
+          })} */}
+          {questions.map((q, index) => {
+            if (q.questionType === "RATING") {
+              return (
+                <LinarQuestion
+                  key={q.id || index}
+                  isDialogOpen={true}
+                  onClose={() => {}}
+                  question={q} // ✅ singular
+                  onDuplicate={handleDuplicate}
+                  onDelete={handleDeleteLinear}
+                  onUpdate={handleUpdate}
+                />
+              );
+            } else if (q.questionType === "TEXT") {
+              return (
+                <ParagraphQuestion
+                  key={q.id || index}
+                  isDialogOpen={true}
+                  onClose={() => {}}
+                  question={q}
+                  onDuplicate={handleDuplicate}
+                  onDelete={handleDeleteParagraph}
+                  onUpdate={handleUpdate}
+                />
+              );
+            } else {
+              return null;
+            }
+          })}
+
+          {/* New question modal */}
+          {/* {selectedLinar && (
+            <LinarQuestion
+              key={selectedLinar.id}
+              isDialogOpen={!!selectedLinar}
+              onClose={()=>setSelectedLinar(null)}
+              question={selectedLinar} // For new
+              onDelete={handleDeleteLinear}
+              onDuplicate={handleDuplicate}
+            />
           )}
+          {selectedParagraph && (
+            <ParagraphQuestion
+              key={selectedParagraph.id}
+              isDialogOpen={!!selectedParagraph}
+              onClose={() => setSelectedParagraphe(null)}
+              question={selectedParagraph} // For new
+              onDelete={handleDeleteParagraph}
+              onDuplicate={handleDuplicate}
+            />
+          )} */}
         </div>
       </Card>
       <CancelConfirmationDialog

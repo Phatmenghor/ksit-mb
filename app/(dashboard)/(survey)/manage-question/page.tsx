@@ -24,6 +24,12 @@ import Loading from "@/components/shared/loading";
 import { Card } from "@/components/ui/card";
 import Component from "@/components/dashboard/survey/form-section-builder";
 import SurveyFormCard from "@/components/dashboard/survey/survey-form";
+import { getAllSurveySectionService } from "@/service/survey/survey.service";
+import {
+  SurveyResponseDto,
+  SurveySectionResponseDto,
+} from "@/model/survey/survey-model";
+import Section from "@/components/dashboard/survey/form-section-builder";
 export default function ManageQAPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -35,6 +41,8 @@ export default function ManageQAPage() {
   const [allStudentData, setAllStudentData] = useState<AllStudentModel | null>(
     null
   );
+  const [survey, setSurvey] = useState<SurveyResponseDto | null>(null);
+  const [sections, setSections] = useState<SurveySectionResponseDto[]>([]);
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [isAddNew, setIsAddNew] = useState<boolean>(false);
   const loadStudents = useCallback(
@@ -83,67 +91,38 @@ export default function ManageQAPage() {
   //    setIsAddNew(true)
   // }
   const iconColor = "text-black";
-  const [sections, setSections] = useState<number[]>([]);
+  // const [sections, setSections] = useState<number[]>([]);
 
+  // const handleAddNew = () => {
+  //   setSections((prev) => [...prev, prev.length]);
+  // };
+
+  const handleRemoveSection = (section: number) => {
+    setSections((prev) => prev.filter((s) => s.id !== section));
+  };
+
+  useEffect(() => {
+    async function fetchSurvey() {
+      const data = await getAllSurveySectionService();
+      //setSurvey(data);
+      setSections(data?.sections || []);
+    }
+
+    fetchSurvey();
+  }, []);
   const handleAddNew = () => {
-    setSections((prev) => [...prev, prev.length]);
-  };
-  const handleRemoveSection = (indexToRemove: number) => {
-    setSections((prev) => prev.filter((_, index) => index !== indexToRemove));
+    const newSection: SurveySectionResponseDto = {
+      id: Date.now(), // or use some unique id generation
+      title: "",
+      description: "",
+      displayOrder: sections.length,
+      questions: [], // empty questions array initially
+    };
+
+    setSections((prev) => [...prev, newSection]);
   };
 
-  const columns: Column<StudentModel>[] = [
-    {
-      key: "student#",
-      header: "#",
-      render: (_: any, index: number) => index + 1,
-    },
-    {
-      key: "id",
-      header: "student ID",
-      render: (student: StudentModel) => `${student.id ?? ""}`,
-    },
-    {
-      key: "fullname (kh)",
-      header: "Fullname (KH)",
-      render: (student: StudentModel) =>
-        `${student.khmerFirstName ?? "---"} ${student.khmerLastName ?? ""}`,
-    },
-    {
-      key: "fullname (en)",
-      header: "Fullname (EN)",
-      render: (student: StudentModel) =>
-        `${student.englishFirstName ?? "---"} ${student.englishLastName ?? ""}`,
-    },
-    {
-      key: "gender",
-      header: "Gender",
-      render: (student: any) => (
-        <span className={`inline-flex rounded-full px-2 py-1  text-center`}>
-          {student.gender ?? "---"}
-        </span>
-      ),
-    },
-    {
-      key: "actions",
-      header: "Actions",
-      render: (student: any) => (
-        <>
-          <BreadcrumbLink href={ROUTE.PAYMENT.VIEW_PAYMENT(String(student.id))}>
-            <Button
-              variant="link"
-              size="icon"
-              className={`${iconColor} underline hover:text-blue-600 flex items-center`}
-            >
-              <Eye size="h-4 w-4" />
-              <span className="text-sm"> Detail</span>
-            </Button>
-          </BreadcrumbLink>
-        </>
-      ),
-    },
-  ];
-
+  console.log("this is result :", survey);
   return (
     <div className="space-y-4">
       <CardHeaderSection
@@ -154,15 +133,16 @@ export default function ManageQAPage() {
         title="Manage Q&As"
       />
 
-      {sections.map((_, index) => (
-        <div key={index} className="mb-4">
-          <Component
-            key={index}
-            sectionNumber={index + 1}
-            totalSections={sections.length}
-            onRemove={async () => handleRemoveSection(index)}
-          />
-        </div>
+      {sections.map((section, index) => (
+        <Section
+          key={section.id}
+          sectionNumber={index + 1}
+          totalSections={sections.length}
+          section={section} // ✅ ONE object, not an array
+          onRemove={async () => {
+            setSections((prev) => prev.filter((s) => s.id !== section.id));
+          }}
+        />
       ))}
 
       <div className="overflow-x-auto">
