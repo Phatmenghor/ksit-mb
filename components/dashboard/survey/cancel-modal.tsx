@@ -13,7 +13,7 @@ import { CheckCircle, DiscIcon, Loader2 } from "lucide-react";
 interface CancelConfirmationDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onDelete: () => Promise<void>;
+  onDelete: () => void;
   title: string;
   description: string;
   itemName?: string;

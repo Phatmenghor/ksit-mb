@@ -29,7 +29,40 @@ import { hrtime } from "process";
 import { CardHeaderSurvey } from "@/components/dashboard/survey/CardHeaderSurvey";
 import { CancelConfirmationDialog } from "@/components/dashboard/survey/cancel-modal";
 import SuccessPopup from "@/components/dashboard/survey/success-modal";
+import { getAllSurveySectionService } from "@/service/survey/survey.service";
+import {
+  SurveyResponseDto,
+  SurveySectionResponseDto,
+} from "@/model/survey/survey-model";
+import { toRoman } from "@/utils/number/roman-number";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import CourseCard from "@/components/dashboard/survey/CourseCard";
+export const schema = z.object({
+  answers: z.record(z.string().min(1, "Please select a rating")),
+});
+type FormValues = {
+  answers: Record<string, string>;
+};
 export default function TakeSurvey() {
+  const {
+    handleSubmit,
+    setValue,
+    watch,
+    control,
+    formState: { errors },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      answers: {},
+    },
+  });
+
+  const onSubmit = (data: FormValues) => {
+    console.log("✅ User's selected answers:", data.answers);
+    // your API call or other logic
+  };
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -42,22 +75,13 @@ export default function TakeSurvey() {
   );
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [isAddNew, setIsAddNew] = useState<boolean>(false);
-  const questions = [
-    "1. The course materials were helpful and relevant.",
-    "2. The instructor communicated clearly.",
-    "3. The course met my expectations.",
-    // Add more questions as needed
-  ];
+
   const iconColor = "text-black";
-  const [sections, setSections] = useState<number[]>([]);
   const [currentSection, setCurrentSection] = useState(2);
+  const [survey, setSurvey] = useState<SurveyResponseDto | null>(null);
+  const [sections, setSections] = useState<SurveySectionResponseDto[]>([]);
   const [showPopup, setShowPopup] = useState(false);
-  const handleAddNew = () => {
-    setSections((prev) => [...prev, prev.length]);
-  };
-  const handleRemoveSection = (indexToRemove: number) => {
-    setSections((prev) => prev.filter((_, index) => index !== indexToRemove));
-  };
+
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const handleAnswerChange = useCallback(
     (index: number, value: string): void => {
@@ -65,40 +89,63 @@ export default function TakeSurvey() {
     },
     []
   );
+  async function fetchSurvey() {
+    const data = await getAllSurveySectionService();
+    setSurvey(data);
+    setSections(data?.sections || []);
+    console.log("this data", data);
+  }
+  // const questions =
+  //   survey?.sections?.find((section) => section.id === currentSection)
+  //     ?.questions || [];
+
+  useEffect(() => {
+    fetchSurvey();
+  }, []);
 
   const [isCancel, setisCancel] = useState(false);
   const [selectedValue, setSelectedValue] = useState("4");
-  const handleSubmit = (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-    console.log("User chose:", answers);
+  // const handleSubmit = (e: { preventDefault: () => void }) => {
+  //   e.preventDefault();
+  //   console.log("User chose:", answers);
+  // };
+  console.log("Survey:", survey);
+  console.log("Current section:", currentSection);
+
+  // Instead of picking just one section, flatten ALL sections' questions
+  const questions =
+    survey?.sections
+      ?.flatMap((section) => section.questions)
+      .filter((q) => q != null) ?? [];
+  const onError = (errors: any) => {
+    console.log("Validation errors on submit:", errors);
   };
+  console.log("Questions for this section:", questions);
+  //const prefix = `${toRoman(sections.)}. `;
+  console.log("err", errors);
+  const handleCancel = () => {
+    setisCancel(true);
+  };
+
+  const confirmCancel = () => {
+    // Reset answers
+    setValue("answers", {}); // react-hook-form: reset all answers to {}
+    setAnswers({}); // optional: also clear your local answers state if you use it
+    setisCancel(false); // close dialog
+    toast.success("Survey form has been reset");
+  };
+
   return (
     <div className="space-y-4">
       <CardHeaderSurvey
         title="Survey Form"
         back
         customSelect={
-          <div className="w-full bg-[#fdf7ed] p-4 rounded-md flex items-center">
-            <div className="relative h-10 w-10 mr-4 shrink-0">
-              <div className="absolute inset-0 rounded-full  border-2 border-[#024D3E] flex items-center justify-center overflow-hidden">
-                <Image
-                  src="./assets/profile.png"
-                  alt="Course logo"
-                  width={40}
-                  height={40}
-                  className="object-cover"
-                />
-              </div>
-            </div>
-            <div className="flex-1">
-              <h1 className="text-[#333] text-base font-medium">
-                Computer Programming II - 3(2,1,0)
-              </h1>
-              <p className="text-[#666] text-sm">Class 44001 | Tong Yuthea</p>
-            </div>
-            <div className="max-w-full"></div>
-            <div className="max-w-full"></div>
-          </div>
+          <CourseCard
+            imageSrc="/assets/profile.png"
+            title="Computer Programming II - 3(2,1,0)"
+            description="Class 44001 | Tong Yuthea"
+          />
         }
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
@@ -108,73 +155,68 @@ export default function TakeSurvey() {
         ]}
       />
       <Card>
-        <div className="p-2">
-          I. Please share your thoughts about your experience in this class
-        </div>
+        {survey?.sections.map((q, idx) => (
+          <div key={q.id ?? idx} className="p-2">
+            {toRoman(idx + 1)} . {q.title}
+          </div>
+        ))}
       </Card>
-      <form onSubmit={handleSubmit} className="">
-        {questions.map((questionText, idx) => (
-          <SurveyFormCard
-            key={idx}
-            question={questionText}
-            initialValue={answers[idx] ?? "4"}
-            onValueChange={(val: string) => handleAnswerChange(idx, val)}
-          />
+
+      <form onSubmit={handleSubmit(onSubmit, onError)} className="">
+        {questions.map((q, idx) => (
+          <div key={q.id}>
+            <Controller
+              name={`answers.${q.id}`}
+              control={control}
+              render={({ field }) => (
+                <SurveyFormCard
+                  question={`${idx + 1}. ${q.questionText}`}
+                  leftLabel={q.leftLabel}
+                  rightLabel={q.rightLabel}
+                  minRating={q.minRating}
+                  maxRating={q.maxRating}
+                  onValueChange={field.onChange}
+                  name={field.name}
+                  selectedValue={watch(`answers.${q.id}`)}
+                />
+              )}
+            />
+
+            {errors.answers?.[q.id]?.message && (
+              <p className="text-red-500 text-sm">
+                {errors.answers[q.id]?.message}
+              </p>
+            )}
+          </div>
         ))}
 
         <Card className="mt-4">
-          <div className="flex items-center justify-between p-3 ">
-            {/* Section Label */}
-            <div className="text-sm font-medium text-gray-700">
-              {currentSection === 1 ? "Section 1 of 2" : "Section 2 of 2"}
-            </div>
+          <div className="flex gap-3 p-2 justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              className="border border-gray-300 text-gray-700 bg-transparent hover:bg-gray-100"
+            >
+              Cancel
+            </Button>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 ">
-              {currentSection === 1 ? (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => setisCancel(true)}
-                    className="border border-gray-300 text-gray-700 bg-transparent hover:bg-gray-100"
-                  >
-                    Cancel
-                  </Button>
-                  <Button className="">Next</Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="outline"
-                    className="border border-gray-300 text-gray-700 bg-transparent hover:bg-gray-100"
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    type="submit"
-                    className=""
-                    onClick={() => setShowPopup(true)}
-                  >
-                    Submit
-                  </Button>
-                </>
-              )}
-            </div>
+            <Button type="submit">Submit</Button>
           </div>
         </Card>
+        {/* Action Buttons */}
       </form>
       <SuccessPopup isOpen={showPopup} onClose={() => setShowPopup(false)} />
       <CancelConfirmationDialog
         isOpen={isCancel}
         onClose={() => setisCancel(false)}
         title="Confirm Cancel!"
-        description="Are you sure you want cancel this survey form?"
+        description="Are you sure you want to cancel this survey form?"
         isSubmitting={isSubmitting}
-        onDelete={function (): Promise<void> {
-          throw new Error("Function not implemented.");
-        }}
+        onDelete={confirmCancel} // ✅ Do the reset here
         isDelete={false}
       />
+
       {/* {!isLoading && allStudentData && (
         <div className="mt-4 flex justify-end ">
           <PaginationPage
