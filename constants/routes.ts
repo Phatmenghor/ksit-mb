@@ -53,7 +53,7 @@ export const ROUTE = {
   MANAGE_SCHEDULE: {
     DEPARTMENT: "/manage-schedule/department",
     DEPARTMENT_CLASS: "/manage-schedule/class",
-    UPDATE_SCHEDULE: "/manage-schedule/all-schedule/update",
+    UPDATE_SCHEDULE: "/manage-schedule/all-schedule/update/",
     ROOT: "/schedule",
   },
 

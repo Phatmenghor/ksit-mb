@@ -34,7 +34,7 @@ function DepartmentCard({
         asChild
       >
         <Link href="#">
-          View Class
+          Classes
           <ChevronRight className="ml-1 h-4 w-4" />
         </Link>
       </Button>

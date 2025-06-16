@@ -1,4 +1,4 @@
-import { SemesterEnum } from "@/constants/constant";
+import { SemesterEnum, YearLevelEnum } from "@/constants/constant";
 
 export interface AllScheduleFilterModel {
   search?: string;
@@ -21,6 +21,7 @@ export interface CreateScheduleModel {
   teacherId?: number;
   courseId?: number;
   roomId?: number;
+  yearLevel?: YearLevelEnum;
   semesterId?: number;
   status?: string;
 }
@@ -30,6 +31,7 @@ export interface UpdateScheduleModel {
   endTime?: string;
   day?: string;
   classId?: number;
+  yearLevel?: YearLevelEnum;
   teacherId?: number;
   courseId?: number;
   roomId?: number;

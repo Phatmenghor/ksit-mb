@@ -1,20 +1,7 @@
 "use client";
 
-import type React from "react";
-
 import { useCallback, useEffect, useState } from "react";
-import { Search, Plus, Pencil, Trash2, Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,14 +10,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { YearSelector } from "@/components/shared/year-selector";
 import Loading from "@/components/shared/loading";
 import PaginationPage from "@/components/shared/pagination-page";
 import DepartmentCard from "@/components/dashboard/schedule/department/department-card";
@@ -38,10 +17,7 @@ import { AllDepartmentModel } from "@/model/master-data/department/all-departmen
 import { ROUTE } from "@/constants/routes";
 import { useRouter } from "next/navigation";
 import { AllDepartmentFilterModel } from "@/model/master-data/department/type-department-model";
-import {
-  getAllDepartmentService,
-  getMyDepartmentService,
-} from "@/service/master-data/department.service";
+import { getMyDepartmentService } from "@/service/master-data/department.service";
 import { Constants } from "@/constants/text-string";
 import { toast } from "sonner";
 import { getAllStatisticService } from "@/service/statistic/statistic.service";
@@ -69,10 +45,6 @@ const MetricCard = ({
 );
 
 export default function ManageClassPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedYear, setSelectedYear] = useState<number>(
-    new Date().getFullYear()
-  );
   const [allDepartmentData, setAllDepartmentData] =
     useState<AllDepartmentModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -87,7 +59,6 @@ export default function ManageClassPage() {
 
       try {
         const response = await getMyDepartmentService({
-          search: searchQuery,
           status: Constants.ACTIVE,
           ...param,
         });
@@ -128,10 +99,6 @@ export default function ManageClassPage() {
     loadStatistics();
   }, [loadDepartments, loadStatistics]);
 
-  const handleYearChange = (year: number) => {
-    setSelectedYear(year);
-  };
-
   function onClickDepartmentCard(departmentId: number) {
     router.push(ROUTE.MY_CLASS.CLASS + `/${departmentId}`);
   }
@@ -158,18 +125,6 @@ export default function ManageClassPage() {
 
           {/* Overview Data Section */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between w-full py-2 border-t border-gray-300">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Overview Data
-              </h2>
-              <div>
-                <YearSelector
-                  value={selectedYear}
-                  onChange={handleYearChange}
-                />
-              </div>
-            </div>
-
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <MetricCard

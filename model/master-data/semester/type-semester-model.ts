@@ -1,4 +1,4 @@
-import { SemesterEnum } from "@/constants/constant";
+import { SemesterEnum, YearLevelEnum } from "@/constants/constant";
 
 export interface AllSemesterFilterModel {
   search?: string;
@@ -20,6 +20,7 @@ export interface UpdateSemesterModel {
   startDate?: string;
   endDate?: string;
   academyYear?: number;
+  yearLevel?: YearLevelEnum;
   semester?: SemesterEnum;
   status?: string;
 }

@@ -45,7 +45,7 @@ import { RoomModel } from "@/model/master-data/room/all-room-model";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
 import { SemesterModel } from "@/model/master-data/semester/semester-model";
 import { StaffModel } from "@/model/user/staff/staff.respond.model";
-import { DayEnum, StatusEnum } from "@/constants/constant";
+import { DayEnum, StatusEnum, YearLevelEnum } from "@/constants/constant";
 import { Constants } from "@/constants/text-string";
 import { createScheduleService } from "@/service/schedule/schedule.service";
 import { toast } from "sonner";
@@ -66,6 +66,9 @@ const formSchema = z.object({
   semesterId: z.number().min(1, "Semester is required"),
   roomId: z.number().min(1, "Room is required"),
   status: z.literal(Constants.ACTIVE),
+  yearLevel: z.nativeEnum(YearLevelEnum, {
+    required_error: "Year level is required",
+  }),
 });
 
 export default function AddSchedule() {
@@ -146,6 +149,7 @@ export default function AddSchedule() {
         roomId: values.roomId,
         semesterId: values.semesterId,
         status: values.status,
+        yearLevel: values.yearLevel,
       };
 
       const response = await createScheduleService(scheduleData);
@@ -497,6 +501,43 @@ export default function AddSchedule() {
                             dataSelect={selectedRoom}
                             onChangeSelected={handleRoomChange}
                           />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="yearLevel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Year Level <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            disabled={isSubmitting}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select year level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={YearLevelEnum.FIRST_YEAR}>
+                                Year 1
+                              </SelectItem>
+                              <SelectItem value={YearLevelEnum.SECOND_YEAR}>
+                                Year 2
+                              </SelectItem>
+                              <SelectItem value={YearLevelEnum.THIRD_YEAR}>
+                                Year 3
+                              </SelectItem>
+                              <SelectItem value={YearLevelEnum.FOURTH_YEAR}>
+                                Year 4
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
