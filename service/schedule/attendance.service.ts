@@ -49,6 +49,36 @@ export async function getAllAttedanceHistoryService(
   }
 }
 
+export async function getAllAttedanceHistoryExcelService(
+  data: AttendanceHistoryFilter
+) {
+  try {
+    const response = await axiosClientWithAuth.post(
+      `/v1/attendance/history/all`,
+      data
+    );
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching requests:", error);
+    return null;
+  }
+}
+
+export async function getAllAttedanceHistoryCountService(
+  data: AttendanceHistoryFilter
+) {
+  try {
+    const response = await axiosClientWithAuth.post(
+      `/v1/attendance/history/count`,
+      data
+    );
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching requests:", error);
+    return null;
+  }
+}
+
 export async function getAttendanceSessionService(id: number) {
   try {
     const response = await axiosClientWithAuth.get(

@@ -104,6 +104,11 @@ export enum SemesterEnumFilter {
   SEMESTER_2 = "SEMESTER_2",
 }
 
+export enum semesterValue {
+  SEMESTER_1 = "1st Semester",
+  SEMESTER_2 = "2nd Semester",
+}
+
 export enum DayEnum {
   MONDAY = "Monday",
   TUESDAY = "Tuesday",

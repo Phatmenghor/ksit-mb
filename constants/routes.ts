@@ -88,9 +88,6 @@ export const ROUTE = {
   REQUEST_DETAIL: (id: string) => `/requests/${id}`,
   REQUEST_UPDATE: (id: string) => `/request/${id}`,
 
-  // REQUESTS_LIST: "/request-list",
-  // STUDENT_DETAIL: "/student-detail",
-
   SETTINGS: {
     THEME: "/settings/theme",
   },

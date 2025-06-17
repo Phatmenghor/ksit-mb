@@ -4,6 +4,7 @@ import {
 } from "@/model/request/request-filter";
 import { CreateRequestModel, UpdateRequestModel } from "@/model/request/request-model";
 import { axiosClientWithAuth } from "@/utils/axios";
+import { string } from "zod";
 
 export async function getAllRequestService(data: RequestFilterModel) {
   try {
@@ -69,6 +70,19 @@ export async function getAllHistoryReqService(data: HistoryReqFilterModel) {
     return response.data.data;
   } catch (error: any) {
     console.error("Error fetching history requests:", error);
+    return null;
+  }
+}
+
+// transcript
+export async function getDetailRequestTranscriptService(studentId: number) {
+  try {
+    const response = await axiosClientWithAuth.get(
+      `/v1/transcript/student/${studentId}`
+    );
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching transcript detail:", error);
     return null;
   }
 }
