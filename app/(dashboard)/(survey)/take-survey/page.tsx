@@ -29,7 +29,10 @@ import { hrtime } from "process";
 import { CardHeaderSurvey } from "@/components/dashboard/survey/CardHeaderSurvey";
 import { CancelConfirmationDialog } from "@/components/dashboard/survey/cancel-modal";
 import SuccessPopup from "@/components/dashboard/survey/success-modal";
-import { getAllSurveySectionService } from "@/service/survey/survey.service";
+import {
+  getAllSurveySectionService,
+  submitAnswerService,
+} from "@/service/survey/survey.service";
 import {
   SurveyResponseDto,
   SurveySectionResponseDto,
@@ -59,10 +62,12 @@ export default function TakeSurvey() {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    console.log("✅ User's selected answers:", data.answers);
-    // your API call or other logic
-  };
+  // const onSubmit = async (data: FormValues) => {
+  //   console.log("✅ User's selected answers:", data.answers);
+  //   const result = await submitAnswerService()
+  //   // your API call or other logic
+  // };
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -81,6 +86,7 @@ export default function TakeSurvey() {
   const [survey, setSurvey] = useState<SurveyResponseDto | null>(null);
   const [sections, setSections] = useState<SurveySectionResponseDto[]>([]);
   const [showPopup, setShowPopup] = useState(false);
+  const [submitResponse, setSubmitResponse] = useState<any>(null);
 
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const handleAnswerChange = useCallback(
@@ -127,6 +133,56 @@ export default function TakeSurvey() {
     setisCancel(true);
   };
 
+  const onSubmit = async (data: FormValues) => {
+    console.log("✅ User's selected answers:", data.answers);
+
+    try {
+      setIsSubmitting(true);
+
+      // Build questionId → sectionId map
+      const questionToSectionMap = new Map<number, number>();
+      sections.forEach((section) => {
+        section.questions.forEach((q) => {
+          questionToSectionMap.set(q.id, section.id);
+        });
+      });
+
+      // Group answers by section
+      const answersBySection: Record<
+        number,
+        { questionId: number; ratingAnswer: number }[]
+      > = {};
+      Object.entries(data.answers).forEach(([questionIdStr, ratingStr]) => {
+        const questionId = parseInt(questionIdStr, 10);
+        const ratingAnswer = parseInt(ratingStr, 10);
+        const sectionId = questionToSectionMap.get(questionId);
+        if (!sectionId) return;
+        if (!answersBySection[sectionId]) answersBySection[sectionId] = [];
+        answersBySection[sectionId].push({ questionId, ratingAnswer });
+      });
+
+      for (const [sectionIdStr, answers] of Object.entries(answersBySection)) {
+        const sectionId = parseInt(sectionIdStr, 10);
+        let responses = [];
+        const payload = {
+          sectionId,
+          answers,
+        };
+
+        responses = await submitAnswerService(payload);
+        setSubmitResponse(responses);
+      }
+
+      toast.success("Survey submitted successfully!");
+
+      setShowPopup(true);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to submit survey.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const confirmCancel = () => {
     // Reset answers
     setValue("answers", {}); // react-hook-form: reset all answers to {}
@@ -154,39 +210,43 @@ export default function TakeSurvey() {
           { label: "Take Survey", href: ROUTE.SURVEY.MANAGE_QA },
         ]}
       />
-      <Card>
-        {survey?.sections.map((q, idx) => (
-          <div key={q.id ?? idx} className="p-2">
-            {toRoman(idx + 1)} . {q.title}
-          </div>
-        ))}
-      </Card>
 
+     
       <form onSubmit={handleSubmit(onSubmit, onError)} className="">
-        {questions.map((q, idx) => (
-          <div key={q.id}>
-            <Controller
-              name={`answers.${q.id}`}
-              control={control}
-              render={({ field }) => (
-                <SurveyFormCard
-                  question={`${idx + 1}. ${q.questionText}`}
-                  leftLabel={q.leftLabel}
-                  rightLabel={q.rightLabel}
-                  minRating={q.minRating}
-                  maxRating={q.maxRating}
-                  onValueChange={field.onChange}
-                  name={field.name}
-                  selectedValue={watch(`answers.${q.id}`)}
-                />
-              )}
-            />
+        {sections.map((section, idx) => (
+          <div key={section.id} className="mb-4">
+            <Card>
+              <div key={section.id} className="p-2">
+                {toRoman(idx + 1)}. {section.title}
+              </div>
+            </Card>
 
-            {errors.answers?.[q.id]?.message && (
-              <p className="text-red-500 text-sm">
-                {errors.answers[q.id]?.message}
-              </p>
-            )}
+            {section.questions.map((q, qidx) => (
+              <div key={q.id}>
+                <Controller
+                  name={`answers.${q.id}`}
+                  control={control}
+                  render={({ field }) => (
+                    <SurveyFormCard
+                      question={`${idx + 1}. ${q.questionText}`}
+                      leftLabel={q.leftLabel}
+                      rightLabel={q.rightLabel}
+                      minRating={q.minRating}
+                      maxRating={q.maxRating}
+                      onValueChange={field.onChange}
+                      name={field.name}
+                      selectedValue={watch(`answers.${q.id}`)}
+                    />
+                  )}
+                />
+
+                {errors.answers?.[q.id]?.message && (
+                  <p className="text-red-500 text-sm">
+                    {errors.answers[q.id]?.message}
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
         ))}
 
@@ -205,8 +265,14 @@ export default function TakeSurvey() {
           </div>
         </Card>
         {/* Action Buttons */}
-      </form>
-      <SuccessPopup isOpen={showPopup} onClose={() => setShowPopup(false)} />
+      </form> 
+      
+      <SuccessPopup
+        isOpen={showPopup}
+        onClose={() => setShowPopup(false)}
+        response={submitResponse}
+      />
+
       <CancelConfirmationDialog
         isOpen={isCancel}
         onClose={() => setisCancel(false)}
