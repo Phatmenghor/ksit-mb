@@ -11,31 +11,19 @@ import { uploadImageService } from "@/service/setting/image.serice";
 import { UploadImage } from "@/model/setting/image-model";
 
 export default function ProfileUploadCard() {
-  // State to hold preview image URL (can be uploaded blob or server image)
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  // State to track upload status
   const [isUploading, setIsUploading] = useState(false);
-  // Ref for the hidden file input (if we want to programmatically trigger it later)
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Access form context (from React Hook Form)
   const { setValue, watch } = useFormContext();
   const profileUrl = watch("profileUrl");
 
-  /**
-   * On mount or when profileUrl changes,
-   * update the preview state if there's already a profile image in the form.
-   */
   useEffect(() => {
     if (profileUrl) {
       setLogoPreview(profileUrl);
     }
   }, [profileUrl]);
 
-  /**
-   * Cleanup blob URLs when component unmounts or logoPreview changes.
-   * This prevents memory leaks when using blob URLs.
-   */
   useEffect(() => {
     return () => {
       if (logoPreview?.startsWith("blob:")) {
@@ -44,11 +32,6 @@ export default function ProfileUploadCard() {
     };
   }, [logoPreview]);
 
-  /**
-   * Handle file selection and upload.
-   * Converts image file to base64, sends to backend,
-   * and updates form state + preview on success.
-   */
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -82,21 +65,11 @@ export default function ProfileUploadCard() {
     }
   };
 
-  /**
-   * Handle removing the uploaded profile image.
-   * Clears both form value and local preview.
-   */
   const handleRemoveLogo = () => {
     setLogoPreview(null);
     setValue("profileUrl", "", { shouldDirty: true });
   };
 
-  /**
-   * Decide which image source to display:
-   * - blob or full http(s) URL → use directly
-   * - relative path → prepend base URL
-   * - no image → fallback placeholder
-   */
   const getImageSource = () => {
     if (!logoPreview) {
       return baseAPI.NO_IMAGE;

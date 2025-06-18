@@ -5,11 +5,9 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import { CircleAlert, DollarSign, FileText, Pencil } from "lucide-react";
-
 import { UserProfileSection } from "@/components/dashboard/users/shared/UserProfile";
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
-import { getStudentByIdService } from "@/service/user/student.service";
 import StudentDetails from "@/components/dashboard/users/student/view/tab/StudentDetailsTabs";
 import StudentDetailsTabs from "@/components/dashboard/users/student/view/tab/StudentDetailsTabs";
 import PaymentTabs from "@/components/dashboard/users/student/view/tab/PaymentTabs";
@@ -90,15 +88,12 @@ export default function StudentViewPage() {
     >
       {/* Header with TabsList injected via prop */}
       <CardHeaderSection
-        title="Student View Details"
+        title="My Profile"
         back
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "View Student", href: ROUTE.STUDENTS.VIEW(id) },
+          { label: "View Student", href: "" },
         ]}
-        buttonHref={ROUTE.STUDENTS.EDIT_STUDENT(String(studentDetail?.id))}
-        buttonText="Update your profile"
-        buttonIcon={<Pencil className="w-4 h-4" />}
         tabs={
           <div className="container mx-auto mt-3">
             <TabsList className="flex w-full border-b gap-6 pb-1 bg-transparent justify-start">

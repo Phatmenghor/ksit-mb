@@ -30,7 +30,7 @@ import {
   AllAttendanceHistoryModel,
   AttendanceHistoryFilter,
 } from "@/model/schedule/attendance/attendance-history";
-import { getAllAttedanceHistoryService } from "@/service/schedule/attendance.service";
+import { getAllAttendanceHistoryService } from "@/service/schedule/attendance.service";
 import { toast } from "sonner";
 import PaginationPage from "@/components/shared/pagination-page";
 import { Button } from "@/components/ui/button";
@@ -67,7 +67,7 @@ export default function HistoryRecordsPage() {
     async (filter: AttendanceHistoryFilter) => {
       setIsLoading(true);
       try {
-        const response = await getAllAttedanceHistoryService({
+        const response = await getAllAttendanceHistoryService({
           search: debouncedSearchQuery,
           academyYear: selectAcademicYear,
           semester: selectedSemester != "ALL" ? selectedSemester : undefined,
@@ -178,7 +178,6 @@ export default function HistoryRecordsPage() {
     setIsSubmitting(true);
 
     try {
-      // First, let's check if we have current data
       if (
         !attendanceHistoryData?.content ||
         attendanceHistoryData.content.length === 0
@@ -187,8 +186,6 @@ export default function HistoryRecordsPage() {
         return;
       }
 
-      // Fetch ALL data (Recommended)
-      // Create a proper filter object for the API call
       const exportFilter: AttendanceHistoryFilter = {
         search: debouncedSearchQuery,
         academyYear: selectAcademicYear,
@@ -204,7 +201,7 @@ export default function HistoryRecordsPage() {
 
       // Fetch data for export
       const allDataResponse: AllAttendanceHistoryModel | null =
-        await getAllAttedanceHistoryService(exportFilter);
+        await getAllAttendanceHistoryService(exportFilter);
 
       console.log("Export response:", allDataResponse);
 

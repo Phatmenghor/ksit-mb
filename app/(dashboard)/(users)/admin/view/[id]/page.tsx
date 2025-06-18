@@ -45,7 +45,6 @@ export default function AdminDetailPage() {
 
   return (
     <div>
-      {/* Header with TabsList injected via prop */}
       <CardHeaderSection
         title="Admin View Details"
         back

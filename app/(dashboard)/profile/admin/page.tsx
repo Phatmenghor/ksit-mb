@@ -4,10 +4,8 @@ import { UserProfileSection } from "@/components/dashboard/users/shared/UserProf
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
-import {
-  getStaffByIdService,
-  getStaffByTokenService,
-} from "@/service/user/user.service";
+import { getStaffByTokenService } from "@/service/user/user.service";
+import { Pencil } from "lucide-react";
 import { useParams } from "next/navigation";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
@@ -50,7 +48,7 @@ export default function AdminProfilePage() {
     <div>
       {/* Header with TabsList injected via prop */}
       <CardHeaderSection
-        title="Admin View Details"
+        title="My Profile"
         back
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },

@@ -34,7 +34,7 @@ export async function updateAttendanceSessionService(
   }
 }
 
-export async function getAllAttedanceHistoryService(
+export async function getAllAttendanceHistoryService(
   data: AttendanceHistoryFilter
 ) {
   try {

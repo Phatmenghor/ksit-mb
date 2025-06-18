@@ -15,24 +15,20 @@ import TeacherShortCourseSection from "@/components/dashboard/users/teachers/vie
 import TeacherLanguageSection from "@/components/dashboard/users/teachers/view/TeacherLanguage";
 import TeacherFamilySection from "@/components/dashboard/users/teachers/view/TeacherFamily";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
-import {
-  getStaffByIdService,
-  getStaffByTokenService,
-} from "@/service/user/user.service";
+import { getStaffByTokenService } from "@/service/user/user.service";
 import { Pencil } from "lucide-react";
 
 export default function TeacherViewPage() {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [teacher, setteacher] = React.useState<StaffRespondModel | null>(null);
+  const [teacher, setTeacher] = React.useState<StaffRespondModel | null>(null);
   const params = useParams();
   const teacherId = params.id as string;
-  const router = useRouter();
   const loadTeacher = async () => {
     setIsLoading(true);
     try {
       const response = await getStaffByTokenService();
       if (response) {
-        setteacher(response);
+        setTeacher(response);
       } else {
         toast.error("Error getting teacher data");
       }
@@ -59,15 +55,12 @@ export default function TeacherViewPage() {
     <div>
       {/* Header with TabsList injected via prop */}
       <CardHeaderSection
-        title="Teacher View Details"
+        title="My Profile"
         back
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
           { label: "View Teacher", href: ROUTE.USERS.VIEW_TEACHER(teacherId) },
         ]}
-        buttonHref={ROUTE.USERS.EDIT_TEACHER(String(teacher?.id))}
-        buttonText="Update your profile"
-        buttonIcon={<Pencil className="w-4 h-4" />}
       />
 
       {/* Tab Content outside the header */}

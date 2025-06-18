@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import {
-  getStaffByIdService,
+  getStaffByTokenService,
   updateStaffService,
 } from "@/service/user/user.service";
 import TeacherForm from "@/components/dashboard/users/teachers/form/TeacherForm";
@@ -13,19 +13,19 @@ import { EditStaffFormData } from "@/model/user/staff/staff.schema";
 import { EditStaffModel } from "@/model/user/staff/staff.request.model";
 import { cleanField } from "@/utils/map-helper/student";
 
-export default function EditTeacherPage() {
+export default function EditTeacherProfilePage() {
   const [loading, setLoading] = useState(false);
   const [initialValues, setInitialValues] = useState<EditStaffFormData>();
+  const [staffId, setStaffId] = useState<number | null>(null);
 
   const router = useRouter();
-  const params = useParams();
-  const teacherId = params?.id as string;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getStaffByIdService(teacherId);
+        const response = await getStaffByTokenService();
 
+        setStaffId(response.id);
         const payload: EditStaffFormData = {
           email: response?.email ?? "",
           roles: response?.roles ?? [],
@@ -96,17 +96,20 @@ export default function EditTeacherPage() {
 
         setInitialValues(payload);
       } catch (error) {
-        console.error("Failed to fetch teacher:", error);
-        toast.error("Failed to load teacher data");
+        console.error("Failed to fetch profile:", error);
+        toast.error("Failed to load profile data");
       }
     };
 
     fetchData();
-  }, [teacherId]);
+  }, [staffId]);
 
   const onSubmit = async (data: EditStaffFormData) => {
+    if (staffId == null) {
+      toast.error("ID is missing");
+      return;
+    }
     setLoading(true);
-
     try {
       const payload: EditStaffModel = {
         email: cleanField(data.email),
@@ -188,12 +191,12 @@ export default function EditTeacherPage() {
         })),
       };
 
-      await updateStaffService(Number(teacherId), payload);
+      await updateStaffService(staffId, payload);
 
-      toast.success("Teacher updated successfully");
+      toast.success("Profile updated successfully");
     } catch (error) {
-      console.error("Failed to update teacher:", error);
-      toast.error("Failed to update teacher");
+      console.error("Failed to update profile:", error);
+      toast.error("Failed to update profile");
       setLoading(false);
     }
   };
@@ -201,7 +204,7 @@ export default function EditTeacherPage() {
   return (
     <TeacherForm
       mode="Edit"
-      title="Edit Teacher"
+      title="Edit your profile"
       onSubmit={onSubmit}
       initialValues={initialValues}
       loading={loading}
