@@ -16,37 +16,40 @@ import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRouter } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
-import { clearRoles, getRoles } from "@/utils/local-storage/user-info/roles";
-import { clearUserId, getUserId } from "@/utils/local-storage/user-info/userId";
+import {
+  clearRoles,
+  getRoleCheck,
+  getRoleCheckGrope,
+} from "@/utils/local-storage/user-info/roles";
+import { clearUserId } from "@/utils/local-storage/user-info/userId";
 import { clearUsername } from "@/utils/local-storage/user-info/username";
 import { logoutUser } from "@/utils/local-storage/user-info/token";
 import { ConfirmDialog } from "../shared/custom-confirm-dialog";
 import { MobileSidebar } from "./mobile-sidebar";
+import { RoleEnum } from "@/constants/constant";
 
 export function Header() {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false); // state to open/close confirm dialog
-  const roles = getRoles();
-  const role = roles[0] || "";
   const router = useRouter();
-  const userId = getUserId();
-  const primaryRole = roles[0] || "";
 
   const getProfileUrl = () => {
-    switch (primaryRole) {
-      case "ADMIN":
-        return ROUTE.USERS.ADMIN_VIEW(userId ?? "");
-      case "STAFF":
-        return ROUTE.USERS.EDIT_STAFF(userId ?? "");
-      case "TEACHER":
-        return ROUTE.USERS.VIEW_TEACHER(userId ?? "");
-      case "STUDENT":
-        return ROUTE.STUDENTS.VIEW(userId ?? "");
-      case "DEVELOPER":
-        return ROUTE.USERS.VIEW_TEACHER(userId ?? "");
+    const roleGroup = getRoleCheck();
+
+    console.log("##Role: ", roleGroup);
+
+    switch (roleGroup) {
+      case RoleEnum.ADMIN:
+        return "/profile/admin";
+      case RoleEnum.DEVELOPER:
+      case RoleEnum.TEACHER:
+      case RoleEnum.STAFF:
+        return "/profile/teacher";
+      case RoleEnum.STUDENT:
+        return "/profile/student";
       default:
-        return "/";
+        return "/unauthorized";
     }
   };
 

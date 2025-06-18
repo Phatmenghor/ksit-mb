@@ -30,6 +30,7 @@ interface CardHeaderSectionProps {
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   buttonText?: string;
   buttonIcon?: React.ReactNode;
+  customAddNewButton?: React.ReactNode; // 👈 optional render prop
   buttonHref?: string;
   back?: boolean;
   openModal?: () => void;
@@ -42,6 +43,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
   title,
   searchPlaceholder = "Search...",
   searchValue,
+  customAddNewButton,
   onSearchChange,
   buttonText,
   buttonIcon,
@@ -84,16 +86,13 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
 
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-start gap-4">
           {backHref ? (
-            <Link
-              href={backHref}
-              className="text-black hover:text-black focus:outline-none"
-            >
+            <Link href={backHref} className="focus:outline-none">
               <ArrowLeft className="w-5 h-5" />
             </Link>
           ) : back ? (
             <Button
               onClick={() => router.back()}
-              className="text-black hover:text-black focus:outline-none"
+              className="focus:outline-none"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -119,6 +118,8 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
           {/* Right side */}
           <div className="flex flex-col md:flex-row md:items-center gap-4 w-full md:w-auto">
             {customSelect && customSelect}
+
+            {customAddNewButton && customAddNewButton}
 
             {buttonText && buttonHref && (
               <Link href={buttonHref}>

@@ -156,15 +156,15 @@ export default function AddTeacherPage() {
 
       // Call API service to create the new staff member
       await addStaffService(payload);
-
       // Notify success to the user
       toast.success("Teacher created successfully");
-    } catch (error) {
+      router.back();
+    } catch (error: any) {
       // Log the error for debugging purposes
       console.error("Failed to create teacher:", error);
 
       // Notify failure to the user
-      toast.error("Failed to create teacher");
+      toast.error(error.message || "Unknown error");
     } finally {
       // Always reset loading state after the operation
       setLoading(false);

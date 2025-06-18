@@ -151,9 +151,10 @@ export default function AddStaffOfficerPage() {
 
       await addStaffService(payload);
       toast.success("Staff created successfully");
-    } catch (error) {
+      router.back();
+    } catch (error: any) {
       console.error("Failed to create Staff:", error);
-      toast.error("Failed to create Staff");
+      toast.error(error.message || "Unknown error");
     } finally {
       setLoading(false);
     }

@@ -41,7 +41,7 @@ export function clearRoles(): void {
 }
 
 export function getRoleCheckGrope(): RoleEnum | null {
-  const roles = getRoles() || [];
+  const roles = getRoles().map((r) => r.toUpperCase()) || [];
   if (!roles || roles.length === 0) {
     return null;
   }
@@ -50,12 +50,10 @@ export function getRoleCheckGrope(): RoleEnum | null {
     return RoleEnum.ADMIN;
   }
 
-  // Check for staff/teacher
   if (roles.includes(RoleEnum.TEACHER) || roles.includes(RoleEnum.STAFF)) {
     return RoleEnum.STAFF;
   }
 
-  // Check for student
   if (roles.includes(RoleEnum.STUDENT)) {
     return RoleEnum.STUDENT;
   }

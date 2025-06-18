@@ -35,6 +35,36 @@ export async function getStaffByIdService(id: string) {
   }
 }
 
+export async function getStaffByTokenService() {
+  try {
+    // GET request to fetch a staff by ID
+    const response = await axiosClientWithAuth.post(`/v1/auth/staff/token`);
+    return response.data.data; // Return staff detail data
+  } catch (error: any) {
+    // Extract and throw API error message if available
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    console.error("Error get staff by token:", error);
+    throw error;
+  }
+}
+
+export async function getStudentByTokenService() {
+  try {
+    // GET request to fetch a staff by ID
+    const response = await axiosClientWithAuth.post(`/v1/auth/student/token`);
+    return response.data.data; // Return staff detail data
+  } catch (error: any) {
+    // Extract and throw API error message if available
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    console.error("Error get student by token:", error);
+    throw error;
+  }
+}
+
 export async function addStaffService(data: AddStaffModel) {
   try {
     // POST request to register/add a new staff

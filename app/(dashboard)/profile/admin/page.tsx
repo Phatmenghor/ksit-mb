@@ -4,12 +4,15 @@ import { UserProfileSection } from "@/components/dashboard/users/shared/UserProf
 import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { ROUTE } from "@/constants/routes";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
-import { getStaffByIdService } from "@/service/user/user.service";
+import {
+  getStaffByIdService,
+  getStaffByTokenService,
+} from "@/service/user/user.service";
 import { useParams } from "next/navigation";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
 
-export default function AdminDetailPage() {
+export default function AdminProfilePage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [admin, setAdmin] = React.useState<StaffRespondModel | null>(null);
   const params = useParams();
@@ -18,7 +21,7 @@ export default function AdminDetailPage() {
   const loadAdmin = async () => {
     setIsLoading(true);
     try {
-      const response = await getStaffByIdService(adminId);
+      const response = await getStaffByTokenService();
       if (response) {
         setAdmin(response);
       } else {
