@@ -6,8 +6,8 @@ import { Eye } from "lucide-react";
 import { toast } from "sonner";
 import { getAllStudentsService } from "@/service/user/student.service";
 import { SemesterFilter, StatusEnum } from "@/constants/constant";
-import { Column, CustomTable } from "@/components/shared/layout/TableSection";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { Column, CustomTable } from "@/components/shared/layout/table-section";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import { YearSelector } from "@/components/shared/year-selector";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
@@ -21,7 +21,13 @@ import {
 import { useDebounce } from "@/utils/debounce/debounce";
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 import Loading from "@/components/shared/loading";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function ResultListPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -114,7 +120,7 @@ export default function ResultListPage() {
         </span>
       ),
     },
-   {
+    {
       key: "lastUpdate",
       header: "Last Updated",
       render: (student: StudentModel) =>
@@ -135,7 +141,7 @@ export default function ResultListPage() {
         onSearchChange={handleSearchChange}
         customSelect={
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
-              <div className="w-full min-w-[200px] md:w-1/2">
+            <div className="w-full min-w-[200px] md:w-1/2">
               <ComboboxSelectClass
                 dataSelect={selectedClass ?? null}
                 onChangeSelected={handleClassChange}
@@ -149,25 +155,21 @@ export default function ResultListPage() {
                   onChange={handleYearChange}
                   value={selectAcademicYear || 0}
                 />
-               
               </div>
             </div>
 
-             <Select
-                onValueChange={handleSearchChange}
-                value={selectedSemester}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a semester" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SemesterFilter.map((semester) => (
-                    <SelectItem key={semester.value} value={semester.value}>
-                      {semester.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <Select onValueChange={handleSearchChange} value={selectedSemester}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a semester" />
+              </SelectTrigger>
+              <SelectContent>
+                {SemesterFilter.map((semester) => (
+                  <SelectItem key={semester.value} value={semester.value}>
+                    {semester.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         }
       />

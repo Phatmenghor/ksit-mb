@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { User, X } from "lucide-react";
 import { useFormContext } from "react-hook-form";
-
 import { baseAPI } from "@/constants/api";
 import { Input } from "@/components/ui/input";
 import { uploadImageService } from "@/service/setting/image.serice";
@@ -76,7 +75,7 @@ export default function ProfileUploadCard() {
     }
     return logoPreview.startsWith("http") || logoPreview.startsWith("blob:")
       ? logoPreview
-      : baseAPI.BASE_IMAGE + logoPreview;
+      : process.env.NEXT_PUBLIC_API_IMAGE + logoPreview;
   };
 
   return (
@@ -85,51 +84,53 @@ export default function ProfileUploadCard() {
         <div className="relative w-24 h-24">
           <div className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-100 overflow-hidden relative">
             {logoPreview ? (
-              <>
-                <img
-                  src={getImageSource()}
-                  alt="Profile"
-                  className="w-full h-full object-cover rounded-full"
-                  draggable={false}
-                />
-                {/* Remove (X) button overlay */}
-                <button
-                  type="button"
-                  onClick={handleRemoveLogo}
-                  className="absolute top-0 right-0 bg-red-500 rounded-full p-1 border-2 border-white hover:bg-red-600 transition"
-                  disabled={isUploading}
-                  title="Remove profile image"
-                >
-                  <X className="w-3 h-3 text-white" />
-                </button>
-              </>
+              <img
+                src={getImageSource()}
+                alt="Profile"
+                className="w-full h-full object-cover rounded-full"
+                draggable={false}
+              />
             ) : (
               <User className="w-10 h-10 text-gray-300" />
             )}
           </div>
 
-          {/* Upload button overlay */}
-          <label
-            htmlFor="profile-upload"
-            className="absolute bottom-0 right-0 bg-black rounded-full p-1 border-2 border-white cursor-pointer hover:bg-gray-800 transition"
-            onClick={(e) => e.stopPropagation()}
-            title="Upload profile image"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          {/* Conditional button - X for remove or + for upload */}
+          {logoPreview ? (
+            // Remove (X) button when image exists
+            <button
+              type="button"
+              onClick={handleRemoveLogo}
+              className="absolute -bottom-1 -right-1 bg-red-500 rounded-full p-1 border-2 border-white hover:bg-red-600 transition-colors duration-200 shadow-md z-10"
+              disabled={isUploading}
+              title="Remove profile image"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-          </label>
+              <X className="w-4 h-4 text-white" />
+            </button>
+          ) : (
+            // Upload (+) button when no image
+            <label
+              htmlFor="profile-upload"
+              className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1 border-2 border-white cursor-pointer hover:bg-blue-600 transition-colors duration-200 shadow-md z-10"
+              onClick={(e) => e.stopPropagation()}
+              title="Upload profile image"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+            </label>
+          )}
 
           {/* Hidden file input field */}
           <Input

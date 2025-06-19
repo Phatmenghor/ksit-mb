@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { addStaffService } from "@/service/user/user.service";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
-import TeacherForm from "@/components/dashboard/users/teachers/form/TeacherForm";
+import TeacherForm from "@/components/dashboard/users/teachers/form/teacher-form";
 import { useRouter } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
 import { AddStaffFormData } from "@/model/user/staff/staff.schema";

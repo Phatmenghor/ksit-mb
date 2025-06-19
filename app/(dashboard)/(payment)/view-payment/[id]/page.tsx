@@ -40,8 +40,8 @@ import {
   TooltipTrigger,
 } from "@radix-ui/react-tooltip";
 import { useParams } from "next/navigation";
-import { UserProfileSection } from "@/components/dashboard/users/shared/UserProfile";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { UserProfileSection } from "@/components/dashboard/users/shared/user-profile";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 import { getStudentByIdService } from "@/service/user/student.service";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";

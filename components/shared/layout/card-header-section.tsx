@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ArrowLeft } from "lucide-react";
+import { Search, ArrowLeft, Ghost } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,12 +30,12 @@ interface CardHeaderSectionProps {
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   buttonText?: string;
   buttonIcon?: React.ReactNode;
-  customAddNewButton?: React.ReactNode; // 👈 optional render prop
+  customAddNewButton?: React.ReactNode;
   buttonHref?: string;
   back?: boolean;
   openModal?: () => void;
-  customSelect?: React.ReactNode; // 👈 new optional prop
-  tabs?: React.ReactNode; // 👈 new prop
+  customSelect?: React.ReactNode;
+  tabs?: React.ReactNode;
 }
 
 export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
@@ -51,7 +51,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
   back,
   buttonHref,
   openModal,
-  customSelect, // 👈 receive here
+  customSelect,
   tabs,
 }) => {
   const router = useRouter();
@@ -91,8 +91,9 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
             </Link>
           ) : back ? (
             <Button
+              variant="ghost"
               onClick={() => router.back()}
-              className="focus:outline-none"
+              className="focus:outline-none p-0"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>

@@ -1,8 +1,8 @@
-import { Column, CustomTable } from "@/components/shared/layout/TableSection";
+import { Column, CustomTable } from "@/components/shared/layout/table-section";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import React from "react";
-import InfoGrid from "../../shared/UserPersonalHistory";
+import InfoGrid from "../../shared/user-personal-history";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 import { TeacherFamily } from "@/model/user/staff/staff.request.model";
 import { formatValue } from "@/utils/map-helper/student";

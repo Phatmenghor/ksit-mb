@@ -4,14 +4,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
-import { CircleAlert, DollarSign, FileText, Pencil } from "lucide-react";
-import { UserProfileSection } from "@/components/dashboard/users/shared/UserProfile";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { CircleAlert, DollarSign, FileText } from "lucide-react";
+import { UserProfileSection } from "@/components/dashboard/users/shared/user-profile";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
-import StudentDetails from "@/components/dashboard/users/student/view/tab/StudentDetailsTabs";
-import StudentDetailsTabs from "@/components/dashboard/users/student/view/tab/StudentDetailsTabs";
-import PaymentTabs from "@/components/dashboard/users/student/view/tab/PaymentTabs";
-import TranscriptTabs from "@/components/dashboard/users/student/view/tab/TranscriptTabs";
+import StudentDetails from "@/components/dashboard/users/student/view/tab/student-detail-tab";
+import StudentDetailsTabs from "@/components/dashboard/users/student/view/tab/student-detail-tab";
+import PaymentTabs from "@/components/dashboard/users/student/view/tab/student-payment-tab";
+import TranscriptTabs from "@/components/dashboard/users/student/view/tab/student-transcript-tab";
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 import { getStudentByTokenService } from "@/service/user/user.service";
 
@@ -58,7 +58,6 @@ export default function StudentViewPage() {
   };
 
   useEffect(() => {
-    // If `type` is one of the valid tabs, use it
     if (["student", "payment", "transcript"].includes(type)) {
       if (type === "student") {
         setActiveTab("information");
@@ -86,7 +85,6 @@ export default function StudentViewPage() {
       onValueChange={setActiveTab}
       className="w-full space-y-4"
     >
-      {/* Header with TabsList injected via prop */}
       <CardHeaderSection
         title="My Profile"
         back

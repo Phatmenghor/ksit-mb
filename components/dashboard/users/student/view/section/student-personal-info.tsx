@@ -1,6 +1,6 @@
 // components/student/StudentPersonalInfo.tsx
 import CollapsibleCard from "@/components/shared/collapsibleCard";
-import InfoGrid from "../../../shared/UserPersonalHistory";
+import InfoGrid from "../../../shared/user-personal-history";
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 import { formatValue } from "@/utils/map-helper/student";
 

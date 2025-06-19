@@ -1,14 +1,11 @@
 "use client";
 
 import { ROUTE } from "@/constants/routes";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import {
-  editStudentService,
-  getStudentByIdService,
-} from "@/service/user/student.service";
-import StudentForm from "@/components/dashboard/users/student/form/StudentForm";
+import { editStudentService } from "@/service/user/student.service";
+import StudentForm from "@/components/dashboard/users/student/form/student-form";
 import {
   EditStudentFormData,
   StudentFormSchema,

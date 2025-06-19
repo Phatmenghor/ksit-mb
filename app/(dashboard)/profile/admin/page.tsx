@@ -1,7 +1,7 @@
 "use client";
-import AdminPersonal from "@/components/dashboard/users/admin/AdminPersonal";
-import { UserProfileSection } from "@/components/dashboard/users/shared/UserProfile";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import AdminPersonal from "@/components/dashboard/users/admin/admin-personal-info";
+import { UserProfileSection } from "@/components/dashboard/users/shared/user-profile";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 import { getStaffByTokenService } from "@/service/user/user.service";
@@ -36,14 +36,6 @@ export default function AdminProfilePage() {
     loadAdmin();
   }, [adminId]);
 
-  const profile = admin
-    ? {
-        id: admin.identifyNumber,
-        username: admin.username,
-        profileUrl: admin.profileUrl,
-      }
-    : null;
-
   return (
     <div>
       {/* Header with TabsList injected via prop */}
@@ -56,7 +48,7 @@ export default function AdminProfilePage() {
         ]}
       />
       <div className="mt-4 space-y-4">
-        <UserProfileSection user={profile} />
+        <UserProfileSection user={admin} />
         <AdminPersonal admin={admin} />
       </div>
     </div>

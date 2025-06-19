@@ -185,6 +185,7 @@ const BaseAdminSchema = BaseStaffSchema.pick({
   email: true,
   status: true,
   roles: true,
+  profileUrl: true,
 }).extend({
   username: z.string(),
   first_name: z.string().optional(),

@@ -3,7 +3,7 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { YearSelector } from "@/components/shared/year-selector";
 import {
   Select,

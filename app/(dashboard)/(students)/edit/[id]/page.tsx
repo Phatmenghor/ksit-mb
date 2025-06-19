@@ -8,7 +8,7 @@ import {
   editStudentService,
   getStudentByIdService,
 } from "@/service/user/student.service";
-import StudentForm from "@/components/dashboard/users/student/form/StudentForm";
+import StudentForm from "@/components/dashboard/users/student/form/student-form";
 import {
   EditStudentFormData,
   StudentFormSchema,

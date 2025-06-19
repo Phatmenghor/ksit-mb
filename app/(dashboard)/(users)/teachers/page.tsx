@@ -19,7 +19,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import {
   deletedStaffService,
@@ -27,7 +27,7 @@ import {
 } from "@/service/user/user.service";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
 import PaginationPage from "@/components/shared/pagination-page";
-import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
+import ChangePasswordModal from "@/components/dashboard/users/shared/change-password-modal";
 import { StaffTableHeader, TeacherTableHeader } from "@/constants/table/user";
 import {
   AllStaffModel,

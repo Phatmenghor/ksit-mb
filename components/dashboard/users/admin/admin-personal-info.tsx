@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import InfoGrid from "../shared/UserPersonalHistory";
+import InfoGrid from "../shared/user-personal-history";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 
 interface AdminProps {

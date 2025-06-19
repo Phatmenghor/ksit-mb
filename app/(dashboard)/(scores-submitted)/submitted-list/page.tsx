@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Eye } from "lucide-react";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import { YearSelector } from "@/components/shared/year-selector";
 import { ComboboxSelectSemester } from "@/components/shared/ComboBox/combobox-semester";

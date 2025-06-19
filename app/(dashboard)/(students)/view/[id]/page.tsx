@@ -6,14 +6,14 @@ import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import { CircleAlert, DollarSign, FileText } from "lucide-react";
 
-import { UserProfileSection } from "@/components/dashboard/users/shared/UserProfile";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { UserProfileSection } from "@/components/dashboard/users/shared/user-profile";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import { getStudentByIdService } from "@/service/user/student.service";
-import StudentDetails from "@/components/dashboard/users/student/view/tab/StudentDetailsTabs";
-import StudentDetailsTabs from "@/components/dashboard/users/student/view/tab/StudentDetailsTabs";
-import PaymentTabs from "@/components/dashboard/users/student/view/tab/PaymentTabs";
-import TranscriptTabs from "@/components/dashboard/users/student/view/tab/TranscriptTabs";
+import StudentDetails from "@/components/dashboard/users/student/view/tab/student-detail-tab";
+import StudentDetailsTabs from "@/components/dashboard/users/student/view/tab/student-detail-tab";
+import PaymentTabs from "@/components/dashboard/users/student/view/tab/student-payment-tab";
+import TranscriptTabs from "@/components/dashboard/users/student/view/tab/student-transcript-tab";
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 
 const tabs = [

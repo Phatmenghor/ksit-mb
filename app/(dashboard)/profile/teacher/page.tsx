@@ -1,6 +1,6 @@
 "use client";
-import { UserProfileSection } from "@/components/dashboard/users/shared/UserProfile";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { UserProfileSection } from "@/components/dashboard/users/shared/user-profile";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import React, { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";

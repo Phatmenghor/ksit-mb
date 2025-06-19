@@ -5,16 +5,12 @@ import { ConfirmRejectModal } from "@/components/dashboard/requests/confirm-reje
 import { ConfirmReturnModal } from "@/components/dashboard/requests/confirm-return-modal";
 import { RequestCompletedModal } from "@/components/dashboard/requests/request-completed-modal";
 import { RequestHistory } from "@/components/dashboard/requests/request-history";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-import {
-  REQUEST_DETAIL,
-  RequestEnum,
-  RequestType,
-} from "@/constants/constant";
+import { REQUEST_DETAIL, RequestEnum, RequestType } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
 import { RequestModel } from "@/model/request/request-model";
 import {
@@ -49,7 +45,7 @@ export default function StudentDetail() {
   );
   const [completedModalOpen, setCompletedModalOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
+
   // API
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -80,7 +76,7 @@ export default function StudentDetail() {
   useEffect(() => {
     loadRequest();
   }, [requestId]);
-  
+
   // label and value in request detail
   const leftColumnData = [
     { label: "Student ID", value: requestData?.user?.identifyNumber || "---" },
@@ -184,7 +180,6 @@ export default function StudentDetail() {
 
       await loadRequest();
       console.log("Request accepted successfully");
-
     } catch (error) {
       console.error("Error accepting request:", error);
       toast.error("An error occurred while update accept request");
@@ -208,7 +203,6 @@ export default function StudentDetail() {
 
       await loadRequest();
       console.log("Request rejected successfully");
-
     } catch (error) {
       console.error("Error rejecting request:", error);
       toast.error("An error occurred while update reject request");
@@ -235,7 +229,6 @@ export default function StudentDetail() {
 
       await loadRequest();
       console.log("Request completed successfully");
-
     } catch (error) {
       console.error("Error completing request:", error);
       toast.error("An error occurred while update complete request");

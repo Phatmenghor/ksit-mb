@@ -4,14 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import clsx from "clsx";
 import { Badge } from "@/components/ui/badge";
 
-interface BaseProfile {
-  id: number | string;
-  username: string;
-  profileUrl?: string;
-}
-
 interface ProfileProps {
-  user: BaseProfile | null;
+  user: any;
   className?: string;
 }
 
@@ -20,7 +14,7 @@ export const UserProfileSection: React.FC<ProfileProps> = ({
   className,
 }) => {
   const profileUrl = user?.profileUrl
-    ? `${process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE}${user.profileUrl}`
+    ? `${process.env.NEXT_PUBLIC_API_IMAGE}${user?.profileUrl}`
     : undefined;
 
   return (
@@ -28,9 +22,12 @@ export const UserProfileSection: React.FC<ProfileProps> = ({
       <CardContent className="flex flex-col items-center justify-center py-6">
         <Avatar className="h-24 w-24">
           <AvatarImage src={profileUrl} alt={user?.username || "User"} />
-           <AvatarImage src={'/assets/profile.png'} alt={user?.username || "User"} />
+
           <AvatarFallback>
-            {user?.username ? user.username.charAt(0).toUpperCase() : "?"}
+            <AvatarImage
+              src={"/assets/profile.png"}
+              alt={user?.username || "User"}
+            />{" "}
           </AvatarFallback>
         </Avatar>
 

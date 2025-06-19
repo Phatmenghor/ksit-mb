@@ -4,7 +4,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Ban, Loader2, Save } from "lucide-react";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import { useEffect, useState } from "react";
 import { StatusEnum } from "@/constants/constant";

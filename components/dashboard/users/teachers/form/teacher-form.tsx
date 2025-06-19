@@ -17,7 +17,7 @@ import {
   EditStaffFormData,
   EditStaffSchema,
 } from "@/model/user/staff/staff.schema";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { initialStaffValues } from "@/model/user/staff/staff.request.model";
 
 type Props = {

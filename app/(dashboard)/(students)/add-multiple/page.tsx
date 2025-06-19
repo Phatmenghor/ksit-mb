@@ -1,5 +1,5 @@
 import GenerateMultiStudentForm from "@/components/dashboard/users/student/generate-multi-Student/GenerateMultiStudent";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 
 export default function AddMultipleStudentsPage() {

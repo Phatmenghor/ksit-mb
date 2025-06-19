@@ -1,7 +1,7 @@
 "use client";
-import AdminPersonal from "@/components/dashboard/users/admin/AdminPersonal";
-import { UserProfileSection } from "@/components/dashboard/users/shared/UserProfile";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import AdminPersonal from "@/components/dashboard/users/admin/admin-personal-info";
+import { UserProfileSection } from "@/components/dashboard/users/shared/user-profile";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 import { getStaffByIdService } from "@/service/user/user.service";

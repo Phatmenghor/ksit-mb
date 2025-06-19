@@ -2,24 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   getStaffByTokenService,
   updateStaffService,
 } from "@/service/user/user.service";
 import { AdminFormData } from "@/model/user/staff/staff.schema";
-import { EditStaffModel } from "@/model/user/staff/staff.request.model";
-import { cleanField } from "@/utils/map-helper/student";
-import AdminForm from "@/components/dashboard/users/admin/AdminProfileForm";
-
-export type ExtendedAdminFormData = AdminFormData & {
-  profileUrl?: string;
-};
+import { cleanField, cleanRequiredField } from "@/utils/map-helper/student";
+import AdminForm from "@/components/dashboard/users/admin/admin-profile-form";
+import Loading from "@/components/shared/loading";
 
 export default function EditAdminProfilePage() {
   const [loading, setLoading] = useState(false);
-  const [initialValues, setInitialValues] =
-    useState<ExtendedAdminFormData | null>(null);
+  const [initialValues, setInitialValues] = useState<AdminFormData | null>(
+    null
+  );
   const [staffId, setStaffId] = useState<number | null>(null);
 
   const router = useRouter();
@@ -38,6 +35,7 @@ export default function EditAdminProfilePage() {
           first_name: response?.englishFirstName ?? "",
           last_name: response?.englishLastName ?? "",
           status: response?.status ?? "",
+          profileUrl: response.profileUrl ?? "",
           roles: response?.roles ?? [],
           selectedStaff: response,
         };
@@ -50,9 +48,9 @@ export default function EditAdminProfilePage() {
     };
 
     fetchData();
-  }, []); // Remove staffId from dependency array to avoid infinite loop
+  }, []);
 
-  const onSubmit = async (data: ExtendedAdminFormData) => {
+  const onSubmit = async (data: AdminFormData) => {
     if (staffId == null) {
       toast.error("ID is missing");
       return;
@@ -60,7 +58,9 @@ export default function EditAdminProfilePage() {
 
     setLoading(true);
     try {
-      const payload: EditStaffModel = {
+      console.log("Profile url: ", data.profileUrl);
+      const payload: any = {
+        username: cleanRequiredField(data.username),
         email: cleanField(data.email),
         khmerFirstName: cleanField(data.first_name),
         khmerLastName: cleanField(data.last_name),
@@ -85,15 +85,11 @@ export default function EditAdminProfilePage() {
   };
 
   if (!initialValues) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto">
       <AdminForm
         initialData={initialValues}
         onSubmit={onSubmit}

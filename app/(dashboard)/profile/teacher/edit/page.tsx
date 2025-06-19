@@ -7,7 +7,7 @@ import {
   getStaffByTokenService,
   updateStaffService,
 } from "@/service/user/user.service";
-import TeacherForm from "@/components/dashboard/users/teachers/form/TeacherForm";
+import TeacherForm from "@/components/dashboard/users/teachers/form/teacher-form";
 import { ROUTE } from "@/constants/routes";
 import { EditStaffFormData } from "@/model/user/staff/staff.schema";
 import { EditStaffModel } from "@/model/user/staff/staff.request.model";
