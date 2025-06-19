@@ -1,12 +1,12 @@
 import React from "react";
-import PersonalHistoryForm from "../detail-section/TeacherPersonalInfo";
-import ExperienceForm from "../detail-section/TeacherExperiences";
-import PraiseCriticismForm from "../detail-section/TeacherPraiseOrCriticisms";
-import ShortCourseForm from "../detail-section/TeacherShortCourses";
-import LanguageForm from "../detail-section/TeacherLanguages";
-import FamilyStatusForm from "../detail-section/TeacherFamilies";
-import VocationalForm from "../detail-section/TeacherVocational";
-import EducatonForm from "../detail-section/TeacherEducations";
+import PersonalHistoryForm from "../detail-section/teacher-personal-info";
+import ExperienceForm from "../detail-section/teacher-experiences";
+import PraiseCriticismForm from "../detail-section/teacher-praise-or-criticisms";
+import ShortCourseForm from "../detail-section/teacher-short-courses";
+import LanguageForm from "../detail-section/teacher-languages";
+import FamilyStatusForm from "../detail-section/teacher-families";
+import VocationalForm from "../detail-section/teacher-vocational";
+import EducatonForm from "../detail-section/teacher-education";
 
 export default function FormDetail() {
   return (

@@ -1,7 +1,7 @@
 "use client";
 import { Separator } from "@/components/ui/separator";
 import React from "react";
-import TeachingDetailForm from "./TeachingDetailForm";
+import TeachingDetailForm from "./teacher-detail-form";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import { useFieldArray, useFormContext } from "react-hook-form";

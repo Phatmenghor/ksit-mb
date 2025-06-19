@@ -8,9 +8,9 @@ import { CardHeaderSection } from "@/components/shared/layout/card-header-sectio
 import { ROUTE } from "@/constants/routes";
 import { useEffect, useState } from "react";
 import { StatusEnum } from "@/constants/constant";
-import { StudentBasicForm } from "../add-single-student/StuBasicForm";
-import StudentProfileUploadCard from "../add-single-student/StuProfileUploadCard";
-import StudentFormDetail from "./StudentFormDetail";
+import { StudentBasicForm } from "../add-single-student/student-base-form";
+import StudentProfileUploadCard from "../add-single-student/student-profile-upload";
+import StudentFormDetail from "./student-form-detail";
 import {
   AddStudentSchema,
   EditStudentFormData,

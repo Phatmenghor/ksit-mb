@@ -1,7 +1,7 @@
 import React from "react";
-import StudentPersonalInfo from "../section/StudentPersonalInfo";
-import StudentStudyHistory from "../section/StudentStudyHistory";
-import StudentFamily from "../section/StudentFamily";
+import StudentPersonalInfo from "../section/student-personal-info";
+import StudentStudyHistory from "../section/student-studies-histories";
+import StudentFamily from "../section/student-family";
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 
 export default function StudentDetailsTabs({

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useFormContext, Controller } from "react-hook-form";
-import StudentSibling from "./StuSibling";
+import StudentSibling from "./student-sibling";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 
 export default function StudentFamilyBackgroundSection() {

@@ -7,10 +7,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Ban, Loader2, Save } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import FormDetail from "./FormDetail";
+import FormDetail from "./form-detail";
 import { ROUTE } from "@/constants/routes";
-import { BasicInformationForm } from "../detail-section/TeacherBasicInfo";
-import ProfileUploadCard from "./profileUploadCard";
+import { BasicInformationForm } from "../detail-section/teacher-basic-info";
+import ProfileUploadCard from "./profile-upload-card";
 import { StatusEnum } from "@/constants/constant";
 import {
   AddStaffSchema,
