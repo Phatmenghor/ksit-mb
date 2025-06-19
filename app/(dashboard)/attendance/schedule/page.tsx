@@ -28,11 +28,11 @@ import {
   getAllMyScheduleService,
   getAllScheduleService,
 } from "@/service/schedule/schedule.service";
-import { AllScheduleModel } from "@/model/schedule/schedule/schedule-model";
+import { AllScheduleModel } from "@/model/attendance/schedule/schedule-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
 import PaginationPage from "@/components/shared/pagination-page";
-import { ScheduleFilterModel } from "@/model/schedule/schedule/schedule-filter";
+import { ScheduleFilterModel } from "@/model/attendance/schedule/schedule-filter";
 import { useRouter } from "next/navigation";
 
 const ClassSchedulePage = () => {

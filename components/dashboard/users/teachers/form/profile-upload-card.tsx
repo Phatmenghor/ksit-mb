@@ -4,9 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { User, X } from "lucide-react";
 import { useFormContext } from "react-hook-form";
-import { baseAPI } from "@/constants/api";
 import { Input } from "@/components/ui/input";
-import { uploadImageService } from "@/service/setting/image.serice";
+import { uploadImageService } from "@/service/setting/image.service";
 import { UploadImage } from "@/model/setting/image-model";
 
 export default function ProfileUploadCard() {
@@ -70,12 +69,9 @@ export default function ProfileUploadCard() {
   };
 
   const getImageSource = () => {
-    if (!logoPreview) {
-      return baseAPI.NO_IMAGE;
-    }
-    return logoPreview.startsWith("http") || logoPreview.startsWith("blob:")
+    return logoPreview?.startsWith("http")
       ? logoPreview
-      : process.env.NEXT_PUBLIC_API_IMAGE + logoPreview;
+      : (process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE ?? "") + logoPreview;
   };
 
   return (

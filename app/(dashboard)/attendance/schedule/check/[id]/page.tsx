@@ -45,7 +45,7 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { getDetailScheduleService } from "@/service/schedule/schedule.service";
-import { ScheduleModel } from "@/model/schedule/schedule/schedule-model";
+import { ScheduleModel } from "@/model/attendance/schedule/schedule-model";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -64,7 +64,7 @@ import {
   submitAttendanceSessionService,
   updateAttendanceSessionService,
 } from "@/service/schedule/attendance.service";
-import { AttendanceGenerateModel } from "@/model/schedule/attendance/attendance-generate";
+import { AttendanceGenerateModel } from "@/model/attendance/attendance-generate";
 import {
   attendanceStatusOptions,
   attendanceTypeOptions,

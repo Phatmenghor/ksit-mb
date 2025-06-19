@@ -14,7 +14,7 @@ export const UserProfileSection: React.FC<ProfileProps> = ({
   className,
 }) => {
   const profileUrl = user?.profileUrl
-    ? `${process.env.NEXT_PUBLIC_API_IMAGE}${user?.profileUrl}`
+    ? `${process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE}${user?.profileUrl}`
     : undefined;
 
   return (

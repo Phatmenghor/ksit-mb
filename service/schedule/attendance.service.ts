@@ -1,6 +1,6 @@
-import { AttendanceGenerateParamModel } from "@/model/schedule/attendance/attendance-filter";
-import { AttendanceHistoryFilter } from "@/model/schedule/attendance/attendance-history";
-import { UpdateAttendanceModel } from "@/model/schedule/attendance/update-attendance";
+import { AttendanceGenerateParamModel } from "@/model/attendance/attendance-filter";
+import { AttendanceHistoryFilter } from "@/model/attendance/attendance-history";
+import { UpdateAttendanceModel } from "@/model/attendance/attendance-update";
 import { axiosClientWithAuth } from "@/utils/axios";
 
 export async function getAllAttendanceGenerateService(

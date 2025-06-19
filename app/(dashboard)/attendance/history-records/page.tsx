@@ -29,7 +29,7 @@ import { AttendanceHistoryTableHeader } from "@/constants/table/attendance-histo
 import {
   AllAttendanceHistoryModel,
   AttendanceHistoryFilter,
-} from "@/model/schedule/attendance/attendance-history";
+} from "@/model/attendance/attendance-history";
 import { getAllAttendanceHistoryService } from "@/service/schedule/attendance.service";
 import { toast } from "sonner";
 import PaginationPage from "@/components/shared/pagination-page";

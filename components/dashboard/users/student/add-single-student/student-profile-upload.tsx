@@ -7,7 +7,7 @@ import { useFormContext } from "react-hook-form";
 import { baseAPI } from "@/constants/api";
 import { Input } from "@/components/ui/input";
 import { UploadImage } from "@/model/setting/image-model";
-import { uploadImageService } from "@/service/setting/image.serice";
+import { uploadImageService } from "@/service/setting/image.service";
 
 export default function StudentProfileUploadCard() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -73,7 +73,7 @@ export default function StudentProfileUploadCard() {
     }
     return logoPreview.startsWith("http") || logoPreview.startsWith("blob:")
       ? logoPreview
-      : process.env.NEXT_PUBLIC_API_IMAGE + logoPreview;
+      : process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE + logoPreview;
   };
 
   return (
