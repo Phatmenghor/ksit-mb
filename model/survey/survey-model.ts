@@ -2,19 +2,19 @@
 
 // ✅ RatingOptionDto
 export interface RatingOptionDto {
-  value: number;  // integer
+  value: number; // integer
   label: string;
 }
 
 // ✅ SurveyQuestionResponseDto
 export interface SurveyQuestionResponseDto {
-  id: number;  // integer ($int64)
+  id: number; // integer ($int64)
   questionText: string;
-  questionType: string;  // could be enum later
+  questionType: string; // could be enum later
   required: boolean;
-  displayOrder: number;  // integer ($int32)
-  minRating: number;     // integer ($int32)
-  maxRating: number;     // integer ($int32)
+  displayOrder: number; // integer ($int32)
+  minRating: number; // integer ($int32)
+  maxRating: number; // integer ($int32)
   leftLabel: string;
   rightLabel: string;
   ratingOptions: RatingOptionDto[];
@@ -22,10 +22,10 @@ export interface SurveyQuestionResponseDto {
 
 // ✅ SurveySectionResponseDto
 export interface SurveySectionResponseDto {
-  id: number;  // integer ($int64)
+  id: number; // integer ($int64)
   title: string;
   description: string;
-  displayOrder: number;  // integer ($int32)
+  displayOrder: number; // integer ($int32)
   questions: SurveyQuestionResponseDto[];
 }
 
