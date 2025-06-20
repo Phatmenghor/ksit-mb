@@ -27,7 +27,7 @@ import {
   getAllMyScheduleService,
   getAllScheduleService,
 } from "@/service/schedule/schedule.service";
-import { AllScheduleModel } from "@/model/schedule/schedule/schedule-model";
+import { AllScheduleModel } from "@/model/attendance/schedule/schedule-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
 import PaginationPage from "@/components/shared/pagination-page";
@@ -42,7 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 
 export default function AllSchedulePage() {
   const [searchQuery, setSearchQuery] = useState<string>("");

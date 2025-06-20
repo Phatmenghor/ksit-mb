@@ -1,4 +1,4 @@
-import { Column, CustomTable } from "@/components/shared/layout/TableSection";
+import { Column, CustomTable } from "@/components/shared/layout/table-section";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { TeacherVocational } from "@/model/user/staff/staff.request.model";

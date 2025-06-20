@@ -3,7 +3,7 @@ import { useState } from "react";
 import { addStaffService } from "@/service/user/user.service";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { toast } from "sonner";
-import TeacherForm from "@/components/dashboard/users/teachers/form/TeacherForm";
+import TeacherForm from "@/components/dashboard/users/teachers/form/teacher-form";
 import { useRouter } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
 import { AddStaffFormData } from "@/model/user/staff/staff.schema";
@@ -151,9 +151,10 @@ export default function AddStaffOfficerPage() {
 
       await addStaffService(payload);
       toast.success("Staff created successfully");
-    } catch (error) {
+      router.back();
+    } catch (error: any) {
       console.error("Failed to create Staff:", error);
-      toast.error("Failed to create Staff");
+      toast.error(error.message || "Unknown error");
     } finally {
       setLoading(false);
     }

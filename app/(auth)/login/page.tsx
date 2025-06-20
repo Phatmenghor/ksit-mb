@@ -46,7 +46,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const credentials: LoginRequest = {
-        email: data.username,
+        username: data.username,
         password: data.password,
       };
 
@@ -54,7 +54,7 @@ export default function LoginPage() {
 
       if (response) {
         toast("Login success");
-        router.push(ROUTE.DASHBOARD);
+        router.replace(ROUTE.DASHBOARD);
       } else {
         toast("Fail to login");
       }

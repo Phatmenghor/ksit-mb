@@ -24,13 +24,13 @@ import {
   getAllStudentsService,
 } from "@/service/user/student.service";
 import { StatusEnum } from "@/constants/constant";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import { YearSelector } from "@/components/shared/year-selector";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { StudentTableHeader } from "@/constants/table/user";
-import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
+import ChangePasswordModal from "@/components/dashboard/users/shared/change-password-modal";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import {
   AllStudentModel,

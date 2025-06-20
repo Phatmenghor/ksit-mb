@@ -1,6 +1,6 @@
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import React from "react";
-import InfoGrid from "../../shared/UserPersonalHistory";
+import InfoGrid from "../../shared/user-personal-history";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";

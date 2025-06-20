@@ -1,5 +1,5 @@
 import { UpdateSemesterModel } from "@/model/master-data/semester/type-semester-model";
-import { ScheduleFilterModel } from "@/model/schedule/schedule/schedule-filter";
+import { ScheduleFilterModel } from "@/model/attendance/schedule/schedule-filter";
 import { CreateScheduleModel } from "@/model/schedules/type-schedule-model";
 import { axiosClientWithAuth } from "@/utils/axios";
 

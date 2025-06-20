@@ -29,9 +29,9 @@ import {
 } from "@/service/user/user.service";
 import { StaffTableHeader } from "@/constants/table/user";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
-import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
+import ChangePasswordModal from "@/components/dashboard/users/shared/change-password-modal";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import PaginationPage from "@/components/shared/pagination-page";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { addStudentService } from "@/service/user/student.service";
-import StudentForm from "@/components/dashboard/users/student/form/StudentForm";
+import StudentForm from "@/components/dashboard/users/student/form/student-form";
 import { cleanField } from "@/utils/map-helper/student";
 import { AddStudentFormData } from "@/model/user/student/student.schema";
 import { AddStudentModel } from "@/model/user/student/student.request.model";

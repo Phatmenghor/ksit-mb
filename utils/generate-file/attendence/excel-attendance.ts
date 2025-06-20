@@ -1,7 +1,7 @@
 import { DateTimeFormatter } from "@/utils/date/date-time-format";
 import { saveAs } from "file-saver";
 import ExcelJS from "exceljs";
-import { AttendanceModel } from "@/model/schedule/attendance/attendance-get";
+import { AttendanceModel } from "@/model/attendance/attendance-get";
 
 export const exportAttendanceToExcel = async (
   attendances: AttendanceModel[],

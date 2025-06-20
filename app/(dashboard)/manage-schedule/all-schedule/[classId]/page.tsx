@@ -32,7 +32,7 @@ import {
 import Loading from "@/components/shared/loading";
 import { toast } from "sonner";
 import { getAllScheduleService } from "@/service/schedule/schedule.service";
-import { AllScheduleModel } from "@/model/schedule/schedule/schedule-model";
+import { AllScheduleModel } from "@/model/attendance/schedule/schedule-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
 import PaginationPage from "@/components/shared/pagination-page";

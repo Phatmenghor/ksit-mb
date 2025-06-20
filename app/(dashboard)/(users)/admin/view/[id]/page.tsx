@@ -1,7 +1,7 @@
 "use client";
-import AdminPersonal from "@/components/dashboard/users/admin/AdminPersonal";
-import { UserProfileSection } from "@/components/dashboard/users/shared/UserProfile";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import AdminPersonal from "@/components/dashboard/users/admin/admin-personal-info";
+import { UserProfileSection } from "@/components/dashboard/users/shared/user-profile";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 import { getStaffByIdService } from "@/service/user/user.service";
@@ -9,7 +9,7 @@ import { useParams } from "next/navigation";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
 
-export default function AdminProfilePage() {
+export default function AdminDetailPage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [admin, setAdmin] = React.useState<StaffRespondModel | null>(null);
   const params = useParams();
@@ -45,7 +45,6 @@ export default function AdminProfilePage() {
 
   return (
     <div>
-      {/* Header with TabsList injected via prop */}
       <CardHeaderSection
         title="Admin View Details"
         back

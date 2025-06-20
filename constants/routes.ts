@@ -30,6 +30,7 @@ export const ROUTE = {
 
   USERS: {
     ADMIN: "/admin",
+    ADMIN_PROFILE: "/admin/profile",
     ADMIN_VIEW: (id: string) => `/admin/view/${id}`,
     EDIT_STAFF: (id: string) => `/staff-officer/edit/${id}`,
     VIEW_STAFF: (id: string) => `/staff-officer/view/${id}`,
@@ -38,6 +39,8 @@ export const ROUTE = {
     TEACHERS: "/teachers",
     ADD_TEACHER: "/teachers/add",
     EDIT_TEACHER: (id: string) => `/teachers/edit/${id}`,
+    EDIT_TEACHER_PROFILE: "/profile/teacher/edit",
+    EDIT_ADMIN_PROFILE: "/profile/admin/edit",
     VIEW_TEACHER: (id: string) => `/teachers/view/${id}`,
     SETTING_CHANGE_PASSWORD: "/change-password",
   },
@@ -46,6 +49,7 @@ export const ROUTE = {
     ADD_MULTIPLE: "/add-multiple",
     ADD_SINGLE: "/add-single",
     LIST: "/student-list",
+    EDIT_STUDENT_PROFILE: "/profile/student/edit",
     VIEW: (id: string) => `/view/${id}`,
     EDIT_STUDENT: (id: string) => `/edit/${id}`,
   },
@@ -87,9 +91,6 @@ export const ROUTE = {
   REQUESTS: "/requests",
   REQUEST_DETAIL: (id: string) => `/requests/${id}`,
   REQUEST_UPDATE: (id: string) => `/request/${id}`,
-
-  // REQUESTS_LIST: "/request-list",
-  // STUDENT_DETAIL: "/student-detail",
 
   SETTINGS: {
     THEME: "/settings/theme",

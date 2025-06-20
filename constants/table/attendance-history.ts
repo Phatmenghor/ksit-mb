@@ -9,3 +9,16 @@ export const AttendanceHistoryTableHeader = [
   { label: "Check-in Time", className: "w-[15%]" },
   { label: "Comment", className: "w-[20%]" },
 ];
+
+// Header excel
+export const AttendanceHistoryExcelTableHeader = [
+  "No.",
+  "Student Code",
+  "Student Name",
+  "Teacher Name",
+  "Course Name",
+  "Attendance",
+  "Type",
+  "Check-in Time",
+  "Comment",
+];

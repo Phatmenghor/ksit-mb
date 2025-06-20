@@ -18,7 +18,7 @@ import {
   exportAttendanceToExcel,
   exportAttendanceToExcelAdvanced,
 } from "@/utils/generate-file/attendence/excel-attendance";
-import { AllAttendanceModel } from "@/model/schedule/attendance/attendance-get";
+import { AllAttendanceModel } from "@/model/attendance/attendance-get";
 
 // Enhanced export handlers with improved functionality
 export const useExportAttendanceHandlers = (

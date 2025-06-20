@@ -1,7 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, Menu, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Bell,
+  Edit,
+  LogOut,
+  Menu,
+  Pencil,
+  Settings,
+  SettingsIcon,
+  User,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -16,37 +28,37 @@ import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRouter } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
-import { clearRoles, getRoles } from "@/utils/local-storage/user-info/roles";
-import { clearUserId, getUserId } from "@/utils/local-storage/user-info/userId";
+import {
+  clearRoles,
+  getRoleCheck,
+} from "@/utils/local-storage/user-info/roles";
+import { clearUserId } from "@/utils/local-storage/user-info/userId";
 import { clearUsername } from "@/utils/local-storage/user-info/username";
 import { logoutUser } from "@/utils/local-storage/user-info/token";
 import { ConfirmDialog } from "../shared/custom-confirm-dialog";
 import { MobileSidebar } from "./mobile-sidebar";
+import { RoleEnum } from "@/constants/constant";
 
 export function Header() {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false); // state to open/close confirm dialog
-  const roles = getRoles();
-  const role = roles[0] || "";
   const router = useRouter();
-  const userId = getUserId();
-  const primaryRole = roles[0] || "";
 
   const getProfileUrl = () => {
-    switch (primaryRole) {
-      case "ADMIN":
-        return ROUTE.USERS.ADMIN_VIEW(userId ?? "");
-      case "STAFF":
-        return ROUTE.USERS.EDIT_STAFF(userId ?? "");
-      case "TEACHER":
-        return ROUTE.USERS.VIEW_TEACHER(userId ?? "");
-      case "STUDENT":
-        return ROUTE.STUDENTS.VIEW(userId ?? "");
-      case "DEVELOPER":
-        return ROUTE.USERS.VIEW_TEACHER(userId ?? "");
+    const roleGroup = getRoleCheck();
+
+    switch (roleGroup) {
+      case RoleEnum.ADMIN:
+        return "/profile/admin";
+      case RoleEnum.DEVELOPER:
+      case RoleEnum.TEACHER:
+      case RoleEnum.STAFF:
+        return "/profile/teacher";
+      case RoleEnum.STUDENT:
+        return "/profile/student";
       default:
-        return "/";
+        return "/unauthorized";
     }
   };
 
@@ -125,25 +137,50 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuLabel>
-                <div className="flex flex-col">
-                  <span className="font-medium text-gray-900">Regadmin</span>
-                  <span className="text-xs text-gray-500">Super Admin</span>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push(profileUrl)}>
-                Profile
-              </DropdownMenuItem>
               <DropdownMenuItem
+                className="flex items-center justify-between"
+                onClick={() => router.push(profileUrl)}
+              >
+                <div className="flex items-center">
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                className="flex items-center justify-between"
+                onClick={() => router.push(profileUrl + "/edit")}
+              >
+                <div className="flex items-center">
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Profile
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                className="flex items-center justify-between"
                 onClick={() => router.push(ROUTE.USERS.SETTING_CHANGE_PASSWORD)}
               >
-                Settings
+                <div className="flex items-center">
+                  <SettingsIcon className="mr-2 h-4 w-4" />
+                  Settings
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
               </DropdownMenuItem>
+
               <DropdownMenuSeparator />
-              {/* Open confirm dialog on Logout click */}
-              <DropdownMenuItem onClick={() => setConfirmOpen(true)}>
-                Logout
+
+              <DropdownMenuItem
+                className="flex items-center justify-between"
+                onClick={() => setConfirmOpen(true)}
+              >
+                <div className="flex items-center text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </div>
+                <ArrowRight className="h-4 w-4 text-red-600" />
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

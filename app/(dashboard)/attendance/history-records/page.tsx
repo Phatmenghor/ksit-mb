@@ -3,7 +3,6 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
 import { YearSelector } from "@/components/shared/year-selector";
 import {
   Select,
@@ -25,12 +24,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AttendanceHistoryTableHeader } from "@/constants/table/attendance-history";
 import {
-  AllAttendanceHistoryModel,
+  AttendanceHistoryExcelTableHeader,
+  AttendanceHistoryTableHeader,
+} from "@/constants/table/attendance-history";
+import {
   AttendanceHistoryFilter,
-} from "@/model/schedule/attendance/attendance-history";
-import { getAllAttedanceHistoryService } from "@/service/schedule/attendance.service";
+  AttendanceHistoryModel,
+} from "@/model/attendance/attendance-history";
+import {
+  getAllAttedanceHistoryCountService,
+  getAllAttedanceHistoryExcelService,
+  getAllAttedanceHistoryService,
+} from "@/service/schedule/attendance.service";
 import { toast } from "sonner";
 import PaginationPage from "@/components/shared/pagination-page";
 import { Button } from "@/components/ui/button";
@@ -41,6 +47,10 @@ import Loading from "@/components/shared/loading";
 import { formatDate } from "@/utils/date/dd-mm-yyyy-format";
 import { Badge } from "@/components/ui/badge";
 import { DateRangePicker } from "@/components/shared/start-end-date";
+import { Constants } from "@/constants/text-string";
+import { formatType } from "@/constants/format-enum/formate-type-attendance";
+import { AllAttendanceHistoryModel } from "@/model/attendance/attendance-history";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 
 export default function HistoryRecordsPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -178,16 +188,7 @@ export default function HistoryRecordsPage() {
     setIsSubmitting(true);
 
     try {
-      // First, let's check if we have current data
-      if (
-        !attendanceHistoryData?.content ||
-        attendanceHistoryData.content.length === 0
-      ) {
-        toast.error("No data available to export!");
-        return;
-      }
-
-      // Fetch ALL data (Recommended)
+      setIsLoading(true);
       // Create a proper filter object for the API call
       const exportFilter: AttendanceHistoryFilter = {
         search: debouncedSearchQuery,
@@ -196,59 +197,40 @@ export default function HistoryRecordsPage() {
         classId: selectedClass?.id,
         startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
         endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined,
-        pageNo: 1,
-        pageSize: 1000,
       };
 
-      console.log("Export filter:", exportFilter);
+      // count data
+      const countFilter = await getAllAttedanceHistoryCountService(
+        exportFilter
+      );
+
+      if ((countFilter || 0) === 0) {
+        toast.warning("No data available to export.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // EXCEL_LIMIT : limit data to export
+      if (countFilter > Constants.EXCEL_LIMIT) {
+        toast.info(
+          `Only ${Constants.EXCEL_LIMIT} items were exported. Too many records. Please filter the data.`
+        );
+        setIsSubmitting(false);
+        return;
+      }
 
       // Fetch data for export
-      const allDataResponse: AllAttendanceHistoryModel | null =
-        await getAllAttedanceHistoryService(exportFilter);
+      const allDataResponse: AttendanceHistoryModel[] =
+        await getAllAttedanceHistoryExcelService(exportFilter);
 
       console.log("Export response:", allDataResponse);
 
-      // Check if we got valid data
-      if (
-        !allDataResponse ||
-        !allDataResponse.content ||
-        allDataResponse.content.length === 0
-      ) {
-        console.error("No data returned from API for export");
-
-        // Fallback: Use current page data if API call fails
-        if (
-          attendanceHistoryData?.content &&
-          attendanceHistoryData.content.length > 0
-        ) {
-          toast.warning(
-            "Using current page data for export as full data fetch failed"
-          );
-          // Continue with current data
-        } else {
-          toast.error("No data available to export!");
-          return;
-        }
-      }
-
       // Use API data if available, otherwise use current data
-      const finalDataToExport =
-        allDataResponse?.content || attendanceHistoryData.content;
-
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Attendance History Data");
 
-      const columns: string[] = [
-        "No.",
-        "Student Code",
-        "Student Name",
-        "Teacher Name",
-        "Course Name",
-        "Attendance",
-        "Type",
-        "Check-in Time",
-        "Comment",
-      ];
+      // Header table excel
+      const columns: string[] = AttendanceHistoryExcelTableHeader;
 
       // Add title row at Row 1
       worksheet.mergeCells(1, 1, 1, columns.length);
@@ -286,7 +268,7 @@ export default function HistoryRecordsPage() {
       });
 
       // Add data rows starting at row 4
-      finalDataToExport.forEach((item: any, i: number) => {
+      allDataResponse.forEach((item: any, i: number) => {
         const row = worksheet.addRow([
           i + 1,
           item.identifyNumber || "---",
@@ -351,13 +333,14 @@ export default function HistoryRecordsPage() {
       saveAs(blob, fileName);
 
       toast.success(
-        `Excel file exported successfully! Total records: ${finalDataToExport.length}`
+        `Excel file exported successfully! Total records: ${allDataResponse.length}`
       );
     } catch (error: unknown) {
       console.error("Error exporting to Excel:", error);
       toast.error("Error exporting to Excel. Please try again.");
     } finally {
       setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -435,15 +418,21 @@ export default function HistoryRecordsPage() {
                   <span className="text-sm mr-2">Export Data by Class</span>
                   <Button
                     onClick={exportToExcel}
-                    disabled={attendanceHistoryData?.content.length === 0}
                     variant="outline"
                     size="sm"
                     className="h-8 px-2 border-gray-200 py-5"
+                    disabled={isLoading}
                   >
-                    <FileSpreadsheet className="h-4 w-4 text-green-500" />
-                    <span className="ml-1 text-xs font-medium">Excel</span>
-                    <Tally1 className="-mr-[12px] text-gray-300" />
-                    <Download className="h-4 w-4" />
+                    {isLoading ? (
+                      <Loading />
+                    ) : (
+                      <>
+                        <FileSpreadsheet className="h-4 w-4 text-green-500" />
+                        <span className="ml-1 text-xs font-medium">Excel</span>
+                        <Tally1 className="-mr-[12px] text-gray-300" />
+                        <Download className="h-4 w-4" />
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -490,7 +479,9 @@ export default function HistoryRecordsPage() {
                       <TableCell>
                         {getStatusAttendance(history.status) || "---"}
                       </TableCell>
-                      <TableCell>{history.attendanceType || "---"}</TableCell>
+                      <TableCell>
+                        {formatType(history.attendanceType) || "---"}
+                      </TableCell>
                       <TableCell>
                         {formatDate(history.createdAt) || "---"}
                       </TableCell>

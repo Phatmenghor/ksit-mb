@@ -19,7 +19,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-import { CardHeaderSection } from "@/components/shared/layout/CardHeaderSection";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import {
   deletedStaffService,
@@ -27,7 +27,7 @@ import {
 } from "@/service/user/user.service";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
 import PaginationPage from "@/components/shared/pagination-page";
-import ChangePasswordModal from "@/components/dashboard/users/shared/ChangePasswordModal";
+import ChangePasswordModal from "@/components/dashboard/users/shared/change-password-modal";
 import { StaffTableHeader, TeacherTableHeader } from "@/constants/table/user";
 import {
   AllStaffModel,
@@ -40,7 +40,7 @@ import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmatio
 export default function TeachersListPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [allTeachersData, setallTeachersData] = useState<AllStaffModel | null>(
+  const [allTeachersData, setAllTeachersData] = useState<AllStaffModel | null>(
     null
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,7 +70,7 @@ export default function TeachersListPage() {
         });
 
         if (response) {
-          setallTeachersData(response);
+          setAllTeachersData(response);
         } else {
           console.error("Failed to fetch teachers:");
         }
@@ -93,7 +93,7 @@ export default function TeachersListPage() {
     setIsSubmitting(true);
     try {
       const originalData = allTeachersData;
-      setallTeachersData((prevData) => {
+      setAllTeachersData((prevData) => {
         if (!prevData) return null;
         const updatedContent = prevData.content.filter(
           (item) => item.id !== selectedTeacher.id
@@ -112,7 +112,7 @@ export default function TeachersListPage() {
           `Teacher ${selectedTeacher.username ?? ""} deleted successfully`
         );
       } else {
-        setallTeachersData(originalData);
+        setAllTeachersData(originalData);
         toast.error("Failed to delete teacher");
       }
     } catch (error) {

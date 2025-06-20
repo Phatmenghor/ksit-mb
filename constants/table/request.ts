@@ -17,3 +17,11 @@ export const RequestHistoryTableHeader = [
   { label: "Status", className: "w-[10%]" },
   { label: "Staff Comment", className: "w-[20%]" },
 ];
+
+
+export const RequestTranscriptTableHeader = [
+  { label: "Subject Code", className: "w-[10%]" },
+  { label: "Subject Name", className: "w-[20%]" },
+  { label: "Credit", className: "w-[15%]" },
+  { label: "Grade", className: "w-[15%]" },
+];

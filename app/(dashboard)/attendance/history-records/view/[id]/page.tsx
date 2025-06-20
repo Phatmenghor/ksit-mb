@@ -27,7 +27,7 @@ import {
 import {
   AllAttendanceModel,
   AttendanceModel,
-} from "@/model/schedule/attendance/attendance-get";
+} from "@/model/attendance/attendance-get";
 import { useExportAttendanceHandlers } from "@/components/shared/export/attendance-export-handler";
 
 export default function HistoryRecordDetailPage() {

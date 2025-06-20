@@ -2,27 +2,8 @@
 
 import StudentScoreHeader from "@/components/dashboard/student-scores/layout/header-section";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  AlertCircle,
-  CheckCircle,
-  Download,
-  Edit,
-  Eye,
-  Loader2,
-  Save,
-  Upload,
-  X,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useParams, useRouter } from "next/navigation";
@@ -37,13 +18,6 @@ import {
   updateStudentsScoreService,
 } from "@/service/score/score.service";
 import { toast } from "sonner";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { ROUTE } from "@/constants/routes";
 import { Badge } from "@/components/ui/badge";
 import { getDetailScheduleService } from "@/service/schedule/schedule.service";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
@@ -52,8 +26,11 @@ import { SubmissionEnum } from "@/constants/constant";
 import { formatDate } from "date-fns";
 import Loading from "@/app/(dashboard)/settings/theme/loading";
 import _ from "lodash";
-import { useExportScoreHandlers } from "@/components/shared/export/score-export-handler";
 import { ScoreConfigurationModel } from "@/model/score/submitted-score/submitted-score.response.model";
+import StudentScoresTable from "@/components/dashboard/student-scores/student-scores-table";
+import StudentScoresQuickAction from "@/components/dashboard/student-scores/student-scores-quick-action";
+import StudentScoreAlert from "@/components/dashboard/student-scores/student-scores-alert";
+import RenderModeBasedContent from "@/components/dashboard/student-scores/student-scores-mode-based-content";
 
 export default function StudentScoreDetailsPage() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -77,11 +54,6 @@ export default function StudentScoreDetailsPage() {
   const [mode, setMode] = useState<"view" | "edit-score">("view");
   const [originalData, setOriginalData] = useState<Map<number, any>>(new Map());
   const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const { handleExportToExcel, handleExportToPDF } = useExportScoreHandlers(
-    score,
-    scheduleDetail
-  );
 
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -125,10 +97,6 @@ export default function StudentScoreDetailsPage() {
     }
   }, [id]);
 
-  useEffect(() => {
-    loadScoreConfigureData();
-  }, []);
-
   // Helper function to determine if editing is allowed
   const isEditingAllowed = (status: string) => {
     return status === SubmissionEnum.DRAFT;
@@ -139,7 +107,7 @@ export default function StudentScoreDetailsPage() {
     return isEditingAllowed(status) ? "edit-score" : "view";
   };
 
-  const loadStudentScore = useCallback(
+  const HandleInitStudentScore = useCallback(
     async (forceRefresh = false, showLoader = true) => {
       if (!scheduleDetail?.id) return;
 
@@ -161,6 +129,7 @@ export default function StudentScoreDetailsPage() {
         });
 
         setScore(response);
+
         setIsInitialized(true);
 
         // Set mode based on status
@@ -168,7 +137,9 @@ export default function StudentScoreDetailsPage() {
         setMode(newMode);
 
         // Set isSubmitted based on whether editing is allowed
-        setIsSubmitted(!isEditingAllowed(response.status));
+        const notEditable = !isEditingAllowed(response.status);
+        setIsSubmitted(notEditable);
+        setIsSubmittingToStaff(notEditable);
 
         // Update original data
         const originalMap = new Map();
@@ -183,7 +154,8 @@ export default function StudentScoreDetailsPage() {
         setOriginalData(originalMap);
         setUnsavedChanges(new Set());
       } catch (error: any) {
-        // Error handling...
+        toast.error("Failed to initialize student");
+        console.log("Error initialize student", error);
       } finally {
         if (showLoader) {
           setTimeout(() => {
@@ -200,7 +172,10 @@ export default function StudentScoreDetailsPage() {
     if (score?.status) {
       const newMode = getModeFromStatus(score.status);
       setMode(newMode);
-      setIsSubmitted(!isEditingAllowed(score.status));
+
+      const notEditable = !isEditingAllowed(score.status);
+      setIsSubmitted(notEditable);
+      setIsSubmittingToStaff(notEditable);
     }
   }, [score?.status]);
 
@@ -338,7 +313,8 @@ export default function StudentScoreDetailsPage() {
   // Initial load
   useEffect(() => {
     loadScheduleData();
-  }, [loadScheduleData]);
+    loadScoreConfigureData();
+  }, [loadScheduleData, id]);
 
   // Smart auto-refresh with smooth progress animation
   useEffect(() => {
@@ -347,7 +323,7 @@ export default function StudentScoreDetailsPage() {
 
       refreshIntervalRef.current = setInterval(() => {
         if (unsavedChanges.size === 0) {
-          loadStudentScore(false, false); // Silent refresh
+          HandleInitStudentScore(false, false); // Silent refresh
           startRefreshProgress(); // Restart progress
         }
       }, REFRESH_INTERVAL);
@@ -375,7 +351,7 @@ export default function StudentScoreDetailsPage() {
     isInitialized,
     unsavedChanges.size,
     isSubmitted,
-    loadStudentScore,
+    HandleInitStudentScore,
     startRefreshProgress,
   ]);
 
@@ -420,7 +396,7 @@ export default function StudentScoreDetailsPage() {
 
       // Clear unsaved changes - create new empty Set
       setUnsavedChanges(new Set());
-
+      setMode("view");
       toast.success(
         `Successfully updated ${changedStudentScore?.length} student scores`,
         { duration: 2000 }
@@ -447,10 +423,6 @@ export default function StudentScoreDetailsPage() {
     });
   }, []);
 
-  useEffect(() => {
-    loadStudentScore(false, false);
-  }, []);
-
   const handleResetChanges = useCallback(() => {
     if (isSubmitted) {
       toast.error("Cannot reset student score after submission");
@@ -459,14 +431,8 @@ export default function StudentScoreDetailsPage() {
     // Clear unsaved changes
     setUnsavedChanges(new Set());
     // Reload original data
-    loadStudentScore(true);
-  }, [loadStudentScore, isSubmitted]);
-
-  useEffect(() => {
-    if (scheduleDetail?.id) {
-      loadStudentScore();
-    }
-  }, [scheduleDetail?.id, loadStudentScore]);
+    HandleInitStudentScore(true);
+  }, [HandleInitStudentScore, isSubmitted]);
 
   const handleSaveScores = async () => {
     setIsSubmitting(true);
@@ -492,7 +458,6 @@ export default function StudentScoreDetailsPage() {
       } else {
         toast.success("All scores updated successfully!");
       }
-      setMode("view");
     } catch (err: any) {
       console.error("Failed to update scores:");
       toast.error(err.message || "Failed to update scores.");
@@ -501,457 +466,143 @@ export default function StudentScoreDetailsPage() {
     }
   };
 
-  const renderModeBasedContent = () => {
-    if (mode === "edit-score") {
-      return (
-        <div className="flex flex-row gap-2">
-          <Button
-            className=" bg-orange-400 hover:bg-orange-500"
-            onClick={() => setMode("edit-score")}
-          >
-            <Edit className="w-4 h-4" />
-            Edit score
-          </Button>
-          {!isSubmittingToStaff && (
-            <Button onClick={() => setIsSubmittedDialogOpen(true)}>
-              <Save className="w-4 h-4" />
-              Submit score
-            </Button>
-          )}
-        </div>
-      );
-    } else {
-      return (
-        <div className="flex items-center gap-4">
-          {/* Label */}
-          <span className="text-muted-foreground font-medium">
-            Export Data By Class:
-          </span>
-
-          {/* Excel Export Button */}
-          <Button
-            onClick={() =>
-              handleExportToExcel({
-                includeComments: false,
-                customFileName: "Student Score",
-              })
-            }
-            variant="outline"
-            className="gap-2"
-          >
-            <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
-              <span className="text-white text-xs font-bold">X</span>
-            </div>
-            <span>Excel</span>
-            <Download className="w-4 h-4" />
-          </Button>
-
-          {/* PDF Export Button */}
-          <Button
-            onClick={() =>
-              handleExportToPDF({
-                customFileName: "Student Score",
-                includeComments: false,
-              })
-            }
-            variant="outline"
-            className="gap-2"
-          >
-            <div className="w-5 h-5 border-2 border-red-500 rounded flex items-center justify-center">
-              <span className="text-red-500 text-[10px] font-bold">PDF</span>
-            </div>
-            <span>PDF</span>
-            <Download className="w-4 h-4" />
-          </Button>
-        </div>
-      );
-    }
-  };
-
   return (
     <div className="space-y-4">
       <StudentScoreHeader schedule={scheduleDetail} title="View Class Detail" />
-      <div>
-        <Card className="shadow-md">
-          <CardHeader className="flex flex-row justify-between w-full">
-            <div>
-              <CardTitle className="font-bold text-xl">Student List</CardTitle>
-            </div>
-            <div>{renderModeBasedContent()}</div>
-          </CardHeader>
-
-          {/* Initialize Session Button */}
-          {!isInitialized && <Loading />}
-
-          <div className="w-full px-4">
-            <Separator className="bg-gray-300" />
-          </div>
-          <CardContent className="p-4">
-            <div className="flex flex-row gap-2">
-              <p className="mb-4">
-                <span className="text-gray-500">Total Students: </span>
-                <span className="font-semibold">
-                  {score?.studentScores.length || 0}
-                </span>
-              </p>
-              {isSubmittingToStaff && (
+      {!isInitialized ? (
+        <div className="flex justify-end">
+          <Button
+            onClick={() => HandleInitStudentScore()}
+            className="bg-green-600 hover:bg-green-700 text-white"
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? "Initializing..." : "Initialize Score"}
+          </Button>
+        </div>
+      ) : (
+        <div>
+          <div>
+            <Card className="shadow-md">
+              <CardHeader className="flex flex-row justify-between w-full">
                 <div>
-                  <span className="text-gray-500">|</span>
-                  <p className="mb-4">
-                    <span className="text-gray-500">Submitted Date:</span>{" "}
+                  <CardTitle className="font-bold text-xl">
+                    Student List
+                  </CardTitle>
+                </div>
+                <div>
+                  <RenderModeBasedContent
+                    isSubmittingToStaff={isSubmittingToStaff}
+                    mode={mode}
+                    scheduleDetail={scheduleDetail}
+                    score={score}
+                    setIsSubmittedDialogOpen={setIsSubmittedDialogOpen}
+                    setMode={setMode}
+                  />
+                </div>
+              </CardHeader>
+
+              {/* Initialize Session Button */}
+              {isRefreshing && (
+                <div className="flex justify-center py-4">
+                  <Loading />
+                </div>
+              )}
+
+              <div className="w-full px-4">
+                <Separator className="bg-gray-300" />
+              </div>
+              <CardContent className="p-4">
+                <div className="flex flex-wrap items-center gap-6 mb-2">
+                  <p className="mb-0">
+                    <span className="text-gray-500">Total Students: </span>
                     <span className="font-semibold">
-                      {score?.submissionDate
-                        ? formatDate(new Date(score.submissionDate), "PP")
-                        : "---"}
+                      {score?.studentScores.length || 0}
                     </span>
                   </p>
-                </div>
-              )}
-            </div>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-black hover:bg-black">
-                    <TableHead className="text-white w-12">#</TableHead>
-                    <TableHead className="text-white">Student ID</TableHead>
-                    <TableHead className="text-white">Fullname (KH)</TableHead>
-                    <TableHead className="text-white">Fullname (EN)</TableHead>
-                    <TableHead className="text-white">Gender</TableHead>
-                    <TableHead className="text-white">Birth Date</TableHead>
-                    <TableHead className="text-white text-center">
-                      Att. (10%)
-                    </TableHead>
-                    <TableHead className="text-white text-center">
-                      Ass. (30%)
-                    </TableHead>
 
-                    <TableHead className="text-white text-center">
-                      Mid. (30%)
-                    </TableHead>
-                    <TableHead className="text-white text-center">
-                      Final (30%)
-                    </TableHead>
-
-                    {mode === "view" && (
-                      <TableHead className="text-white text-center">
-                        Total
-                      </TableHead>
-                    )}
-                    {mode !== "edit-score" && (
-                      <TableHead className="text-white text-center">
-                        Grade
-                      </TableHead>
-                    )}
-                    <TableHead className="text-white text-center">
-                      Action
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {score?.studentScores.length === 0 || score === null ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={15}
-                        className="text-center italic text-gray-500"
-                      >
-                        No students found in this class.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    score?.studentScores?.map((student, index) => {
-                      const indexDisplay = index + 1;
-                      return (
-                        <TableRow key={student.id} className="hover:bg-gray-50">
-                          <TableCell className="font-medium">
-                            {indexDisplay}
-                          </TableCell>
-                          <TableCell>{student?.studentId}</TableCell>
-                          <TableCell className="font-medium">
-                            {student?.studentNameKhmer?.trim() ?? "---"}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {student?.studentNameEnglish?.trim() ?? "---"}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {student?.gender ?? "---"}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {student?.dateOfBirth ?? "---"}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {student?.attendanceScore ?? 0}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {mode === "edit-score" ? (
-                              <Input
-                                type="number"
-                                value={student.assignmentScore}
-                                disabled={isSubmitting}
-                                className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
-                                  unsavedChanges.has(student.id)
-                                    ? "border-yellow-300 ring-1 ring-yellow-200"
-                                    : ""
-                                } ${isSubmitted ? "cursor-not-allowed" : ""}`}
-                                onChange={(e) =>
-                                  handleFieldChange(
-                                    student.id,
-                                    "assignmentScore",
-                                    e.target.value
-                                  )
-                                }
-                                min="0"
-                                max={configureScore?.assignmentPercentage}
-                              />
-                            ) : (
-                              <span>{student?.assignmentScore ?? 0}</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {mode === "edit-score" ? (
-                              <Input
-                                type="number"
-                                disabled={isSubmitting}
-                                value={student.midtermScore}
-                                className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
-                                  unsavedChanges.has(student.id)
-                                    ? "border-yellow-300 ring-1 ring-yellow-200"
-                                    : ""
-                                } ${isSubmitted ? "cursor-not-allowed" : ""}`}
-                                onChange={(e) =>
-                                  handleFieldChange(
-                                    student.id,
-                                    "midtermScore",
-                                    e.target.value
-                                  )
-                                }
-                                min="0"
-                                max={configureScore?.midtermPercentage}
-                              />
-                            ) : (
-                              <span>{student?.midtermScore ?? 0}</span>
-                            )}
-                          </TableCell>
-
-                          <TableCell className="text-center">
-                            {mode === "edit-score" ? (
-                              <Input
-                                type="number"
-                                value={student.finalScore}
-                                disabled={isSubmitting}
-                                className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
-                                  unsavedChanges.has(student.id)
-                                    ? "border-yellow-300 ring-1 ring-yellow-200"
-                                    : ""
-                                } ${isSubmitted ? "cursor-not-allowed" : ""}`}
-                                onChange={(e) =>
-                                  handleFieldChange(
-                                    student.id,
-                                    "finalScore",
-                                    e.target.value
-                                  )
-                                }
-                                min="0"
-                                max={configureScore?.finalPercentage}
-                              />
-                            ) : (
-                              <span>{student?.finalScore ?? 0}</span>
-                            )}
-                          </TableCell>
-
-                          {mode === "view" && (
-                            <TableCell className="text-center font-bold">
-                              <span>{student?.totalScore ?? 0}</span>
-                            </TableCell>
-                          )}
-
-                          {mode === "view" && (
-                            <TableCell className="text-center">
-                              <span
-                                className={`font-bold px-2 py-1 rounded text-sm ${
-                                  student.grade === "A"
-                                    ? "bg-green-100 text-green-800"
-                                    : student.grade === "B"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : student.grade === "C"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : student.grade === "D"
-                                    ? "bg-orange-100 text-orange-800"
-                                    : "bg-red-100 text-red-800"
-                                }`}
-                              >
-                                {student?.grade ?? "---"}
-                              </span>
-                            </TableCell>
-                          )}
-
-                          {mode === "view" ? (
-                            <TableCell>
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      onClick={() => {
-                                        router.push(
-                                          `${ROUTE.USERS.VIEW_TEACHER(
-                                            String(student.id)
-                                          )}`
-                                        );
-                                      }}
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
-                                      disabled={isSubmitting}
-                                    >
-                                      <Eye className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>Detail</TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </TableCell>
-                          ) : mode === "edit-score" ? (
-                            <TableCell>
-                              {isSubmitted ? (
-                                <Badge variant="secondary" className="text-xs">
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  Submitted
-                                </Badge>
-                              ) : unsavedChanges.has(student.id) ? (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() =>
-                                    handleRemoveFromUnsaved(student.id)
-                                  }
-                                  className="text-red-500 hover:text-red-700"
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              ) : (
-                                <Badge variant="secondary" className="text-xs">
-                                  Saved
-                                </Badge>
-                              )}
-                            </TableCell>
-                          ) : (
-                            <></>
-                          )}
-                        </TableRow>
-                      );
-                    })
+                  {isSubmittingToStaff && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-400">|</span>
+                      <p className="mb-0">
+                        <span className="text-gray-500">Submitted Date: </span>
+                        <span className="font-semibold">
+                          {score?.submissionDate
+                            ? formatDate(new Date(score.submissionDate), "PP")
+                            : "---"}
+                        </span>
+                      </p>
+                    </div>
                   )}
-                </TableBody>
-              </Table>
-            </div>
-            {(!score?.studentScores || score?.studentScores.length === 0) &&
-              isInitialized && (
-                <div className="text-center py-12 text-muted-foreground">
-                  <p className="text-sm mt-1">No Record</p>
                 </div>
-              )}
-          </CardContent>
-        </Card>
-      </div>
+                <StudentScoresTable
+                  configureScore={configureScore}
+                  handleFieldChange={handleFieldChange}
+                  handleRemoveFromUnsaved={handleRemoveFromUnsaved}
+                  isSubmitted={isSubmitted}
+                  isSubmitting={isSubmitting}
+                  mode={mode}
+                  score={score}
+                  unsavedChanges={unsavedChanges}
+                />
+                {(!score?.studentScores || score?.studentScores.length === 0) &&
+                  isInitialized && (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <p className="text-sm mt-1">No Record</p>
+                    </div>
+                  )}
+              </CardContent>
+            </Card>
+          </div>
 
-      {mode === "edit-score" && score !== null && (
-        <Card className="w-full">
-          <CardContent className="flex justify-end gap-3 p-4">
-            <Button
-              disabled={isSubmitting}
-              variant="outline"
-              onClick={() => setMode("view")}
-            >
-              Discard
-            </Button>
-            <Button
-              variant="default"
-              className="bg-orange-500 hover:bg-orange-600 text-white"
-              onClick={handleSaveScores}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Saving..." : "Save"}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+          {mode === "edit-score" && score !== null && (
+            <Card className="w-full">
+              <CardContent className="flex justify-end gap-3 p-4">
+                <Button
+                  disabled={isSubmitting}
+                  variant="outline"
+                  onClick={() => setMode("view")}
+                >
+                  Discard
+                </Button>
+                <Button
+                  variant="default"
+                  className="bg-orange-500 hover:bg-orange-600 text-white"
+                  onClick={handleSaveAllChanges}
+                  disabled={isSavingAll}
+                >
+                  {isSavingAll ? "Saving..." : "Save"}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
-      {/* Quick Actions Panel - Only show when not submitted */}
-      {score && unsavedChanges.size > 0 && !isSubmitted && (
-        <Card className="fixed bottom-4 right-4 w-80 shadow-lg border-yellow-300 bg-yellow-50 z-50 animate-in slide-in-from-bottom-4 duration-300">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Badge variant="destructive" className="animate-pulse">
-                  {unsavedChanges.size}
-                </Badge>
-                <span className="text-sm font-medium">Pending Changes</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setUnsavedChanges(new Set())}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleResetChanges}
-                className="flex-1 hover:bg-red-100 text-red-600"
-              >
-                <X className="h-4 w-4 mr-1" />
-                Reset
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSaveAllChanges}
-                disabled={isSavingAll}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {isSavingAll ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                ) : (
-                  <Upload className="h-4 w-4 mr-1" />
-                )}
-                Save All
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+          {/* Quick Actions Panel - Only show when not submitted */}
+          {score && unsavedChanges.size > 0 && !isSubmitted && (
+            <StudentScoresQuickAction
+              handleResetChanges={handleResetChanges}
+              handleSaveScores={handleSaveScores}
+              isSavingAll={isSavingAll}
+              setUnsavedChanges={setUnsavedChanges}
+              unsavedChanges={unsavedChanges}
+            />
+          )}
 
-      <ScoreSubmitConfirmDialog
-        open={isSubmittedDialogOpen}
-        title="Confirm Submit!"
-        description="Are u sure u want to submit student score?"
-        onConfirm={handleSubmit}
-        cancelText="Discard"
-        subDescription="Student score will submit to staff officer."
-        onOpenChange={() => {
-          setIsSubmittedDialogOpen(false);
-        }}
-      />
+          <ScoreSubmitConfirmDialog
+            open={isSubmittedDialogOpen}
+            title="Confirm Submit!"
+            description="Are u sure u want to submit student score?"
+            onConfirm={handleSubmit}
+            cancelText="Discard"
+            subDescription="Student score will submit to staff officer."
+            onOpenChange={() => {
+              setIsSubmittedDialogOpen(false);
+            }}
+          />
 
-      {score && unsavedChanges.size > 0 && (
-        <Card className="border-orange-200 bg-orange-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-orange-600" />
-              <div className="flex-1">
-                <div className="text-sm font-medium text-orange-800">
-                  Save changes before submitting
-                </div>
-                <div className="text-xs text-orange-700">
-                  You have {unsavedChanges.size} unsaved changes. Please save
-                  all changes before submitting student score.
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          {score && unsavedChanges.size > 0 && (
+            <StudentScoreAlert unsavedChanges={unsavedChanges} />
+          )}
+        </div>
       )}
     </div>
   );

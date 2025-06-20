@@ -3,40 +3,29 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
-
 import {
   getStaffByIdService,
   updateStaffService,
 } from "@/service/user/user.service";
-import TeacherForm from "@/components/dashboard/users/teachers/form/TeacherForm";
+import TeacherForm from "@/components/dashboard/users/teachers/form/teacher-form";
 import { ROUTE } from "@/constants/routes";
 import { EditStaffFormData } from "@/model/user/staff/staff.schema";
 import { EditStaffModel } from "@/model/user/staff/staff.request.model";
 import { cleanField } from "@/utils/map-helper/student";
 
 export default function EditTeacherPage() {
-  // Loading state to show spinner or disable UI while fetching or submitting
   const [loading, setLoading] = useState(false);
-
-  // Stores the initial form values fetched from API for editing
   const [initialValues, setInitialValues] = useState<EditStaffFormData>();
 
-  const router = useRouter(); // Next.js router instance for navigation
-  const params = useParams(); // Retrieves dynamic route params (e.g. teacher ID)
-  const teacherId = params?.id as string; // Extract teacher ID from URL params
+  const router = useRouter();
+  const params = useParams();
+  const teacherId = params?.id as string;
 
-  /**
-   * Fetch teacher data when component mounts or teacherId changes
-   * This populates the form with existing teacher details
-   */
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Call API to get teacher details by ID
         const response = await getStaffByIdService(teacherId);
 
-        // Map API response fields to form data structure,
-        // providing default empty values if any field is missing
         const payload: EditStaffFormData = {
           email: response?.email ?? "",
           roles: response?.roles ?? [],
@@ -105,26 +94,20 @@ export default function EditTeacherPage() {
           teacherFamilies: response?.teacherFamily ?? [],
         };
 
-        // Set fetched data as initial form values
         setInitialValues(payload);
       } catch (error) {
         console.error("Failed to fetch teacher:", error);
-        toast.error("Failed to load teacher data"); // Show user-friendly error
+        toast.error("Failed to load teacher data");
       }
     };
 
     fetchData();
   }, [teacherId]);
 
-  /**
-   * Handle form submission for updating teacher data
-   * Cleans all fields and prepares the payload before sending to API
-   */
   const onSubmit = async (data: EditStaffFormData) => {
     setLoading(true);
 
     try {
-      // Prepare payload with cleaned data for optional string fields
       const payload: EditStaffModel = {
         email: cleanField(data.email),
         khmerFirstName: cleanField(data.khmerFirstName),
@@ -141,7 +124,6 @@ export default function EditTeacherPage() {
         placeOfBirth: cleanField(data.placeOfBirth),
         status: cleanField(data.status),
 
-        // Clean and map nested array fields before sending
         teachersProfessionalRanks: (data.teachersProfessionalRanks ?? []).map(
           (rank) => ({
             typeOfProfessionalRank: cleanField(rank.typeOfProfessionalRank),
@@ -206,28 +188,26 @@ export default function EditTeacherPage() {
         })),
       };
 
-      // Call API to update teacher data by ID
       await updateStaffService(Number(teacherId), payload);
 
-      toast.success("Teacher updated successfully"); // Notify success
+      toast.success("Teacher updated successfully");
     } catch (error) {
       console.error("Failed to update teacher:", error);
-      toast.error("Failed to update teacher"); // Notify failure
-    } finally {
-      setLoading(false); // Reset loading state
+      toast.error("Failed to update teacher");
+      setLoading(false);
     }
   };
 
   return (
     <TeacherForm
-      mode="Edit" // Indicates form mode for UI
+      mode="Edit"
       title="Edit Teacher"
-      onSubmit={onSubmit} // Submission handler
-      initialValues={initialValues} // Prefilled form data
-      loading={loading} // Loading indicator to disable UI if needed
-      back={ROUTE.DASHBOARD} // Route to navigate back
+      onSubmit={onSubmit}
+      initialValues={initialValues}
+      loading={loading}
+      back={ROUTE.DASHBOARD}
       onDiscard={() => {
-        router.back(); // Go back to previous page on discard
+        router.back();
       }}
     />
   );

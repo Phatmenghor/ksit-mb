@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { addStaffService } from "@/service/user/user.service";
 import { RoleEnum, StatusEnum } from "@/constants/constant";
-import TeacherForm from "@/components/dashboard/users/teachers/form/TeacherForm";
+import TeacherForm from "@/components/dashboard/users/teachers/form/teacher-form";
 import { useRouter } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
 import { AddStaffFormData } from "@/model/user/staff/staff.schema";
@@ -16,20 +16,16 @@ export default function AddTeacherPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Handle form submission for adding a new staff (teacher)
   const onSubmit = async (data: AddStaffFormData) => {
-    setLoading(true); // Set loading state to disable UI interactions
+    setLoading(true);
 
     try {
-      // Construct the payload to match AddStaffModel
       const payload: AddStaffModel = {
-        // Required fields (validated upfront)
         username: cleanRequiredField(data.username),
         password: cleanRequiredField(data.password),
         departmentId: data.departmentId ?? undefined,
         identifyNumber: cleanRequiredField(data.identifyNumber),
 
-        // Optional string fields (cleaned if provided)
         email: cleanField(data.email),
         khmerFirstName: cleanField(data.khmerFirstName),
         khmerLastName: cleanField(data.khmerLastName),
@@ -85,7 +81,6 @@ export default function AddTeacherPage() {
         ),
         wivesSalary: cleanField(data.wivesSalary),
 
-        // Nested arrays — map and clean each item
         teachersProfessionalRanks: (data.teachersProfessionalRanks ?? []).map(
           (rank) => ({
             typeOfProfessionalRank: cleanField(rank.typeOfProfessionalRank),
@@ -149,24 +144,18 @@ export default function AddTeacherPage() {
           working: cleanField(fam.working),
         })),
 
-        // Set default roles and status for newly added teachers
         roles: [RoleEnum.TEACHER],
         status: StatusEnum.ACTIVE,
       };
 
-      // Call API service to create the new staff member
       await addStaffService(payload);
-
-      // Notify success to the user
       toast.success("Teacher created successfully");
-    } catch (error) {
-      // Log the error for debugging purposes
+      router.back();
+    } catch (error: any) {
       console.error("Failed to create teacher:", error);
 
-      // Notify failure to the user
-      toast.error("Failed to create teacher");
+      toast.error(error.message || "Unknown error");
     } finally {
-      // Always reset loading state after the operation
       setLoading(false);
     }
   };

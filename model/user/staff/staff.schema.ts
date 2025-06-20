@@ -164,10 +164,7 @@ export const AddStaffSchema = BaseStaffSchema.extend({
       "Password must include letters, numbers, and special characters"
     ),
 
-  username: z
-    .string()
-    .min(3, "Username must be at least 3 characters")
-    .max(20, "Username must be at most 20 characters"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
   departmentId: z
     .number()
     .int("Department ID must be an integer")
@@ -188,6 +185,7 @@ const BaseAdminSchema = BaseStaffSchema.pick({
   email: true,
   status: true,
   roles: true,
+  profileUrl: true,
 }).extend({
   username: z.string(),
   first_name: z.string().optional(),

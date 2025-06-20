@@ -26,7 +26,7 @@ import {
 import { Upload, X } from "lucide-react";
 import { Constants } from "@/constants/text-string";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
-import { uploadImageService } from "@/service/setting/image.serice";
+import { uploadImageService } from "@/service/setting/image.service";
 import {
   convertFileToBase64,
   getFileExtension,
