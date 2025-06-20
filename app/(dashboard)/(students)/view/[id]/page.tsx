@@ -13,8 +13,9 @@ import { getStudentByIdService } from "@/service/user/student.service";
 import StudentDetails from "@/components/dashboard/users/student/view/tab/student-detail-tab";
 import StudentDetailsTabs from "@/components/dashboard/users/student/view/tab/student-detail-tab";
 import PaymentTabs from "@/components/dashboard/users/student/view/tab/student-payment-tab";
-import TranscriptTabs from "@/components/dashboard/users/student/view/tab/student-transcript-tab";
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
+import { Card } from "@/components/ui/card";
+import { TranscriptTabs } from "@/components/dashboard/users/student/view/tab/student-transcript-tab";
 
 const tabs = [
   {
@@ -132,7 +133,9 @@ export default function StudentViewPage() {
       </TabsContent>
 
       <TabsContent value="transcript" className="space-y-4 w-full">
-        <TranscriptTabs />
+        <Card>
+          <TranscriptTabs studentId={studentDetail?.id} />
+        </Card>
       </TabsContent>
     </Tabs>
   );

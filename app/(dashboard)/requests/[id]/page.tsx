@@ -6,11 +6,14 @@ import { ConfirmReturnModal } from "@/components/dashboard/requests/confirm-retu
 import { RequestCompletedModal } from "@/components/dashboard/requests/request-completed-modal";
 import { RequestHistory } from "@/components/dashboard/requests/request-history";
 import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
+import { RequestTranscript } from "@/components/dashboard/requests/request-transcript";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 import { REQUEST_DETAIL, RequestEnum, RequestType } from "@/constants/constant";
+import { formatDegree } from "@/constants/format-enum/format-degree";
+import { formatGender } from "@/constants/format-enum/formate-gender";
 import { ROUTE } from "@/constants/routes";
 import { RequestModel } from "@/model/request/request-model";
 import {
@@ -80,14 +83,17 @@ export default function StudentDetail() {
   // label and value in request detail
   const leftColumnData = [
     { label: "Student ID", value: requestData?.user?.identifyNumber || "---" },
-    { label: "Gender", value: requestData?.user?.gender || "---" },
+    {
+      label: "Gender",
+      value: formatGender(requestData?.user?.gender) || "---",
+    },
     {
       label: "Department",
       value: requestData?.user?.departmentName || "---",
     },
     {
       label: "Degree",
-      value: requestData?.user?.degree || "---",
+      value: formatDegree(requestData?.user?.degree) || "---",
     },
     { label: "Phone", value: requestData?.user?.phoneNumber || "---" },
   ];
@@ -102,19 +108,28 @@ export default function StudentDetail() {
     },
     {
       label: "Date of Birth",
-      value: requestData?.user?.dateOfBirth ?? "---",
+      value: requestData?.user.dateOfBirth
+        ? formatDate(requestData.user.dateOfBirth)
+        : "---",
     },
     {
       label: "Major",
-      value: requestData?.user?.majorName ?? "---",
+      value: requestData?.user?.majorName || "---",
     },
     {
       label: "Current Address",
-      value: requestData?.user?.currentAddress ?? "---",
+      value: requestData?.user?.currentAddress || "---",
     },
   ];
 
-  // button or tabs
+  // button or tabs - Filter REQUEST_DETAIL based on isStudent
+  const availableRequestTypes = React.useMemo(() => {
+    if (requestData?.user?.isStudent === false) {
+      return REQUEST_DETAIL.filter((type) => type.label !== "Transcript");
+    }
+    return REQUEST_DETAIL;
+  }, [requestData?.user?.isStudent]);
+
   const [selectedType, setSelectedType] = useState<RequestType>({
     label: "Information",
     value: "INFORMATION",
@@ -324,26 +339,32 @@ export default function StudentDetail() {
     // check if Transcript
     else if (selectedType.label === "Transcript") {
       return (
-        <Card className="border rounded-lg shadow-sm">
-          <CardHeader className="p-4 flex flex-row items-center justify-between">
-            <h3 className="font-medium">Student Transcript</h3>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground mr-2">
-                Export Transcript
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 px-2 border-gray-200"
-              >
-                <FileText className="h-4 w-4 text-red-500" />
-                <span className="ml-1 text-xs font-medium">PDF</span>
-                <Tally1 className="-mr-[12px]" />
-                <Download className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardHeader>
-        </Card>
+        <div>
+          <Card className="border rounded-lg shadow-sm">
+            <CardHeader className="p-4 flex flex-row items-center justify-between">
+              <h3 className="font-medium">Student Transcript</h3>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground mr-2">
+                  Export Transcript
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-2 border-gray-200"
+                >
+                  <FileText className="h-4 w-4 text-red-500" />
+                  <span className="ml-1 text-xs font-medium">PDF</span>
+                  <Tally1 className="-mr-[12px]" />
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+          </Card>
+
+          <Card className="mt-4">
+            <RequestTranscript studentId={requestData?.user?.id} />
+          </Card>
+        </div>
       );
     }
 
@@ -386,7 +407,7 @@ export default function StudentDetail() {
           className="flex overflow-x-auto scrollbar-hide gap-2 px-16 scroll-smooth"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {REQUEST_DETAIL.map((type) => {
+          {availableRequestTypes.map((type) => {
             const IconComponent = type.icon;
             return (
               <Button

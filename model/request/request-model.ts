@@ -36,6 +36,8 @@ interface RequestUser {
   majorName: string;
   departmentName: string;
   userClass: RequestStudentClass;
+  roles: string[];
+  isStudent: boolean;
   createdAt: string;
 }
 

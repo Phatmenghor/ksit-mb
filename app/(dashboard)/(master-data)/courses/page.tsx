@@ -61,6 +61,7 @@ export default function CoursesPage() {
   };
 
   const { setValue } = useForm<FormValues>();
+
   const loadCourses = useCallback(
     async (param: AllCourseFilterModel) => {
       setIsLoading(true);

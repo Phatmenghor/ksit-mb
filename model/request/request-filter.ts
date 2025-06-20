@@ -16,3 +16,7 @@ export interface HistoryReqFilterModel {
   pageNo?: number;
   pageSize?: number;
 }
+
+export interface TranscriptReqFilterModel {
+  studentId?: number;
+}

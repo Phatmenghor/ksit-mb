@@ -37,6 +37,7 @@ import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
 import { formatDate } from "@/utils/date/dd-mm-yyyy-format";
 import { truncateText } from "@/utils/format/format-width-text";
+import { formatGender } from "@/constants/format-enum/formate-gender";
 
 export default function RequestPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -329,7 +330,9 @@ export default function RequestPage() {
                           : "N/A"}
                       </TableCell>
                       <TableCell>
-                        {req.user ? `${req.user?.gender || "---"}` : "N/A"}
+                        {req.user
+                          ? `${formatGender(req.user?.gender) || "---"}`
+                          : "N/A"}
                       </TableCell>
                       <TableCell>{truncateText(req?.title, 20)}</TableCell>
                       <TableCell>
