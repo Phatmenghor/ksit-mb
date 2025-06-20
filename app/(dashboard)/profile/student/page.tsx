@@ -11,9 +11,9 @@ import { ROUTE } from "@/constants/routes";
 import StudentDetails from "@/components/dashboard/users/student/view/tab/student-detail-tab";
 import StudentDetailsTabs from "@/components/dashboard/users/student/view/tab/student-detail-tab";
 import PaymentTabs from "@/components/dashboard/users/student/view/tab/student-payment-tab";
-import TranscriptTabs from "@/components/dashboard/users/student/view/tab/student-transcript-tab";
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 import { getStudentByTokenService } from "@/service/user/user.service";
+import { TranscriptTabs } from "@/components/dashboard/users/student/view/tab/student-transcript-tab";
 
 const tabs = [
   {
