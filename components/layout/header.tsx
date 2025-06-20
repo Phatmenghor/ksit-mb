@@ -2,14 +2,11 @@
 
 import { useState, useEffect } from "react";
 import {
-  ArrowLeft,
   ArrowRight,
   Bell,
   Edit,
   LogOut,
   Menu,
-  Pencil,
-  Settings,
   SettingsIcon,
   User,
   X,
@@ -20,7 +17,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -50,13 +46,13 @@ export function Header() {
 
     switch (roleGroup) {
       case RoleEnum.ADMIN:
-        return "/profile/admin";
+        return ROUTE.PROFILE.ADMIN;
       case RoleEnum.DEVELOPER:
       case RoleEnum.TEACHER:
       case RoleEnum.STAFF:
-        return "/profile/teacher";
+        return ROUTE.PROFILE.TEACHER;
       case RoleEnum.STUDENT:
-        return "/profile/student";
+        return ROUTE.PROFILE.STUDENT;
       default:
         return "/unauthorized";
     }

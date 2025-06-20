@@ -18,7 +18,6 @@ import { Eye, Pencil, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
 import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import {
@@ -36,6 +35,7 @@ import {
 import { useDebounce } from "@/utils/debounce/debounce";
 import { StaffListRequest } from "@/model/user/staff/staff.request.model";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
+import Loading from "@/components/shared/loading";
 
 export default function TeachersListPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -142,9 +142,7 @@ export default function TeachersListPage() {
 
       <div className="overflow-x-auto">
         {isLoading ? (
-          <div className="flex justify-center py-8">
-            <span className="text-muted-foreground">Loading...</span>
-          </div>
+          <Loading />
         ) : (
           <Table>
             <TableHeader>

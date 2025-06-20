@@ -45,6 +45,12 @@ export const ROUTE = {
     SETTING_CHANGE_PASSWORD: "/change-password",
   },
 
+  PROFILE: {
+    ADMIN: "/profile/admin",
+    TEACHER: "/profile/teacher",
+    STUDENT: "/profile/student",
+  },
+
   STUDENTS: {
     ADD_MULTIPLE: "/add-multiple",
     ADD_SINGLE: "/add-single",

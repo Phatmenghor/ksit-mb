@@ -3,10 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
 import {
-  Question,
-  Section,
   SurveyFormDataModel,
   SurveyMainModel,
 } from "@/model/survey/survey-main-model";
@@ -21,6 +18,10 @@ import { SurveyCancelDialog } from "@/components/dashboard/survey/form/survey-ca
 import SurveySection from "@/components/dashboard/survey/form/survey-section";
 import { useSurveyValidation } from "@/hooks/use-survey-validation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { QuestionTypeEnum } from "@/constants/constant";
+import SurveySuccessDialog from "@/components/dashboard/survey/form/survey-success-dialog";
+import { SurveyResponseModel } from "@/model/survey/survey-response-model";
 
 export default function SurveyFormPage() {
   const [surveyData, setSurveyData] = useState<SurveyMainModel | null>(null);
@@ -28,17 +29,16 @@ export default function SurveyFormPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cancelSurveyDialog, setCancelSurveyDialog] = useState(false);
-
-  const { toast } = useToast();
+  const [surveySuccessDialogOpen, setSurveySuccessDialogOpen] = useState(false);
+  const [surveyInfo, setSurveyInfo] = useState<SurveyResponseModel | null>(
+    null
+  );
   const router = useRouter();
   const { validateSection, getUnansweredRequiredQuestions } =
     useSurveyValidation();
   const params = useParams();
 
-  const scheduleId =
-    params?.scheduleId && typeof params.scheduleId === "string"
-      ? parseInt(params.scheduleId, 10)
-      : null;
+  const scheduleId = params.id;
 
   const form = useForm<SurveyFormDataModel>({
     defaultValues: {
@@ -49,11 +49,7 @@ export default function SurveyFormPage() {
     mode: "onChange",
   });
 
-  const {
-    handleSubmit,
-    control,
-    formState: { errors, isValid },
-  } = form;
+  const { handleSubmit, control } = form;
 
   const fetchSurveyData = useCallback(async () => {
     try {
@@ -67,15 +63,11 @@ export default function SurveyFormPage() {
       setSurveyData(response);
     } catch (error) {
       console.error("Error fetching survey data:", error);
-      toast({
-        title: "Error loading survey",
-        description: "Failed to load survey data. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to load survey data. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     fetchSurveyData();
@@ -89,7 +81,6 @@ export default function SurveyFormPage() {
   }, [surveyData?.sections]);
 
   const sortedSections = getSortedSections();
-  const currentSection = sortedSections[currentSectionIndex];
   const totalSections = sortedSections.length;
 
   const transformFormDataToApiFormat = useCallback(
@@ -106,23 +97,21 @@ export default function SurveyFormPage() {
             (q) => (q.id?.toString() || q.tempId) === questionId
           );
 
-          const answer: any = {
+          const answer = {
             questionId: parseInt(questionId),
+            textAnswer: "",
+            ratingAnswer: 0,
           };
 
-          // Set appropriate answer field based on question type
-          if (question?.questionType === "rating") {
-            answer.ratingAnswer =
+          if (question?.questionType === QuestionTypeEnum.RATING) {
+            const rating =
               typeof value === "number"
                 ? value
                 : parseInt(value as unknown as string);
-          } else if (
-            question?.questionType === "multiple_choice" &&
-            Array.isArray(value)
-          ) {
-            answer.textAnswer = value.join(", "); // Join multiple selections
-          } else {
-            answer.textAnswer = value as unknown as string;
+            answer.ratingAnswer = isNaN(rating) ? 0 : rating;
+          } else if (question?.questionType === QuestionTypeEnum.TEXT) {
+            answer.textAnswer =
+              typeof value === "string" ? value : String(value ?? "");
           }
 
           return answer;
@@ -132,56 +121,41 @@ export default function SurveyFormPage() {
     [surveyData?.sections]
   );
 
-  const onSubmit = useCallback(
-    async (formData: SurveyFormDataModel) => {
-      if (!surveyData || !scheduleId) {
-        toast({
-          title: "Submission failed",
-          description: "Survey data or schedule ID is missing.",
-          variant: "destructive",
-        });
-        return;
-      }
+  const onSubmit = async (formData: SurveyFormDataModel) => {
+    if (!surveyData || !scheduleId) {
+      toast.success("Survey data or schedule ID is missing.");
+      return;
+    }
 
-      try {
-        setIsSubmitting(true);
+    try {
+      setIsSubmitting(true);
 
-        // Transform form data to API format
-        const transformedData = {
-          ...formData,
-          answers: transformFormDataToApiFormat(formData),
-        };
+      // Transform form data to API format
+      const transformedData = {
+        answers: transformFormDataToApiFormat(formData),
+        overallComment: formData.overallComment,
+        overallRating: formData.overallRating,
+      };
 
-        const response = await submitSurveyService(scheduleId, transformedData);
-
-        if (!response.ok) {
-          throw new Error(`Failed to submit survey: ${response.status}`);
-        }
-
-        toast({
-          title: "Survey submitted successfully!",
-          description: "Thank you for your feedback.",
-        });
-
-        // Redirect to success page or dashboard
-        router.push("/dashboard/surveys");
-      } catch (error) {
-        console.error("Error submitting survey:", error);
-        toast({
-          title: "Submission failed",
-          description: "Please try again later.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [surveyData, scheduleId, transformFormDataToApiFormat, toast, router]
-  );
+      const response = await submitSurveyService(
+        Number(scheduleId),
+        transformedData
+      );
+      setSurveyInfo(response);
+      setSurveySuccessDialogOpen(true);
+      console.log("Response Data:", response);
+      toast.success("Survey submitted successfully!");
+    } catch (error) {
+      console.error("Error submitting survey:", error);
+      toast.error("Failed to submit survey. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleCancel = useCallback(() => {
-    router.back();
     setCancelSurveyDialog(false);
+    router.back();
   }, [router]);
 
   // Loading state
@@ -225,44 +199,28 @@ export default function SurveyFormPage() {
 
         {/* Main Content */}
         <div className="mx-auto space-y-4">
-          {/* Current Section Only */}
-          {currentSection && (
-            <SurveySection
-              key={currentSection.id || currentSection.tempId}
-              section={currentSection}
-              control={control}
-            />
-          )}
+          {sortedSections.map((s) => {
+            return (
+              <SurveySection
+                key={s?.id || s?.tempId}
+                section={s}
+                control={control}
+              />
+            );
+          })}
 
           {/* Navigation Footer */}
           <Card className="p-4 flex justify-end gap-2 items-center">
-            <Button variant="outline" onClick={handleCancel}>
+            <Button
+              variant="outline"
+              onClick={() => setCancelSurveyDialog(true)}
+            >
               Back
             </Button>
+
+            {/* Option 1: Use type="submit" to trigger form submission */}
             <Button
               type="submit"
-              onClick={() => {
-                const formData = form.getValues();
-                const isSectionValid = validateSection(
-                  currentSection,
-                  formData
-                );
-
-                if (!isSectionValid) {
-                  const unanswered = getUnansweredRequiredQuestions(
-                    currentSection,
-                    formData
-                  );
-                  toast({
-                    title: "Please answer all required questions",
-                    description: `Unanswered: ${unanswered.join(", ")}`,
-                    variant: "destructive",
-                  });
-                  return;
-                }
-
-                handleSubmit(onSubmit)();
-              }}
               disabled={isSubmitting}
               className="bg-teal-900 hover:bg-teal-950"
             >
@@ -271,12 +229,20 @@ export default function SurveyFormPage() {
           </Card>
         </div>
 
+        <SurveySuccessDialog
+          onOpenChange={() => setSurveySuccessDialogOpen(false)}
+          open={surveySuccessDialogOpen}
+          surveyInfo={surveyInfo}
+        />
+
         {/* Cancel Dialog */}
         <SurveyCancelDialog
           description="Are you sure you want to cancel this survey? Your progress will be lost."
           cancelText="Discard"
           onConfirm={handleCancel}
-          onOpenChange={setCancelSurveyDialog}
+          onOpenChange={() => {
+            setCancelSurveyDialog(false);
+          }}
           open={cancelSurveyDialog}
           title="Cancel Survey"
         />

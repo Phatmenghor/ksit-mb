@@ -36,6 +36,8 @@ export async function submitSurveyService(
       `/v1/surveys/schedule/${scheduleId}/submit`,
       data
     );
+    console.log("Service Data:", response.data.data);
+
     return response.data.data;
   } catch (error: any) {
     // Extract error message from response if available
