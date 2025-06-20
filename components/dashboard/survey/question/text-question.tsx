@@ -47,11 +47,13 @@ export default function TextQuestion({
             <div className="space-y-1">
               <Input
                 {...field}
+                value={field.value ?? ""}
                 placeholder="Enter your response..."
                 className="w-full rounded-md border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
                 aria-required={question.required}
                 aria-label={`Response for question ${questionIndex + 1}`}
               />
+
               {fieldState.error && (
                 <p className="text-red-500 text-sm">
                   {fieldState.error.message}

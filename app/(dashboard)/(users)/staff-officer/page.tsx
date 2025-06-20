@@ -46,6 +46,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import Loading from "@/components/shared/loading";
 
 export default function StuffOfficerListPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -147,9 +148,7 @@ export default function StuffOfficerListPage() {
 
       <div className="overflow-x-auto">
         {isLoading ? (
-          <div className="flex justify-center py-8 text-muted-foreground">
-            Loading...
-          </div>
+          <Loading />
         ) : (
           <Table>
             <TableHeader>

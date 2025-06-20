@@ -48,12 +48,15 @@ export interface FormResponses {
 
 export interface SurveyFormDataModel {
   answers: Answer[];
-  overallComment: string;
-  overallRating: number;
+  overallComment?: string;
+  overallRating?: number;
 }
 
 export interface Answer {
   questionId: number;
   textAnswer: string;
   ratingAnswer: number;
+}
+export interface FormAnswers {
+  [questionId: string]: string | number | string[]; // Allow various input types
 }
