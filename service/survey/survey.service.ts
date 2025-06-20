@@ -1,4 +1,3 @@
-import { SurveyMainModel } from "@/model/survey/survey-main-model";
 import { axiosClientWithAuth } from "@/utils/axios";
 
 export async function getAllSurveySectionService() {
