@@ -41,3 +41,19 @@ interface RatingOption {
   value?: number;
   label?: string;
 }
+
+export interface FormResponses {
+  [questionId: string]: string | string[];
+}
+
+export interface SurveyFormDataModel {
+  answers: Answer[];
+  overallComment: string;
+  overallRating: number;
+}
+
+export interface Answer {
+  questionId: number;
+  textAnswer: string;
+  ratingAnswer: number;
+}

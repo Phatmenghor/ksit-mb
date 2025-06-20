@@ -338,3 +338,8 @@ export const tabs = [
     status: SubmissionEnum.APPROVED, // Assuming you have this enum value
   },
 ];
+
+export const enum QuestionTypeEnum {
+  TEXT = "TEXT",
+  RATING = "RATING",
+}

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
-interface ConfirmDialogProps {
+interface CancelDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
@@ -20,7 +20,7 @@ interface ConfirmDialogProps {
   cancelText?: string;
 }
 
-export function ReturnDialog({
+export function SurveyCancelDialog({
   open,
   onOpenChange,
   title,
@@ -29,14 +29,14 @@ export function ReturnDialog({
   subDescription,
   confirmText = "Confirm",
   cancelText = "Discard",
-}: ConfirmDialogProps) {
+}: CancelDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl mx-auto p-4 text-center">
         <div className="flex flex-col items-center space-y-6">
           {/* Info Icon */}
           <div className="flex items-center justify-center">
-            <Info className="w-10 h-10 rounded-full bg-yellow-700 text-white" />
+            <Info className="w-10 h-10 rounded-full bg-red-600 text-white" />
           </div>
 
           {/* Title and Description */}
@@ -50,7 +50,7 @@ export function ReturnDialog({
               </DialogDescription>
             </div>
             {subDescription && (
-              <h3 className="mt-2 text-yellow-900">{subDescription}</h3>
+              <h3 className="mt-2 text-red-700">{subDescription}</h3>
             )}
           </div>
 
@@ -70,7 +70,7 @@ export function ReturnDialog({
               onConfirm();
               onOpenChange(false);
             }}
-            className="px-8 py-2.5 bg-yellow-800 hover:bg-emerald-900 text-white"
+            className="px-8 py-2.5 bg-red-600 hover:bg-emerald-900 text-white"
           >
             {confirmText}
           </Button>

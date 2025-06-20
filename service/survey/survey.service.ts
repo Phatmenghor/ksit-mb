@@ -1,5 +1,6 @@
 import { SurveyMainModel } from "@/model/survey/survey-main-model";
 import { axiosClientWithAuth } from "@/utils/axios";
+import { SurveyFormDataModel } from "../../model/survey/survey-main-model";
 
 export async function getAllSurveySectionService() {
   try {
@@ -22,6 +23,27 @@ export async function updateSurveyService(data: SurveyMainModel) {
     }
 
     console.error("Error updating survey:", error);
+    throw error;
+  }
+}
+
+export async function submitSurveyService(
+  scheduleId: number,
+  data: SurveyFormDataModel
+) {
+  try {
+    const response = await axiosClientWithAuth.post(
+      `/v1/surveys/schedule/${scheduleId}/submit`,
+      data
+    );
+    return response.data.data;
+  } catch (error: any) {
+    // Extract error message from response if available
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+
+    console.error("Error submitting survey answer:", error);
     throw error;
   }
 }
