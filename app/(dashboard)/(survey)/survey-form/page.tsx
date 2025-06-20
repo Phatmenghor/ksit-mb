@@ -91,7 +91,6 @@ export default function SurveyFormPage() {
   const sortedSections = getSortedSections();
   const currentSection = sortedSections[currentSectionIndex];
   const totalSections = sortedSections.length;
-  const isLastSection = currentSectionIndex === totalSections - 1;
 
   const transformFormDataToApiFormat = useCallback(
     (formData: SurveyFormDataModel) => {
@@ -216,7 +215,7 @@ export default function SurveyFormPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className=" bg-gray-50">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Header */}
         <SurveyFormHeader
@@ -224,31 +223,8 @@ export default function SurveyFormPage() {
           surveyData={surveyData}
         />
 
-        {/* Progress Indicator */}
-        {totalSections > 1 && (
-          <Card className="p-4 mx-auto max-w-4xl">
-            <div className="flex items-center justify-between text-sm text-gray-600">
-              <span>
-                Section {currentSectionIndex + 1} of {totalSections}
-              </span>
-              <div className="flex space-x-1">
-                {Array.from({ length: totalSections }, (_, index) => (
-                  <div
-                    key={index}
-                    className={`w-2 h-2 rounded-full ${
-                      index <= currentSectionIndex
-                        ? "bg-teal-600"
-                        : "bg-gray-300"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </Card>
-        )}
-
         {/* Main Content */}
-        <div className="mx-auto max-w-4xl space-y-4">
+        <div className="mx-auto space-y-4">
           {/* Current Section Only */}
           {currentSection && (
             <SurveySection
@@ -259,9 +235,12 @@ export default function SurveyFormPage() {
           )}
 
           {/* Navigation Footer */}
-          <Card className="p-4 flex justify-between items-center">
+          <Card className="p-4 flex justify-end gap-2 items-center">
+            <Button variant="outline" onClick={handleCancel}>
+              Back
+            </Button>
             <Button
-              type="button"
+              type="submit"
               onClick={() => {
                 const formData = form.getValues();
                 const isSectionValid = validateSection(
@@ -282,20 +261,12 @@ export default function SurveyFormPage() {
                   return;
                 }
 
-                if (isLastSection) {
-                  handleSubmit(onSubmit)();
-                } else {
-                  setCurrentSectionIndex((prev) => prev + 1);
-                }
+                handleSubmit(onSubmit)();
               }}
               disabled={isSubmitting}
               className="bg-teal-900 hover:bg-teal-950"
             >
-              {isSubmitting
-                ? "Submitting..."
-                : isLastSection
-                ? "Submit Survey"
-                : "Next"}
+              {isSubmitting ? "Submitting..." : "Submit Survey"}
             </Button>
           </Card>
         </div>
