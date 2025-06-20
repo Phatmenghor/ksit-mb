@@ -18,6 +18,21 @@ export async function getAllAttendanceGenerateService(
   }
 }
 
+export async function getAllAttedanceHistoryService(
+  data: AttendanceHistoryFilter
+) {
+  try {
+    const response = await axiosClientWithAuth.post(
+      `/v1/attendance/history`,
+      data
+    );
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching requests:", error);
+    return null;
+  }
+}
+
 // update attendance session
 export async function updateAttendanceSessionService(
   data: UpdateAttendanceModel
@@ -30,21 +45,6 @@ export async function updateAttendanceSessionService(
     return response.data.data;
   } catch (error: any) {
     console.error("Error updating attendance session:", error);
-    return null;
-  }
-}
-
-export async function getAllAttendanceHistoryService(
-  data: AttendanceHistoryFilter
-) {
-  try {
-    const response = await axiosClientWithAuth.post(
-      `/v1/attendance/history`,
-      data
-    );
-    return response.data.data;
-  } catch (error: any) {
-    console.error("Error fetching requests:", error);
     return null;
   }
 }
