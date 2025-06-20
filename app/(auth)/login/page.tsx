@@ -46,7 +46,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const credentials: LoginRequest = {
-        email: data.username,
+        username: data.username,
         password: data.password,
       };
 

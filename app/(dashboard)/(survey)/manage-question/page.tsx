@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { z } from "zod";
 import { Separator } from "@/components/ui/separator";
+
 import {
   getAllSurveySectionService,
   updateSurveyService,
@@ -96,13 +97,18 @@ const ParagraphQuestion: React.FC<QuestionProps> = ({
     question.questionText || ""
   );
   const [displayOrder, setDisplayOrder] = useState<number | string>(
-    (question.displayOrder || 0) + 1
+    question.displayOrder !== undefined ? question.displayOrder : ""
   );
 
   // Sync local state with prop changes (crucial for duplicated questions)
   useEffect(() => {
     setQuestionText(question.questionText || "");
-    setDisplayOrder((question.displayOrder || 0) + 1);
+    // Only update displayOrder if it's actually different to prevent input field flickering
+    const newDisplayOrder =
+      question.displayOrder !== undefined ? question.displayOrder : "";
+    if (displayOrder !== newDisplayOrder) {
+      setDisplayOrder(newDisplayOrder);
+    }
   }, [
     question.questionText,
     question.displayOrder,
@@ -114,7 +120,6 @@ const ParagraphQuestion: React.FC<QuestionProps> = ({
     const newText = e.target.value;
     setQuestionText(newText);
 
-    // Create updated question object with new text
     const updatedQuestion = {
       ...question,
       questionText: newText,
@@ -124,29 +129,23 @@ const ParagraphQuestion: React.FC<QuestionProps> = ({
 
   const handleDisplayOrderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
+    setDisplayOrder(inputValue);
 
-    // Allow empty string for user experience, but ensure we have a valid number
+    // Allow empty string but don't update the question object until we have a valid number
     if (inputValue === "") {
-      setDisplayOrder("");
-      return; // Don't update question until user enters a valid number
+      return;
     }
 
     const newOrder = parseInt(inputValue);
-    if (isNaN(newOrder) || newOrder < 1) {
-      return; // Don't allow invalid numbers
+    if (!isNaN(newOrder) && newOrder >= 1) {
+      const updatedQuestion = {
+        ...question,
+        displayOrder: newOrder,
+      };
+      onUpdate(updatedQuestion);
     }
-
-    setDisplayOrder(newOrder);
-
-    // Create updated question object with new display order
-    const updatedQuestion = {
-      ...question,
-      displayOrder: newOrder - 1,
-    };
-    onUpdate(updatedQuestion);
   };
 
-  // Get unique identifier for delete operation
   const getQuestionId = () => {
     return question.tempId || question.id;
   };
@@ -159,10 +158,10 @@ const ParagraphQuestion: React.FC<QuestionProps> = ({
             <div className="space-y-3">
               <div className="flex gap-3 items-center">
                 <Input
-                  type="number"
-                  min="1"
+                  type="text"
                   value={displayOrder}
                   onChange={handleDisplayOrderChange}
+                  placeholder="#"
                   className="w-16 text-center"
                 />
                 <Input
@@ -220,7 +219,7 @@ const LinearQuestion: React.FC<QuestionProps> = ({
     question.rightLabel || ""
   );
   const [displayOrder, setDisplayOrder] = useState<number | string>(
-    (question.displayOrder || 0) + 1
+    question.displayOrder !== undefined ? question.displayOrder : ""
   );
 
   // Sync local state with prop changes (crucial for duplicated questions)
@@ -228,7 +227,12 @@ const LinearQuestion: React.FC<QuestionProps> = ({
     setQuestionText(question.questionText || "");
     setLeftLabel(question.leftLabel || "");
     setRightLabel(question.rightLabel || "");
-    setDisplayOrder((question.displayOrder || 0) + 1);
+    // Only update displayOrder if it's actually different to prevent input field flickering
+    const newDisplayOrder =
+      question.displayOrder !== undefined ? question.displayOrder : "";
+    if (displayOrder !== newDisplayOrder) {
+      setDisplayOrder(newDisplayOrder);
+    }
   }, [
     question.questionText,
     question.leftLabel,
@@ -238,7 +242,6 @@ const LinearQuestion: React.FC<QuestionProps> = ({
     question.id,
   ]);
 
-  // Use useCallback to prevent unnecessary re-renders and ensure latest state
   const updateQuestion = useCallback(
     (updates: Partial<Question>) => {
       const updatedQuestion: Question = {
@@ -291,23 +294,19 @@ const LinearQuestion: React.FC<QuestionProps> = ({
 
   const handleDisplayOrderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
+    setDisplayOrder(inputValue);
 
-    // Allow empty string for user experience, but ensure we have a valid number
+    // Allow empty string but don't update the question object until we have a valid number
     if (inputValue === "") {
-      setDisplayOrder("");
-      return; // Don't update question until user enters a valid number
+      return;
     }
 
     const newOrder = parseInt(inputValue);
-    if (isNaN(newOrder) || newOrder < 1) {
-      return; // Don't allow invalid numbers
+    if (!isNaN(newOrder) && newOrder >= 1) {
+      updateQuestion({ displayOrder: newOrder });
     }
-
-    setDisplayOrder(newOrder);
-    updateQuestion({ displayOrder: newOrder - 1 });
   };
 
-  // Get unique identifier for delete operation
   const getQuestionId = () => {
     return question.tempId || question.id;
   };
@@ -319,10 +318,10 @@ const LinearQuestion: React.FC<QuestionProps> = ({
         <div className="flex justify-between items-center mb-4">
           <div className="flex gap-3 items-center flex-1">
             <Input
-              type="number"
-              min="1"
+              type="text"
               value={displayOrder}
               onChange={handleDisplayOrderChange}
+              placeholder="#"
               className="w-16 text-center"
             />
             <Input
@@ -406,18 +405,26 @@ const SectionComponent: React.FC<SectionProps> = ({
   const [sectionTitle, setSectionTitle] = useState<string>(section.title || "");
   const [sectionDisplayOrder, setSectionDisplayOrder] = useState<
     number | string
-  >((section.displayOrder || 0) + 1);
+  >(section.displayOrder !== undefined ? section.displayOrder : "");
   const [questions, setQuestions] = useState<Question[]>(
     section.questions || []
   );
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
 
+  // Track if this is the initial mount to prevent unnecessary updates
+  const isInitialMount = React.useRef(true);
+
   // Sync section questions when section prop changes
   useEffect(() => {
     setQuestions(section.questions || []);
     setSectionTitle(section.title || "");
-    setSectionDisplayOrder((section.displayOrder || 0) + 1);
+    // Only update displayOrder if it's actually different to prevent input field flickering
+    const newDisplayOrder =
+      section.displayOrder !== undefined ? section.displayOrder : "";
+    if (sectionDisplayOrder !== newDisplayOrder) {
+      setSectionDisplayOrder(newDisplayOrder);
+    }
   }, [
     section.questions,
     section.title,
@@ -426,61 +433,51 @@ const SectionComponent: React.FC<SectionProps> = ({
     section.id,
   ]);
 
-  // Use useCallback to prevent unnecessary re-renders
-  const updateSection = useCallback(
-    (updates: Partial<Section>) => {
-      const updatedSection = {
-        ...section,
-        ...updates,
-        questions: updates.questions || questions,
-      };
-      onUpdate(updatedSection);
+  // Debounced update function to prevent excessive updates
+  const debouncedUpdate = useCallback(
+    (updatedSection: Section) => {
+      // Use setTimeout to defer the update and prevent infinite loops
+      const timeoutId = setTimeout(() => {
+        onUpdate(updatedSection);
+      }, 0);
+
+      return () => clearTimeout(timeoutId);
     },
-    [section, onUpdate]
-  ); // Removed questions from dependencies to prevent loops
-
-  // Use useEffect to update parent section when questions change (but exclude initial mount)
-  const isInitialMount = React.useRef(true);
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-
-    // Only update if questions actually changed
-    const currentQuestions = section.questions || [];
-    const questionsChanged =
-      JSON.stringify(currentQuestions) !== JSON.stringify(questions);
-
-    if (questionsChanged) {
-      updateSection({ questions });
-    }
-  }, [questions]); // Remove updateSection from dependencies to break the cycle
+    [onUpdate]
+  );
 
   const handleSectionTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setSectionTitle(newTitle);
-    updateSection({ title: newTitle });
+
+    const updatedSection = {
+      ...section,
+      title: newTitle,
+      questions: questions,
+    };
+    debouncedUpdate(updatedSection);
   };
 
   const handleSectionDisplayOrderChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const inputValue = e.target.value;
+    setSectionDisplayOrder(inputValue);
 
-    // Allow empty string for user experience
+    // Allow empty string but don't update the section object until we have a valid number
     if (inputValue === "") {
-      setSectionDisplayOrder("");
-      return; // Don't update section until user enters a valid number
+      return;
     }
 
     const newOrder = parseInt(inputValue);
-    if (isNaN(newOrder) || newOrder < 1) {
-      return; // Don't allow invalid numbers
+    if (!isNaN(newOrder) && newOrder >= 1) {
+      const updatedSection = {
+        ...section,
+        displayOrder: newOrder,
+        questions: questions,
+      };
+      debouncedUpdate(updatedSection);
     }
-
-    setSectionDisplayOrder(newOrder);
-    updateSection({ displayOrder: newOrder - 1 });
   };
 
   const handleAddQuestion = (type: "TEXT" | "RATING") => {
@@ -489,7 +486,7 @@ const SectionComponent: React.FC<SectionProps> = ({
       questionText: "",
       questionType: type,
       required: true,
-      displayOrder: questions.length,
+      displayOrder: undefined, // Let user set the display order
       minRating: 1,
       maxRating: 5,
       leftLabel: type === "RATING" ? "" : undefined,
@@ -502,57 +499,56 @@ const SectionComponent: React.FC<SectionProps> = ({
     const updatedQuestions = [...questions, newQuestion];
     setQuestions(updatedQuestions);
 
-    // Update parent immediately in the next event loop
-    setTimeout(() => {
-      updateSection({ questions: updatedQuestions });
-    }, 0);
+    const updatedSection = {
+      ...section,
+      questions: updatedQuestions,
+    };
+    debouncedUpdate(updatedSection);
 
     setShowDropdown(false);
   };
 
   const handleUpdateQuestion = useCallback(
     (updatedQuestion: Question) => {
-      setQuestions((prevQuestions) => {
-        const updatedQuestions = prevQuestions.map((q) => {
-          // Check for temp ID first, then regular ID
-          if (q.tempId && q.tempId === updatedQuestion.tempId) {
-            return updatedQuestion;
-          }
-          if (q.id && q.id === updatedQuestion.id) {
-            return updatedQuestion;
-          }
-          return q;
-        });
-
-        // Update parent immediately in the same render cycle
-        setTimeout(() => {
-          updateSection({ questions: updatedQuestions });
-        }, 0);
-
-        return updatedQuestions;
+      const updatedQuestions = questions.map((q) => {
+        // Check for temp ID first, then regular ID
+        if (q.tempId && q.tempId === updatedQuestion.tempId) {
+          return updatedQuestion;
+        }
+        if (q.id && q.id === updatedQuestion.id) {
+          return updatedQuestion;
+        }
+        return q;
       });
+
+      setQuestions(updatedQuestions);
+
+      const updatedSection = {
+        ...section,
+        questions: updatedQuestions,
+      };
+      debouncedUpdate(updatedSection);
     },
-    [updateSection]
+    [questions, section, debouncedUpdate]
   );
 
   const handleDeleteQuestion = (questionId: number | string) => {
-    setQuestions((prevQuestions) => {
-      const updatedQuestions = prevQuestions.filter((q) => {
-        // Handle both temp IDs (string) and regular IDs (number)
-        if (typeof questionId === "string") {
-          return q.tempId !== questionId;
-        } else {
-          return q.id !== questionId;
-        }
-      });
-
-      // Update parent immediately in the next event loop
-      setTimeout(() => {
-        updateSection({ questions: updatedQuestions });
-      }, 0);
-
-      return updatedQuestions;
+    const updatedQuestions = questions.filter((q) => {
+      // Handle both temp IDs (string) and regular IDs (number)
+      if (typeof questionId === "string") {
+        return q.tempId !== questionId;
+      } else {
+        return q.id !== questionId;
+      }
     });
+
+    setQuestions(updatedQuestions);
+
+    const updatedSection = {
+      ...section,
+      questions: updatedQuestions,
+    };
+    debouncedUpdate(updatedSection);
   };
 
   const handleDuplicateQuestion = (questionToDuplicate: Question) => {
@@ -560,7 +556,7 @@ const SectionComponent: React.FC<SectionProps> = ({
     const duplicated: Question = {
       ...questionToDuplicate,
       id: undefined, // Remove ID so backend assigns new one
-      displayOrder: questions.length,
+      displayOrder: undefined, // Let user set the display order
       isNew: true,
       tempId,
     };
@@ -568,10 +564,11 @@ const SectionComponent: React.FC<SectionProps> = ({
     const updatedQuestions = [...questions, duplicated];
     setQuestions(updatedQuestions);
 
-    // Update parent immediately in the next event loop
-    setTimeout(() => {
-      updateSection({ questions: updatedQuestions });
-    }, 0);
+    const updatedSection = {
+      ...section,
+      questions: updatedQuestions,
+    };
+    debouncedUpdate(updatedSection);
   };
 
   return (
@@ -636,10 +633,10 @@ const SectionComponent: React.FC<SectionProps> = ({
           <div className="flex gap-4 items-center">
             <div className="border-l-4 border-[#024D3E] rounded-lg h-12"></div>
             <Input
-              type="number"
-              min="1"
+              type="text"
               value={sectionDisplayOrder}
               onChange={handleSectionDisplayOrderChange}
+              placeholder="#"
               className="w-16 text-center"
             />
             <Input
@@ -749,7 +746,7 @@ const SurveyManager: React.FC = () => {
     const newSection: Section = {
       title: "",
       description: "",
-      displayOrder: sections.length,
+      displayOrder: undefined, // Let user set the display order
       questions: [],
       isNew: true,
       tempId,
@@ -784,7 +781,7 @@ const SurveyManager: React.FC = () => {
     );
   };
 
-  // Clean data before sending to API - now properly matches SurveyMainModel
+  // Clean data before sending to API - preserves user's displayOrder input
   const cleanDataForApi = (data: SurveyMainModel): SurveyMainModel => {
     return {
       id: data.id,
@@ -793,17 +790,17 @@ const SurveyManager: React.FC = () => {
       status: data.status,
       createdBy: data.createdBy,
       createdAt: data.createdAt,
-      sections: data.sections?.map((section, sectionIndex) => ({
+      sections: data.sections?.map((section) => ({
         ...(section.id && { id: section.id }), // Only include ID if it exists
         title: section.title,
         description: section.description,
-        displayOrder: sectionIndex, // Use array index for consistent ordering
-        questions: section.questions?.map((question, questionIndex) => ({
+        displayOrder: section.displayOrder || 0, // Keep user's input exactly as they entered it
+        questions: section.questions?.map((question) => ({
           ...(question.id && { id: question.id }), // Only include ID if it exists
           questionText: question.questionText,
           questionType: question.questionType,
           required: question.required,
-          displayOrder: questionIndex, // Use array index for consistent ordering
+          displayOrder: question.displayOrder || 0, // Keep user's input exactly as they entered it
           minRating: question.minRating,
           maxRating: question.maxRating,
           leftLabel: question.leftLabel,
