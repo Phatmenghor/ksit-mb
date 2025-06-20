@@ -280,7 +280,7 @@ const AllSchedulePage = () => {
                               <div className="flex items-center gap-1">
                                 <Clock className="h-4 w-4" />
                                 <span>
-                                  {sche.startTime} - {sche.endTime}
+                                  {sche.startTime.hour} - {sche.endTime.hour}
                                 </span>
                               </div>
                               <div className="flex items-center gap-1">

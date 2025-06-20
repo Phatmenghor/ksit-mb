@@ -32,7 +32,7 @@ import { toast } from "sonner";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-export const ConfigureScoreSchema = z
+const ConfigureScoreSchema = z
   .object({
     attendancePercentage: z
       .number()
@@ -66,7 +66,7 @@ export const ConfigureScoreSchema = z
     }
   );
 
-export type ScoreFormData = z.infer<typeof ConfigureScoreSchema>;
+type ScoreFormData = z.infer<typeof ConfigureScoreSchema>;
 
 export default function ScoreSettingPage() {
   const [isEditing, setIsEditing] = useState(false);

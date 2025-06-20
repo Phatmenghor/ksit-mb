@@ -30,12 +30,12 @@ import { ComboboxSelectSubject } from "@/components/shared/ComboBox/combobox-sub
 import { ComboboxSelectInstructor } from "@/components/shared/ComboBox/combobox-instructor";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
 import { SubjectModel } from "@/model/master-data/subject/all-subject-model";
-import { StaffModel } from "@/model/user/staff/stuff.model";
 import { Constants } from "@/constants/text-string";
 import { createCourseService } from "@/service/master-data/course.service";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
+import { StaffModel } from "@/model/user/staff/staff.respond.model";
 
 const courseFormSchema = z.object({
   subjectCode: z.string().min(1, "Subject code is required"),

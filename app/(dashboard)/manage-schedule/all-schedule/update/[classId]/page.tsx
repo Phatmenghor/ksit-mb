@@ -463,7 +463,7 @@ export default function UpdateSchedule() {
                             {semesters.map((semester) => (
                               <SelectItem
                                 key={semester.id}
-                                value={semester.id.toString()}
+                                value={semester.id?.toString()}
                               >
                                 {semester.semester}
                               </SelectItem>
