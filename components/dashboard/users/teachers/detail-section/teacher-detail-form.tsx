@@ -1,6 +1,5 @@
 import { Input } from "@/components/ui/input";
 import { Mode } from "@/constants/constant";
-import { ZodStaffModelType } from "@/model/user/staff/schema";
 import { Controller, useFormContext } from "react-hook-form";
 
 export default function TeachingDetailForm({ mode }: { mode: Mode }) {
@@ -8,7 +7,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
     control,
     register,
     formState: { isSubmitting, isDirty },
-  } = useFormContext<ZodStaffModelType>();
+  } = useFormContext();
 
   const isReadOnly = mode === Mode.VIEW;
   return (

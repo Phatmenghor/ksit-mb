@@ -1,10 +1,10 @@
 import { DateTimeFormatter } from "@/utils/date/date-time-format";
 import { saveAs } from "file-saver";
 import ExcelJS from "exceljs";
-import { SubmittedScoreModel } from "@/model/score/submitted-score/submitted-score.response.model";
+import { StudentScoreModel } from "@/model/score/student-score/student-score.response";
 
 export const exportApprovedStudentsToExcel = async (
-  students: SubmittedScoreModel[],
+  students: StudentScoreModel[],
   fileName: string = "submitted-score.xlsx"
 ) => {
   const workbook = new ExcelJS.Workbook();
@@ -93,7 +93,7 @@ export const exportApprovedStudentsToExcel = async (
 
 // Enhanced version with additional formatting options
 export const exportApprovedStudentsToExcelAdvanced = async (
-  students: SubmittedScoreModel[],
+  students: StudentScoreModel[],
   fileName: string = "submitted-score.xlsx",
   options?: {
     includeComments?: boolean;

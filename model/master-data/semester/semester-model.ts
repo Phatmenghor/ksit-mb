@@ -10,7 +10,7 @@ export interface AllSemesterModel {
 }
 
 export interface SemesterModel {
-  id: number;
+  id?: number;
   semester: SemesterEnum;
   startDate: string;
   endDate: string;

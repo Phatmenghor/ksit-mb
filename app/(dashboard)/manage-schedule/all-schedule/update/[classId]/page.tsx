@@ -46,7 +46,12 @@ import { RoomModel } from "@/model/master-data/room/all-room-model";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
 import { SemesterModel } from "@/model/master-data/semester/semester-model";
 import { StaffModel } from "@/model/user/staff/staff.respond.model";
-import { DayEnum, StatusEnum } from "@/constants/constant";
+import {
+  DayEnum,
+  StatusEnum,
+  YearLevelEnum,
+  yearLevels,
+} from "@/constants/constant";
 import { Constants } from "@/constants/text-string";
 import {
   updateScheduleService,
@@ -54,6 +59,7 @@ import {
 } from "@/service/schedule/schedule.service";
 import { toast } from "sonner";
 import { getAllSemesterService } from "@/service/master-data/semester.service";
+import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 
 const formSchema = z.object({
   classId: z.number().min(1, "Class is required"),
@@ -70,6 +76,9 @@ const formSchema = z.object({
   semesterId: z.number().min(1, "Semester is required"),
   roomId: z.number().min(1, "Room is required"),
   status: z.literal(Constants.ACTIVE),
+  yearLevel: z.nativeEnum(YearLevelEnum, {
+    required_error: "Year level is required",
+  }),
 });
 
 export default function UpdateSchedule() {
@@ -85,7 +94,7 @@ export default function UpdateSchedule() {
   const [selectedClass, setSelectedClass] = useState<ClassModel | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<RoomModel | null>(null);
   const [semesters, setSemesters] = useState<SemesterModel[]>([]);
-  const [scheduleData, setScheduleData] = useState<any>(null);
+  const [scheduleData, setScheduleData] = useState<ScheduleModel | null>(null);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
 
   const params = useParams();
@@ -107,6 +116,7 @@ export default function UpdateSchedule() {
       semesterId: 0,
       roomId: 0,
       status: Constants.ACTIVE,
+      yearLevel: YearLevelEnum.FIRST_YEAR,
     },
   });
 
@@ -120,6 +130,8 @@ export default function UpdateSchedule() {
       try {
         setIsLoading(true);
         const data = await getDetailScheduleService(scheduleId);
+
+        console.log("##data", data);
 
         if (data) {
           setScheduleData(data);
@@ -143,6 +155,7 @@ export default function UpdateSchedule() {
             semesterId: data.semester?.id || 0, // Set the semester ID directly
             roomId: data.room?.id || 0,
             status: data.status || Constants.ACTIVE,
+            yearLevel: data.yearLevel,
           });
 
           // Set selected items for comboboxes
@@ -233,11 +246,13 @@ export default function UpdateSchedule() {
         roomId: values.roomId,
         semesterId: values.semesterId,
         status: values.status,
+        yearLevel: values.yearLevel,
       };
 
       await updateScheduleService(scheduleId, scheduleUpdateData);
       toast.success("Schedule updated successfully");
-      router.replace(ROUTE.SCHEDULE.DEPARTMENT);
+      // router.replace(ROUTE.SCHEDULE.DEPARTMENT);
+      router.back();
     } catch (error: any) {
       toast.error(error.message || "Failed to update schedule");
       console.error("Error updating schedule:", error);
@@ -448,7 +463,7 @@ export default function UpdateSchedule() {
                             {semesters.map((semester) => (
                               <SelectItem
                                 key={semester.id}
-                                value={semester.id.toString()}
+                                value={(semester.id ?? "").toString()}
                               >
                                 {semester.semester}
                               </SelectItem>
@@ -559,6 +574,43 @@ export default function UpdateSchedule() {
                             dataSelect={selectedRoom}
                             onChangeSelected={handleRoomChange}
                           />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="yearLevel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Year Level <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            disabled={isSubmitting}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select year level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={YearLevelEnum.FIRST_YEAR}>
+                                Year 1
+                              </SelectItem>
+                              <SelectItem value={YearLevelEnum.SECOND_YEAR}>
+                                Year 2
+                              </SelectItem>
+                              <SelectItem value={YearLevelEnum.THIRD_YEAR}>
+                                Year 3
+                              </SelectItem>
+                              <SelectItem value={YearLevelEnum.FOURTH_YEAR}>
+                                Year 4
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>

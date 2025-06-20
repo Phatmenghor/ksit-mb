@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { ROUTE } from "@/constants/routes";
 import { useState } from "react";
+import { SemesterFormData } from "./manage-semester/semester-form-modal";
 
 export default function ManageRoom() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -82,14 +83,6 @@ export default function ManageRoom() {
     setModalMode("edit");
     setInitialData(semesterData);
     setIsModalOpen(true);
-  };
-
-  const handleSubmit = (data: SemesterFormData) => {
-    if (modalMode === "add") {
-      setSemesters([...semsters, data]);
-    } else {
-      setSemesters(semsters.map((c) => (c.id === initialData?.id ? data : c)));
-    }
   };
 
   return (

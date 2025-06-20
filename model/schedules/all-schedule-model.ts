@@ -1,3 +1,4 @@
+import { YearLevelEnum } from "@/constants/constant";
 import { ClassModel } from "../master-data/class/all-class-model";
 import { CourseModel } from "../master-data/course/all-course-model";
 import { RoomModel } from "../master-data/room/all-room-model";
@@ -18,6 +19,7 @@ export interface ScheduleModel {
   startTime: string;
   endTime: string;
   academyYear: any;
+  yearLevel: YearLevelEnum;
   day: string;
   status: string;
   classes: ClassModel;

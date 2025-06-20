@@ -56,13 +56,13 @@ const PaymentTabs = () => {
 
   const typeOptions = ["Pay", "Free", "Scholarship"];
 
-  const updateFee = (id, field, value) => {
+  const updateFee = (id: any, field: any, value: any) => {
     setFees(
       fees.map((fee) => (fee.id === id ? { ...fee, [field]: value } : fee))
     );
   };
 
-  const deleteFee = (id) => {
+  const deleteFee = (id: any) => {
     setFees(fees.filter((fee) => fee.id !== id));
   };
 

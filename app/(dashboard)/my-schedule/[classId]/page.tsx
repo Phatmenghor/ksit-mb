@@ -19,6 +19,9 @@ import {
   Users,
   MapPin,
   Pen,
+  Eye,
+  Clipboard,
+  ClipboardPenLine,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -49,6 +52,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 
 const MySchedulePage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -135,6 +139,9 @@ const MySchedulePage = () => {
   };
   const handleClassListClick = () => {
     router.back();
+  };
+  const handleToSurveypage = () => {
+    router.push(`/take-survey`);
   };
 
   return (
@@ -282,37 +289,51 @@ const MySchedulePage = () => {
 
                           <Separator className="my-2" />
 
-                          <div className="flex flex-wrap mt-3 ">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                <span>
-                                  {sche.startTime} - {sche.endTime}
-                                </span>
+                          <div className="flex flex-wrap mt-3">
+                            <div className="flex items-center justify-between w-full text-sm text-muted-foreground">
+                              <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>
+                                    {sche.startTime.hour} - {sche.endTime.hour}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-4 w-4" />
+                                  <span>
+                                    {(sche.teacher &&
+                                      (sche.teacher.englishFirstName ||
+                                      sche.teacher.englishLastName
+                                        ? `${
+                                            sche.teacher.englishFirstName || ""
+                                          } ${
+                                            sche.teacher.englishLastName || ""
+                                          }`.trim()
+                                        : sche.teacher.khmerFirstName ||
+                                          sche.teacher.khmerLastName
+                                        ? `${
+                                            sche.teacher.khmerFirstName || ""
+                                          } ${
+                                            sche.teacher.khmerLastName || ""
+                                          }`.trim()
+                                        : "- - -")) ||
+                                      "- - -"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="h-4 w-4" />
+                                  <span>{sche.room.name || "- - -"}</span>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-1">
-                                <Users className="h-4 w-4" />
-                                <span>
-                                  {(sche.teacher &&
-                                    (sche.teacher.englishFirstName ||
-                                    sche.teacher.englishLastName
-                                      ? `${
-                                          sche.teacher.englishFirstName || ""
-                                        } ${
-                                          sche.teacher.englishLastName || ""
-                                        }`.trim()
-                                      : sche.teacher.khmerFirstName ||
-                                        sche.teacher.khmerLastName
-                                      ? `${sche.teacher.khmerFirstName || ""} ${
-                                          sche.teacher.khmerLastName || ""
-                                        }`.trim()
-                                      : "- - -")) ||
-                                    "- - -"}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-4 w-4" />
-                                <span>{sche.room.name || "- - -"}</span>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  className="flex items-center gap-1 bg-amber-500 text-white hover:bg-amber-50 hover:text-amber-600"
+                                  onClick={() => handleToSurveypage()}
+                                >
+                                  <ClipboardPenLine className="h-4 w-4" />
+                                  Take Survey
+                                </Button>
                               </div>
                             </div>
                           </div>
