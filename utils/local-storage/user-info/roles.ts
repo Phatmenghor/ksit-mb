@@ -1,3 +1,4 @@
+import { RoleEnum } from "@/constants/constant";
 import { deleteCookie, getCookie, setCookie } from "cookies-next";
 
 /**
@@ -37,4 +38,56 @@ export function hasRole(role: string): boolean {
  */
 export function clearRoles(): void {
   deleteCookie("user-roles");
+}
+
+export function getRoleCheckGrope(): RoleEnum | null {
+  const roles = getRoles() || [];
+  if (!roles || roles.length === 0) {
+    return null;
+  }
+
+  if (roles.includes(RoleEnum.ADMIN) || roles.includes(RoleEnum.DEVELOPER)) {
+    return RoleEnum.ADMIN;
+  }
+
+  // Check for staff/teacher
+  if (roles.includes(RoleEnum.TEACHER) || roles.includes(RoleEnum.STAFF)) {
+    return RoleEnum.STAFF;
+  }
+
+  // Check for student
+  if (roles.includes(RoleEnum.STUDENT)) {
+    return RoleEnum.STUDENT;
+  }
+
+  return null;
+}
+
+export function getRoleCheck(): RoleEnum | null {
+  const roles = getRoles() || [];
+  if (!roles || roles.length === 0) {
+    return null;
+  }
+
+  if (roles.includes(RoleEnum.ADMIN)) {
+    return RoleEnum.ADMIN;
+  }
+
+  if (roles.includes(RoleEnum.DEVELOPER)) {
+    return RoleEnum.DEVELOPER;
+  }
+
+  if (roles.includes(RoleEnum.TEACHER)) {
+    return RoleEnum.TEACHER;
+  }
+
+  if (roles.includes(RoleEnum.STAFF)) {
+    return RoleEnum.STAFF;
+  }
+
+  if (roles.includes(RoleEnum.STUDENT)) {
+    return RoleEnum.STUDENT;
+  }
+
+  return null;
 }
