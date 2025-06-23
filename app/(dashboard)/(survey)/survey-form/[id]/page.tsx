@@ -154,8 +154,8 @@ export default function SurveyFormPage() {
   };
 
   const handleCancel = useCallback(() => {
-    router.back();
     setCancelSurveyDialog(false);
+    router.back();
   }, [router]);
 
   // Validation function for manual validation
@@ -248,7 +248,10 @@ export default function SurveyFormPage() {
 
           {/* Navigation Footer */}
           <Card className="p-4 flex justify-end gap-2 items-center">
-            <Button variant="outline" onClick={handleCancel}>
+            <Button
+              variant="outline"
+              onClick={() => setCancelSurveyDialog(true)}
+            >
               Back
             </Button>
 
@@ -274,7 +277,9 @@ export default function SurveyFormPage() {
           description="Are you sure you want to cancel this survey? Your progress will be lost."
           cancelText="Discard"
           onConfirm={handleCancel}
-          onOpenChange={setCancelSurveyDialog}
+          onOpenChange={() => {
+            setCancelSurveyDialog(false);
+          }}
           open={cancelSurveyDialog}
           title="Cancel Survey"
         />

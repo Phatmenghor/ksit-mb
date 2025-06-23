@@ -60,7 +60,10 @@ export function SurveyCancelDialog({
         <div className="flex space-x-3 items-end justify-end">
           <Button
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => {
+              onOpenChange(false);
+              setTimeout(onConfirm, 100);
+            }}
             className="px-8 py-2.5 text-gray-700 border-gray-300 hover:bg-gray-50"
           >
             {cancelText}
