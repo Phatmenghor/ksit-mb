@@ -25,7 +25,7 @@ type Props = {
   loading: boolean;
   title: string;
   mode: "Add" | "Edit";
-  onDiscard: () => void;
+  onDiscard?: () => void;
   back?: string;
 };
 
@@ -143,11 +143,15 @@ export default function StudentForm({
           className="space-y-4"
           noValidate
         >
+          ,
           <CardHeaderSection
             back
             title={title}
             backHref={back ?? ROUTE.STUDENTS.LIST}
-            breadcrumbs={[{ label: "Dashboard", href: ROUTE.DASHBOARD }]}
+            breadcrumbs={[
+              { label: "Dashboard", href: ROUTE.DASHBOARD },
+              { label: "Add single student", href: "" },
+            ]}
           />
           {mode === "Add" && <StudentBasicForm />}
           <StudentProfileUploadCard />

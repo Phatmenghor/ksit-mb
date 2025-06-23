@@ -87,10 +87,6 @@ export default function AddSingleStudentPage() {
       title="Add Student"
       onSubmit={onSubmit}
       loading={loading}
-      back={ROUTE.DASHBOARD}
-      onDiscard={() => {
-        router.back();
-      }}
     />
   );
 }

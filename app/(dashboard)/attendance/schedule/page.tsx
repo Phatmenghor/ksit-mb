@@ -127,10 +127,6 @@ const ClassSchedulePage = () => {
               <BreadcrumbItem>
                 <BreadcrumbPage>Schedule</BreadcrumbPage>
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Class</BreadcrumbPage>
-              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
 

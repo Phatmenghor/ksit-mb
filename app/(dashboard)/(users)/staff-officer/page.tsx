@@ -136,7 +136,7 @@ export default function StuffOfficerListPage() {
       <CardHeaderSection
         breadcrumbs={[
           { label: "Home", href: ROUTE.DASHBOARD },
-          { label: "Stuff-Officer-List", href: ROUTE.USERS.STUFF_OFFICER },
+          { label: "Stuff-Officer-List", href: "" },
         ]}
         searchValue={searchQuery}
         buttonHref={ROUTE.USERS.ADD_STAFF}

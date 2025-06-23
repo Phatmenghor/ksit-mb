@@ -98,10 +98,6 @@ export const ROUTE = {
   REQUEST_DETAIL: (id: string) => `/requests/${id}`,
   REQUEST_UPDATE: (id: string) => `/request/${id}`,
 
-  SETTINGS: {
-    THEME: "/settings/theme",
-  },
-
   MY_CLASS: {
     CLASS: "/my-class",
     MY_SCHEDULE: "/my-schedule",
@@ -171,14 +167,13 @@ export const sidebarRoutes = [
     ],
   },
   {
-    title: "Manage schedule",
-    href: ROUTE.MANAGE_SCHEDULE.DEPARTMENT,
-    icon: Calendar,
-  },
-  {
-    title: "Student score",
-    href: ROUTE.SCORES.STUDENT_SCORE,
-    icon: Database,
+    title: "Survey",
+    icon: FileQuestion,
+    section: "users",
+    subroutes: [
+      { title: "Result List", href: ROUTE.SURVEY.RESULT_LIST },
+      { title: "Manage Q&As", href: ROUTE.SURVEY.MANAGE_QA },
+    ],
   },
   {
     title: "Score submitted",
@@ -190,14 +185,9 @@ export const sidebarRoutes = [
     ],
   },
   {
-    title: "Request",
-    href: ROUTE.REQUESTS,
-    icon: FileText,
-  },
-  {
-    title: "Theme setting",
-    href: ROUTE.SETTINGS.THEME,
-    icon: Palette,
+    title: "Student score",
+    href: ROUTE.SCORES.STUDENT_SCORE,
+    icon: Database,
   },
   {
     title: "Schedule",
@@ -205,19 +195,23 @@ export const sidebarRoutes = [
     icon: Calendar,
   },
   {
+    title: "Manage schedule",
+    href: ROUTE.MANAGE_SCHEDULE.DEPARTMENT,
+    icon: Calendar,
+  },
+
+  {
+    title: "Request",
+    href: ROUTE.REQUESTS,
+    icon: FileText,
+  },
+
+  {
     title: "Payment",
     href: ROUTE.PAYMENT.LIST,
     icon: ScrollText,
   },
-  {
-    title: "Survey",
-    icon: FileQuestion,
-    section: "users",
-    subroutes: [
-      { title: "Result List", href: ROUTE.SURVEY.RESULT_LIST },
-      { title: "Manage Q&As", href: ROUTE.SURVEY.MANAGE_QA },
-    ],
-  },
+
   {
     title: "Role&User permission",
     href: ROUTE.PERMISSIONS,

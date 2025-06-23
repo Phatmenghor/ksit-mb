@@ -62,7 +62,7 @@ export default function ChangePasswordPage() {
           { label: "Dashboard", href: ROUTE.DASHBOARD },
           {
             label: "Change Password",
-            href: ROUTE.USERS.SETTING_CHANGE_PASSWORD,
+            href: "",
           },
         ]}
       />

@@ -65,7 +65,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
                 <BreadcrumbItem>
                   {item.href ? (
                     <BreadcrumbLink
-                      className={index === 0 ? "font-bold" : ""}
+                      className={index === 0 ? "" : ""}
                       href={item.href}
                     >
                       {item.label}
@@ -75,9 +75,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
                   )}
                 </BreadcrumbItem>
                 {index < breadcrumbs.length - 1 && (
-                  <BreadcrumbSeparator
-                    className={index === 0 ? "font-bold" : ""}
-                  />
+                  <BreadcrumbSeparator className={index === 0 ? "" : ""} />
                 )}
               </React.Fragment>
             ))}

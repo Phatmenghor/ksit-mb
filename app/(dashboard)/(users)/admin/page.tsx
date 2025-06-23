@@ -240,7 +240,7 @@ export default function AdminsListPage() {
       <CardHeaderSection
         breadcrumbs={[
           { label: "Home", href: ROUTE.DASHBOARD },
-          { label: "Admin List", href: ROUTE.USERS.ADMIN },
+          { label: "Admin List", href: "" },
         ]}
         searchValue={searchQuery}
         searchPlaceholder="Search..."

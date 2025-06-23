@@ -162,7 +162,7 @@ export default function TeacherForm({
             { label: "Home", href: ROUTE.DASHBOARD },
             {
               label: mode === "Add" ? "Add new" : "Edit teacher",
-              href: back,
+              href: "",
             },
           ]}
         />

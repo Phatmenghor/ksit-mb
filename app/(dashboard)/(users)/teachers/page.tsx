@@ -130,7 +130,7 @@ export default function TeachersListPage() {
       <CardHeaderSection
         breadcrumbs={[
           { label: "Home", href: ROUTE.DASHBOARD },
-          { label: "Teacher List", href: ROUTE.USERS.TEACHERS },
+          { label: "Teacher List", href: "" },
         ]}
         searchValue={searchQuery}
         searchPlaceholder="Search..."
