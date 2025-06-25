@@ -1,4 +1,9 @@
+import { AllSubjectFilterModel } from "@/model/master-data/subject/type-subject-mode";
 import { SurveyMainModel } from "@/model/survey/survey-main-model";
+import {
+  AllSurveyFilterModel,
+  SurveyReportHeadersRequest,
+} from "@/model/survey/survey-result-model";
 import { axiosClientWithAuth } from "@/utils/axios";
 import { SurveyFormDataModel } from "../../model/survey/survey-main-model";
 
@@ -27,6 +32,35 @@ export async function updateSurveyService(data: SurveyMainModel) {
   }
 }
 
+export async function getSurveyReportHeadersService(
+  data?: SurveyReportHeadersRequest
+) {
+  try {
+    const requestBody = data || { hiddenHeaders: [] };
+    const response = await axiosClientWithAuth.post(
+      `/v1/surveys/reports/active/headers`,
+      requestBody
+    );
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching survey report headers:", error);
+    return null;
+  }
+}
+
+export async function getAllSurveyResultService(data: AllSurveyFilterModel) {
+  try {
+    const response = await axiosClientWithAuth.post(
+      `/v1/surveys/reports/active/preview`,
+      data
+    );
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching survey results:", error);
+    return null;
+  }
+}
+
 export async function submitSurveyService(
   scheduleId: number,
   data: SurveyFormDataModel
@@ -47,5 +81,20 @@ export async function submitSurveyService(
 
     console.error("Error submitting survey answer:", error);
     throw error;
+  }
+}
+
+export async function getAllSurveyResultExcelService(
+  data: AllSurveyFilterModel
+) {
+  try {
+    const response = await axiosClientWithAuth.post(
+      `/v1/surveys/reports/active/export`,
+      data
+    );
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching survey results for Excel:", error);
+    return null;
   }
 }

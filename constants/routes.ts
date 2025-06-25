@@ -110,7 +110,7 @@ export const ROUTE = {
     VIEW_PAYMENT: (id: string) => `/view-payment/${id}`,
   },
   SURVEY: {
-    RESULT_LIST: "/result-list",
+    RESULT_LIST: "/survey-result",
     MANAGE_QA: "/manage-question",
     SURVEY_FORM: (id: string) => `/survey-form/${id}`,
   },
