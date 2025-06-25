@@ -146,7 +146,7 @@ export default function AllSchedulePage() {
       <CardHeaderSection
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "Student Score", href: ROUTE.SCORES.STUDENT_SCORE },
+          { label: "Student Score", href: "" },
         ]}
         searchValue={searchQuery}
         searchPlaceholder="Search..."

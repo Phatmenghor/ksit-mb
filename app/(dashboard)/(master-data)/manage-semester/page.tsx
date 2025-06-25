@@ -379,7 +379,7 @@ export default function ManageSemester() {
         onClose={() => setIsDeleteDialogOpen(false)}
         onDelete={handleDeleteSemester}
         title="Delete Semester"
-        description="Are you sure you want to delete the semeseter:"
+        description="Are you sure you want to delete the semester:"
         itemName={semesters?.semester}
         isSubmitting={isSubmitting}
       />

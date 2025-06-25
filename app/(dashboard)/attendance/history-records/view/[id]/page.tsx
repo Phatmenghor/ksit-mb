@@ -18,17 +18,10 @@ import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { getDetailScheduleService } from "@/service/schedule/schedule.service";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
-import Loading from "@/app/(dashboard)/settings/theme/loading";
-import {
-  getAllAttendanceGenerateService,
-  getAttendanceSessionByIdService,
-  getAttendanceSessionService,
-} from "@/service/schedule/attendance.service";
-import {
-  AllAttendanceModel,
-  AttendanceModel,
-} from "@/model/attendance/attendance-get";
+import { getAllAttendanceGenerateService } from "@/service/schedule/attendance.service";
+import { AllAttendanceModel } from "@/model/attendance/attendance-get";
 import { useExportAttendanceHandlers } from "@/components/shared/export/attendance-export-handler";
+import Loading from "@/components/shared/loading";
 
 export default function HistoryRecordDetailPage() {
   const [isInitialized, setIsInitialized] = useState(false);

@@ -24,13 +24,13 @@ import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 import { ScoreSubmitConfirmDialog } from "@/components/dashboard/student-scores/layout/submit-confirm-dialog";
 import { SubmissionEnum } from "@/constants/constant";
 import { formatDate } from "date-fns";
-import Loading from "@/app/(dashboard)/settings/theme/loading";
 import _ from "lodash";
 import { ScoreConfigurationModel } from "@/model/score/submitted-score/submitted-score.response.model";
 import StudentScoresTable from "@/components/dashboard/student-scores/student-scores-table";
 import StudentScoresQuickAction from "@/components/dashboard/student-scores/student-scores-quick-action";
 import StudentScoreAlert from "@/components/dashboard/student-scores/student-scores-alert";
 import RenderModeBasedContent from "@/components/dashboard/student-scores/student-scores-mode-based-content";
+import Loading from "@/components/shared/loading";
 
 export default function StudentScoreDetailsPage() {
   const [isInitialized, setIsInitialized] = useState(false);

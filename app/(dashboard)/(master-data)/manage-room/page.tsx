@@ -50,7 +50,7 @@ export default function ManageRoomPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [room, setRoom] = useState<RoomModel | null>(null);
-  const [allRoomData, setAllRoomtData] = useState<AllRoomModel | null>(null);
+  const [allRoomData, setAllRoomData] = useState<AllRoomModel | null>(null);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [initialData, setInitialData] = useState<RoomFormData | undefined>(
@@ -69,7 +69,7 @@ export default function ManageRoomPage() {
         });
 
         if (response) {
-          setAllRoomtData(response);
+          setAllRoomData(response);
         } else {
           console.error("Failed to fetch rooms:");
         }
@@ -110,7 +110,7 @@ export default function ManageRoomPage() {
     setIsSubmitting(true);
 
     try {
-      const roomtData = {
+      const roomData = {
         name: formData.name.trim(),
         status: formData.status,
       };
@@ -119,10 +119,10 @@ export default function ManageRoomPage() {
 
       if (modalMode === "add") {
         try {
-          response = await createRoomService(roomtData);
+          response = await createRoomService(roomData);
 
           if (response) {
-            setAllRoomtData((prevData) => {
+            setAllRoomData((prevData) => {
               if (!prevData) return null;
 
               const updatedContent = response
@@ -144,10 +144,10 @@ export default function ManageRoomPage() {
         }
       } else if (modalMode === "edit" && formData.id) {
         try {
-          response = await updateRoomService(formData.id, roomtData);
+          response = await updateRoomService(formData.id, roomData);
 
           if (response) {
-            setAllRoomtData((prevData) => {
+            setAllRoomData((prevData) => {
               if (!prevData) return null;
 
               const updatedContent = prevData.content.map((dept) =>
@@ -182,7 +182,7 @@ export default function ManageRoomPage() {
       const response = await deletedRoomService(room.id);
 
       if (response) {
-        setAllRoomtData((prevData) => {
+        setAllRoomData((prevData) => {
           if (!prevData) return null;
 
           const updatedContent = prevData.content.filter(

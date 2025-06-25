@@ -343,7 +343,7 @@ export default function ManageMajorPage() {
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onDelete={handleDeleteMajor}
-        title="Delete Mojor"
+        title="Delete Major"
         description="Are you sure you want to delete the major:"
         itemName={majors?.name}
         isSubmitting={isSubmitting}

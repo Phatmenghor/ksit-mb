@@ -7,7 +7,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { ROUTE } from "@/constants/routes";
@@ -18,8 +17,6 @@ import {
   Clock,
   Users,
   MapPin,
-  Edit,
-  Pen,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -31,10 +28,7 @@ import {
 } from "@/constants/constant";
 import Loading from "@/components/shared/loading";
 import { toast } from "sonner";
-import {
-  getAllMyScheduleService,
-  getAllScheduleService,
-} from "@/service/schedule/schedule.service";
+import { getAllMyScheduleService } from "@/service/schedule/schedule.service";
 import { AllScheduleModel } from "@/model/attendance/schedule/schedule-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
@@ -85,7 +79,11 @@ const ScheduleAllPage = () => {
           ...filters,
         };
 
+        console.log("##Fetching schedule with filters:", baseFilters);
+
         const response = await getAllMyScheduleService(baseFilters);
+
+        console.log("##Schedule data received:", response);
         setScheduleData(response);
       } catch (error) {
         console.error("Error fetching schedule data:", error);
@@ -289,35 +287,38 @@ const ScheduleAllPage = () => {
 
                           <Separator className="my-2" />
 
-                          <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              <span>
-                                {sche.startTime.hour} - {sche.endTime.hour}
-                              </span>
+                          <div className="flex flex-wrap justify-between items-center gap-4 mt-3 text-sm text-muted-foreground">
+                            {/* Left side: icons */}
+                            <div className="flex flex-wrap gap-4 items-center">
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                <span>
+                                  {sche.startTime.hour ?? "---"} -{" "}
+                                  {sche.endTime.hour ?? "---"}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Users className="h-4 w-4" />
+                                <span>{/* teacher name logic */}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-4 w-4" />
+                                <span>{sche.room.name || "- - -"}</span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Users className="h-4 w-4" />
-                              <span>
-                                {(sche.teacher &&
-                                  (sche.teacher.englishFirstName ||
-                                  sche.teacher.englishLastName
-                                    ? `${sche.teacher.englishFirstName || ""} ${
-                                        sche.teacher.englishLastName || ""
-                                      }`.trim()
-                                    : sche.teacher.khmerFirstName ||
-                                      sche.teacher.khmerLastName
-                                    ? `${sche.teacher.khmerFirstName || ""} ${
-                                        sche.teacher.khmerLastName || ""
-                                      }`.trim()
-                                    : "- - -")) ||
-                                  "- - -"}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
-                              <span>{sche.room.name || "- - -"}</span>
-                            </div>
+
+                            {/* Right side: button */}
+                            <Button
+                              className="bg-yellow-600 underline text-white hover:bg-yellow-700"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(
+                                  ROUTE.SURVEY.SURVEY_FORM(String(sche.id))
+                                );
+                              }}
+                            >
+                              Take Survey Now!
+                            </Button>
                           </div>
                         </div>
                       </div>

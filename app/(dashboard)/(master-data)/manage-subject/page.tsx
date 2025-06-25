@@ -123,7 +123,7 @@ export default function ManageSubjectPage() {
     setIsSubmitting(true);
 
     try {
-      const roomtData = {
+      const roomData = {
         name: formData.name.trim(),
 
         status: formData.status,
@@ -133,7 +133,7 @@ export default function ManageSubjectPage() {
 
       if (modalMode === "add") {
         try {
-          response = await createSubjectService(roomtData);
+          response = await createSubjectService(roomData);
 
           if (response) {
             setAllSubjectData((prevData) => {
@@ -157,7 +157,7 @@ export default function ManageSubjectPage() {
         }
       } else if (modalMode === "edit" && formData.id) {
         try {
-          response = await updateSubjectService(formData.id, roomtData);
+          response = await updateSubjectService(formData.id, roomData);
           if (response) {
             setAllSubjectData((prevData) => {
               if (!prevData) return null;

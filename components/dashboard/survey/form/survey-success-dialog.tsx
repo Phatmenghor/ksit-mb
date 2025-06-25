@@ -90,7 +90,7 @@ export default function SurveySuccessDialog({
             {/* Done Button */}
             <Button
               className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3"
-              onClick={() => router.push("/")}
+              onClick={() => router.back()}
             >
               Done
             </Button>

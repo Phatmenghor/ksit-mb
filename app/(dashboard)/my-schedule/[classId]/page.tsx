@@ -52,7 +52,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 
 const MySchedulePage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");

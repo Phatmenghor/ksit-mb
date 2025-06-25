@@ -112,6 +112,7 @@ export const ROUTE = {
   SURVEY: {
     RESULT_LIST: "/result-list",
     MANAGE_QA: "/manage-question",
+    SURVEY_FORM: (id: string) => `/survey-form/${id}`,
   },
 };
 
