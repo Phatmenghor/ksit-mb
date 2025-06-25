@@ -133,9 +133,7 @@ export default function StudentViewPage() {
       </TabsContent>
 
       <TabsContent value="transcript" className="space-y-4 w-full">
-        <Card>
-          <TranscriptTabs studentId={studentDetail?.id} />
-        </Card>
+        <TranscriptTabs studentId={studentDetail?.id} />
       </TabsContent>
     </Tabs>
   );
