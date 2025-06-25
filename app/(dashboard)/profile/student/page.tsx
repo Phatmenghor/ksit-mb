@@ -14,6 +14,7 @@ import PaymentTabs from "@/components/dashboard/users/student/view/tab/student-p
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 import { getStudentByTokenService } from "@/service/user/user.service";
 import { TranscriptTabs } from "@/components/dashboard/users/student/view/tab/student-transcript-tab";
+import { Card } from "@/components/ui/card";
 
 const tabs = [
   {
@@ -121,7 +122,7 @@ export default function StudentViewPage() {
       </TabsContent>
 
       <TabsContent value="transcript" className="space-y-4 w-full">
-        <TranscriptTabs />
+        <TranscriptTabs studentId={studentDetail?.id} />
       </TabsContent>
     </Tabs>
   );

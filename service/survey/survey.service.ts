@@ -1,4 +1,9 @@
+import { AllSubjectFilterModel } from "@/model/master-data/subject/type-subject-mode";
 import { SurveyMainModel } from "@/model/survey/survey-main-model";
+import {
+  AllSurveyFilterModel,
+  SurveyReportHeadersRequest,
+} from "@/model/survey/survey-result-model";
 import { axiosClientWithAuth } from "@/utils/axios";
 import { SurveyFormDataModel } from "../../model/survey/survey-main-model";
 
