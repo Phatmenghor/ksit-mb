@@ -96,7 +96,7 @@ export default function StudentsListPage() {
   const iconColor = "text-black";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-in fade-in duration-700">
       <CardHeaderSection
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
@@ -129,20 +129,24 @@ export default function StudentsListPage() {
         }
       />
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto mt-4 animate-in fade-in duration-500">
         {isLoading ? (
-          <Loading />
+          <div className="animate-in fade-in duration-300">
+            <Loading />
+          </div>
         ) : (
-          // <CustomTable
-          //   columns={columns}
-          //   isLoading={isLoading}
-          //   data={allStudentData?.content ?? []}
-          // />
-          <Table>
+          <Table className="animate-in slide-in-from-bottom-2 duration-400">
             <TableHeader>
-              <TableRow>
+              <TableRow className="animate-in fade-in duration-300 delay-100">
                 {StudentTablePaymentHeader.map((header, index) => (
-                  <TableHead key={index} className={header.className}>
+                  <TableHead
+                    key={index}
+                    className={`${header.className} animate-in fade-in duration-200`}
+                    style={{
+                      animationDelay: `${150 + index * 50}ms`,
+                      animationFillMode: "backwards",
+                    }}
+                  >
                     {header.label}
                   </TableHead>
                 ))}
@@ -150,7 +154,7 @@ export default function StudentsListPage() {
             </TableHeader>
             <TableBody>
               {allStudentData?.content.length === 0 ? (
-                <TableRow>
+                <TableRow className="animate-in fade-in duration-400 delay-300">
                   <TableCell
                     colSpan={StudentTablePaymentHeader.length}
                     className="text-center py-8 text-muted-foreground"
@@ -166,22 +170,35 @@ export default function StudentsListPage() {
                     index +
                     1;
                   return (
-                    <TableRow key={student.id}>
-                      <TableCell>{indexDisplay}</TableCell>
-                      <TableCell>{student.id || "---"}</TableCell>
-                      <TableCell>
+                    <TableRow
+                      key={student.id}
+                      className="animate-in fade-in slide-in-from-left-1 duration-300 hover:bg-muted/50 transition-colors"
+                      style={{
+                        animationDelay: `${300 + index * 80}ms`,
+                        animationFillMode: "backwards",
+                      }}
+                    >
+                      <TableCell className="transition-colors duration-200">
+                        {indexDisplay}
+                      </TableCell>
+                      <TableCell className="transition-colors duration-200">
+                        {student.id || "---"}
+                      </TableCell>
+                      <TableCell className="transition-colors duration-200">
                         {`${student.khmerFirstName || ""} ${
                           student.khmerLastName || ""
                         }`.trim() || "---"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="transition-colors duration-200">
                         {`${student.englishFirstName || ""} ${
                           student.englishLastName || ""
                         }`.trim() || "---"}
                       </TableCell>
 
-                      <TableCell>{student.gender || "---"}</TableCell>
-                      <TableCell>
+                      <TableCell className="transition-colors duration-200">
+                        {student.gender || "---"}
+                      </TableCell>
+                      <TableCell className="transition-colors duration-200">
                         <div className="flex justify-start space-x-2">
                           <BreadcrumbLink
                             href={ROUTE.PAYMENT.VIEW_PAYMENT(
@@ -193,8 +210,11 @@ export default function StudentsListPage() {
                               size="icon"
                               className={`${iconColor} underline hover:text-blue-600 flex items-center`}
                             >
-                              <Eye size="h-4 w-4" />
-                              <span className="text-sm"> Detail</span>
+                              <Eye className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                              <span className="text-sm transition-all duration-200">
+                                {" "}
+                                Detail
+                              </span>
                             </Button>
                           </BreadcrumbLink>
                         </div>

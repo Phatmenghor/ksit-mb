@@ -208,28 +208,35 @@ export default function RequestPage() {
   };
 
   return (
-    <div className="p-15">
-      <Card>
+    <div className="animate-in fade-in duration-700">
+      <Card className="animate-in slide-in-from-top-4 duration-500">
         <CardContent className="p-6 space-y-2">
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.DASHBOARD}>Home</BreadcrumbLink>
+              <BreadcrumbItem className="animate-in fade-in duration-500 delay-100">
+                <BreadcrumbLink
+                  href={ROUTE.DASHBOARD}
+                  className="transition-all duration-300 hover:text-amber-600 hover:underline hover:underline-offset-4"
+                >
+                  Home
+                </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
+              <BreadcrumbSeparator className="animate-in fade-in duration-500 delay-200" />
+              <BreadcrumbItem className="animate-in fade-in duration-500 delay-300">
                 <BreadcrumbPage>Request List</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <h3 className="text-xl font-bold">Request List</h3>
-          <div className="mb-4 ">
+          <h3 className="text-xl font-bold animate-in slide-in-from-left-4 duration-600 delay-200">
+            Request List
+          </h3>
+          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-in slide-in-from-bottom-4 duration-600 delay-300">
             <div className="relative w-[60%] md:w-3/2">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-all duration-300 group-focus-within:text-amber-500 group-focus-within:scale-110" />
               <Input
                 type="search"
                 placeholder="Search by name or ID..."
-                className="pl-8 w-full"
+                className="pl-8 w-full transition-all duration-300 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:shadow-lg focus:shadow-amber-100/50 hover:shadow-md"
                 value={searchQuery}
                 onChange={handleSearchChange}
               />
@@ -238,14 +245,14 @@ export default function RequestPage() {
         </CardContent>
       </Card>
 
-      <div className="relative flex items-center my-6 ">
+      <div className="relative flex items-center my-6 animate-in slide-in-from-left-6 duration-700 delay-400">
         <Button
           variant="outline"
           size="icon"
-          className="absolute left-0 z-10 rounded-full"
+          className="absolute left-0 z-10 rounded-full transition-all duration-300 hover:bg-amber-50 hover:border-amber-300 hover:shadow-lg hover:scale-110 active:scale-95 group"
           onClick={scrollLeft}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4 transition-all duration-300 group-hover:-translate-x-0.5 group-hover:text-amber-600" />
         </Button>
 
         <div
@@ -262,7 +269,11 @@ export default function RequestPage() {
               <Button
                 key={type.label}
                 variant={isActive ? "default" : "outline"}
-                className="whitespace-nowrap flex items-center gap-2 relative"
+                className={`whitespace-nowrap transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${
+                  selectedType?.value === type.value
+                    ? "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-200/50 scale-105"
+                    : "hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 hover:shadow-lg hover:shadow-amber-100/50 hover:scale-105 hover:-translate-y-1"
+                }`}
                 onClick={() => handleTypeSelect(type)}
                 disabled={isLoadingCounts}
               >
@@ -286,15 +297,24 @@ export default function RequestPage() {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto mt-4">
+      <div className="overflow-x-auto mt-4 animate-in fade-in duration-500">
         {isLoading ? (
-          <Loading />
+          <div className="animate-in fade-in duration-300">
+            <Loading />
+          </div>
         ) : (
-          <Table>
+          <Table className="animate-in slide-in-from-bottom-2 duration-400">
             <TableHeader>
-              <TableRow>
+              <TableRow className="animate-in fade-in duration-300 delay-100">
                 {RequestTableHeader.map((header, index) => (
-                  <TableHead key={index} className={header.className}>
+                  <TableHead
+                    key={index}
+                    className={`${header.className} animate-in fade-in duration-200`}
+                    style={{
+                      animationDelay: `${150 + index * 50}ms`,
+                      animationFillMode: "backwards",
+                    }}
+                  >
                     {header.label}
                   </TableHead>
                 ))}
@@ -302,7 +322,7 @@ export default function RequestPage() {
             </TableHeader>
             <TableBody>
               {requestData?.content.length === 0 ? (
-                <TableRow>
+                <TableRow className="animate-in fade-in duration-400 delay-300">
                   <TableCell
                     colSpan={8}
                     className="text-center py-6 text-muted-foreground"
@@ -315,34 +335,44 @@ export default function RequestPage() {
                   const indexDisplay =
                     ((requestData.pageNo || 1) - 1) * 10 + index + 1;
                   return (
-                    <TableRow key={req.id}>
-                      <TableCell>{indexDisplay}</TableCell>
-                      <TableCell>
+                    <TableRow
+                      key={req.id}
+                      className="animate-in fade-in slide-in-from-left-1 duration-300 hover:bg-muted/50 transition-colors"
+                      style={{
+                        animationDelay: `${300 + index * 80}ms`,
+                        animationFillMode: "backwards",
+                      }}
+                    >
+                      <TableCell className="transition-colors duration-200">
+                        {indexDisplay}
+                      </TableCell>
+                      <TableCell className="transition-colors duration-200">
                         {req.user
                           ? `${req.user?.identifyNumber || "---"}`
                           : "N/A"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="transition-colors duration-200">
                         {req.user
                           ? `${req.user?.englishFirstName || "---"} ${
                               req.user?.englishLastName || "---"
                             }`
                           : "N/A"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="transition-colors duration-200">
                         {req.user
                           ? `${formatGender(req.user?.gender) || "---"}`
                           : "N/A"}
                       </TableCell>
-                      <TableCell>{truncateText(req?.title, 20)}</TableCell>
-                      <TableCell>
+                      <TableCell className="transition-colors duration-200">
+                        {truncateText(req?.title, 20)}
+                      </TableCell>
+                      <TableCell className="transition-colors duration-200">
                         {formatDate(req?.createdAt || "---")}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="transition-colors duration-200">
                         {getStatusBadge(req?.status || "---")}
                       </TableCell>
-
-                      <TableCell>
+                      <TableCell className="transition-colors duration-200">
                         <div className="flex justify-start space-x-2">
                           <Button
                             onClick={() => {
@@ -351,11 +381,13 @@ export default function RequestPage() {
                               );
                             }}
                             variant="outline"
-                            className="flex items-center gap-2 border-none bg-transparent"
+                            className="flex items-center gap-2 border-none bg-transparent transition-all duration-200 hover:bg-muted hover:scale-105"
                             disabled={isSubmitting}
                           >
-                            <Eye className="h-4 w-4" />
-                            <span className="border-b-2">Detail</span>
+                            <Eye className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                            <span className="border-b-2 transition-all duration-200 hover:border-primary">
+                              Detail
+                            </span>
                           </Button>
                         </div>
                       </TableCell>

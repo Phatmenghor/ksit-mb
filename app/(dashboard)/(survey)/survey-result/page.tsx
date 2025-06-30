@@ -390,7 +390,7 @@ export default function SurveyResultPage() {
       <CardHeaderSection
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "Survey Result", href: ROUTE.SURVEY.RESULT_LIST },
+          { label: "Survey Result", href: "" },
         ]}
         title="Survey Result"
         customSelect={

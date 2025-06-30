@@ -232,9 +232,7 @@ export default function ScoreSettingPage() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink href={ROUTE.SCORES.SETTINGS}>
-                    Score Setting
-                  </BreadcrumbLink>
+                  <BreadcrumbLink>Score Setting</BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

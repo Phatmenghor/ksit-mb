@@ -68,28 +68,35 @@ export default function DepartmentListPage() {
     router.push(ROUTE.MANAGE_SCHEDULE.DEPARTMENT_CLASS + `/${departmentId}`);
   }
   return (
-    <div>
-      <Card>
+    <div className="animate-in fade-in duration-700">
+      <Card className="animate-in slide-in-from-top-4 duration-500">
         <CardContent className="p-6 space-y-2">
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.DASHBOARD}>Home</BreadcrumbLink>
+              <BreadcrumbItem className="animate-in fade-in duration-500 delay-100">
+                <BreadcrumbLink
+                  href={ROUTE.DASHBOARD}
+                  className="transition-all duration-300 hover:text-amber-600 hover:underline hover:underline-offset-4"
+                >
+                  Home
+                </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Departmemt List</BreadcrumbPage>
+              <BreadcrumbSeparator className="animate-in fade-in duration-500 delay-200" />
+              <BreadcrumbItem className="animate-in fade-in duration-500 delay-300">
+                <BreadcrumbPage>Department List</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <h3 className="text-xl font-bold">Manage Schedule</h3>
-          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="relative w-full md:w-1/2">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <h3 className="text-xl font-bold animate-in slide-in-from-left-4 duration-600 delay-200">
+            Manage Schedule
+          </h3>
+          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-in slide-in-from-bottom-4 duration-600 delay-300">
+            <div className="relative w-full md:w-1/2 group">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-all duration-300 group-focus-within:text-amber-500 group-focus-within:scale-110" />
               <Input
                 type="search"
                 placeholder="Search department..."
-                className="pl-8 w-full"
+                className="pl-8 w-full transition-all duration-300 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:shadow-lg focus:shadow-amber-100/50 hover:shadow-md"
                 value={searchQuery}
                 onChange={handleSearchChange}
               />
@@ -99,10 +106,12 @@ export default function DepartmentListPage() {
       </Card>
 
       {isLoading ? (
-        <Loading />
+        <div className="animate-in fade-in duration-300 delay-400">
+          <Loading />
+        </div>
       ) : (
-        <div className="bg-white rounded-lg p-6 shadow-sm border mt-4">
-          <div className="mb-6">
+        <div className="bg-white rounded-lg p-6 shadow-sm border mt-4 animate-in slide-in-from-bottom-4 duration-600 delay-400">
+          <div className="mb-6 animate-in fade-in duration-500 delay-500">
             <p className="text-muted-foreground font-bold">
               Total Department: {allDepartmentData?.totalElements || 0}
             </p>
@@ -110,27 +119,41 @@ export default function DepartmentListPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {allDepartmentData?.content?.length === 0 ? (
-              <p>No Department found</p>
+              <div className="col-span-full animate-in fade-in duration-500 delay-600">
+                <p className="text-center text-muted-foreground py-8">
+                  No Department found
+                </p>
+              </div>
             ) : (
-              allDepartmentData?.content?.map((department) => (
-                <DepartmentCard
-                  onClick={() => onClickDepartmentCard(department.id)}
+              allDepartmentData?.content?.map((department, index) => (
+                <div
                   key={department.id}
-                  name={department.name}
-                  imageUrl={department.urlLogo}
-                  imageName={department.name}
-                />
+                  className="animate-in slide-in-from-bottom-4 duration-500"
+                  style={{
+                    animationDelay: `${600 + index * 100}ms`,
+                    animationFillMode: "backwards",
+                  }}
+                >
+                  <DepartmentCard
+                    onClick={() => onClickDepartmentCard(department.id)}
+                    name={department.name}
+                    imageUrl={department.urlLogo}
+                    imageName={department.name}
+                  />
+                </div>
               ))
             )}
           </div>
         </div>
       )}
+
       {!isLoading && allDepartmentData && (
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex justify-end animate-in fade-in slide-in-from-bottom-2 duration-500 delay-700">
           <PaginationPage
             currentPage={allDepartmentData.pageNo}
             totalPages={allDepartmentData.totalPages}
             onPageChange={(page: number) => loadDepartments({ pageNo: page })}
+            className="transition-all duration-300"
           />
         </div>
       )}

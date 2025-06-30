@@ -18,7 +18,7 @@ function DepartmentCard({
   return (
     <Card
       onClick={onClick}
-      className="flex items-center justify-between p-4 hover:bg-muted/20 transition-colors cursor-pointer"
+      className="flex items-center justify-between p-4 hover:bg-muted/20 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-100/50"
     >
       <div className="flex items-center gap-4">
         <DepartmentIcon imageUrl={imageUrl} imageName={imageName} />

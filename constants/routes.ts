@@ -164,7 +164,6 @@ export const sidebarRoutes = [
     subroutes: [
       { title: "Class Schedule", href: ROUTE.ATTENDANCE.CLASS_SCHEDULE },
       { title: "History Records", href: ROUTE.ATTENDANCE.HISTORY_RECORD },
-      { title: "Student Records", href: ROUTE.ATTENDANCE.STUDENT_RECORD },
     ],
   },
   {
