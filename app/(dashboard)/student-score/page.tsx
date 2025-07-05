@@ -43,6 +43,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
+import { AppIcons } from "@/constants/icons/icon";
 
 export default function AllSchedulePage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -168,7 +169,15 @@ export default function AllSchedulePage() {
               value={selectedSemester}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a semester" />
+                <img
+                  src={AppIcons.Filter}
+                  alt="Time Icon"
+                  className="h-4 w-4 text-muted-foreground"
+                />
+                <SelectValue
+                  className="underline underline-offset-1"
+                  placeholder="Select a semester"
+                />
               </SelectTrigger>
               <SelectContent>
                 {SemesterFilter.map((semester) => (
@@ -279,7 +288,7 @@ export default function AllSchedulePage() {
                             <div className="flex items-center gap-1 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">
                               <Clock className="h-4 w-4 transition-all duration-300 group-hover:text-amber-500 group-hover:rotate-12 group-hover:scale-110" />
                               <span className="transition-all duration-300 group-hover:font-medium">
-                                {sche.startTime.hour} - {sche.endTime.hour}
+                                {sche.startTime} - {sche.endTime}
                               </span>
                             </div>
                             <div className="flex items-center gap-1 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">

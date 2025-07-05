@@ -119,7 +119,7 @@ export const useExportScoreHandlers = (
           credit: schedule?.course?.credit ?? 0,
           degree: schedule?.classes?.degree ?? "N/A",
           department: schedule?.classes?.major?.department?.name ?? "N/A",
-          levelYear: schedule?.academyYear ?? "N/A",
+          levelYear: schedule?.classes.academyYear ?? "N/A",
           major: schedule?.classes?.major?.name ?? "N/A",
           yearOfStudy: new Date().getFullYear().toString(),
           orientation: options?.orientation ?? "landscape",

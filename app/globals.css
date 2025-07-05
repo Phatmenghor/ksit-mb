@@ -58,8 +58,8 @@
     --sidebar-ring: 221 83% 53%;
 
     /* Table specific colors */
-    --table-header-bg: oklch(0.4 0.005 285.823);
-    --table-header-text: oklch(0.985 0 0);
+    --table-header-bg: #000000; /* Pure black */
+    --table-header-text: #ffffff; /* Pure white */
     --table-border: oklch(0.8 0.004 286.32);
     --table-border-dark: oklch(0.7 0.004 286.32);
     --table-row-even: oklch(0.98 0.001 286.375);
@@ -104,11 +104,11 @@
     @apply sticky top-0 z-10;
   }
 
-  /* Table header cells with gray-600 background and white text */
+  /* Table header cells with pure black background and white text */
   th {
     @apply px-4 py-3 text-left font-semibold text-sm;
-    background-color: black; /* gray-600 */
-    color: #ffffff !important;
+    background-color: #000000 !important; /* Pure black with !important */
+    color: #ffffff !important; /* Pure white text */
     white-space: nowrap;
     box-sizing: border-box;
     border-left: 1px solid #9ea0a2;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -46,24 +46,23 @@ import { RoomModel } from "@/model/master-data/room/all-room-model";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
 import { SemesterModel } from "@/model/master-data/semester/semester-model";
 import { StaffModel } from "@/model/user/staff/staff.respond.model";
-import {
-  DayEnum,
-  StatusEnum,
-  YearLevelEnum,
-  yearLevels,
-} from "@/constants/constant";
+import { DayEnum, StatusEnum, YearLevelEnum } from "@/constants/constant";
 import { Constants } from "@/constants/text-string";
 import {
   updateScheduleService,
   getDetailScheduleService,
+  getAllSimpleScheduleService,
 } from "@/service/schedule/schedule.service";
 import { toast } from "sonner";
 import { getAllSemesterService } from "@/service/master-data/semester.service";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
+import SchedulePreviewTable from "@/components/dashboard/manage-schedule/schedule-preview-table";
+import ScheduleTeacherTable from "@/components/dashboard/manage-schedule/schedule-teacher-table";
+import DuplicateScheduleModal from "@/components/dashboard/manage-schedule/duplicate-schedule-modal";
+import { ConfirmDialog } from "@/components/shared/custom-confirm-dialog";
 
 const formSchema = z.object({
   classId: z.number().min(1, "Class is required"),
-  departmentId: z.number().min(1, "Department is required"),
   instructorId: z.number().min(1, "Instructor is required"),
   subjectTypeId: z.number().min(1, "Subject type is required"),
   courseId: z.number().min(1, "Course is required"),
@@ -95,17 +94,27 @@ export default function UpdateSchedule() {
   const [selectedRoom, setSelectedRoom] = useState<RoomModel | null>(null);
   const [semesters, setSemesters] = useState<SemesterModel[]>([]);
   const [scheduleData, setScheduleData] = useState<ScheduleModel | null>(null);
+  const [schedulePreviewData, setSchedulePreviewData] = useState<
+    ScheduleModel[]
+  >([]);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
 
   const params = useParams();
   const router = useRouter();
   const scheduleId = Number(params.id || params.classId);
 
+  const getSemesterEnum = useCallback(
+    (id: number) => {
+      const semester = semesters.find((s) => s.id === id);
+      return semester?.semester || "SEMESTER_1";
+    },
+    [semesters]
+  );
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       classId: 0,
-      departmentId: 0,
       instructorId: 0,
       subjectTypeId: 0,
       courseId: 0,
@@ -121,7 +130,9 @@ export default function UpdateSchedule() {
   });
 
   const watchedAcademyYear = form.watch("academyYear");
-
+  const watchedClassId = form.watch("classId");
+  const watchedInstructorId = form.watch("instructorId");
+  const watchedSemesterId = form.watch("semesterId");
   // Fetch existing schedule data first
   useEffect(() => {
     const fetchScheduleData = async () => {
@@ -144,7 +155,6 @@ export default function UpdateSchedule() {
           // Set form values immediately for most fields
           form.reset({
             classId: data.classes?.id || 0,
-            departmentId: data.course?.department?.id || 0,
             instructorId: data.teacher?.id || 0,
             subjectTypeId: data.course?.subject?.id || 0,
             courseId: data.course?.id || 0,
@@ -232,6 +242,105 @@ export default function UpdateSchedule() {
     fetchSemesters();
   }, [watchedAcademyYear, initialDataLoaded, scheduleData, form]);
 
+  const fetchSchedule = useCallback(
+    async (
+      classId: number,
+      instructorId: number,
+      semesterId: number,
+      academyYear: number
+    ) => {
+      if (semesterId === 0 || academyYear === 0) {
+        setSchedulePreviewData([]);
+        return;
+      }
+
+      // Must have either classId or instructorId (but not both as 0)
+      const hasValidClassId = classId && classId > 0;
+      const hasValidInstructorId = instructorId && instructorId > 0;
+
+      if (!hasValidClassId && !hasValidInstructorId) {
+        setSchedulePreviewData([]);
+        return;
+      }
+
+      console.log("Fetching schedule with:", {
+        classId,
+        instructorId,
+        semesterId,
+        academyYear,
+      });
+
+      setIsLoading(true);
+      try {
+        let res = null;
+        const semester = getSemesterEnum(semesterId);
+
+        // Priority: If both are selected, use instructor first
+        if (hasValidInstructorId) {
+          console.log("Fetching by instructor:", instructorId);
+          res = await getAllSimpleScheduleService({
+            classId: hasValidClassId ? classId : undefined, // Include classId if valid
+            teacherId: instructorId,
+            academyYear,
+            semester,
+            status: StatusEnum.ACTIVE,
+          });
+          console.log("Instructor Schedule Preview: ", res);
+        } else if (hasValidClassId) {
+          console.log("Fetching by class:", classId);
+          res = await getAllSimpleScheduleService({
+            classId,
+            academyYear,
+            semester,
+            status: StatusEnum.ACTIVE,
+          });
+          console.log("Class Schedule Preview: ", res);
+        }
+
+        console.log("Schedule API response:", res);
+        setSchedulePreviewData(res);
+      } catch (error) {
+        console.error("Failed to fetch schedule", error);
+        toast.error("Failed to load schedule preview");
+        setSchedulePreviewData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [getSemesterEnum]
+  );
+
+  useEffect(() => {
+    const hasValidSemester = watchedSemesterId > 0;
+    const hasValidYear = watchedAcademyYear > 0;
+    const hasValidClassId = watchedClassId > 0;
+    const hasValidInstructorId = watchedInstructorId > 0;
+    const hasSemesters = semesters.length > 0;
+
+    if (
+      hasValidSemester &&
+      hasValidYear &&
+      hasSemesters &&
+      (hasValidClassId || hasValidInstructorId)
+    ) {
+      fetchSchedule(
+        watchedClassId,
+        watchedInstructorId,
+        watchedSemesterId,
+        watchedAcademyYear
+      );
+    } else {
+      setSchedulePreviewData([]);
+    }
+  }, [
+    watchedClassId,
+    watchedInstructorId,
+    watchedSemesterId,
+    watchedAcademyYear,
+    semesters.length,
+    fetchSchedule, // Add fetchSchedule to dependencies
+  ]);
+
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
 
@@ -259,11 +368,6 @@ export default function UpdateSchedule() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleDepartmentChange = (department: DepartmentModel) => {
-    setSelectedDepartment(department);
-    form.setValue("departmentId", department.id, { shouldValidate: true });
   };
 
   const handleSubjectTypeChange = (subjectType: SubjectModel) => {
@@ -343,13 +447,10 @@ export default function UpdateSchedule() {
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="p-6">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-4"
-            >
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <Card>
+            <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left Column */}
                 <div className="space-y-4">
@@ -365,25 +466,6 @@ export default function UpdateSchedule() {
                           <ComboboxSelectClass
                             dataSelect={selectedClass}
                             onChangeSelected={handleClassChange}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="departmentId"
-                    render={() => (
-                      <FormItem>
-                        <FormLabel>
-                          Department <span className="text-red-500">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <ComboboxSelectDepartment
-                            dataSelect={selectedDepartment}
-                            onChangeSelected={handleDepartmentChange}
                           />
                         </FormControl>
                         <FormMessage />
@@ -618,36 +700,42 @@ export default function UpdateSchedule() {
                   />
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="flex justify-end gap-3 mt-6">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleBackNavigation}
-                  disabled={isSubmitting}
-                  className="px-6"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-green-700 hover:bg-green-800 text-white px-6"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      Updating...
-                    </>
-                  ) : (
-                    "Update Schedule"
-                  )}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+          <SchedulePreviewTable scheduleList={schedulePreviewData} />
+          <ScheduleTeacherTable scheduleList={schedulePreviewData} />
+
+          <Card>
+            <CardContent className="flex justify-end items-center p-4 gap-3">
+              {" "}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleBackNavigation}
+                disabled={isSubmitting}
+                className="px-6"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-green-700 hover:bg-green-800 text-white px-6"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Schedule"
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
     </div>
   );
 }

@@ -1,108 +1,17 @@
 import React from "react";
 import { Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { ScheduleModel } from "@/model/schedules/all-schedule-model";
+import { convertToWeeklySchedule } from "@/utils/map-helper/schedule";
 
-const ScheduleTeacherTable = () => {
-  const scheduleData = {
-    classInfo: {
-      class: "25401",
-      semester: "1",
-      academicYear: "2025",
-    },
-    weeklySchedule: [
-      {
-        day: "Monday",
-        classes: [
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-        ],
-      },
-      {
-        day: "Tuesday",
-        classes: [
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-        ],
-      },
-      {
-        day: "Wednesday",
-        classes: [
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-        ],
-      },
-      {
-        day: "Thursday",
-        classes: [
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-        ],
-      },
-      {
-        day: "Friday",
-        classes: [
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-        ],
-      },
-      {
-        day: "Saturday",
-        classes: [
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-        ],
-      },
-      {
-        day: "Sunday",
-        classes: [],
-      },
-    ],
-  };
+const ScheduleTeacherTable = ({
+  scheduleList,
+}: {
+  scheduleList: ScheduleModel[];
+}) => {
+  const scheduleData = convertToWeeklySchedule(scheduleList);
 
+  console.log("Preview schedule: ", scheduleData);
   const TableHeader = () => (
     <thead>
       <tr className="bg-black text-white">
@@ -116,10 +25,12 @@ const ScheduleTeacherTable = () => {
 
   const TableRow = ({ classInfo }: any) => (
     <tr className="border-b border-gray-200 hover:bg-gray-50">
-      <td className="px-4 py-3 text-gray-700">{classInfo.subjectCode}</td>
-      <td className="px-4 py-3 text-gray-700">{classInfo.subject}</td>
-      <td className="px-4 py-3 text-gray-700">{classInfo.datetime}</td>
-      <td className="px-4 py-3 text-gray-700">{classInfo.room}</td>
+      <td className="px-4 py-3 text-gray-700">
+        {classInfo.subjectCode || "---"}
+      </td>
+      <td className="px-4 py-3 text-gray-700">{classInfo.subject || "---"}</td>
+      <td className="px-4 py-3 text-gray-700">{classInfo.datetime || "---"}</td>
+      <td className="px-4 py-3 text-gray-700">{classInfo.room || "---"}</td>
     </tr>
   );
 
@@ -136,9 +47,9 @@ const ScheduleTeacherTable = () => {
               Schedule For teacher
             </h1>
             <p className="text-sm text-gray-600">
-              Class: {scheduleData.classInfo.class} | Semester:{" "}
-              {scheduleData.classInfo.semester} | Academy year:{" "}
-              {scheduleData.classInfo.academicYear}
+              Class: {scheduleData.classInfo?.class || "---"} | Semester:{" "}
+              {scheduleData.classInfo?.semester || "---"} | Academic Year:{" "}
+              {scheduleData.classInfo?.academicYear || "---"}
             </p>
           </div>
         </div>
@@ -151,34 +62,31 @@ const ScheduleTeacherTable = () => {
                 {daySchedule.day}
               </h2>
 
-              {daySchedule.classes.length > 0 ? (
-                <div className="overflow-x-auto shadow-sm border border-gray-200 rounded-lg">
-                  <table className="w-full">
-                    <TableHeader />
-                    <tbody className="bg-white">
-                      {daySchedule.classes.map((classInfo, classIndex) => (
-                        <TableRow key={classIndex} classInfo={classInfo} />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="overflow-x-auto shadow-sm border border-gray-200 rounded-lg">
-                  <table className="w-full">
-                    <TableHeader />
-                    <tbody className="bg-white">
-                      <tr>
-                        <td
-                          colSpan={6}
-                          className="px-4 py-8 text-center text-gray-500"
-                        >
-                          Schedule no record
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              <div className="overflow-x-auto shadow-sm border border-gray-200 rounded-lg">
+                <table className="w-full">
+                  <TableHeader />
+                  <tbody className="bg-white">
+                    {daySchedule.classes.length > 0 ? (
+                      daySchedule.classes.map(
+                        (classInfo: any, classIndex: number) => (
+                          <TableRow key={classIndex} classInfo={classInfo} />
+                        )
+                      )
+                    ) : (
+                      <TableRow
+                        classInfo={{
+                          subjectCode: "---",
+                          subject: "---",
+                          credit: "---",
+                          instructor: "---",
+                          datetime: "---",
+                          room: "---",
+                        }}
+                      />
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ))}
         </div>

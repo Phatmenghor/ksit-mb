@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -47,50 +47,107 @@ import { SemesterModel } from "@/model/master-data/semester/semester-model";
 import { StaffModel } from "@/model/user/staff/staff.respond.model";
 import { DayEnum, StatusEnum, YearLevelEnum } from "@/constants/constant";
 import { Constants } from "@/constants/text-string";
-import { createScheduleService } from "@/service/schedule/schedule.service";
+import {
+  createScheduleService,
+  getAllSimpleScheduleService,
+} from "@/service/schedule/schedule.service";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { getAllSemesterService } from "@/service/master-data/semester.service";
+import SchedulePreviewTable from "@/components/dashboard/manage-schedule/schedule-preview-table";
+import ScheduleTeacherTable from "@/components/dashboard/manage-schedule/schedule-teacher-table";
+import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 
-const formSchema = z.object({
-  classId: z.number().min(1, "Class is required"),
-  departmentId: z.number().min(1, "Department is required"),
-  instructorId: z.number().min(1, "Instructor is required"),
-  subjectTypeId: z.number().min(1, "Subject type is required"),
-  day: z.string().min(1, "Please select a day"),
-  academyYear: z.number({
-    required_error: "Academy year is required",
-  }),
-  startTime: z.string().min(1, "Please select start time"),
-  endTime: z.string().min(1, "Please select end time"),
-  semesterId: z.number().min(1, "Semester is required"),
-  roomId: z.number().min(1, "Room is required"),
-  status: z.literal(Constants.ACTIVE),
-  yearLevel: z.nativeEnum(YearLevelEnum, {
-    required_error: "Year level is required",
-  }),
-});
+// Enhanced form schema with better validation
+const formSchema = z
+  .object({
+    classId: z.number().min(0, "Class is required"),
+    instructorId: z.number().min(0, "Instructor is required"),
+    subjectTypeId: z.number().min(1, "Subject type is required"),
+    day: z.string().min(1, "Please select a day"),
+    academyYear: z
+      .number({
+        required_error: "Academy year is required",
+      })
+      .min(2000, "Invalid academy year")
+      .max(2100, "Invalid academy year"),
+    startTime: z
+      .string()
+      .min(1, "Please select start time")
+      .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
+    endTime: z
+      .string()
+      .min(1, "Please select end time")
+      .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
+    semesterId: z.number().min(0, "Semester is required"),
+    roomId: z.number().min(1, "Room is required"),
+    status: z.literal(Constants.ACTIVE),
+    yearLevel: z.nativeEnum(YearLevelEnum, {
+      required_error: "Year level is required",
+    }),
+  })
+  .refine(
+    (data) => {
+      // Validate that end time is after start time
+      const start = new Date(`1970-01-01T${data.startTime}`);
+      const end = new Date(`1970-01-01T${data.endTime}`);
+      return end > start;
+    },
+    {
+      message: "End time must be after start time",
+      path: ["endTime"],
+    }
+  );
 
-export default function AddSchedule() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoadingSemesters, setIsLoadingSemesters] = useState(false);
-  const [selectedDepartment, setSelectedDepartment] =
-    useState<DepartmentModel | null>(null);
+// Custom hook for managing form selections
+const useFormSelections = () => {
   const [selectedSubjectType, setSelectedSubjectType] =
     useState<SubjectModel | null>(null);
   const [selectedInstructor, setSelectedInstructor] =
     useState<StaffModel | null>(null);
   const [selectedClass, setSelectedClass] = useState<ClassModel | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<RoomModel | null>(null);
+
+  const resetSelections = useCallback(() => {
+    setSelectedSubjectType(null);
+    setSelectedInstructor(null);
+    setSelectedClass(null);
+    setSelectedRoom(null);
+  }, []);
+
+  return {
+    selectedSubjectType,
+    setSelectedSubjectType,
+    selectedInstructor,
+    setSelectedInstructor,
+    selectedClass,
+    setSelectedClass,
+    selectedRoom,
+    setSelectedRoom,
+    resetSelections,
+  };
+};
+
+export default function AddSchedule() {
+  // State management
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingSemesters, setIsLoadingSemesters] = useState(false);
+  const [isSchedulePreviewAvailable, setIsSchedulePreviewAvailable] =
+    useState(false);
+  const [isTeacherPreviewAvailable, setIsTeacherPreviewAvailable] =
+    useState(false);
+  const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
+  const [scheduleData, setScheduleData] = useState<ScheduleModel[]>([]);
   const [semesters, setSemesters] = useState<SemesterModel[]>([]);
 
   const router = useRouter();
+  const selections = useFormSelections();
 
+  // Form setup with better default values
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       classId: 0,
-      departmentId: 0,
       instructorId: 0,
       subjectTypeId: 0,
       day: "",
@@ -101,39 +158,163 @@ export default function AddSchedule() {
       roomId: 0,
       status: Constants.ACTIVE,
     },
+    mode: "onChange", // Enable real-time validation
   });
 
+  // Watch form values for reactive updates - separate watches for better reactivity
   const watchedAcademyYear = form.watch("academyYear");
+  const watchedClassId = form.watch("classId");
+  const watchedInstructorId = form.watch("instructorId");
+  const watchedSemesterId = form.watch("semesterId");
 
-  // Fetch semesters when academy year changes
-  useEffect(() => {
-    const fetchSemesters = async () => {
-      if (!watchedAcademyYear) return;
+  // Memoized semester enum lookup
+  const getSemesterEnum = useCallback(
+    (id: number) => {
+      const semester = semesters.find((s) => s.id === id);
+      return semester?.semester || "SEMESTER_1";
+    },
+    [semesters]
+  );
 
-      setIsLoadingSemesters(true);
-      try {
-        const result = await getAllSemesterService({
-          academyYear: watchedAcademyYear,
-          status: StatusEnum.ACTIVE,
-        });
+  // Optimized semester fetching with proper cleanup
+  const fetchSemesters = useCallback(async (academyYear: number) => {
+    if (!academyYear) return;
 
-        if (result?.content) {
-          setSemesters(result.content);
-        }
-      } catch (error) {
-        console.error("Error fetching semesters:", error);
-        toast.error("Failed to load semesters");
-      } finally {
-        setIsLoadingSemesters(false);
+    setIsLoadingSemesters(true);
+    try {
+      const result = await getAllSemesterService({
+        academyYear,
+        status: StatusEnum.ACTIVE,
+      });
+
+      if (result?.content) {
+        setSemesters(result.content);
+      } else {
+        setSemesters([]);
+        toast.warning("No semesters found for the selected year");
       }
-    };
+    } catch (error) {
+      console.error("Error fetching semesters:", error);
+      toast.error("Failed to load semesters");
+      setSemesters([]);
+    } finally {
+      setIsLoadingSemesters(false);
+    }
+  }, []);
 
-    fetchSemesters();
+  // Optimized schedule fetching with proper loading states
+  const fetchSchedule = useCallback(
+    async (
+      classId: number,
+      instructorId: number,
+      semesterId: number,
+      academyYear: number
+    ) => {
+      if (semesterId === 0 || academyYear === 0) {
+        setScheduleData([]);
+        return;
+      }
 
-    // Reset semester selection when academy year changes
-    form.setValue("semesterId", 0);
-  }, [watchedAcademyYear, form]);
+      // Must have either classId or instructorId (but not both as 0)
+      const hasValidClassId = classId && classId > 0;
+      const hasValidInstructorId = instructorId && instructorId > 0;
 
+      if (!hasValidClassId && !hasValidInstructorId) {
+        setScheduleData([]);
+        return;
+      }
+
+      console.log("Fetching schedule with:", {
+        classId,
+        instructorId,
+        semesterId,
+        academyYear,
+      });
+
+      setIsLoadingSchedule(true);
+      try {
+        let res = null;
+        const semester = getSemesterEnum(semesterId);
+
+        // Priority: If both are selected, use instructor first
+        if (hasValidInstructorId) {
+          console.log("Fetching by instructor:", instructorId);
+          res = await getAllSimpleScheduleService({
+            classId: hasValidClassId ? classId : undefined, // Include classId if valid
+            teacherId: instructorId,
+            academyYear,
+            semester,
+            status: StatusEnum.ACTIVE,
+          });
+          setIsTeacherPreviewAvailable(true);
+          console.log("Instructor Schedule Preview: ", res);
+        } else if (hasValidClassId) {
+          console.log("Fetching by class:", classId);
+          res = await getAllSimpleScheduleService({
+            classId,
+            academyYear,
+            semester,
+            status: StatusEnum.ACTIVE,
+          });
+          console.log("Class Schedule Preview: ", res);
+          setIsSchedulePreviewAvailable(true);
+        }
+
+        console.log("Schedule API response:", res);
+        setScheduleData(res);
+      } catch (error) {
+        console.error("Failed to fetch schedule", error);
+        toast.error("Failed to load schedule preview");
+        setScheduleData([]);
+      } finally {
+        setIsLoadingSchedule(false);
+      }
+    },
+    [getSemesterEnum]
+  );
+
+  // Effect for semester fetching
+  useEffect(() => {
+    if (watchedAcademyYear && watchedAcademyYear > 0) {
+      fetchSemesters(watchedAcademyYear);
+      // Reset semester selection when academy year changes
+      form.setValue("semesterId", 0);
+    }
+  }, [watchedAcademyYear, fetchSemesters, form]);
+
+  // Effect for schedule fetching - trigger immediately when dependencies change
+  useEffect(() => {
+    const hasValidSemester = watchedSemesterId > 0;
+    const hasValidYear = watchedAcademyYear > 0;
+    const hasValidClassId = watchedClassId > 0;
+    const hasValidInstructorId = watchedInstructorId > 0;
+    const hasSemesters = semesters.length > 0;
+
+    if (
+      hasValidSemester &&
+      hasValidYear &&
+      hasSemesters &&
+      (hasValidClassId || hasValidInstructorId)
+    ) {
+      fetchSchedule(
+        watchedClassId,
+        watchedInstructorId,
+        watchedSemesterId,
+        watchedAcademyYear
+      );
+    } else {
+      setScheduleData([]);
+    }
+  }, [
+    watchedClassId,
+    watchedInstructorId,
+    watchedSemesterId,
+    watchedAcademyYear,
+    semesters.length,
+    fetchSchedule, // Add fetchSchedule to dependencies
+  ]);
+
+  // Enhanced form submission with better error handling
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
 
@@ -155,57 +336,112 @@ export default function AddSchedule() {
       const response = await createScheduleService(scheduleData);
 
       if (response) {
-        toast.success("Schedule created successfully");
+        toast.success("Schedule created successfully!");
+        // Reset form and selections
+        form.reset();
+        selections.resetSelections();
         router.back();
       } else {
-        toast.error("Failed to create schedule");
+        throw new Error("Failed to create schedule");
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to create schedule");
+      const errorMessage =
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to create schedule";
+      toast.error(errorMessage);
       console.error("Error creating schedule:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDepartmentChange = (department: DepartmentModel) => {
-    setSelectedDepartment(department);
-    form.setValue("departmentId", department.id, { shouldValidate: true });
-  };
+  const handleSubjectTypeChange = useCallback(
+    (subjectType: SubjectModel) => {
+      selections.setSelectedSubjectType(subjectType);
+      form.setValue("subjectTypeId", subjectType.id, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    },
+    [selections, form]
+  );
 
-  const handleSubjectTypeChange = (subjectType: SubjectModel) => {
-    setSelectedSubjectType(subjectType);
-    form.setValue("subjectTypeId", subjectType.id, { shouldValidate: true });
-  };
+  const handleInstructorChange = useCallback(
+    (instructor: StaffModel) => {
+      console.log("Instructor changed:", instructor);
+      selections.setSelectedInstructor(instructor);
+      form.setValue("instructorId", instructor.id, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      form.trigger("instructorId");
+    },
+    [selections, form]
+  );
 
-  const handleInstructorChange = (instructor: StaffModel) => {
-    setSelectedInstructor(instructor);
-    form.setValue("instructorId", instructor.id, { shouldValidate: true });
-  };
+  const handleClassChange = useCallback(
+    (classData: ClassModel) => {
+      console.log("Class changed:", classData);
+      selections.setSelectedClass(classData);
+      form.setValue("classId", classData.id, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      form.trigger("classId");
+    },
+    [selections, form]
+  );
 
-  const handleClassChange = (classData: ClassModel) => {
-    setSelectedClass(classData);
-    form.setValue("classId", classData.id, { shouldValidate: true });
-  };
+  const handleRoomChange = useCallback(
+    (room: RoomModel) => {
+      selections.setSelectedRoom(room);
+      form.setValue("roomId", room.id, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    },
+    [selections, form]
+  );
 
-  const handleRoomChange = (room: RoomModel) => {
-    setSelectedRoom(room);
-    form.setValue("roomId", room.id, { shouldValidate: true });
-  };
+  const handleYearChange = useCallback(
+    (year: number) => {
+      form.setValue("academyYear", year, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      // Trigger form state update to ensure reactivity
+      form.trigger("academyYear");
+    },
+    [form]
+  );
 
-  const handleYearChange = (year: number) => {
-    form.setValue("academyYear", year, { shouldValidate: true });
-  };
-
-  const handleBackNavigation = () => {
+  const handleBackNavigation = useCallback(() => {
     router.back();
-  };
+  }, [router]);
+
+  // Memoized day options for better performance
+  const dayOptions = useMemo(
+    () => Object.entries(DayEnum).map(([key, value]) => ({ key, value })),
+    []
+  );
+
+  // Memoized year level options
+  const yearLevelOptions = useMemo(
+    () => [
+      { value: YearLevelEnum.FIRST_YEAR, label: "Year 1" },
+      { value: YearLevelEnum.SECOND_YEAR, label: "Year 2" },
+      { value: YearLevelEnum.THIRD_YEAR, label: "Year 3" },
+      { value: YearLevelEnum.FOURTH_YEAR, label: "Year 4" },
+    ],
+    []
+  );
 
   return (
-    <div>
-      {/* Breadcrumb */}
-      <Card className="mb-6">
-        <CardContent className="p-6 space-y-2">
+    <div className="space-y-6">
+      {/* Enhanced Breadcrumb */}
+      <Card>
+        <CardContent className="p-6 space-y-4">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -232,12 +468,13 @@ export default function AddSchedule() {
             </BreadcrumbList>
           </Breadcrumb>
 
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               className="h-8 w-8"
               onClick={handleBackNavigation}
+              disabled={isSubmitting}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -246,21 +483,25 @@ export default function AddSchedule() {
             </h1>
           </div>
 
-          {/* Class Info Card */}
-          <Card className="mb-6 bg-orange-50 border-orange-200">
+          {/* Enhanced Class Info Card */}
+          <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
             <CardContent className="p-4">
-              <div className="flex items-center gap-8">
-                <div className="text-lg font-semibold text-gray-900"></div>
-                <div className="gap-6 text-sm text-gray-600">
+              <div className="flex items-center justify-between">
+                <div className="text-lg font-semibold text-gray-900">
+                  Schedule Information
+                </div>
+                <div className="flex gap-6 text-sm text-gray-600">
                   <div>
                     <span className="font-medium">Degree:</span> Associate
                     Degree
                   </div>
                   <div>
-                    <span className="font-medium">Year:</span> 2025
+                    <span className="font-medium">Current Year:</span>{" "}
+                    {new Date().getFullYear()}
                   </div>
                   <div>
-                    <span className="font-medium">Academy Year:</span> 2025
+                    <span className="font-medium">Academy Year:</span>{" "}
+                    {watchedAcademyYear}
                   </div>
                 </div>
               </div>
@@ -269,15 +510,12 @@ export default function AddSchedule() {
         </CardContent>
       </Card>
 
-      {/* Form */}
-      <Card>
-        <CardContent className="p-6">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-6"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Enhanced Form */}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left Column */}
                 <div className="space-y-4">
                   <FormField
@@ -290,27 +528,8 @@ export default function AddSchedule() {
                         </FormLabel>
                         <FormControl>
                           <ComboboxSelectClass
-                            dataSelect={selectedClass}
+                            dataSelect={selections.selectedClass}
                             onChangeSelected={handleClassChange}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="departmentId"
-                    render={() => (
-                      <FormItem>
-                        <FormLabel>
-                          Department <span className="text-red-500">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <ComboboxSelectDepartment
-                            dataSelect={selectedDepartment}
-                            onChangeSelected={handleDepartmentChange}
                           />
                         </FormControl>
                         <FormMessage />
@@ -328,7 +547,7 @@ export default function AddSchedule() {
                         </FormLabel>
                         <FormControl>
                           <ComboboxSelectSubject
-                            dataSelect={selectedSubjectType}
+                            dataSelect={selections.selectedSubjectType}
                             onChangeSelected={handleSubjectTypeChange}
                           />
                         </FormControl>
@@ -390,17 +609,44 @@ export default function AddSchedule() {
                             {semesters.map((semester) => (
                               <SelectItem
                                 key={semester.id}
-                                value={
-                                  semester.id !== undefined
-                                    ? semester.id.toString()
-                                    : ""
-                                }
+                                value={semester.id?.toString() || ""}
                               >
                                 {semester.semester}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="yearLevel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Year Level <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            disabled={isSubmitting}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select year level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {yearLevelOptions.map(({ value, label }) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -419,7 +665,7 @@ export default function AddSchedule() {
                         </FormLabel>
                         <FormControl>
                           <ComboboxSelectInstructor
-                            dataSelect={selectedInstructor}
+                            dataSelect={selections.selectedInstructor}
                             onChangeSelected={handleInstructorChange}
                           />
                         </FormControl>
@@ -446,7 +692,7 @@ export default function AddSchedule() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {Object.entries(DayEnum).map(([key, value]) => (
+                            {dayOptions.map(({ key, value }) => (
                               <SelectItem key={key} value={key}>
                                 {value}
                               </SelectItem>
@@ -502,7 +748,7 @@ export default function AddSchedule() {
                         </FormLabel>
                         <FormControl>
                           <ComboboxSelectRoom
-                            dataSelect={selectedRoom}
+                            dataSelect={selections.selectedRoom}
                             onChangeSelected={handleRoomChange}
                           />
                         </FormControl>
@@ -510,67 +756,60 @@ export default function AddSchedule() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="yearLevel"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Year Level <span className="text-red-500">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                            disabled={isSubmitting}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select year level" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value={YearLevelEnum.FIRST_YEAR}>
-                                Year 1
-                              </SelectItem>
-                              <SelectItem value={YearLevelEnum.SECOND_YEAR}>
-                                Year 2
-                              </SelectItem>
-                              <SelectItem value={YearLevelEnum.THIRD_YEAR}>
-                                Year 3
-                              </SelectItem>
-                              <SelectItem value={YearLevelEnum.FOURTH_YEAR}>
-                                Year 4
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-3 pt-6">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-green-700 hover:bg-green-800 text-white px-6"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      Creating...
-                    </>
-                  ) : (
-                    "Create"
-                  )}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+          {/* Enhanced Schedule Preview with Loading States */}
+          {isLoadingSchedule && (
+            <Card>
+              <CardContent className="p-6 text-center">
+                <Loader2 className="mx-auto h-6 w-6 animate-spin" />
+                <p className="mt-2 text-sm text-gray-600">
+                  Loading schedule preview...
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {isSchedulePreviewAvailable && (
+            <SchedulePreviewTable scheduleList={scheduleData} />
+          )}
+          {isTeacherPreviewAvailable && (
+            <ScheduleTeacherTable scheduleList={scheduleData} />
+          )}
+
+          {/* Enhanced Action Buttons */}
+          <Card>
+            <CardContent className="flex justify-end items-center p-4 gap-3">
+              {" "}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleBackNavigation}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting || !form.formState.isValid}
+                className="bg-green-700 hover:bg-green-800 text-white px-6 min-w-[100px]"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Schedule"
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
     </div>
   );
 }

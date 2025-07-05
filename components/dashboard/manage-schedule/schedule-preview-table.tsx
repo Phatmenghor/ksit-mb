@@ -1,107 +1,20 @@
 import React from "react";
 import { Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { ScheduleModel } from "@/model/schedules/all-schedule-model";
+import { convertToWeeklySchedule } from "@/utils/map-helper/schedule";
 
-const SchedulePreviewTable = () => {
-  const scheduleData = {
-    classInfo: {
-      class: "25401",
-      semester: "1",
-      academicYear: "2025",
-    },
-    weeklySchedule: [
-      {
-        day: "Monday",
-        classes: [
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-        ],
-      },
-      {
-        day: "Tuesday",
-        classes: [
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-        ],
-      },
-      {
-        day: "Wednesday",
-        classes: [
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-        ],
-      },
-      {
-        day: "Thursday",
-        classes: [
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-        ],
-      },
-      {
-        day: "Friday",
-        classes: [
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-        ],
-      },
-      {
-        day: "Saturday",
-        classes: [
-          {
-            subjectCode: "123412421",
-            subject: "Name Subject",
-            credit: "3(210)",
-            instructor: "Name Instructor",
-            datetime: "08:00:00 - 12:00:00",
-            room: "Name Room",
-          },
-        ],
-      },
-      {
-        day: "Sunday",
-        classes: [],
-      },
-    ],
-  };
+const SchedulePreviewTable = ({
+  scheduleList,
+}: {
+  scheduleList: ScheduleModel[];
+}) => {
+  console.log("SchedulePreviewTable received:", scheduleList);
+  console.log("Type:", typeof scheduleList);
+  console.log("Is array:", Array.isArray(scheduleList));
+
+  const scheduleData = convertToWeeklySchedule(scheduleList);
+  console.log("Converted schedule data:", scheduleData);
 
   const TableHeader = () => (
     <thead>
@@ -118,12 +31,16 @@ const SchedulePreviewTable = () => {
 
   const TableRow = ({ classInfo }: any) => (
     <tr className="border-b border-gray-200 hover:bg-gray-50">
-      <td className="px-4 py-3 text-gray-700">{classInfo.subjectCode}</td>
-      <td className="px-4 py-3 text-gray-700">{classInfo.subject}</td>
-      <td className="px-4 py-3 text-gray-700">{classInfo.credit}</td>
-      <td className="px-4 py-3 text-blue-600">{classInfo.instructor}</td>
-      <td className="px-4 py-3 text-gray-700">{classInfo.datetime}</td>
-      <td className="px-4 py-3 text-gray-700">{classInfo.room}</td>
+      <td className="px-4 py-3 text-gray-700">
+        {classInfo.subjectCode || "---"}
+      </td>
+      <td className="px-4 py-3 text-gray-700">{classInfo.subject || "---"}</td>
+      <td className="px-4 py-3 text-gray-700">{classInfo.credit ?? "---"}</td>
+      <td className="px-4 py-3 text-blue-600">
+        {classInfo.instructor || "---"}
+      </td>
+      <td className="px-4 py-3 text-gray-700">{classInfo.datetime || "---"}</td>
+      <td className="px-4 py-3 text-gray-700">{classInfo.room || "---"}</td>
     </tr>
   );
 
@@ -141,48 +58,65 @@ const SchedulePreviewTable = () => {
             </h1>
             <p className="text-sm text-gray-600">
               Class: {scheduleData.classInfo.class} | Semester:{" "}
-              {scheduleData.classInfo.semester} | Academy year:{" "}
+              {scheduleData.classInfo.semester} | Academic Year:{" "}
               {scheduleData.classInfo.academicYear}
             </p>
           </div>
         </div>
 
-        {/* Schedule Tables */}
+        {/* Debug Info - Remove this in production */}
+        <div className="mb-4 p-3 bg-gray-100 rounded text-xs">
+          <strong>Debug Info:</strong>
+          <br />
+          Input type: {typeof scheduleList}
+          <br />
+          Is array: {Array.isArray(scheduleList) ? "Yes" : "No"}
+          <br />
+          Has data: {scheduleList ? "Yes" : "No"}
+          <br />
+          Total classes across all days:{" "}
+          {scheduleData.weeklySchedule.reduce(
+            (acc, day) => acc + day.classes.length,
+            0
+          )}
+        </div>
+
+        {/* Weekly Schedule Tables */}
         <div className="space-y-8">
           {scheduleData.weeklySchedule.map((daySchedule, index) => (
             <div key={index} className="bg-white">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 {daySchedule.day}
+                <span className="ml-2 text-sm text-gray-500">
+                  ({daySchedule.classes.length} classes)
+                </span>
               </h2>
 
-              {daySchedule.classes.length > 0 ? (
-                <div className="overflow-x-auto shadow-sm border border-gray-200 rounded-lg">
-                  <table className="w-full">
-                    <TableHeader />
-                    <tbody className="bg-white">
-                      {daySchedule.classes.map((classInfo, classIndex) => (
-                        <TableRow key={classIndex} classInfo={classInfo} />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="overflow-x-auto shadow-sm border border-gray-200 rounded-lg">
-                  <table className="w-full">
-                    <TableHeader />
-                    <tbody className="bg-white">
-                      <tr>
-                        <td
-                          colSpan={6}
-                          className="px-4 py-8 text-center text-gray-500"
-                        >
-                          Schedule no record
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              <div className="overflow-x-auto shadow-sm border border-gray-200 rounded-lg">
+                <table className="w-full">
+                  <TableHeader />
+                  <tbody className="bg-white">
+                    {daySchedule.classes.length > 0 ? (
+                      daySchedule.classes.map(
+                        (classInfo: any, classIndex: number) => (
+                          <TableRow key={classIndex} classInfo={classInfo} />
+                        )
+                      )
+                    ) : (
+                      <TableRow
+                        classInfo={{
+                          subjectCode: "---",
+                          subject: "---",
+                          credit: "---",
+                          instructor: "---",
+                          datetime: "---",
+                          room: "---",
+                        }}
+                      />
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ))}
         </div>

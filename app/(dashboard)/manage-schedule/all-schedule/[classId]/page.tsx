@@ -20,6 +20,7 @@ import {
   MapPin,
   Edit,
   Pen,
+  Copy,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -187,6 +188,10 @@ const AllSchedulePage = () => {
                   ))}
                 </SelectContent>
               </Select>
+              <Button className="bg-teal-900 hover:bg-teal-950">
+                <Copy />
+                Duplicate
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -280,7 +285,7 @@ const AllSchedulePage = () => {
                               <div className="flex items-center gap-1">
                                 <Clock className="h-4 w-4" />
                                 <span>
-                                  {sche.startTime.hour} - {sche.endTime.hour}
+                                  {sche.startTime} - {sche.endTime}
                                 </span>
                               </div>
                               <div className="flex items-center gap-1">

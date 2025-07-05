@@ -9,8 +9,8 @@ export interface AllScheduleModel {
 
 export interface ScheduleModel {
   id: number;
-  startTime: StartTime;
-  endTime: EndTime;
+  startTime: string;
+  endTime: string;
   academyYear: number;
   day: string;
   status: string;
@@ -24,20 +24,6 @@ export interface ScheduleModel {
   surveyResponseId: number;
   hasSurvey: boolean;
   createdAt: string;
-}
-
-export interface StartTime {
-  hour: number;
-  minute: number;
-  second: number;
-  nano: number;
-}
-
-export interface EndTime {
-  hour: number;
-  minute: number;
-  second: number;
-  nano: number;
 }
 
 export interface Classes {

@@ -15,13 +15,11 @@ import {
 import { ROUTE } from "@/constants/routes";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { AllScheduleFilterModel } from "@/model/schedules/type-schedule-model";
 import {
   AllStudentModel,
   RequestAllStudent,
 } from "@/model/user/student/student.respond.model";
 import { getAllStudentsService } from "@/service/user/student.service";
-import { StudentModel } from "@/model/user/student/student.request.model";
 import { toast } from "sonner";
 import { Separator } from "@radix-ui/react-separator";
 import Loading from "@/components/shared/loading";

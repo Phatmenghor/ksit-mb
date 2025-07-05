@@ -2,8 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { AppIcons } from "@/constants/icons/icon";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
-import { ArrowLeft, Clock, MapPin, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -32,15 +32,19 @@ export default function StudentScoreHeader({ title, schedule }: Props) {
           <span className="text-foreground font-medium">{title}</span>
         </nav>
 
-        {/* Header Section */}
-        <div className="flex items-center gap-3">
+        {/* Header Section with Back Button */}
+        <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => router.back()}
             className="rounded-full"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <img
+              src={AppIcons.Back}
+              alt="back Icon"
+              className="h-4 w-4 mr-5 text-muted-foreground"
+            />
           </Button>
           <h1 className="text-2xl font-bold text-foreground">
             {schedule?.course?.subject.name || "---"}
@@ -51,14 +55,28 @@ export default function StudentScoreHeader({ title, schedule }: Props) {
 
         {/* Class Details */}
         <div className="grid grid-cols-2 md:grid-cols-5">
-          <DetailBlock label="Class" value={schedule?.classes.code} />
+          <DetailBlock label="Class" value={schedule?.classes.code ?? "---"} />
           <DetailBlock
             label="Department"
-            value={schedule?.course.department.name}
+            value={schedule?.course.department.name || "---"}
           />
-          <DetailBlock label="Major" value={schedule?.classes.major.name} />
-          <DetailBlock label="Degree" value={schedule?.classes.degree} />
-          <DetailBlock label="Year Level" value={schedule?.academyYear} />
+          <DetailBlock
+            label="Major"
+            value={schedule?.classes.major.name || "---"}
+          />
+          <DetailBlock
+            label="Degree"
+            value={schedule?.classes.degree || "---"}
+          />
+          <DetailBlock
+            label="Year Level"
+            value={
+              schedule?.classes?.academyYear !== undefined &&
+              schedule?.classes?.academyYear !== null
+                ? String(schedule.classes.academyYear)
+                : "---"
+            }
+          />
         </div>
 
         {/* Course Details */}
@@ -94,11 +112,19 @@ export default function StudentScoreHeader({ title, schedule }: Props) {
 
           <div className="flex flex-wrap gap-6">
             <InfoItem
-              icon={<Clock className="h-5 w-5 text-muted-foreground" />}
+              icon={
+                <img src={AppIcons.Time} alt="Time Icon" className="h-4 w-4" />
+              }
               text={`${schedule?.startTime} - ${schedule?.endTime}`}
             />
             <InfoItem
-              icon={<User className="h-5 w-5 text-muted-foreground" />}
+              icon={
+                <img
+                  src={AppIcons.User}
+                  alt="User Icon"
+                  className="h-5 w-5 text-muted-foreground"
+                />
+              }
               text={
                 `${schedule?.teacher.khmerFirstName ?? ""} ${
                   schedule?.teacher.khmerLastName ?? ""
@@ -106,7 +132,13 @@ export default function StudentScoreHeader({ title, schedule }: Props) {
               }
             />
             <InfoItem
-              icon={<MapPin className="h-5 w-5 text-muted-foreground" />}
+              icon={
+                <img
+                  src={AppIcons.Location}
+                  alt="Location Icon"
+                  className="h-5 w-5 text-muted-foreground"
+                />
+              }
               text={schedule?.room.name || "---"}
             />
           </div>

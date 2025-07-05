@@ -38,6 +38,7 @@ import { useExportScoreHandlers } from "@/components/shared/export/score-export-
 import { getDetailScheduleService } from "@/service/schedule/schedule.service";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 import { SubmissionScoreModel } from "@/model/score/student-score/student-score.response";
+import { AppIcons } from "@/constants/icons/icon";
 
 export default function ScoreSubmissionDetailPage() {
   const [submission, setSubmissions] = useState<SubmissionScoreModel | null>(
@@ -207,9 +208,11 @@ export default function ScoreSubmissionDetailPage() {
                     variant="outline"
                     className="gap-2"
                   >
-                    <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">X</span>
-                    </div>
+                    <img
+                      src={AppIcons.Excel}
+                      alt="excel Icon"
+                      className="h-4 w-4 text-muted-foreground"
+                    />
                     <span>Excel</span>
                     <Download className="w-4 h-4" />
                   </Button>
@@ -224,11 +227,11 @@ export default function ScoreSubmissionDetailPage() {
                     variant="outline"
                     className="gap-2"
                   >
-                    <div className="w-5 h-5 border-2 border-red-500 rounded flex items-center justify-center">
-                      <span className="text-red-500 text-[10px] font-bold">
-                        PDF
-                      </span>
-                    </div>
+                    <img
+                      src={AppIcons.Pdf}
+                      alt="excel Icon"
+                      className="h-4 w-4 text-muted-foreground"
+                    />
                     <span>PDF</span>
                     <Download className="w-4 h-4" />
                   </Button>

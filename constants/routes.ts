@@ -12,6 +12,7 @@ import {
   FileQuestion,
   ListCheck,
 } from "lucide-react";
+import { AppSidebarIcons } from "./icons/icon";
 
 export const ROUTE = {
   DASHBOARD: "/",
@@ -59,6 +60,8 @@ export const ROUTE = {
     VIEW: (id: string) => `/view/${id}`,
     EDIT_STUDENT: (id: string) => `/edit/${id}`,
   },
+
+  STUDENT_LIST: (id: string) => `/student-list/${id}`,
 
   MANAGE_SCHEDULE: {
     DEPARTMENT: "/manage-schedule/department",
@@ -120,11 +123,11 @@ export const sidebarRoutes = [
   {
     title: "Dashboard",
     href: ROUTE.DASHBOARD,
-    icon: Home,
+    image: AppSidebarIcons.Home,
   },
   {
     title: "Master data",
-    icon: Database,
+    image: AppSidebarIcons.Master_Data,
     section: "masterData",
     subroutes: [
       { title: "Manage class", href: ROUTE.MASTER_DATA.MANAGE_CLASS },
@@ -138,7 +141,7 @@ export const sidebarRoutes = [
   },
   {
     title: "Users",
-    icon: Users,
+    image: AppSidebarIcons.Users,
     section: "users",
     subroutes: [
       { title: "Admin", href: ROUTE.USERS.ADMIN },
@@ -148,7 +151,7 @@ export const sidebarRoutes = [
   },
   {
     title: "Students",
-    icon: Users,
+    image: AppSidebarIcons.Students,
     section: "students",
     subroutes: [
       { title: "Add multiple users", href: ROUTE.STUDENTS.ADD_MULTIPLE },
@@ -156,10 +159,9 @@ export const sidebarRoutes = [
       { title: "Students list", href: ROUTE.STUDENTS.LIST },
     ],
   },
-
   {
     title: "Attendance",
-    icon: Users,
+    image: AppSidebarIcons.Attendance,
     section: "attendance",
     subroutes: [
       { title: "Class Schedule", href: ROUTE.ATTENDANCE.CLASS_SCHEDULE },
@@ -168,7 +170,7 @@ export const sidebarRoutes = [
   },
   {
     title: "Survey",
-    icon: FileQuestion,
+    image: AppSidebarIcons.Survey,
     section: "users",
     subroutes: [
       { title: "Result List", href: ROUTE.SURVEY.RESULT_LIST },
@@ -178,7 +180,7 @@ export const sidebarRoutes = [
   {
     title: "Score submitted",
     section: "Score Submitted",
-    icon: ListCheck,
+    image: AppSidebarIcons.Scores_Submitted,
     subroutes: [
       { title: "Submitted List", href: ROUTE.SCORES.SUBMITTED },
       { title: "Score Setting", href: ROUTE.SCORES.SETTINGS },
@@ -187,34 +189,31 @@ export const sidebarRoutes = [
   {
     title: "Student score",
     href: ROUTE.SCORES.STUDENT_SCORE,
-    icon: Database,
+    image: AppSidebarIcons.Student_Scores,
   },
   {
     title: "Schedule",
     href: ROUTE.SCHEDULE.ROOT,
-    icon: Calendar,
+    image: AppSidebarIcons.Schedule,
   },
   {
     title: "Manage schedule",
     href: ROUTE.MANAGE_SCHEDULE.DEPARTMENT,
-    icon: Calendar,
+    image: AppSidebarIcons.Manage_Schedule,
   },
-
   {
     title: "Request",
     href: ROUTE.REQUESTS,
-    icon: FileText,
+    image: AppSidebarIcons.Request,
   },
-
   {
     title: "Payment",
     href: ROUTE.PAYMENT.LIST,
-    icon: ScrollText,
+    image: AppSidebarIcons.Payment,
   },
-
   {
     title: "Role&User permission",
     href: ROUTE.PERMISSIONS,
-    icon: ShieldCheck,
+    image: AppSidebarIcons.Role_Permission,
   },
 ];

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronUp, ChevronDown, Calendar, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AppIcons } from "@/constants/icons/icon";
 
 interface YearSelectorProps {
   value: number;
@@ -161,10 +162,27 @@ export function YearSelector({
               aria-expanded={isOpen}
               className="w-full justify-between"
             >
-              {value === 0 ? title : `${title}: ${value}`}
-              <Calendar className="ml-2 h-4 w-4 opacity-50" />
+              <div className="flex items-center space-x-2">
+                <img
+                  src={AppIcons.Filter}
+                  alt="Filter Icon"
+                  className="h-4 w-4 mr-2 opacity-70"
+                />
+                {value === 0 ? (
+                  title
+                ) : (
+                  <>
+                    {title}:
+                    <span className="underline underline-offset-1">
+                      {value}
+                    </span>
+                  </>
+                )}
+              </div>
+              <Calendar className="ml-3 h-4 w-4 opacity-50" />
             </Button>
           </PopoverTrigger>
+
           <PopoverContent className="w-full p-0" align="start">
             <div className="flex items-center p-3 border-b">
               <Button

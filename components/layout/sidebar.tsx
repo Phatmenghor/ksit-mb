@@ -25,7 +25,6 @@ export function Sidebar() {
     }));
   };
 
-  // Render navigation items
   const renderNavItems = (isCollapsed = false) => (
     <nav className="flex flex-col gap-1">
       {sidebarRoutes.map((route) => {
@@ -52,7 +51,11 @@ export function Sidebar() {
                 aria-expanded={isOpen}
               >
                 <div className="flex w-full items-center">
-                  <route.icon className="h-5 w-5" />
+                  <img
+                    src={route.image}
+                    alt={`${route.title} Icon`}
+                    className="h-5 w-5"
+                  />
                   {!isCollapsed && (
                     <>
                       <span className="ml-3">{route.title}</span>
@@ -69,26 +72,41 @@ export function Sidebar() {
               </Button>
 
               {!isCollapsed && isOpen && (
-                <div className="ml-6 mt-1 space-y-1">
-                  {route.subroutes.map((subroute) => (
-                    <Button
-                      key={subroute.title}
-                      variant="ghost"
-                      asChild
-                      className={cn(
-                        "w-full justify-start text-gray-900 hover:bg-primary/10 hover:text-primary pl-6 rounded",
-                        pathname === subroute.href &&
-                          "bg-primary/15 text-primary font-medium border-l-2 border-primary"
+                <div className="relative ml-6 mt-1 space-y-1">
+                  {/* Vertical connecting line */}
+                  <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-300"></div>
+
+                  {route.subroutes.map((subroute, index) => (
+                    <div key={subroute.title} className="relative">
+                      {/* Horizontal connecting line */}
+                      <div className="absolute left-0 top-1/2 w-4 h-px bg-gray-300"></div>
+
+                      {/* Corner connector for last item - stops vertical line */}
+                      {index === route.subroutes!.length - 1 && (
+                        <div
+                          className="absolute left-0 top-1/2 w-px bg-white"
+                          style={{ height: "50%" }}
+                        ></div>
                       )}
-                    >
-                      <Link
-                        href={subroute.href}
-                        className="flex items-center gap-2"
+
+                      <Button
+                        variant="ghost"
+                        asChild
+                        className={cn(
+                          "w-full justify-start text-gray-900 hover:bg-primary/10 hover:text-primary pl-6 rounded",
+                          pathname === subroute.href &&
+                            "bg-primary/15 text-primary font-medium border-l-2 border-primary"
+                        )}
                       >
-                        <Circle className="h-2 w-2" />
-                        <span>{subroute.title}</span>
-                      </Link>
-                    </Button>
+                        <Link
+                          href={subroute.href}
+                          className="flex items-center gap-2"
+                        >
+                          <Circle className="h-2 w-2" />
+                          <span>{subroute.title}</span>
+                        </Link>
+                      </Button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -111,7 +129,11 @@ export function Sidebar() {
               href={route.href || "#"}
               className="flex items-center gap-3 px-3 py-2"
             >
-              <route.icon className="h-5 w-5" />
+              <img
+                src={route.image}
+                alt={`${route.title} Icon`}
+                className="h-5 w-5"
+              />
               {!isCollapsed && <span>{route.title}</span>}
             </Link>
           </Button>

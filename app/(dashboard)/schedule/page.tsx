@@ -18,6 +18,7 @@ import {
   Users,
   MapPin,
   FileText,
+  CheckCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AppIcons } from "@/constants/icons/icon";
 
 const ScheduleAllPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -148,8 +150,7 @@ const ScheduleAllPage = () => {
   };
 
   const handleCardClick = (scheduleId: number) => {
-    console.log("#", scheduleId);
-    toast.info("Push to student list");
+    router.push(ROUTE.STUDENT_LIST(String(scheduleId)));
   };
 
   return (
@@ -196,8 +197,16 @@ const ScheduleAllPage = () => {
                 onValueChange={handleSemesterChange}
                 value={selectedSemester}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a semester" />
+                <SelectTrigger className="flex gap-2">
+                  <img
+                    src={AppIcons.Filter}
+                    alt="Time Icon"
+                    className="h-4 w-4 text-muted-foreground"
+                  />
+                  <SelectValue
+                    className="underline underline-offset-1"
+                    placeholder="Select a semester"
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {SemesterFilter.map((semester) => (
@@ -221,7 +230,6 @@ const ScheduleAllPage = () => {
         >
           <ChevronLeft className="h-4 w-4 transition-all duration-300 group-hover:-translate-x-0.5 group-hover:text-amber-600" />
         </Button>
-
         <div
           ref={scrollContainerRef}
           className="flex overflow-x-auto scrollbar-hide gap-2 px-16 scroll-smooth"
@@ -306,7 +314,7 @@ const ScheduleAllPage = () => {
                             <div className="flex items-center gap-1 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">
                               <Clock className="h-4 w-4 transition-all duration-300 group-hover:text-amber-500 group-hover:rotate-12 group-hover:scale-110" />
                               <span className="transition-all duration-300 group-hover:font-medium">
-                                {sche.startTime.hour} - {sche.endTime.hour}
+                                {sche.startTime} - {sche.endTime}
                               </span>
                             </div>
                             <div className="flex items-center gap-1 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">
@@ -335,20 +343,40 @@ const ScheduleAllPage = () => {
                             </div>
 
                             {/* Survey - now looks exactly like other items, no button styling */}
-                            <div
-                              className="flex items-center gap-1 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105 cursor-pointer"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                router.push(
-                                  ROUTE.SURVEY.SURVEY_FORM(String(sche.id))
-                                );
-                              }}
-                            >
-                              <FileText className="h-4 w-4 transition-all duration-300 group-hover:text-amber-500 group-hover:scale-110" />
-                              <span className="transition-all duration-300 group-hover:font-medium underline decoration-dotted underline-offset-2">
-                                Take Survey
-                              </span>
-                            </div>
+                            {sche.surveyStatus !== "NONE" && (
+                              <div
+                                className={`flex items-center gap-1 transition-all duration-300 ${
+                                  sche.surveyStatus === "NOT_STARTED"
+                                    ? "group-hover:text-gray-600 group-hover:scale-105 cursor-pointer"
+                                    : "text-green-600 cursor-default"
+                                }`}
+                                onClick={(e) => {
+                                  if (sche.surveyStatus === "NOT_STARTED") {
+                                    e.stopPropagation();
+                                    router.push(
+                                      ROUTE.SURVEY.SURVEY_FORM(String(sche.id))
+                                    );
+                                  }
+                                }}
+                              >
+                                {sche.surveyStatus === "COMPLETED" ? (
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                ) : (
+                                  <FileText className="h-4 w-4 transition-all duration-300 group-hover:text-amber-500 group-hover:scale-110" />
+                                )}
+                                <span
+                                  className={`transition-all duration-300 ${
+                                    sche.surveyStatus === "COMPLETED"
+                                      ? "font-medium text-green-600"
+                                      : "group-hover:font-medium underline decoration-dotted underline-offset-2"
+                                  }`}
+                                >
+                                  {sche.surveyStatus === "COMPLETED"
+                                    ? "Survey Completed"
+                                    : "Take Survey"}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>

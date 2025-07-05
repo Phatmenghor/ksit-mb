@@ -58,7 +58,7 @@ export interface PDFExportOptions {
   department?: string;
   major?: string;
   degree?: string;
-  levelYear?: number;
+  levelYear?: string | number;
 }
 
 interface TableColumn {

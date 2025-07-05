@@ -93,7 +93,11 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                     }}
                   >
                     <div className="flex items-center gap-3">
-                      <route.icon className="h-5 w-5" />
+                      <img
+                        src={route.image}
+                        alt={`${route.title} Icon`}
+                        className="h-5 w-5"
+                      />{" "}
                       <span>{route.title}</span>
                     </div>
                     {route.subroutes && (

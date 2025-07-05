@@ -248,7 +248,7 @@ const ClassSchedulePage = () => {
                             <div className="flex items-center gap-1 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">
                               <Clock className="h-4 w-4 transition-all duration-300 group-hover:text-amber-500 group-hover:rotate-12 group-hover:scale-110" />
                               <span className="transition-all duration-300 group-hover:font-medium">
-                                {sche.startTime.hour} - {sche.endTime.hour}
+                                {sche.startTime} - {sche.endTime}
                               </span>
                             </div>
                             <div className="flex items-center gap-1 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">
