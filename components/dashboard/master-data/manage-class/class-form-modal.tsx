@@ -36,6 +36,8 @@ import {
 import { DegreeEnum, YearLevelEnum } from "@/constants/constant";
 import { ComboboxSelectMajor } from "@/components/shared/ComboBox/combobox-major";
 import { YearSelector } from "@/components/shared/year-selector";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 // Define the schema once in a shared location
 export const classFormSchema = z.object({
@@ -86,7 +88,7 @@ export function ClassFormModal({
   );
   const [isFormDirty, setIsFormDirty] = useState(false);
   const currentYear = new Date().getFullYear();
-
+  const isMobile = useIsMobile();
   // Initialize the form with Zod validation
   const form = useForm<ClassFormData>({
     resolver: zodResolver(classFormSchema),
@@ -193,7 +195,11 @@ export function ClassFormModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCloseModal}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className={`max-h-[90vh] rounded-xl overflow-y-auto ${
+          isMobile ? "max-w-sm" : "max-w-lg"
+        }`}
+      >
         <DialogHeader>
           <DialogTitle>
             {mode === "add" ? "Add Class" : "Edit Class"}
@@ -341,7 +347,7 @@ export function ClassFormModal({
               )}
             />
 
-            <DialogFooter className="mt-6 sticky -bottom-8 z-10 bg-white py-4">
+            <div className="flex space-x-4 justify-end mr-auto">
               <Button
                 type="button"
                 variant="outline"
@@ -350,6 +356,7 @@ export function ClassFormModal({
               >
                 Cancel
               </Button>
+
               <Button
                 type="submit"
                 disabled={
@@ -368,7 +375,7 @@ export function ClassFormModal({
                   `${mode === "add" ? "Create" : "Update"} Class`
                 )}
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </Form>
       </DialogContent>

@@ -175,12 +175,12 @@ export default function StudentPersonalDetailSection() {
                   disabled={isSubmitting}
                 >
                   <SelectTrigger id="gender" className="bg-gray-100">
-                    <SelectValue>
+                    <SelectValue placeholder="សូមជ្រើសរើសភេទ">
                       {field.value === "MALE"
                         ? "ប្រុស"
                         : field.value === "FEMALE"
                         ? "ស្រី"
-                        : "សូមជ្រើសរើស"}
+                        : "សូមជ្រើសរើសភេទ"}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="bg-gray-100">
@@ -191,7 +191,6 @@ export default function StudentPersonalDetailSection() {
               )}
             />
           </div>
-
           <div className="flex flex-col flex-1 gap-2">
             <label htmlFor="dob" className="text-sm font-bold">
               ថ្ងៃខែឆ្នាំកំណើត

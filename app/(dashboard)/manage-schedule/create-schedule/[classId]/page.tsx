@@ -57,6 +57,7 @@ import { getAllSemesterService } from "@/service/master-data/semester.service";
 import SchedulePreviewTable from "@/components/dashboard/manage-schedule/schedule-preview-table";
 import ScheduleTeacherTable from "@/components/dashboard/manage-schedule/schedule-teacher-table";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
+import { AppIcons } from "@/constants/icons/icon";
 
 // Enhanced form schema with better validation
 const formSchema = z
@@ -468,15 +469,18 @@ export default function AddSchedule() {
             </BreadcrumbList>
           </Breadcrumb>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center">
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
-              onClick={handleBackNavigation}
-              disabled={isSubmitting}
+              onClick={() => router.back()}
+              className="rounded-full"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <img
+                src={AppIcons.Back}
+                alt="back Icon"
+                className="h-4 w-4 mr-5 text-muted-foreground"
+              />
             </Button>
             <h1 className="text-2xl font-semibold text-gray-900">
               Add Schedule

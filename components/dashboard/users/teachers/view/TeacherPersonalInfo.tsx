@@ -1,15 +1,16 @@
-import CollapsibleCard from "@/components/shared/collapsibleCard";
 import React from "react";
 import InfoGrid from "../../shared/user-personal-history";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TeacherProfileProps {
   teacher: StaffRespondModel | null;
 }
 
 export default function TeacherPersonal({ teacher }: TeacherProfileProps) {
+  const isMobile = useIsMobile();
   const infoItems = [
     {
       label: "គោត្តនាម និងនាម",
@@ -60,7 +61,7 @@ export default function TeacherPersonal({ teacher }: TeacherProfileProps) {
       <CardContent className="space-y-5 p-5">
         <h3>ប្រវត្តិគ្រូបង្រៀន</h3>
         <Separator />
-        <InfoGrid data={infoItems} columns={2} />
+        <InfoGrid data={infoItems} columns={isMobile ? 1 : 2} />
       </CardContent>
     </Card>
   );

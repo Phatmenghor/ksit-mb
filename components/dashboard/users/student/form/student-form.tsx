@@ -18,6 +18,11 @@ import {
 } from "@/model/user/student/student.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { initStudentFormData } from "@/model/user/student/student.request.model";
+import { usePathname } from "next/navigation";
+import { toast } from "sonner";
+import { AdminChangePasswordService } from "@/service/auth/auth.service";
+import { ResetPasswordDialog } from "@/components/shared/dialog/reset-password-dialog";
+import Loading from "@/components/shared/loading";
 
 type Props = {
   initialValues?: EditStudentFormData;
@@ -40,6 +45,8 @@ export default function StudentForm({
 }: Props) {
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] =
+    useState(false);
 
   const methods = useForm({
     resolver: zodResolver(
@@ -57,6 +64,8 @@ export default function StudentForm({
     formState: { isSubmitting, isDirty, isValid, errors },
     handleSubmit,
   } = methods;
+
+  const pathname = usePathname();
 
   useEffect(() => {
     if (initialValues && mode === "Edit") {
@@ -85,6 +94,21 @@ export default function StudentForm({
     return () => subscription.unsubscribe();
   }, [methods]);
 
+  const handleResetPassword = async () => {
+    if (initialValues?.id == null) {
+      toast.error("User ID is missing, cannot reset password.");
+      return;
+    }
+    const ok = await AdminChangePasswordService({
+      id: initialValues.id,
+      confirmNewPassword: "88889999",
+      newPassword: "88889999",
+    });
+    ok
+      ? toast.success("Password reset successfully!")
+      : toast.error("Reset failed", ok);
+  };
+
   const handleClosePage = () => {
     if (isFormDirty) {
       const confirmed = window.confirm(
@@ -106,14 +130,7 @@ export default function StudentForm({
   };
 
   if (!initialValues && mode === "Edit") {
-    return (
-      <div className="flex justify-center items-center h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        <span className="ml-2 text-sm text-muted-foreground">
-          Loading student data...
-        </span>
-      </div>
-    );
+    return <Loading />;
   }
 
   const canSubmitForm = () => {
@@ -143,29 +160,29 @@ export default function StudentForm({
           className="space-y-4"
           noValidate
         >
-          ,
           <CardHeaderSection
             back
+            backHref={ROUTE.STUDENTS.LIST}
             title={title}
-            backHref={back ?? ROUTE.STUDENTS.LIST}
             breadcrumbs={[
               { label: "Dashboard", href: ROUTE.DASHBOARD },
               { label: "Add single student", href: "" },
             ]}
           />
+
           {mode === "Add" && <StudentBasicForm />}
           <StudentProfileUploadCard />
           <div className="w-full mx-auto space-y-5">
             <StudentFormDetail />
-            <Card>
-              <CardContent>
-                <div className="flex justify-between items-center pt-5 gap-3">
-                  {mode === "Edit" && (
+            {mode === "Edit" ? (
+              <Card>
+                <CardContent>
+                  <div className="flex justify-between items-center pt-5 gap-3">
                     <Button
-                      type="submit"
+                      type="button"
                       disabled={loading || isSubmitting}
                       onClick={() =>
-                        setValue("status", StatusEnum.INACTIVE as any)
+                        setIsResetPasswordDialogOpen(!isResetPasswordDialogOpen)
                       }
                       className="flex items-center gap-2 bg-red-600 bg-opacity-30 text-red-600 hover:bg-red-700 hover:bg-opacity-40 disabled:pointer-events-none"
                     >
@@ -176,40 +193,101 @@ export default function StudentForm({
                           className="text-red-600"
                         />
                       </span>
-                      Disable User
+                      Reset Password
                     </Button>
-                  )}
-
-                  <div className="flex gap-3">
-                    <Button
-                      type="button"
-                      disabled={loading || isSubmitting}
-                      variant="outline"
-                      onClick={handleClosePage}
-                    >
-                      Discard
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="bg-emerald-800 hover:bg-emerald-900"
-                      disabled={!canSubmitForm()}
-                    >
-                      {loading || isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="mr-2 h-4 w-4" />
-                          Save
-                        </>
-                      )}
-                    </Button>
+                    <div className="flex items-end justify-end gap-3">
+                      <Button
+                        type="button"
+                        disabled={loading || isSubmitting}
+                        variant="outline"
+                        onClick={handleClosePage}
+                      >
+                        Discard
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="bg-emerald-800 hover:bg-emerald-900"
+                        disabled={!canSubmitForm()}
+                      >
+                        {loading || isSubmitting ? (
+                          <>
+                            <Loading />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-4 w-4" />
+                            Save
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                  <ResetPasswordDialog
+                    onConfirm={handleResetPassword}
+                    onDiscard={() => setIsResetPasswordDialogOpen(false)}
+                    description={`Password will reset for: ${
+                      initialValues?.englishFirstName || "---"
+                    } ${initialValues?.englishLastName || "---"} `}
+                    subDescription="Password reset: 88889999"
+                    open={isResetPasswordDialogOpen}
+                    cancelText="Discard"
+                    onOpenChange={() =>
+                      setIsResetPasswordDialogOpen(!isResetPasswordDialogOpen)
+                    }
+                    title="Confirm Reset!"
+                  />
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent>
+                  <div className="flex justify-end pt-5 gap-3">
+                    <div className="flex items-end justify-end gap-3">
+                      <Button
+                        type="button"
+                        disabled={loading || isSubmitting}
+                        variant="outline"
+                        onClick={handleClosePage}
+                      >
+                        Discard
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="bg-emerald-800 hover:bg-emerald-900"
+                        disabled={!canSubmitForm()}
+                      >
+                        {loading || isSubmitting ? (
+                          <>
+                            <Loading />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-4 w-4" />
+                            Save
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <ResetPasswordDialog
+                    onConfirm={handleResetPassword}
+                    onDiscard={() => setIsResetPasswordDialogOpen(false)}
+                    description={`Password will reset for: ${
+                      initialValues?.englishFirstName || "---"
+                    } ${initialValues?.englishLastName || "---"} `}
+                    subDescription="Password reset: 88889999"
+                    open={isResetPasswordDialogOpen}
+                    cancelText="Discard"
+                    onOpenChange={() =>
+                      setIsResetPasswordDialogOpen(!isResetPasswordDialogOpen)
+                    }
+                    title="Confirm Reset!"
+                  />
+                </CardContent>
+              </Card>
+            )}
           </div>
         </form>
       </FormProvider>

@@ -50,7 +50,13 @@ export default function DynamicInputGrid({
   }, []);
 
   return (
-    <div className="border p-4 rounded-md shadow-sm space-y-4 overflow-x-auto">
+    <div
+      className="border p-4 rounded-md shadow-sm space-y-4 overflow-x-auto"
+      style={{
+        scrollbarWidth: "thin",
+        scrollbarColor: "#000000 #d1d5db",
+      }}
+    >
       {/* Header */}
       <div
         className="grid gap-4 font-bold text-sm"
@@ -101,9 +107,7 @@ export default function DynamicInputGrid({
                     }
                   `}
                   >
-                    <option value="" disabled>
-                      {field.placeholder}
-                    </option>
+                    <option value="">{field.placeholder}</option>
                     {field.options?.map((opt) => (
                       <option key={opt.value} value={opt.value}>
                         {opt.label}

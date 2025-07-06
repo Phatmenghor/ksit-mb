@@ -96,7 +96,7 @@ export default function StudentsListPage() {
   const iconColor = "text-black";
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-700">
+    <div className="space-y-4">
       <CardHeaderSection
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
@@ -129,24 +129,17 @@ export default function StudentsListPage() {
         }
       />
 
-      <div className="overflow-x-auto mt-4 animate-in fade-in duration-500">
+      <div className="overflow-x-auto mt-4">
         {isLoading ? (
-          <div className="animate-in fade-in duration-300">
+          <div>
             <Loading />
           </div>
         ) : (
-          <Table className="animate-in slide-in-from-bottom-2 duration-400">
+          <Table>
             <TableHeader>
-              <TableRow className="animate-in fade-in duration-300 delay-100">
+              <TableRow>
                 {StudentTablePaymentHeader.map((header, index) => (
-                  <TableHead
-                    key={index}
-                    className={`${header.className} animate-in fade-in duration-200`}
-                    style={{
-                      animationDelay: `${150 + index * 50}ms`,
-                      animationFillMode: "backwards",
-                    }}
-                  >
+                  <TableHead key={index} className={header.className}>
                     {header.label}
                   </TableHead>
                 ))}
@@ -154,7 +147,7 @@ export default function StudentsListPage() {
             </TableHeader>
             <TableBody>
               {allStudentData?.content.length === 0 ? (
-                <TableRow className="animate-in fade-in duration-400 delay-300">
+                <TableRow>
                   <TableCell
                     colSpan={StudentTablePaymentHeader.length}
                     className="text-center py-8 text-muted-foreground"
@@ -170,35 +163,22 @@ export default function StudentsListPage() {
                     index +
                     1;
                   return (
-                    <TableRow
-                      key={student.id}
-                      className="animate-in fade-in slide-in-from-left-1 duration-300 hover:bg-muted/50 transition-colors"
-                      style={{
-                        animationDelay: `${300 + index * 80}ms`,
-                        animationFillMode: "backwards",
-                      }}
-                    >
-                      <TableCell className="transition-colors duration-200">
-                        {indexDisplay}
-                      </TableCell>
-                      <TableCell className="transition-colors duration-200">
-                        {student.id || "---"}
-                      </TableCell>
-                      <TableCell className="transition-colors duration-200">
+                    <TableRow key={student.id}>
+                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{student.id || "---"}</TableCell>
+                      <TableCell>
                         {`${student.khmerFirstName || ""} ${
                           student.khmerLastName || ""
                         }`.trim() || "---"}
                       </TableCell>
-                      <TableCell className="transition-colors duration-200">
+                      <TableCell>
                         {`${student.englishFirstName || ""} ${
                           student.englishLastName || ""
                         }`.trim() || "---"}
                       </TableCell>
 
-                      <TableCell className="transition-colors duration-200">
-                        {student.gender || "---"}
-                      </TableCell>
-                      <TableCell className="transition-colors duration-200">
+                      <TableCell>{student.gender || "---"}</TableCell>
+                      <TableCell>
                         <div className="flex justify-start space-x-2">
                           <BreadcrumbLink
                             href={ROUTE.PAYMENT.VIEW_PAYMENT(

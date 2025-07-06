@@ -1,8 +1,7 @@
 "use client";
 
-import { ArrowLeft, Clock, MapPin, Users } from "lucide-react";
+import { Clock, MapPin, Users } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Breadcrumb,
@@ -13,7 +12,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { ROUTE } from "@/constants/routes";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
   AllStudentModel,
@@ -33,12 +32,11 @@ import {
 } from "@/components/ui/table";
 import { StudentListTableHeader } from "@/constants/table/user";
 import PaginationPage from "@/components/shared/pagination-page";
-import { status } from "@/constants/constant";
 import { Constants } from "@/constants/text-string";
-import { getClassByIdService } from "@/service/master-data/class.service";
-import { ClassModel } from "@/model/master-data/class/all-class-model";
 import { getScheduleByIdService } from "@/service/schedule/schedule.service";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
+import { Button } from "@/components/ui/button";
+import { AppIcons } from "@/constants/icons/icon";
 
 export default function AddSchedule() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -46,6 +44,7 @@ export default function AddSchedule() {
   const [schedule, setSchedule] = useState<ScheduleModel | null>(null);
 
   const params = useParams();
+
   const scheduleId = params?.id ? Number(params.id) : null;
 
   const fetchSchedule = useCallback(async (filters: RequestAllStudent) => {
@@ -75,7 +74,6 @@ export default function AddSchedule() {
     try {
       const response = await getScheduleByIdService(scheduleId || 0);
 
-      console.log("hourng", response);
       setSchedule(response);
     } catch (error) {
       console.error("Error fetching class data:", error);
@@ -109,25 +107,30 @@ export default function AddSchedule() {
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
-
-              <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.MY_CLASS.CLASS}>
-                  Class List
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-
-              <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.MY_CLASS.MY_SCHEDULE}>
-                  Schedule List
-                </BreadcrumbLink>
-              </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage>Student List Schedule</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.back()}
+              className="rounded-full"
+            >
+              <img
+                src={AppIcons.Back}
+                alt="back Icon"
+                className="h-4 w-4 mr-5 text-muted-foreground"
+              />
+            </Button>
+            <h1 className="text-2xl font-bold text-foreground">
+              {schedule?.course?.subject.name || "---"}
+            </h1>
+          </div>
 
           {/* Class Info Card */}
           <Card className="mb-6 bg-orange-50 border-orange-200">

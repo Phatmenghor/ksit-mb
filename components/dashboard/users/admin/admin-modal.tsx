@@ -29,6 +29,7 @@ import {
 } from "@/model/user/staff/staff.schema";
 import { StaffModel } from "@/model/user/staff/staff.respond.model";
 import { cleanField, cleanRequiredField } from "@/utils/map-helper/student";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AdminFormModalProps {
   isOpen: boolean;
@@ -54,6 +55,7 @@ export default function AdminModalForm({
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
 
+  const isMobile = useIsMobile();
   // Initialize the form with Zod validation
   const form = useForm<AdminFormData>({
     resolver: zodResolver(AdminFormSchema),
@@ -210,7 +212,11 @@ export default function AdminModalForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCloseModal}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className={`max-h-[90vh] rounded-xl overflow-y-auto ${
+          isMobile ? "max-w-sm" : "max-w-lg"
+        }`}
+      >
         <DialogHeader>
           <DialogTitle>
             {mode === "add" ? "Add Admin" : "Edit Admin"}

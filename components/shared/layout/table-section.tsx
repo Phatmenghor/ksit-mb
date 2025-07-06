@@ -27,41 +27,54 @@ export function CustomTable<T>({
   isLoading = false,
 }: CustomTableProps<T>) {
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {columns.map((col, index) => (
-            <TableHead key={index}>{col.header}</TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {isLoading ? (
+    <div
+      className="relative overflow-x-visible"
+      style={{
+        scrollbarWidth: "thin",
+        scrollbarColor: "#000000 #d1d5db",
+      }}
+    >
+      <Table>
+        <TableHeader>
           <TableRow>
-            <TableCell colSpan={columns.length} className="text-center py-4">
-              Loading...
-            </TableCell>
+            {columns.map((col, index) => (
+              <TableHead key={index}>{col.header}</TableHead>
+            ))}
           </TableRow>
-        ) : data?.length > 0 ? (
-          data.map((item, index) => (
-            <TableRow key={index}>
-              {columns.map((col, colIndex) => (
-                <TableCell key={colIndex}>
-                  {col.render
-                    ? col.render(item, index)
-                    : (item as any)[col.key]}
+        </TableHeader>
+        <TableBody>
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="text-center py-4">
+                Loading...
+              </TableCell>
+            </TableRow>
+          ) : data.length === 0 ? (
+            <TableRow>
+              {columns.map((_, colIndex) => (
+                <TableCell
+                  key={colIndex}
+                  className="text-center text-muted-foreground"
+                >
+                  ---
                 </TableCell>
               ))}
             </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell colSpan={columns.length} className="text-center py-4">
-              No data available
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+          ) : (
+            data.map((item, index) => (
+              <TableRow key={index}>
+                {columns.map((col, colIndex) => (
+                  <TableCell key={colIndex}>
+                    {col.render
+                      ? col.render(item, index)
+                      : (item as any)[col.key] || "---"}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

@@ -1,17 +1,3 @@
-import {
-  BookOpen,
-  Calendar,
-  Database,
-  FileCheck,
-  Home,
-  FileText,
-  ShieldCheck,
-  Users,
-  Palette,
-  ScrollText,
-  FileQuestion,
-  ListCheck,
-} from "lucide-react";
 import { AppSidebarIcons } from "./icons/icon";
 
 export const ROUTE = {
@@ -171,7 +157,7 @@ export const sidebarRoutes = [
   {
     title: "Survey",
     image: AppSidebarIcons.Survey,
-    section: "users",
+    section: "survey",
     subroutes: [
       { title: "Result List", href: ROUTE.SURVEY.RESULT_LIST },
       { title: "Manage Q&As", href: ROUTE.SURVEY.MANAGE_QA },

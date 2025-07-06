@@ -58,7 +58,7 @@ export default function StudentPersonalInfo({ student }: StudentProfileProps) {
   ];
 
   return (
-    <CollapsibleCard title="ព័ត៍មានទាក់ទងនឹងគ្រួសារសិស្ស">
+    <CollapsibleCard title="ព័ត៌មានផ្ទាល់ខ្លួនរបស់និស្សិត">
       <InfoGrid data={infoItems} columns={2} />
     </CollapsibleCard>
   );

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
@@ -14,6 +14,7 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Constants for limits
 const MAX_SIBLINGS = 20; // Maximum total siblings
@@ -30,6 +31,7 @@ export default function StudentSibling() {
   const [totalSiblings, setTotalSiblings] = useState(1);
   const [femaleSiblings, setFemaleSiblings] = useState(0);
   const [validationError, setValidationError] = useState("");
+  const skipReplaceRef = useRef(false);
 
   const {} = useFieldArray({
     control,
@@ -46,70 +48,13 @@ export default function StudentSibling() {
     name: "studentSiblings",
   });
 
-  // Validation function
-  const validateSiblingInput = (total: number, female: number): string => {
-    if (total > MAX_SIBLINGS) {
-      return `ចំនួនបងប្អូនមិនអាចលើសពី ${MAX_SIBLINGS} នាក់ទេ`;
-    }
-    if (total < MIN_SIBLINGS) {
-      return `ចំនួនបងប្អូនមិនអាចតិចជាង ${MIN_SIBLINGS} នាក់ទេ`;
-    }
-    if (female > total) {
-      return "ចំនួនបងប្អូនស្រីមិនអាចលើសពីចំនួនបងប្អូនសរុបទេ";
-    }
-    return "";
-  };
-
-  // Generate siblings based on totals
-  useEffect(() => {
-    const validTotal = Math.max(
-      MIN_SIBLINGS,
-      Math.min(totalSiblings, MAX_SIBLINGS)
-    );
-    const validFemale = Math.min(femaleSiblings, validTotal);
-    const maleSiblings = validTotal - validFemale;
-
-    // Validate input
-    const error = validateSiblingInput(validTotal, validFemale);
-    setValidationError(error);
-
-    // Only proceed if validation passes
-    if (!error) {
-      const newSiblings = [];
-
-      for (let i = 0; i < validFemale; i++) {
-        newSiblings.push({
-          name: "",
-          gender: "FEMALE",
-          dateOfBirth: "",
-          occupation: "",
-          phoneNumber: "",
-        });
-      }
-
-      for (let i = 0; i < maleSiblings; i++) {
-        newSiblings.push({
-          name: "",
-          gender: "MALE",
-          dateOfBirth: "",
-          occupation: "",
-          phoneNumber: "",
-        });
-      }
-
-      replaceSiblings(newSiblings);
-
-      // Save the total as a string in the form
-      setValue("numberOfSiblings", String(validTotal));
-    }
-  }, [totalSiblings, femaleSiblings, replaceSiblings, setValue]);
-
   const handleAddSibling = () => {
     if (totalSiblings >= MAX_SIBLINGS) {
       setValidationError(`ចំនួនបងប្អូនមិនអាចលើសពី ${MAX_SIBLINGS} នាក់ទេ`);
       return;
     }
 
+    skipReplaceRef.current = true;
     appendSibling({
       name: "",
       gender: "MALE",
@@ -117,27 +62,22 @@ export default function StudentSibling() {
       occupation: "",
       phoneNumber: "",
     });
+
     setTotalSiblings((prev) => Math.min(prev + 1, MAX_SIBLINGS));
     setValidationError("");
   };
 
   const handleRemoveSibling = () => {
     if (siblingFields.length > 0) {
-      // Get the index of the last sibling
       const lastIndex = siblingFields.length - 1;
-
-      // Get the full data of the last sibling (including gender)
-      // We need to use watch to get the actual form values, not just the field metadata
       const siblingValues = watch("studentSiblings");
       const lastSibling = siblingValues[lastIndex];
 
-      // Remove the sibling
       removeSibling(lastIndex);
+      skipReplaceRef.current = true; // 🔥 prevent replace on next render
 
-      // Update counts
       setTotalSiblings((prev) => Math.max(prev - 1, MIN_SIBLINGS));
 
-      // Check if the removed sibling was female and update the female count
       if (lastSibling && lastSibling.gender === GenderEnum.FEMALE) {
         setFemaleSiblings((prev) => Math.max(prev - 1, MIN_SIBLINGS));
       }
@@ -151,36 +91,99 @@ export default function StudentSibling() {
       const male = Math.min(parseInt(value) || 0, MAX_SIBLINGS);
       const newTotal = male + femaleSiblings;
 
-      if (newTotal <= MAX_SIBLINGS) {
-        setTotalSiblings(newTotal);
-        setValidationError("");
-      } else {
+      if (newTotal > MAX_SIBLINGS) {
         setValidationError(
           `ចំនួនបងប្អូនសរុបមិនអាចលើសពី ${MAX_SIBLINGS} នាក់ទេ`
         );
+        return;
       }
+
+      const currentSiblings = watch("studentSiblings");
+      const currentMaleCount = currentSiblings.filter(
+        (s) => s.gender === "MALE"
+      ).length;
+
+      const diff = male - currentMaleCount;
+
+      if (diff > 0) {
+        // Add new male siblings
+        for (let i = 0; i < diff; i++) {
+          appendSibling({
+            name: "",
+            gender: "MALE",
+            dateOfBirth: "",
+            occupation: "",
+            phoneNumber: "",
+          });
+        }
+      } else if (diff < 0) {
+        // Remove excess male siblings
+        let removed = 0;
+        for (let i = siblingFields.length - 1; i >= 0 && removed < -diff; i--) {
+          const sibling = watch(`studentSiblings.${i}`);
+          if (sibling.gender === "MALE") {
+            removeSibling(i);
+            removed++;
+          }
+        }
+      }
+
+      setTotalSiblings(newTotal);
+      setValidationError("");
     }
   };
 
   const handleFemaleSiblingChange = (value: string) => {
     if (/^\d*$/.test(value)) {
       const female = Math.min(parseInt(value) || 0, MAX_SIBLINGS);
-      const male = totalSiblings - femaleSiblings;
-      const newTotal = male + female;
+      const currentSiblings = watch("studentSiblings");
+      const currentFemaleCount = currentSiblings.filter(
+        (s) => s.gender === "FEMALE"
+      ).length;
+      const maleCount = currentSiblings.filter(
+        (s) => s.gender === "MALE"
+      ).length;
+      const newTotal = maleCount + female;
 
-      if (newTotal <= MAX_SIBLINGS && female <= newTotal) {
-        setFemaleSiblings(female);
-        setTotalSiblings(newTotal);
-        setValidationError("");
-      } else if (newTotal > MAX_SIBLINGS) {
+      if (newTotal > MAX_SIBLINGS) {
         setValidationError(
           `ចំនួនបងប្អូនសរុបមិនអាចលើសពី ${MAX_SIBLINGS} នាក់ទេ`
         );
-      } else if (female > newTotal) {
-        setValidationError("ចំនួនបងប្អូនស្រីមិនអាចលើសពីចំនួនបងប្អូនសរុបទេ");
+        return;
       }
+
+      const diff = female - currentFemaleCount;
+
+      if (diff > 0) {
+        // Add new female siblings
+        for (let i = 0; i < diff; i++) {
+          appendSibling({
+            name: "",
+            gender: "FEMALE",
+            dateOfBirth: "",
+            occupation: "",
+            phoneNumber: "",
+          });
+        }
+      } else if (diff < 0) {
+        // Remove excess female siblings
+        let removed = 0;
+        for (let i = siblingFields.length - 1; i >= 0 && removed < -diff; i--) {
+          const sibling = watch(`studentSiblings.${i}`);
+          if (sibling.gender === "FEMALE") {
+            removeSibling(i);
+            removed++;
+          }
+        }
+      }
+
+      setFemaleSiblings(female);
+      setTotalSiblings(newTotal);
+      setValidationError("");
     }
   };
+
+  const isMobile = useIsMobile();
 
   return (
     <div className="space-y-4">
@@ -205,7 +208,7 @@ export default function StudentSibling() {
         </div>
 
         <div className="flex flex-col">
-          <label className="text-sm mb-2 font-semibold">
+          <label className="text-sm mb-2 font-semibold leading-relaxed break-words whitespace-normal">
             ចំនួនបងប្អូនស្រី (អតិបរមា {MAX_SIBLINGS} នាក់)
           </label>
           <Input
@@ -233,126 +236,134 @@ export default function StudentSibling() {
         <span className="font-semibold">{totalSiblings} នាក់</span>
       </div>
 
-      <Card className="overflow-x-auto p-1">
+      <Card
+        className="overflow-x-auto p-1"
+        style={{
+          scrollbarWidth: "thin",
+          scrollbarColor: "#000000 #d1d5db",
+        }}
+      >
         <CardContent>
-          <div className="grid grid-cols-5 mt-3 gap-4 font-semibold pb-2">
-            <div>ឈ្មោះ</div>
-            <div>ភេទ</div>
-            <div>ថ្ងៃខែឆ្នាំកំណើត</div>
-            <div>មុខរបរ</div>
-            <div>លេខទូរស័ព្ទ</div>
-          </div>
+          <div className="min-w-[800px]">
+            <div className="grid grid-cols-5 mt-3 gap-4 font-semibold pb-2">
+              <div>ឈ្មោះ</div>
+              <div>ភេទ</div>
+              <div>ថ្ងៃខែឆ្នាំកំណើត</div>
+              <div>មុខរបរ</div>
+              <div>លេខទូរស័ព្ទ</div>
+            </div>
 
-          <div className="space-y-4">
-            {siblingFields.map((field, index) => (
-              <div
-                key={field.id}
-                className="grid grid-cols-5 gap-4 items-center"
-              >
-                {/* Name */}
-                <Controller
-                  control={control}
-                  name={`studentSiblings.${index}.name`}
-                  render={({ field }) => (
-                    <input
-                      {...field}
-                      className="border border-gray-300 bg-gray-100 rounded px-2 py-1 w-full"
-                      placeholder="ឈ្មោះ"
-                      maxLength={50}
-                    />
-                  )}
-                />
+            <div className="space-y-4">
+              {siblingFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="grid grid-cols-5 gap-4 items-center"
+                >
+                  {/* Name */}
+                  <Controller
+                    control={control}
+                    name={`studentSiblings.${index}.name`}
+                    render={({ field }) => (
+                      <input
+                        {...field}
+                        className="border border-gray-300 bg-gray-100 rounded px-2 py-1 w-full"
+                        placeholder="ឈ្មោះ"
+                        maxLength={50}
+                      />
+                    )}
+                  />
 
-                {/* Gender */}
-                <Controller
-                  control={control}
-                  name={`studentSiblings.${index}.gender`}
-                  render={({ field }) => (
-                    <select
-                      {...field}
-                      className="border border-gray-300 bg-gray-100 rounded px-2 py-1 w-full"
-                    >
-                      <option value="">Select</option>
-                      <option value="MALE">ប្រុស</option>
-                      <option value="FEMALE">ស្រី</option>
-                    </select>
-                  )}
-                />
+                  {/* Gender */}
+                  <Controller
+                    control={control}
+                    name={`studentSiblings.${index}.gender`}
+                    render={({ field }) => (
+                      <select
+                        {...field}
+                        className="border border-gray-300 bg-gray-100 rounded px-2 py-1 w-full"
+                      >
+                        <option value="">Select</option>
+                        <option value="MALE">ប្រុស</option>
+                        <option value="FEMALE">ស្រី</option>
+                      </select>
+                    )}
+                  />
 
-                {/* Date of Birth */}
-                <Controller
-                  control={control}
-                  name={`studentSiblings.${index}.dateOfBirth`}
-                  render={({ field }) => {
-                    const selectedDate = field.value
-                      ? new Date(field.value)
-                      : undefined;
+                  {/* Date of Birth */}
+                  <Controller
+                    control={control}
+                    name={`studentSiblings.${index}.dateOfBirth`}
+                    render={({ field }) => {
+                      const selectedDate = field.value
+                        ? new Date(field.value)
+                        : undefined;
 
-                    return (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full bg-gray-100 justify-start text-left text-sm",
-                              !selectedDate && "text-muted-foreground"
-                            )}
-                            disabled={isSubmitting}
-                          >
-                            {selectedDate
-                              ? format(selectedDate, "yyyy-MM-dd")
-                              : "ជ្រើសរើស"}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
+                      return (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full bg-gray-100 justify-start text-left text-sm",
+                                !selectedDate && "text-muted-foreground"
+                              )}
+                              disabled={isSubmitting}
+                            >
+                              {selectedDate
+                                ? format(selectedDate, "yyyy-MM-dd")
+                                : "ជ្រើសរើស"}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
 
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={selectedDate}
-                            onSelect={(date) => {
-                              field.onChange(
-                                date ? format(date, "yyyy-MM-dd") : ""
-                              );
-                            }}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    );
-                  }}
-                />
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={selectedDate}
+                              onSelect={(date) => {
+                                field.onChange(
+                                  date ? format(date, "yyyy-MM-dd") : ""
+                                );
+                              }}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      );
+                    }}
+                  />
 
-                {/* Occupation */}
-                <Controller
-                  control={control}
-                  name={`studentSiblings.${index}.occupation`}
-                  render={({ field }) => (
-                    <input
-                      {...field}
-                      className="border border-gray-300 rounded bg-gray-100 px-2 py-1 w-full"
-                      placeholder="មុខរបរ"
-                      maxLength={100}
-                    />
-                  )}
-                />
+                  {/* Occupation */}
+                  <Controller
+                    control={control}
+                    name={`studentSiblings.${index}.occupation`}
+                    render={({ field }) => (
+                      <input
+                        {...field}
+                        className="border border-gray-300 rounded bg-gray-100 px-2 py-1 w-full"
+                        placeholder="មុខរបរ"
+                        maxLength={100}
+                      />
+                    )}
+                  />
 
-                {/* Phone Number */}
-                <Controller
-                  control={control}
-                  name={`studentSiblings.${index}.phoneNumber`}
-                  render={({ field }) => (
-                    <input
-                      {...field}
-                      className="border border-gray-300 bg-gray-100 rounded px-2 py-1 w-full"
-                      placeholder="លេខទូរស័ព្ទ"
-                      maxLength={15}
-                      pattern="[0-9]*"
-                    />
-                  )}
-                />
-              </div>
-            ))}
+                  {/* Phone Number */}
+                  <Controller
+                    control={control}
+                    name={`studentSiblings.${index}.phoneNumber`}
+                    render={({ field }) => (
+                      <input
+                        {...field}
+                        className="border border-gray-300 bg-gray-100 rounded px-2 py-1 w-full"
+                        placeholder="លេខទូរស័ព្ទ"
+                        maxLength={15}
+                        pattern="[0-9]*"
+                      />
+                    )}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>

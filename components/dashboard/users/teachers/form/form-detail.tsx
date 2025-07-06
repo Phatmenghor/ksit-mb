@@ -7,11 +7,14 @@ import LanguageForm from "../detail-section/teacher-languages";
 import FamilyStatusForm from "../detail-section/teacher-families";
 import VocationalForm from "../detail-section/teacher-vocational";
 import EducatonForm from "../detail-section/teacher-education";
+import EducationForm from "../detail-section/teacher-professional-ranks";
 
 export default function FormDetail() {
   return (
     <div className="space-y-5">
       <PersonalHistoryForm />
+
+      <EducationForm />
 
       <ExperienceForm />
 

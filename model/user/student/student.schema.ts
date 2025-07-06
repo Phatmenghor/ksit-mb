@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { number, z } from "zod";
 
 export const StudentStudiesHistorySchema = z.object({
   id: z.number().optional().nullable(),
@@ -79,7 +79,9 @@ export const AddStudentSchema = StudentFormSchema.extend({
     .max(20, "Username must be at most 20 characters"),
 });
 
-export const EditStudentSchema = StudentFormSchema.extend({});
+export const EditStudentSchema = StudentFormSchema.extend({
+  id: z.number().positive().optional().nullable(),
+});
 
 // Types inferred from schemas for type-safe form data handling
 

@@ -22,6 +22,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScheduleModel } from "@/model/attendance/schedule/schedule-model";
+import { useRouter } from "next/navigation";
+import { AppIcons } from "@/constants/icons/icon";
 
 interface AttendanceCheckProps {
   scheduleDetail: ScheduleModel | null;
@@ -41,6 +43,7 @@ export default function AttendanceCheckHeader({
   lastUpdated,
   refreshProgress,
 }: AttendanceCheckProps) {
+  const router = useRouter();
   return (
     <Card>
       <CardContent className="p-6 space-y-2">
@@ -62,10 +65,17 @@ export default function AttendanceCheckHeader({
 
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/manage-class-schedule">
-                <ArrowLeft className="h-6 w-6" />
-              </Link>
+            <Button
+              onClick={() => router.back()}
+              variant="ghost"
+              size="icon"
+              asChild
+            >
+              <img
+                src={AppIcons.Back}
+                alt="back Icon"
+                className="h-4 w-4 mr-5 text-muted-foreground"
+              />
             </Button>
             <h1 className="text-xl font-semibold">
               {scheduleDetail?.course?.nameEn ||

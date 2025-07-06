@@ -5,20 +5,17 @@ import TeachingDetailForm from "./teacher-detail-form";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { Mode } from "@/constants/constant";
 
-export default function EducationForm({ mode }: { mode: Mode }) {
+export default function EducationForm() {
   const {
     control,
-    formState: { isSubmitting, isDirty },
+    formState: { isSubmitting },
   } = useFormContext();
 
   useFieldArray({
     control: control,
     name: "teachersProfessionalRanks",
   });
-
-  const isReadOnly = mode === Mode.VIEW;
 
   return (
     <CollapsibleCard title="ឋានៈវិជ្ជាជីវៈគ្រូបង្រៀន">
@@ -30,7 +27,7 @@ export default function EducationForm({ mode }: { mode: Mode }) {
             "ប្រកាសលេខ",
             "កាលបរិច្ឆេទទទួល",
           ]}
-          isSubmitting={isSubmitting || isReadOnly}
+          isSubmitting={isSubmitting}
           fields={[
             {
               name: "typeOfProfessionalRank",
@@ -51,7 +48,7 @@ export default function EducationForm({ mode }: { mode: Mode }) {
 
         <Separator />
 
-        <TeachingDetailForm mode={mode} />
+        <TeachingDetailForm />
       </div>
     </CollapsibleCard>
   );

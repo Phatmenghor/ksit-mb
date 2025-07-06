@@ -17,6 +17,8 @@ import { useRouter } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
 import { FormField } from "@/components/ui/form";
 import { loginService } from "@/service/auth/auth.service";
+import { ConfirmDialog } from "@/components/shared/custom-confirm-dialog";
+import { HelpDialog } from "@/components/shared/dialog/help-dialog";
 
 const FormSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -27,6 +29,7 @@ type FormData = z.infer<typeof FormSchema>;
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
   const router = useRouter();
 
   const {
@@ -158,13 +161,33 @@ export default function LoginPage() {
                 <span className="text-gray-500">
                   Forgot username or password?
                 </span>
-                <Link href="/help" className="text-emerald-800 hover:underline">
+                <span
+                  onClick={() => {
+                    setIsHelpDialogOpen(true);
+                  }}
+                  className="text-yellow-500 hover:underline"
+                >
                   Get help!
-                </Link>
+                </span>
               </div>
             </form>
           </CardContent>
         </Card>
+
+        <HelpDialog
+          title="អំពីការភ្លេចលេខសម្ងាត់!"
+          subDescription="សូមអរគុណ!"
+          open={isHelpDialogOpen}
+          onConfirm={() => {
+            setIsHelpDialogOpen(!isHelpDialogOpen);
+          }}
+          confirmText="បាទ/ចា៎ស"
+          onOpenChange={() => {
+            setIsHelpDialogOpen(!isHelpDialogOpen);
+          }}
+          description="សូមនិស្សិតធ្វើការទាក់ទងទៅកាន់ការិយាល័យសិក្សា និងកិច្ចការនិស្សិតនៃ
+វិទ្យាស្ថានបច្ចេកវិទ្យាកំពង់ស្ពឺដើម្បីបំពេញទម្រង់ស្នើសុំលេខសម្ងាត់សម្រាប់ចូលប្រព័ន្ធ។"
+        />
       </div>
     </div>
   );

@@ -11,7 +11,13 @@ export default function StudentStudyHistory({ student }: StudentProfileProps) {
   return (
     <CollapsibleCard title="ប្រវត្តិការសិក្សា">
       <div className="mt-8">
-        <div className="overflow-x-auto">
+        <div
+          className="overflow-x-auto"
+          style={{
+            scrollbarWidth: "thin",
+            scrollbarColor: "#000000 #d1d5db",
+          }}
+        >
           <table className="w-full text-sm border">
             <thead>
               <tr className="bg-black text-white text-left">

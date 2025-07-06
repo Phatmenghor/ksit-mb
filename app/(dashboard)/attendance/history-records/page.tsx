@@ -349,7 +349,7 @@ export default function HistoryRecordsPage() {
       <CardHeaderSection
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "History Record", href: ROUTE.ATTENDANCE.HISTORY_RECORD },
+          { label: "History Record", href: "" },
         ]}
         title="History Record"
         customSelect={

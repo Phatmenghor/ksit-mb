@@ -14,18 +14,12 @@ import PaymentTabs from "@/components/dashboard/users/student/view/tab/student-p
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 import { getStudentByTokenService } from "@/service/user/user.service";
 import { TranscriptTabs } from "@/components/dashboard/users/student/view/tab/student-transcript-tab";
-import { Card } from "@/components/ui/card";
 
 const tabs = [
   {
     value: "information",
     label: "Student Information",
     icon: CircleAlert,
-  },
-  {
-    value: "payment",
-    label: "Payment",
-    icon: DollarSign,
   },
   {
     value: "transcript",
@@ -99,7 +93,7 @@ export default function StudentViewPage() {
                     <span>{label}</span>
                   </div>
                   <span
-                    className={`absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 ${
+                    className={`absolute rounded-lg -bottom-1 left-0 w-full h-1 transition-all duration-200 ${
                       activeTab === value ? "bg-primary" : "bg-transparent"
                     }`}
                   />
@@ -114,11 +108,6 @@ export default function StudentViewPage() {
       <UserProfileSection user={studentDetail} />
       <TabsContent value="information" className="space-y-4 w-full">
         <StudentDetails studentDetail={studentDetail} />
-        <StudentDetailsTabs studentDetail={studentDetail} />
-      </TabsContent>
-
-      <TabsContent value="payment" className="space-y-4 w-full">
-        <PaymentTabs />
       </TabsContent>
 
       <TabsContent value="transcript" className="space-y-4 w-full">

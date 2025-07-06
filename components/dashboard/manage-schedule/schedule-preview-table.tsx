@@ -9,12 +9,7 @@ const SchedulePreviewTable = ({
 }: {
   scheduleList: ScheduleModel[];
 }) => {
-  console.log("SchedulePreviewTable received:", scheduleList);
-  console.log("Type:", typeof scheduleList);
-  console.log("Is array:", Array.isArray(scheduleList));
-
   const scheduleData = convertToWeeklySchedule(scheduleList);
-  console.log("Converted schedule data:", scheduleData);
 
   const TableHeader = () => (
     <thead>
@@ -62,23 +57,6 @@ const SchedulePreviewTable = ({
               {scheduleData.classInfo.academicYear}
             </p>
           </div>
-        </div>
-
-        {/* Debug Info - Remove this in production */}
-        <div className="mb-4 p-3 bg-gray-100 rounded text-xs">
-          <strong>Debug Info:</strong>
-          <br />
-          Input type: {typeof scheduleList}
-          <br />
-          Is array: {Array.isArray(scheduleList) ? "Yes" : "No"}
-          <br />
-          Has data: {scheduleList ? "Yes" : "No"}
-          <br />
-          Total classes across all days:{" "}
-          {scheduleData.weeklySchedule.reduce(
-            (acc, day) => acc + day.classes.length,
-            0
-          )}
         </div>
 
         {/* Weekly Schedule Tables */}

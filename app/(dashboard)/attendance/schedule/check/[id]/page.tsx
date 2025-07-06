@@ -65,6 +65,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import Loading from "@/components/shared/loading";
 import AttendanceCheckHeader from "@/components/dashboard/attendance/schedule/attendance-check-header";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const AttendanceCheckPage = () => {
   const params = useParams();
@@ -112,6 +113,7 @@ const AttendanceCheckPage = () => {
   const REFRESH_INTERVAL = 30; // 30 seconds
   const PROGRESS_UPDATE_INTERVAL = 100; // Update progress every 100ms
 
+  const isMobile = useIsMobile();
   // Get status color with smooth transitions
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -531,16 +533,16 @@ const AttendanceCheckPage = () => {
       {/* Student List */}
       {attendanceGenerate && (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            {/* Left Title Section */}
             <div className="flex items-center gap-4">
               <CardTitle className="text-base font-medium">
                 Attendance - Student List
               </CardTitle>
             </div>
 
-            <div className="flex gap-2">
-              {/* Submit to Staff Button */}
-
+            {/* Right Button Actions Section */}
+            <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:justify-end">
               {/* Auto-refresh Button */}
               <Button
                 variant="outline"
@@ -578,6 +580,7 @@ const AttendanceCheckPage = () => {
                 Refresh
               </Button>
 
+              {/* Submit to Staff Button */}
               {!isSubmitted && (
                 <Button
                   variant="default"

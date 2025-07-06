@@ -34,6 +34,7 @@ export default function EditSingleStudentPage() {
 
         setInitialValues({
           ...response,
+          id: response.id,
           classId: response.studentClass.id,
           studentParents: response.studentParent,
           studentStudiesHistories: response.studentStudiesHistory,

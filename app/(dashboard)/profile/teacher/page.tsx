@@ -16,13 +16,15 @@ import TeacherLanguageSection from "@/components/dashboard/users/teachers/view/T
 import TeacherFamilySection from "@/components/dashboard/users/teachers/view/TeacherFamily";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 import { getStaffByTokenService } from "@/service/user/user.service";
-import { Pencil } from "lucide-react";
+import { useIsMobile } from "@/components/ui/use-mobile";
 
 export default function TeacherViewPage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [teacher, setTeacher] = React.useState<StaffRespondModel | null>(null);
   const params = useParams();
   const teacherId = params.id as string;
+  const isMobile = useIsMobile();
+
   const loadTeacher = async () => {
     setIsLoading(true);
     try {
@@ -43,42 +45,52 @@ export default function TeacherViewPage() {
     loadTeacher();
   }, [teacherId]);
 
+  const renderContent = () => (
+    <div className={`mt-4 space-y-4 ${isMobile ? "w-full px-0" : ""}`}>
+      <UserProfileSection user={teacher} />
+      <TeacherPersonal teacher={teacher} />
+      <TeacherProfessionalRank teacher={teacher} />
+      <TeacherExperienceSection teacher={teacher?.teacherExperience || null} />
+      <TeacherPraiseOrCriticismSection
+        teacher={teacher?.teacherPraiseOrCriticism || null}
+      />
+      <TeacherEducationSection teacher={teacher?.teacherEducation || null} />
+      <TeacherVocationalSection teacher={teacher?.teacherVocational || null} />
+      <TeacherShortCourseSection
+        teacher={teacher?.teacherShortCourse || null}
+      />
+      <TeacherLanguageSection teacher={teacher?.teacherLanguage || null} />
+      <TeacherFamilySection
+        familyStatus={teacher}
+        teacher={teacher?.teacherFamily || null}
+      />
+    </div>
+  );
+
   return (
-    <div>
-      {/* Header with TabsList injected via prop */}
+    <div className={isMobile ? "w-full" : ""}>
+      {/* Header with different breadcrumbs for mobile/desktop */}
       <CardHeaderSection
         title="My Profile"
         back
-        breadcrumbs={[
-          { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "View Teacher", href: ROUTE.USERS.VIEW_TEACHER(teacherId) },
-        ]}
+        breadcrumbs={
+          isMobile
+            ? [
+                { label: "Home", href: ROUTE.DASHBOARD },
+                { label: "Teacher view" },
+              ]
+            : [
+                { label: "Dashboard", href: ROUTE.DASHBOARD },
+                {
+                  label: "View Teacher",
+                  href: ROUTE.USERS.VIEW_TEACHER(teacherId),
+                },
+              ]
+        }
       />
 
-      {/* Tab Content outside the header */}
-      <div className="mt-4 space-y-4">
-        <UserProfileSection user={teacher} />
-        <TeacherPersonal teacher={teacher} />
-        <TeacherProfessionalRank teacher={teacher} />
-        <TeacherExperienceSection
-          teacher={teacher?.teacherExperience || null}
-        />
-        <TeacherPraiseOrCriticismSection
-          teacher={teacher?.teacherPraiseOrCriticism || null}
-        />
-        <TeacherEducationSection teacher={teacher?.teacherEducation || null} />
-        <TeacherVocationalSection
-          teacher={teacher?.teacherVocational || null}
-        />
-        <TeacherShortCourseSection
-          teacher={teacher?.teacherShortCourse || null}
-        />
-        <TeacherLanguageSection teacher={teacher?.teacherLanguage || null} />{" "}
-        <TeacherFamilySection
-          familyStatus={teacher}
-          teacher={teacher?.teacherFamily || null}
-        />{" "}
-      </div>
+      {/* Content - full width on mobile */}
+      {renderContent()}
     </div>
   );
 }

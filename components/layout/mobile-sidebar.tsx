@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { sidebarRoutes } from "@/constants/routes";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 
 interface MobileSidebarProps {
@@ -17,6 +17,7 @@ interface MobileSidebarProps {
 
 export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     masterData: false, // Default expanded section
   });
@@ -73,7 +74,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                 : route.subroutes?.some((sub) => pathname === sub.href);
 
               const isOpen = route.section
-                ? openSections[route.section]
+                ? openSections[route.section as keyof typeof openSections]
                 : false;
 
               return (
@@ -81,13 +82,18 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                   <Button
                     variant="ghost"
                     className={cn(
-                      "w-full justify-between text-gray-900 hover:bg-gray-100 rounded py-3",
-                      isActive && "bg-gray-100 font-medium"
+                      "w-full justify-start text-gray-900 hover:bg-primary/10 hover:text-primary rounded",
+                      pathname === route.href &&
+                        "bg-primary/15 text-primary font-medium border-l-2 border-primary"
                     )}
                     onClick={() => {
                       if (route.subroutes) {
-                        route.section && toggleSection(route.section);
+                        route.section &&
+                          toggleSection(
+                            route.section as keyof typeof openSections
+                          );
                       } else if (route.href) {
+                        router.push(route.href);
                         onClose();
                       }
                     }}
@@ -124,7 +130,13 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                               "bg-gray-100 font-medium"
                           )}
                         >
-                          <Link href={subroute.href} onClick={onClose}>
+                          <Link
+                            href={{
+                              pathname: subroute.href,
+                              query: { from: "sidebar" },
+                            }}
+                            onClick={onClose}
+                          >
                             <span>{subroute.title}</span>
                           </Link>
                         </Button>

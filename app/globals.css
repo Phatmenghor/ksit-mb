@@ -27,6 +27,8 @@
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
+    --radius: 0.4rem;
+    --card-radius: 15px;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
     --primary: 221 83% 53%;
@@ -68,7 +70,7 @@
     --table-shadow: oklch(0 0 0);
 
     /* Card border color */
-    --card-border: oklch(0.8 0.004 286.32);
+    --card-border: #ddd;
   }
 }
 
@@ -78,7 +80,8 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: "Noto Sans Khmer", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Noto Sans Khmer", "Poppins", ui-sans-serif, system-ui,
+      sans-serif;
   }
 
   dialog {
@@ -95,8 +98,17 @@
   table {
     @apply w-full table-auto text-sm;
     border-collapse: collapse;
+    border: 1px solid #ddd;
+    overflow: hidden;
+    border-radius: 15px;
     box-shadow: 0 4px 12px oklch(var(--table-shadow) / 0.08),
       0 2px 4px oklch(var(--table-shadow) / 0.08);
+  }
+
+  table th,
+  table td {
+    border: 1px solid #ddd;
+    padding: 8px;
   }
 
   /* Table header */

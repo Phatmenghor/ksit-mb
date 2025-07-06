@@ -48,6 +48,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AppIcons } from "@/constants/icons/icon";
 
 const AllSchedulePage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -132,8 +133,12 @@ const AllSchedulePage = () => {
     setCurrentPage(page);
   };
 
-  const handleCardClick = (scheduleId: number) => {
+  const handleEditClick = (scheduleId: number) => {
     router.push(ROUTE.MANAGE_SCHEDULE.UPDATE_SCHEDULE + `${scheduleId}`);
+  };
+
+  const handleCardClick = (scheduleId: number) => {
+    router.push(ROUTE.STUDENT_LIST(String(scheduleId)));
   };
 
   return (
@@ -158,7 +163,21 @@ const AllSchedulePage = () => {
             </BreadcrumbList>
           </Breadcrumb>
 
-          <h3 className="text-xl font-bold">Class Schedule List</h3>
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.back()}
+              className="rounded-full"
+            >
+              <img
+                src={AppIcons.Back}
+                alt="back Icon"
+                className="h-4 w-4 mr-5 text-muted-foreground"
+              />
+            </Button>
+            <h3 className="text-xl font-bold">Class Schedule List</h3>
+          </div>
 
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="relative w-full md:w-1/2">
@@ -321,7 +340,7 @@ const AllSchedulePage = () => {
                                 className="text-amber-500 hover:bg-amber-50 hover:text-amber-600 hover:underline p-0 h-auto"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleCardClick(sche.id);
+                                  handleEditClick(sche.id);
                                 }}
                               >
                                 <Pen className="h-4 w-4" />

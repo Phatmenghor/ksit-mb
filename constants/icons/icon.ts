@@ -6,6 +6,9 @@ export const AppIcons = {
   Excel: "/icons/excel.png",
   Pdf: "/icons/pdf.png",
   Back: "/icons/Back.png",
+  Circle_alert: "/icons/circle-alert.png",
+  transcript: "/icons/transcript.png",
+  circle_alert_black: "/icons/circle-!-black.png",
 };
 
 export const AppSidebarIcons = {

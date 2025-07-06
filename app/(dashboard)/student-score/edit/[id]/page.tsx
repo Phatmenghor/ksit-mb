@@ -396,7 +396,6 @@ export default function StudentScoreDetailsPage() {
 
       // Clear unsaved changes - create new empty Set
       setUnsavedChanges(new Set());
-      setMode("view");
       toast.success(
         `Successfully updated ${changedStudentScore?.length} student scores`,
         { duration: 2000 }
@@ -433,38 +432,6 @@ export default function StudentScoreDetailsPage() {
     // Reload original data
     HandleInitStudentScore(true);
   }, [HandleInitStudentScore, isSubmitted]);
-
-  const handleSaveScores = async () => {
-    setIsSubmitting(true);
-    try {
-      const promises =
-        score?.studentScores.map((student) => {
-          const payload = {
-            id: student.id,
-            assignmentScore: student.assignmentScore,
-            midtermScore: student.midtermScore,
-            finalScore: student.finalScore,
-            comments: student.comments || "",
-          };
-
-          return updateStudentsScoreService(payload);
-        }) || [];
-
-      const results = await Promise.allSettled(promises);
-      const hasFailures = results.some((r) => r.status === "rejected");
-
-      if (hasFailures) {
-        toast.error("Some scores failed to update.");
-      } else {
-        toast.success("All scores updated successfully!");
-      }
-    } catch (err: any) {
-      console.error("Failed to update scores:");
-      toast.error(err.message || "Failed to update scores.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -554,33 +521,11 @@ export default function StudentScoreDetailsPage() {
             </Card>
           </div>
 
-          {mode === "edit-score" && score !== null && (
-            <Card className="w-full">
-              <CardContent className="flex justify-end gap-3 p-4">
-                <Button
-                  disabled={isSubmitting}
-                  variant="outline"
-                  onClick={() => setMode("view")}
-                >
-                  Discard
-                </Button>
-                <Button
-                  variant="default"
-                  className="bg-orange-500 hover:bg-orange-600 text-white"
-                  onClick={handleSaveAllChanges}
-                  disabled={isSavingAll}
-                >
-                  {isSavingAll ? "Saving..." : "Save"}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
           {/* Quick Actions Panel - Only show when not submitted */}
           {score && unsavedChanges.size > 0 && !isSubmitted && (
             <StudentScoresQuickAction
               handleResetChanges={handleResetChanges}
-              handleSaveScores={handleSaveScores}
+              handleSaveScores={handleSaveAllChanges}
               isSavingAll={isSavingAll}
               setUnsavedChanges={setUnsavedChanges}
               unsavedChanges={unsavedChanges}

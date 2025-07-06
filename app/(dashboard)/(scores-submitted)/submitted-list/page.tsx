@@ -261,9 +261,7 @@ export default function ScoreSubmittedPage() {
 
       {/* Accept List Tab */}
       <TabsContent value="accept" className="space-y-4 w-full">
-        <Card>
-          <CardContent className="p-0">{renderTableContent()}</CardContent>
-        </Card>
+        {renderTableContent()}
 
         {!isLoading && submissions && (
           <div className="mt-4 flex justify-end">

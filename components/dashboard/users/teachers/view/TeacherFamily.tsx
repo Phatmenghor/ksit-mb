@@ -6,6 +6,7 @@ import InfoGrid from "../../shared/user-personal-history";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 import { TeacherFamily } from "@/model/user/staff/staff.request.model";
 import { formatValue } from "@/utils/map-helper/student";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TeacherProps {
   teacher: TeacherFamily[] | null;
@@ -16,6 +17,7 @@ export default function TeacherFamilySection({
   teacher,
   familyStatus,
 }: TeacherProps) {
+  const isMobile = useIsMobile();
   const infoItems = [
     {
       label: "ស្ថានភាពគ្រួស",
@@ -89,7 +91,7 @@ export default function TeacherFamilySection({
         <Separator />
 
         <div>
-          <InfoGrid data={infoItems} columns={2} />
+          <InfoGrid data={infoItems} columns={isMobile ? 1 : 2} />
         </div>
         <CustomTable columns={columns} data={teacher ?? []} />
       </CardContent>

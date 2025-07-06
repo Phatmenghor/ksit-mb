@@ -26,6 +26,7 @@ import {
 import { Constants } from "@/constants/text-string";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
 import { ComboboxSelectDepartment } from "@/components/shared/ComboBox/combobox-department";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const majorFormSchema = z.object({
   name: z.string().min(1, { message: "Room name is required" }),
@@ -59,6 +60,7 @@ export function MajorFormModal({
     useState<DepartmentModel | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  const isMobile = useIsMobile();
   const form = useForm<MajorFormData>({
     resolver: zodResolver(majorFormSchema),
     defaultValues: {
@@ -119,7 +121,12 @@ export function MajorFormModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className={`max-h-[90vh] rounded-xl overflow-y-auto ${
+          isMobile ? "max-w-sm" : "max-w-lg"
+        }`}
+      >
+        {" "}
         <DialogHeader>
           <DialogTitle>
             {mode === "add" ? "Add Major" : "Edit Major"}
@@ -129,7 +136,6 @@ export function MajorFormModal({
             {mode === "add" ? "create" : "update"} a room.
           </DialogDescription>
         </DialogHeader>
-
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
@@ -186,7 +192,7 @@ export function MajorFormModal({
               )}
             />
 
-            <DialogFooter className="mt-6 sticky -bottom-8 z-10 bg-white py-4">
+            <div className="flex space-x-4 justify-end mr-auto">
               <Button
                 type="button"
                 variant="outline"
@@ -209,7 +215,7 @@ export function MajorFormModal({
                   "Save Major"
                 )}
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </Form>
       </DialogContent>

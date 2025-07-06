@@ -27,16 +27,16 @@ export default function RenderModeBasedContent({
     scheduleDetail
   );
 
-  if (mode === "view" && !isSubmittingToStaff) {
+  if ((mode === "view" || mode === "edit-score") && !isSubmittingToStaff) {
     return (
       <div className="flex flex-row gap-2">
-        <Button
+        {/* <Button
           className="bg-orange-400 hover:bg-orange-500"
           onClick={() => setMode("edit-score")}
         >
           <Edit className="w-4 h-4 mr-1" />
           Edit score
-        </Button>
+        </Button> */}
         <Button onClick={() => setIsSubmittedDialogOpen(true)}>
           <Save className="w-4 h-4 mr-1" />
           Submit score

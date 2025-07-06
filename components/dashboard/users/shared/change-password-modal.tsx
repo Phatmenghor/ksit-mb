@@ -64,7 +64,7 @@ export default function ChangePasswordModal({
     const ok = await AdminChangePasswordService({ id: userId, ...data });
     ok
       ? (toast.success("Password changed"), onClose())
-      : toast.error("Change failed");
+      : toast.error("Change failed", ok);
   };
 
   const inputClasses =

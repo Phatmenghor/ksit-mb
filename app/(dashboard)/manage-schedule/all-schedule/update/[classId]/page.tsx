@@ -60,6 +60,7 @@ import SchedulePreviewTable from "@/components/dashboard/manage-schedule/schedul
 import ScheduleTeacherTable from "@/components/dashboard/manage-schedule/schedule-teacher-table";
 import DuplicateScheduleModal from "@/components/dashboard/manage-schedule/duplicate-schedule-modal";
 import { ConfirmDialog } from "@/components/shared/custom-confirm-dialog";
+import Loading from "@/components/shared/loading";
 
 const formSchema = z.object({
   classId: z.number().min(1, "Class is required"),
@@ -82,10 +83,10 @@ const formSchema = z.object({
 
 export default function UpdateSchedule() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSchedulePreviewLoading, setIsSchedulePreviewLoading] =
+    useState(false);
   const [isLoadingSemesters, setIsLoadingSemesters] = useState(false);
-  const [selectedDepartment, setSelectedDepartment] =
-    useState<DepartmentModel | null>(null);
   const [selectedSubjectType, setSelectedSubjectType] =
     useState<SubjectModel | null>(null);
   const [selectedInstructor, setSelectedInstructor] =
@@ -133,6 +134,7 @@ export default function UpdateSchedule() {
   const watchedClassId = form.watch("classId");
   const watchedInstructorId = form.watch("instructorId");
   const watchedSemesterId = form.watch("semesterId");
+
   // Fetch existing schedule data first
   useEffect(() => {
     const fetchScheduleData = async () => {
@@ -170,7 +172,6 @@ export default function UpdateSchedule() {
 
           // Set selected items for comboboxes
           setSelectedClass(data.classes || null);
-          setSelectedDepartment(data.course?.department || null);
           setSelectedInstructor(data.teacher || null);
           setSelectedSubjectType(data.course?.subject || null);
           setSelectedRoom(data.room || null);
@@ -270,7 +271,7 @@ export default function UpdateSchedule() {
         academyYear,
       });
 
-      setIsLoading(true);
+      setIsSchedulePreviewLoading(true);
       try {
         let res = null;
         const semester = getSemesterEnum(semesterId);
@@ -304,7 +305,7 @@ export default function UpdateSchedule() {
         toast.error("Failed to load schedule preview");
         setSchedulePreviewData([]);
       } finally {
-        setIsLoading(false);
+        setIsSchedulePreviewLoading(false);
       }
     },
     [getSemesterEnum]
@@ -402,12 +403,7 @@ export default function UpdateSchedule() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex h-[70vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-        <span className="ml-2">Loading schedule details...</span>
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
@@ -424,9 +420,7 @@ export default function UpdateSchedule() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href={ROUTE.SCHEDULE.DEPARTMENT}>
-                Schedules
-              </BreadcrumbLink>
+              <BreadcrumbLink>Schedules</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -556,6 +550,43 @@ export default function UpdateSchedule() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="yearLevel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Year Level <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            disabled={isSubmitting}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select year level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={YearLevelEnum.FIRST_YEAR}>
+                                Year 1
+                              </SelectItem>
+                              <SelectItem value={YearLevelEnum.SECOND_YEAR}>
+                                Year 2
+                              </SelectItem>
+                              <SelectItem value={YearLevelEnum.THIRD_YEAR}>
+                                Year 3
+                              </SelectItem>
+                              <SelectItem value={YearLevelEnum.FOURTH_YEAR}>
+                                Year 4
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 {/* Right Column */}
@@ -661,43 +692,6 @@ export default function UpdateSchedule() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="yearLevel"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Year Level <span className="text-red-500">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                            disabled={isSubmitting}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select year level" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value={YearLevelEnum.FIRST_YEAR}>
-                                Year 1
-                              </SelectItem>
-                              <SelectItem value={YearLevelEnum.SECOND_YEAR}>
-                                Year 2
-                              </SelectItem>
-                              <SelectItem value={YearLevelEnum.THIRD_YEAR}>
-                                Year 3
-                              </SelectItem>
-                              <SelectItem value={YearLevelEnum.FOURTH_YEAR}>
-                                Year 4
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
               </div>
             </CardContent>
@@ -721,7 +715,7 @@ export default function UpdateSchedule() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-green-700 hover:bg-green-800 text-white px-6"
+                className="bg-teal-900 hover:bg-teal-950 text-white px-6"
               >
                 {isSubmitting ? (
                   <>

@@ -22,7 +22,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { YearSelector } from "@/components/shared/year-selector";
 import { REQUEST_TYPES, RequestType } from "@/constants/constant";
 
 import { toast } from "sonner";
@@ -208,31 +207,29 @@ export default function RequestPage() {
   };
 
   return (
-    <div className="animate-in fade-in duration-700">
-      <Card className="animate-in slide-in-from-top-4 duration-500">
+    <div>
+      <Card>
         <CardContent className="p-6 space-y-2">
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem className="animate-in fade-in duration-500 delay-100">
+              <BreadcrumbItem>
                 <BreadcrumbLink
                   href={ROUTE.DASHBOARD}
-                  className="transition-all duration-300 hover:text-amber-600 hover:underline hover:underline-offset-4"
+                  className="hover:text-amber-600 hover:underline hover:underline-offset-4"
                 >
                   Home
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="animate-in fade-in duration-500 delay-200" />
-              <BreadcrumbItem className="animate-in fade-in duration-500 delay-300">
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
                 <BreadcrumbPage>Request List</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <h3 className="text-xl font-bold animate-in slide-in-from-left-4 duration-600 delay-200">
-            Request List
-          </h3>
-          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-in slide-in-from-bottom-4 duration-600 delay-300">
+          <h3 className="text-xl font-bold">Request List</h3>
+          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="relative w-[60%] md:w-3/2">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-all duration-300 group-focus-within:text-amber-500 group-focus-within:scale-110" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground " />
               <Input
                 type="search"
                 placeholder="Search by name or ID..."
@@ -245,11 +242,11 @@ export default function RequestPage() {
         </CardContent>
       </Card>
 
-      <div className="relative flex items-center my-6 animate-in slide-in-from-left-6 duration-700 delay-400">
+      <div className="relative flex items-center my-6">
         <Button
           variant="outline"
           size="icon"
-          className="absolute left-0 z-10 rounded-full transition-all duration-300 hover:bg-amber-50 hover:border-amber-300 hover:shadow-lg hover:scale-110 active:scale-95 group"
+          className="absolute left-0 z-10 rounded-full transition-all duration-300 hover:bg-amber-50 hover:border-amber-300 hover:shadow-lg "
           onClick={scrollLeft}
         >
           <ChevronLeft className="h-4 w-4 transition-all duration-300 group-hover:-translate-x-0.5 group-hover:text-amber-600" />
@@ -269,7 +266,7 @@ export default function RequestPage() {
               <Button
                 key={type.label}
                 variant={isActive ? "default" : "outline"}
-                className={`whitespace-nowrap transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${
+                className={`whitespace-nowrap transition-all duration-300  ${
                   selectedType?.value === type.value
                     ? "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-200/50 scale-105"
                     : "hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 hover:shadow-lg hover:shadow-amber-100/50 hover:scale-105 hover:-translate-y-1"
@@ -297,19 +294,19 @@ export default function RequestPage() {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto mt-4 animate-in fade-in duration-500">
+      <div>
         {isLoading ? (
-          <div className="animate-in fade-in duration-300">
+          <div>
             <Loading />
           </div>
         ) : (
-          <Table className="animate-in slide-in-from-bottom-2 duration-400">
+          <Table>
             <TableHeader>
-              <TableRow className="animate-in fade-in duration-300 delay-100">
+              <TableRow>
                 {RequestTableHeader.map((header, index) => (
                   <TableHead
                     key={index}
-                    className={`${header.className} animate-in fade-in duration-200`}
+                    className={`${header.className}`}
                     style={{
                       animationDelay: `${150 + index * 50}ms`,
                       animationFillMode: "backwards",
@@ -322,7 +319,7 @@ export default function RequestPage() {
             </TableHeader>
             <TableBody>
               {requestData?.content.length === 0 ? (
-                <TableRow className="animate-in fade-in duration-400 delay-300">
+                <TableRow>
                   <TableCell
                     colSpan={8}
                     className="text-center py-6 text-muted-foreground"
@@ -337,42 +334,37 @@ export default function RequestPage() {
                   return (
                     <TableRow
                       key={req.id}
-                      className="animate-in fade-in slide-in-from-left-1 duration-300 hover:bg-muted/50 transition-colors"
                       style={{
                         animationDelay: `${300 + index * 80}ms`,
                         animationFillMode: "backwards",
                       }}
                     >
-                      <TableCell className="transition-colors duration-200">
-                        {indexDisplay}
-                      </TableCell>
-                      <TableCell className="transition-colors duration-200">
+                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>
                         {req.user
                           ? `${req.user?.identifyNumber || "---"}`
                           : "N/A"}
                       </TableCell>
-                      <TableCell className="transition-colors duration-200">
+                      <TableCell>
                         {req.user
                           ? `${req.user?.englishFirstName || "---"} ${
                               req.user?.englishLastName || "---"
                             }`
                           : "N/A"}
                       </TableCell>
-                      <TableCell className="transition-colors duration-200">
+                      <TableCell>
                         {req.user
                           ? `${formatGender(req.user?.gender) || "---"}`
                           : "N/A"}
                       </TableCell>
-                      <TableCell className="transition-colors duration-200">
-                        {truncateText(req?.title, 20)}
-                      </TableCell>
-                      <TableCell className="transition-colors duration-200">
+                      <TableCell>{truncateText(req?.title, 20)}</TableCell>
+                      <TableCell>
                         {formatDate(req?.createdAt || "---")}
                       </TableCell>
-                      <TableCell className="transition-colors duration-200">
+                      <TableCell>
                         {getStatusBadge(req?.status || "---")}
                       </TableCell>
-                      <TableCell className="transition-colors duration-200">
+                      <TableCell>
                         <div className="flex justify-start space-x-2">
                           <Button
                             onClick={() => {

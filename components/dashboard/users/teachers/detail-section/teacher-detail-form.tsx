@@ -2,14 +2,12 @@ import { Input } from "@/components/ui/input";
 import { Mode } from "@/constants/constant";
 import { Controller, useFormContext } from "react-hook-form";
 
-export default function TeachingDetailForm({ mode }: { mode: Mode }) {
+export default function TeachingDetailForm() {
   const {
     control,
-    register,
-    formState: { isSubmitting, isDirty },
+    formState: { isSubmitting },
   } = useFormContext();
 
-  const isReadOnly = mode === Mode.VIEW;
   return (
     <div className="space-y-3">
       <div className="mt-4 grid grid-cols-3 gap-4">
@@ -26,7 +24,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
             render={({ field }) => (
               <Input
                 id="rankingsAndClass"
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 {...field}
                 placeholder="ឋាននន្តរស័ក្តិ និងថ្នាក់..."
                 className="bg-gray-100"
@@ -48,7 +46,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
             render={({ field }) => (
               <Input
                 id="teaching-english"
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 {...field}
                 placeholder="បង្រៀនភាសាអង់គ្លេស..."
                 className="bg-gray-100"
@@ -70,7 +68,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
             render={({ field }) => (
               <Input
                 id="threeLevelClass"
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 {...field}
                 placeholder="ថ្នាក់គួបបីកម្រិត..."
                 className="bg-gray-100"
@@ -90,7 +88,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
               <Input
                 id="reference"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="យោង..."
                 className="bg-gray-100"
               />
@@ -112,7 +110,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
               <Input
                 id="technical-team-lead"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="ប្រធានក្រុមបច្ចេកទេស..."
                 className="bg-gray-100"
               />
@@ -134,7 +132,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
               <Input
                 id="assistInTeaching"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="ជួយបង្រៀន..."
                 className="bg-gray-100"
               />
@@ -156,7 +154,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
               <Input
                 id="serialNumber"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="លេខរៀង..."
                 className="bg-gray-100"
               />
@@ -175,7 +173,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
               <Input
                 id="two-class"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="ពីរថ្នាក់ណីរពេល..."
                 className="bg-gray-100"
               />
@@ -197,7 +195,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
               <Input
                 id="classResponsibility"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="ទទួលបន្ទុកថ្នាក់..."
                 className="bg-gray-100"
               />
@@ -220,7 +218,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
                 id="lastSalaryIncrease"
                 type="date"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="ថ្ងៃខែឡើងការប្រាក់ចុងក្រោយ..."
                 className="bg-gray-100"
               />
@@ -242,7 +240,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
               <Input
                 id="teachAcrossSchools"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="បង្រៀនឆ្លងសាលា..."
                 className="bg-gray-100"
               />
@@ -264,7 +262,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
               <Input
                 id="overtimeHours"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="ម៉ោងលើស..."
                 className="bg-gray-100"
               />
@@ -283,7 +281,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
               <Input
                 id="issuedDate"
                 type="date"
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 {...field}
                 placeholder="ចុះថ្ងៃទី..."
                 className="bg-gray-100"
@@ -306,7 +304,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
               <Input
                 id="suitableClass"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="ថ្នាក់គួប..."
                 className="bg-gray-100"
               />
@@ -325,7 +323,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
               <Input
                 id="bilingual"
                 {...field}
-                disabled={isSubmitting || isReadOnly}
+                disabled={isSubmitting}
                 placeholder="ពីរភាសា..."
                 className="bg-gray-100"
               />
@@ -346,7 +344,7 @@ export default function TeachingDetailForm({ mode }: { mode: Mode }) {
           render={({ field }) => (
             <Input
               id="academicYearTaught"
-              disabled={isSubmitting || isReadOnly}
+              disabled={isSubmitting}
               {...field}
               placeholder="បង្រៀននៅឆ្នាំសិក្សា..."
               className="bg-gray-100"

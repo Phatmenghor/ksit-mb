@@ -1,6 +1,7 @@
 "use client";
 import CollapsibleCard from "@/components/shared/collapsibleCard";
 import DynamicInputGrid from "@/components/shared/dynamicInputGrid";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
 export default function PraiseCriticismForm() {
@@ -14,12 +15,16 @@ export default function PraiseCriticismForm() {
     name: "teacherPraiseOrCriticisms",
   });
 
+  const isMobile = useIsMobile();
+
   return (
     <CollapsibleCard title="ការសរសើរ​ / ស្តីបន្ទោស">
       <DynamicInputGrid
         isSubmitting={isSubmitting}
         labels={[
-          "ប្រភេទនៃការសរសើរ/ការស្តីបន្ទោស/ទទួលអធិការកិច្ច​",
+          !isMobile
+            ? "ប្រភេទនៃការសរសើរ/ការស្តីបន្ទោស/ទទួលអធិការកិច្ច​"
+            : "ប្រភេទនៃការសរសើរ",
           "ផ្តល់ដោយ",
           "កាលបរិច្ឆេទទទួល",
         ]}

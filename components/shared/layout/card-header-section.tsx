@@ -14,8 +14,9 @@ import { Search, ArrowLeft, Ghost } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AppIcons } from "@/constants/icons/icon";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BreadcrumbItemType {
   label: string;
@@ -56,11 +57,15 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
   tabs,
 }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const isMobile = useIsMobile();
+  const fromSidebar = searchParams.get("from") === "sidebar";
 
   return (
     <div>
       <Card>
-        <CardContent className="p-6 space-y-3">
+        <CardContent className="py-6 space-y-3">
           {/* Breadcrumb Section */}
           <Breadcrumb>
             <BreadcrumbList>
@@ -89,8 +94,8 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
           </Breadcrumb>
 
           {/* Title Section with Back Button */}
-          <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-start gap-4">
-            {backHref ? (
+          <div className="mb-3 flex flex-col md:flex-row md:items-center md:justify-start">
+            {backHref && !isMobile && !fromSidebar ? (
               <Link href={backHref}>
                 <img
                   src={AppIcons.Back}
@@ -98,8 +103,12 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
                   className="h-4 w-4 mr-5 text-muted-foreground"
                 />{" "}
               </Link>
-            ) : back ? (
-              <Button variant="ghost" onClick={() => router.back()}>
+            ) : back && !isMobile && !fromSidebar ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => router.back()}
+              >
                 <img
                   src={AppIcons.Back}
                   alt="back Icon"
@@ -108,12 +117,13 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
               </Button>
             ) : null}
 
-            {title && <h3 className="text-xl font-bold">{title}</h3>}
+            {title && (
+              <h3 className="text-2xl font-bold text-gray-900">{title}</h3>
+            )}
           </div>
 
           {/* Search and Actions Section */}
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            {/* Search input */}
             {/* Search input */}
             {onSearchChange && (
               <div className="relative w-full md:w-[300px] group">

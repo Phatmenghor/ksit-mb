@@ -22,6 +22,7 @@ import { Constants } from "@/constants/text-string";
 import { toast } from "sonner";
 import { getAllStatisticService } from "@/service/statistic/statistic.service";
 import { StatisticModel } from "@/model/statistic/statistic-model";
+import { Separator } from "@/components/ui/separator";
 
 interface MetricCardProps {
   title: string;
@@ -120,9 +121,12 @@ export default function ManageClassPage() {
               </BreadcrumbList>
             </Breadcrumb>
 
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
           </div>
 
+          <Separator className="bg-gray-900" />
+
+          <p className="text-gray-900">Overview Data</p>
           {/* Overview Data Section */}
           <div className="space-y-4">
             {/* Metrics Grid */}

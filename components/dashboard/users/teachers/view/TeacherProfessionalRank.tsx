@@ -4,11 +4,15 @@ import InfoGrid from "../../shared/user-personal-history";
 import { Card, CardContent } from "@/components/ui/card";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 import { formatValue } from "@/utils/map-helper/student";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TeacherProps {
   teacher: StaffRespondModel | null;
 }
+
 export default function TeacherProfessionalRank({ teacher }: TeacherProps) {
+  const isMobile = useIsMobile();
+
   const infoItems = [
     {
       label: "ឋាននន្តរស័ក្តិ និងថ្នាក់",
@@ -80,42 +84,77 @@ export default function TeacherProfessionalRank({ teacher }: TeacherProps) {
     <Card title="ឋានៈវិជ្ជាជីវៈគ្រូបង្រៀន">
       <CardContent className="p-5">
         <div className="mt-2">
-          <div className="overflow-x-auto space-y-7">
-            <table className="w-full text-sm border-none">
-              <thead>
-                <tr className="bg-black text-white text-left">
-                  <th className="p-2 border">ប្រភេទឋានៈវិជ្ជាជីវៈ </th>
-                  <th className="p-2 border">បរិយាយ</th>
-                  <th className="p-2 border">ប្រកាសលេខ</th>
-                  <th className="p-2 border">កាលបរិច្ឆេទទទួល</th>
-                </tr>
-              </thead>
-              <tbody>
-                {teacher?.teachersProfessionalRank.map((value, index) => {
-                  return (
-                    <tr key={value.id} className="border-t">
-                      <td className="p-2 border">
-                        {value?.typeOfProfessionalRank || "---"}
-                      </td>
-                      <td className="p-2 border">
-                        {value?.description || "---"}
-                      </td>
-                      <td className="p-2 border">
-                        {value.announcementNumber || "---"}
-                      </td>
-                      <td className="p-2 border">
-                        {value?.dateAccepted || "---"}
-                      </td>
+          <div className="space-y-7">
+            {/* Table container with horizontal scroll */}
+            <div
+              className="relative overflow-x-auto"
+              style={{
+                scrollbarWidth: "thin",
+                maxHeight: "300px",
+                scrollbarColor: "#000000 #d1d5db",
+              }}
+            >
+              <div>
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="bg-black text-white text-left">
+                      <th className="p-2 border border-gray-300 min-w-[200px] whitespace-nowrap">
+                        ប្រភេទឋានៈវិជ្ជាជីវៈ
+                      </th>
+                      <th className="p-2 border border-gray-300 min-w-[150px] whitespace-nowrap">
+                        បរិយាយ
+                      </th>
+                      <th className="p-2 border border-gray-300 min-w-[120px] whitespace-nowrap">
+                        ប្រកាសលេខ
+                      </th>
+                      <th className="p-2 border border-gray-300 min-w-[150px] whitespace-nowrap">
+                        កាលបរិច្ឆេទទទួល
+                      </th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {teacher?.teachersProfessionalRank?.length ? (
+                      teacher.teachersProfessionalRank.map((value) => (
+                        <tr key={value.id} className="border-t bg-white">
+                          <td className="p-2 border border-gray-300 whitespace-nowrap">
+                            {value?.typeOfProfessionalRank || "---"}
+                          </td>
+                          <td className="p-2 border border-gray-300 whitespace-nowrap">
+                            {value?.description || "---"}
+                          </td>
+                          <td className="p-2 border border-gray-300 whitespace-nowrap">
+                            {value?.announcementNumber || "---"}
+                          </td>
+                          <td className="p-2 border border-gray-300 whitespace-nowrap">
+                            {value?.dateAccepted || "---"}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr className="border-t bg-white">
+                        <td className="p-2 border border-gray-300 text-center whitespace-nowrap">
+                          ---
+                        </td>
+                        <td className="p-2 border border-gray-300 text-center whitespace-nowrap">
+                          ---
+                        </td>
+                        <td className="p-2 border border-gray-300 text-center whitespace-nowrap">
+                          ---
+                        </td>
+                        <td className="p-2 border border-gray-300 text-center whitespace-nowrap">
+                          ---
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
             <Separator />
 
             <div>
-              <InfoGrid data={infoItems} columns={2} />
+              <InfoGrid data={infoItems} columns={isMobile ? 1 : 2} />
             </div>
           </div>
         </div>

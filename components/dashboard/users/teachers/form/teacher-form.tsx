@@ -89,8 +89,6 @@ export default function TeacherForm({
     const subscription = watch(() => {
       setIsFormDirty(isDirty);
       setIsFormValid(Object.keys(errors).length === 0 && isValid);
-
-      console.log("Dirty:", isDirty, "Valid:", isValid, "Errors:", errors);
     });
     return () => subscription.unsubscribe();
   }, [methods]);
@@ -173,11 +171,11 @@ export default function TeacherForm({
         <div className="w-full mx-auto space-y-5">
           <FormDetail />
 
-          <Card>
-            <CardContent>
-              <div className="flex justify-between items-center pt-5 gap-3">
-                {/* Left side: Disable User button */}
-                {mode === "Edit" && (
+          {/* Left side: Disable User button */}
+          {mode === "Edit" ? (
+            <Card>
+              <CardContent>
+                <div className="flex justify-between items-center pt-5 gap-3">
                   <Button
                     type="button"
                     disabled={loading || isSubmitting}
@@ -189,39 +187,73 @@ export default function TeacherForm({
                     </span>
                     {isSubmitting ? "Disabling..." : "Disable User"}
                   </Button>
-                )}
-
-                {/* Right side: Discard and Save buttons */}
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    disabled={isSubmitting}
-                    variant="outline"
-                    onClick={handleClosePage}
-                  >
-                    Discard
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="bg-emerald-800 hover:bg-emerald-900"
-                    disabled={!canSubmitForm()}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="mr-2 h-4 w-4" />
-                        Save
-                      </>
-                    )}
-                  </Button>
+                  {/* Right side: Discard and Save buttons */}
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      disabled={isSubmitting}
+                      variant="outline"
+                      onClick={handleClosePage}
+                    >
+                      Discard
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="bg-emerald-800 hover:bg-emerald-900"
+                      disabled={!canSubmitForm()}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          Save
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent>
+                <div className="flex justify-end pt-5 gap-3">
+                  {/* Right side: Discard and Save buttons */}
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      disabled={isSubmitting}
+                      variant="outline"
+                      onClick={handleClosePage}
+                    >
+                      Discard
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="bg-emerald-800 hover:bg-emerald-900"
+                      disabled={!canSubmitForm()}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          Save
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </form>
     </FormProvider>

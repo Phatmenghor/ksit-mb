@@ -239,9 +239,10 @@ export default function StuffOfficerListPage() {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  onClick={() =>
-                                    setIsChangePasswordDialogOpen(true)
-                                  }
+                                  onClick={() => {
+                                    setSelectedStaff(staff);
+                                    setIsChangePasswordDialogOpen(true);
+                                  }}
                                   variant="ghost"
                                   size="icon"
                                   className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
@@ -287,8 +288,8 @@ export default function StuffOfficerListPage() {
       <ChangePasswordModal
         isOpen={isChangePasswordDialogOpen}
         onClose={() => {
-          setIsChangePasswordDialogOpen(false);
           setSelectedStaff(null);
+          setIsChangePasswordDialogOpen(false);
         }}
         userId={selectedStaff?.id}
       />

@@ -241,9 +241,10 @@ export default function TeachersListPage() {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  onClick={() =>
-                                    setIsChangePasswordDialogOpen(true)
-                                  }
+                                  onClick={() => {
+                                    setSelectedTeacher(teacher);
+                                    setIsChangePasswordDialogOpen(true);
+                                  }}
                                   variant="ghost"
                                   size="icon"
                                   className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
@@ -289,8 +290,8 @@ export default function TeachersListPage() {
       <ChangePasswordModal
         isOpen={isChangePasswordDialogOpen}
         onClose={() => {
-          setIsChangePasswordDialogOpen(false);
           setSelectedTeacher(null);
+          setIsChangePasswordDialogOpen(false);
         }}
         userId={selectedTeacher?.id}
       />

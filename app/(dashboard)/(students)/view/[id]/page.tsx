@@ -24,11 +24,6 @@ const tabs = [
     icon: CircleAlert,
   },
   {
-    value: "payment",
-    label: "Payment",
-    icon: DollarSign,
-  },
-  {
     value: "transcript",
     label: "Transcript",
     icon: FileText,
@@ -127,11 +122,6 @@ export default function StudentViewPage() {
         <StudentDetails studentDetail={studentDetail} />
         <StudentDetailsTabs studentDetail={studentDetail} />
       </TabsContent>
-
-      <TabsContent value="payment" className="space-y-4 w-full">
-        <PaymentTabs />
-      </TabsContent>
-
       <TabsContent value="transcript" className="space-y-4 w-full">
         <TranscriptTabs studentId={studentDetail?.id} />
       </TabsContent>

@@ -2,7 +2,7 @@
 
 import { sidebarRoutes } from "@/constants/routes";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { ChevronDown, ChevronRight, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const route = useRouter();
+
   const [openSections, setOpenSections] = useState({
     masterData: false,
     users: false,
@@ -99,10 +101,12 @@ export function Sidebar() {
                         )}
                       >
                         <Link
-                          href={subroute.href}
+                          href={{
+                            pathname: subroute.href,
+                            query: { from: "sidebar" },
+                          }}
                           className="flex items-center gap-2"
                         >
-                          <Circle className="h-2 w-2" />
                           <span>{subroute.title}</span>
                         </Link>
                       </Button>
@@ -126,7 +130,10 @@ export function Sidebar() {
             )}
           >
             <Link
-              href={route.href || "#"}
+              href={{
+                pathname: route.href || "#",
+                query: { from: "sidebar" },
+              }}
               className="flex items-center gap-3 px-3 py-2"
             >
               <img

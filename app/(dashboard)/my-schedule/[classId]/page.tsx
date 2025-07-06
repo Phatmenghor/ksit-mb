@@ -22,6 +22,8 @@ import {
   Eye,
   Clipboard,
   ClipboardPenLine,
+  CheckCircle,
+  FileText,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -132,10 +134,9 @@ const MySchedulePage = () => {
   };
 
   const handleCardClick = (scheduleId: number) => {
-    // Navigate to the class detail page with the schedule ID
-    // toast.success("Navigating to page score makara");
-    router.push(`/student-list/${scheduleId}`);
+    router.push(ROUTE.STUDENT_LIST(String(scheduleId)));
   };
+
   const handleClassListClick = () => {
     router.back();
   };
@@ -324,16 +325,42 @@ const MySchedulePage = () => {
                                   <span>{sche.room.name || "- - -"}</span>
                                 </div>
                               </div>
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="outline"
-                                  className="flex items-center gap-1 bg-amber-500 text-white hover:bg-amber-50 hover:text-amber-600"
-                                  onClick={() => handleToSurveypage()}
+                              {sche.surveyStatus !== "NONE" && (
+                                <div
+                                  className={`flex items-center gap-1 transition-all duration-300 ${
+                                    sche.surveyStatus === "NOT_STARTED"
+                                      ? "group-hover:text-gray-600 group-hover:scale-105 cursor-pointer"
+                                      : "text-green-600 cursor-default"
+                                  }`}
+                                  onClick={(e) => {
+                                    if (sche.surveyStatus === "NOT_STARTED") {
+                                      e.stopPropagation();
+                                      router.push(
+                                        ROUTE.SURVEY.SURVEY_FORM(
+                                          String(sche.id)
+                                        )
+                                      );
+                                    }
+                                  }}
                                 >
-                                  <ClipboardPenLine className="h-4 w-4" />
-                                  Take Survey
-                                </Button>
-                              </div>
+                                  {sche.surveyStatus === "COMPLETED" ? (
+                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                  ) : (
+                                    <FileText className="h-4 w-4 transition-all duration-300 group-hover:text-amber-500 group-hover:scale-110" />
+                                  )}
+                                  <span
+                                    className={`transition-all duration-300 ${
+                                      sche.surveyStatus === "COMPLETED"
+                                        ? "font-medium text-green-600"
+                                        : "group-hover:font-medium underline decoration-dotted underline-offset-2"
+                                    }`}
+                                  >
+                                    {sche.surveyStatus === "COMPLETED"
+                                      ? "Survey Completed"
+                                      : "Take Survey"}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>

@@ -26,7 +26,7 @@ export function StudentBasicForm() {
   const handleClassChange = (selectedClass: ClassModel | null) => {
     console.log("##class: ", selectedClass?.id);
     setSelectedClass(selectedClass);
-    setValue("classId", selectedClass?.id as number, {
+    setValue("classId", selectedClass?.id ?? null, {
       shouldValidate: true,
       shouldDirty: true,
     });
@@ -94,14 +94,11 @@ export function StudentBasicForm() {
                       placeholder="Password..."
                       required
                     />
-                    {errors.password &&
-                      typeof errors.password === "object" &&
-                      "message" in errors.password &&
-                      typeof errors.password.message === "string" && (
-                        <p className="text-red-600 text-sm mt-1">
-                          {errors.password.message}
-                        </p>
-                      )}
+                    {typeof errors.password?.message === "string" && (
+                      <p className="text-red-600 text-sm mt-1">
+                        {errors.password.message}
+                      </p>
+                    )}
                   </>
                 )}
               />
@@ -112,7 +109,7 @@ export function StudentBasicForm() {
                 control={control}
                 name="classId"
                 render={({ field }) => (
-                  <FormItem {...field}>
+                  <FormItem>
                     <FormLabel>
                       Class <span className="text-red-500">*</span>
                     </FormLabel>

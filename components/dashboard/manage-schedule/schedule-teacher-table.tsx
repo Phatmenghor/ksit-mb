@@ -11,7 +11,6 @@ const ScheduleTeacherTable = ({
 }) => {
   const scheduleData = convertToWeeklySchedule(scheduleList);
 
-  console.log("Preview schedule: ", scheduleData);
   const TableHeader = () => (
     <thead>
       <tr className="bg-black text-white">

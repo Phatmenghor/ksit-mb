@@ -42,6 +42,7 @@ import { Constants } from "@/constants/text-string";
 import { YearSelector } from "@/components/shared/year-selector";
 import { SemesterEnum } from "@/constants/constant";
 import { SemesterModel } from "@/model/master-data/semester/semester-model";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const semesterFormSchema = z.object({
   startDate: z.date({
@@ -94,6 +95,8 @@ export function SemesterFormModal({
       status: Constants.ACTIVE,
     },
   });
+
+  const isMobile = useIsMobile();
 
   // Helper function to safely parse date strings
   const parseDateString = (dateString: string | undefined): Date => {
@@ -187,7 +190,12 @@ export function SemesterFormModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className={`max-h-[90vh] rounded-xl overflow-y-auto ${
+          isMobile ? "max-w-sm" : "max-w-lg"
+        }`}
+      >
+        {" "}
         <DialogHeader>
           <DialogTitle>
             {mode === "add" ? "Add Semester" : "Edit Semester"}
@@ -197,7 +205,6 @@ export function SemesterFormModal({
             {mode === "add" ? "create" : "update"} a semester.
           </DialogDescription>
         </DialogHeader>
-
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
@@ -339,7 +346,7 @@ export function SemesterFormModal({
               )}
             />
 
-            <DialogFooter className="mt-6 sticky -bottom-8 z-10 bg-white py-4">
+            <div className="flex space-x-4 justify-end mr-auto">
               <Button
                 type="button"
                 variant="outline"
@@ -362,7 +369,7 @@ export function SemesterFormModal({
                   "Save Semester"
                 )}
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </Form>
       </DialogContent>

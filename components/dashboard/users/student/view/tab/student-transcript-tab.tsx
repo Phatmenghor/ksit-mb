@@ -170,7 +170,13 @@ export function TranscriptTabs(param: RequestParam) {
                         {formatYearLevel(transcript?.yearLevel)}
                       </h3>
                     </CardHeader>
-                    <CardContent className="px-4">
+                    <CardContent
+                      className="px-4 overflow-x-auto"
+                      style={{
+                        scrollbarWidth: "thin",
+                        scrollbarColor: "#000000 #d1d5db",
+                      }}
+                    >
                       <Table>
                         <TableHeader>
                           <TableRow>
