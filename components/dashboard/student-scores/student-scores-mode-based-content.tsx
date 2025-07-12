@@ -29,16 +29,13 @@ export default function RenderModeBasedContent({
 
   if ((mode === "view" || mode === "edit-score") && !isSubmittingToStaff) {
     return (
-      <div className="flex flex-row gap-2">
-        {/* <Button
-          className="bg-orange-400 hover:bg-orange-500"
-          onClick={() => setMode("edit-score")}
-        >
-          <Edit className="w-4 h-4 mr-1" />
-          Edit score
-        </Button> */}
+      <div className="flex flex-row">
         <Button onClick={() => setIsSubmittedDialogOpen(true)}>
-          <Save className="w-4 h-4 mr-1" />
+          <img
+            src={AppIcons.score_submit}
+            alt="back Icon"
+            className="h-4 w-4 mr-5 text-muted-foreground"
+          />
           Submit score
         </Button>
       </div>

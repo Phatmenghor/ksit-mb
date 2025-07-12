@@ -61,6 +61,7 @@ import ScheduleTeacherTable from "@/components/dashboard/manage-schedule/schedul
 import DuplicateScheduleModal from "@/components/dashboard/manage-schedule/duplicate-schedule-modal";
 import { ConfirmDialog } from "@/components/shared/custom-confirm-dialog";
 import Loading from "@/components/shared/loading";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const formSchema = z.object({
   classId: z.number().min(1, "Class is required"),
@@ -135,6 +136,7 @@ export default function UpdateSchedule() {
   const watchedInstructorId = form.watch("instructorId");
   const watchedSemesterId = form.watch("semesterId");
 
+  const isMobile = useIsMobile();
   // Fetch existing schedule data first
   useEffect(() => {
     const fetchScheduleData = async () => {
@@ -408,37 +410,46 @@ export default function UpdateSchedule() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Update Schedule</h1>
-          <p className="text-muted-foreground">Institute Management System</p>
-        </div>
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink>Schedules</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Update Schedule</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
+      <div className="p-3 space-y-3">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          {/* Breadcrumb */}
+          <div className={isMobile ? "order-1 w-full" : "order-3"}>
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink>Schedules</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Update Schedule</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
 
-      <div className="mb-4">
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1"
-          onClick={handleBackNavigation}
-        >
-          <ArrowLeft className="h-4 w-4" /> BACK
-        </Button>
+          {/* Heading and subheading */}
+          <div className="order-2">
+            <h1 className="lg:text-2xl text-base font-bold">Update Schedule</h1>
+            <p className="text-muted-foreground text-sm">
+              Institute Management System
+            </p>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1"
+            onClick={handleBackNavigation}
+          >
+            <ArrowLeft className="h-4 w-4" /> BACK
+          </Button>
+        </div>
       </div>
 
       <Form {...form}>

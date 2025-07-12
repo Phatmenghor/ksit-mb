@@ -10,9 +10,8 @@ export const StaffTableHeader = [
 export const AdminTableHeader = [
   { label: "#", className: "w-[10%]" },
   { label: "Username", className: "w-[20%]" },
-  { label: "Fullname (KH)", className: "w-[30%]" },
-  { label: "Fullname (EN)", className: "w-[30%]" },
-  { label: "Gender", className: "w-[20%]" },
+  { label: "Email", className: "w-[30%]" },
+  { label: "Fullname", className: "w-[30%]" },
   { label: "Actions", className: "w-[10%]" },
 ];
 

@@ -38,7 +38,11 @@ import {
   AllStaffModel,
   StaffModel,
 } from "@/model/user/staff/staff.respond.model";
-import { cleanField, cleanRequiredField } from "@/utils/map-helper/student";
+import {
+  cleanField,
+  cleanRequiredField,
+  cleanRequiredFieldAdvance,
+} from "@/utils/map-helper/student";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import {
   Tooltip,
@@ -47,6 +51,8 @@ import {
 } from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/shared/loading";
+import { useIsMobile } from "@/hooks/use-mobile";
+import ResetPasswordModal from "@/components/dashboard/users/shared/change-password-modal";
 
 export default function AdminsListPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -125,29 +131,24 @@ export default function AdminsListPage() {
     try {
       // Prepare common payload fields
       const basePayload = {
-        username: cleanRequiredField(formData.username),
-        email: cleanRequiredField(formData.email),
+        username: cleanRequiredFieldAdvance(formData.username, "username"),
+        email: cleanRequiredFieldAdvance(formData.email, "email"),
         khmerFirstName: cleanField(formData.first_name),
         khmerLastName: cleanField(formData.last_name),
         englishFirstName: cleanField(formData.first_name),
         englishLastName: cleanField(formData.last_name),
-        status: cleanRequiredField(formData.status),
+        status: cleanRequiredFieldAdvance(formData.status, "status"),
         roles: formData.roles,
       };
 
-      const addPayload: AddStaffModel = {
-        ...basePayload,
-        roles: formData.roles ?? undefined,
-        password: cleanRequiredField(formData.password),
-      };
-
-      const updatePayload: EditStaffModel = {
-        ...basePayload,
-        status: formData.status ?? undefined,
-        roles: formData.roles ?? undefined,
-      };
-
       if (modalMode === "add") {
+        // Only create addPayload when in add mode
+        const addPayload: AddStaffModel = {
+          ...basePayload,
+          roles: formData.roles ?? undefined,
+          password: cleanRequiredFieldAdvance(formData.password, "password"),
+        };
+
         try {
           let response = await addStaffService(addPayload);
 
@@ -167,6 +168,13 @@ export default function AdminsListPage() {
           toast.error(error.message || "Failed to add admin");
         }
       } else if (modalMode === "edit" && formData.id) {
+        // Only create updatePayload when in edit mode
+        const updatePayload: EditStaffModel = {
+          ...basePayload,
+          status: formData.status ?? undefined,
+          roles: formData.roles ?? undefined,
+        };
+
         try {
           let response = await updateStaffService(formData.id, updatePayload);
           console.log("##response from update api:", response);
@@ -250,7 +258,8 @@ export default function AdminsListPage() {
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
       />
 
-      <div className="overflow-x-auto">
+      <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
+        {" "}
         {isLoading ? (
           <Loading />
         ) : (
@@ -284,19 +293,12 @@ export default function AdminsListPage() {
                     <TableRow key={admin.id}>
                       <TableCell>{indexDisplay}</TableCell>
                       <TableCell>{admin.username.trim() || "---"}</TableCell>
+                      <TableCell>{admin?.email || "---"}</TableCell>
                       <TableCell>
                         {`${admin.khmerFirstName || ""} ${
                           admin.khmerLastName || ""
                         }`.trim() || "---"}
                       </TableCell>
-                      <TableCell>
-                        {admin.englishFirstName || admin.englishLastName
-                          ? `${admin.englishFirstName ?? ""} ${
-                              admin.englishLastName ?? ""
-                            }`.trim()
-                          : "---"}
-                      </TableCell>
-                      <TableCell>{admin.gender || "---"}</TableCell>
                       <TableCell>
                         <div className="flex justify-start space-x-2">
                           <TooltipProvider>
@@ -405,8 +407,9 @@ export default function AdminsListPage() {
         isSubmitting={isSubmitting}
       />
 
-      <ChangePasswordModal
+      <ResetPasswordModal
         isOpen={isChangePasswordDialogOpen}
+        userName={selectedAdmin?.username}
         onClose={() => {
           setIsChangePasswordDialogOpen(false);
           setSelectedAdmin(null);

@@ -34,6 +34,7 @@ import { getAllClassService } from "@/service/master-data/class.service";
 import { ClassCard } from "@/components/dashboard/schedule/class/class-card";
 import Loading from "@/components/shared/loading";
 import { AppIcons } from "@/constants/icons/icon";
+import { useDebounce } from "@/utils/debounce/debounce";
 
 // Empty state components
 const EmptyMajorsState = ({ searchQuery }: { searchQuery: string }) => (
@@ -90,6 +91,7 @@ const ClassSchedulePage = () => {
   const depId = params?.depId ? Number(params.depId) : null;
   const router = useRouter();
 
+  const searchDebounce = useDebounce(searchQuery, 500);
   const loadMajors = useCallback(
     async (param: AllMajorFilterModel) => {
       try {
@@ -99,7 +101,7 @@ const ClassSchedulePage = () => {
         }
 
         const response = await getAllMajorService({
-          search: searchQuery,
+          search: searchDebounce,
           status: Constants.ACTIVE,
           departmentId: depId || undefined,
           ...param,
@@ -137,12 +139,12 @@ const ClassSchedulePage = () => {
         setHasLoadedOnce(true);
       }
     },
-    [searchQuery, selectedMajor, depId, hasLoadedOnce]
+    [searchDebounce, selectedMajor, depId, hasLoadedOnce]
   );
 
   useEffect(() => {
     loadMajors({});
-  }, [searchQuery, loadMajors]);
+  }, [searchDebounce, loadMajors]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -216,26 +218,24 @@ const ClassSchedulePage = () => {
             </BreadcrumbList>
           </Breadcrumb>
 
-          {allMajorData?.content?.[0]?.department?.name && (
-            <div className="flex items-center">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => router.back()}
-                className="rounded-full"
-              >
-                <img
-                  src={AppIcons.Back}
-                  alt="back Icon"
-                  className="h-4 w-4 mr-5 text-muted-foreground"
-                />
-              </Button>
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.back()}
+              className="rounded-full"
+            >
+              <img
+                src={AppIcons.Back}
+                alt="back Icon"
+                className="h-4 w-4 mr-5 text-muted-foreground"
+              />
+            </Button>
 
-              <h3 className="text-xl font-bold">
-                {allMajorData.content[0].department.name}
-              </h3>
-            </div>
-          )}
+            <h3 className="text-xl font-bold">
+              {allMajorData?.content[0]?.department?.name || "No Department"}
+            </h3>
+          </div>
 
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="relative w-full md:w-1/2">

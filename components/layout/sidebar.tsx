@@ -8,6 +8,8 @@ import { ChevronDown, ChevronRight, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Image from "next/image";
+import { AppResource } from "@/constants/icons/icon";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -160,6 +162,15 @@ export function Sidebar() {
       >
         <div className="flex h-16 items-center bg-primary justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
+            <div className="relative h-10 w-10">
+              <Image
+                src={AppResource.Logo}
+                alt="KSIT Logo"
+                fill
+                className="rounded-full object-contain"
+                priority
+              />
+            </div>
             <span className="font-bold text-white text-lg">KSIT</span>
           </Link>
         </div>

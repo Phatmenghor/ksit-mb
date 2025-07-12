@@ -24,10 +24,7 @@ import { Button } from "@/components/ui/button";
 import { DAYS_OF_WEEK, DayType, StatusEnum } from "@/constants/constant";
 import Loading from "@/components/shared/loading";
 import { toast } from "sonner";
-import {
-  getAllMyScheduleService,
-  getAllScheduleService,
-} from "@/service/schedule/schedule.service";
+import { getAllMyScheduleService } from "@/service/schedule/schedule.service";
 import { AllScheduleModel } from "@/model/attendance/schedule/schedule-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
@@ -35,7 +32,7 @@ import PaginationPage from "@/components/shared/pagination-page";
 import { ScheduleFilterModel } from "@/model/attendance/schedule/schedule-filter";
 import { useRouter } from "next/navigation";
 
-const ClassSchedulePage = () => {
+const AttendanceScheduleCheckPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [selectedDay, setSelectedDay] = useState<DayType>({
@@ -317,4 +314,4 @@ const ClassSchedulePage = () => {
   );
 };
 
-export default ClassSchedulePage;
+export default AttendanceScheduleCheckPage;

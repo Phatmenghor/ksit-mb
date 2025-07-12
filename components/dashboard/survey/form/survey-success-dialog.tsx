@@ -25,7 +25,7 @@ export default function SurveySuccessDialog({
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md p-8">
+        <DialogContent className="md:max-w-md max-w-sm p-8">
           <DialogTitle className="sr-only">Survey Submitted</DialogTitle>
           <DialogDescription className="sr-only">
             Survey submission confirmation

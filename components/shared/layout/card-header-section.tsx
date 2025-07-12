@@ -57,10 +57,14 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
   tabs,
 }) => {
   const router = useRouter();
+  const [fromSidebar, setFromSidebar] = React.useState(false);
   const searchParams = useSearchParams();
 
+  React.useEffect(() => {
+    setFromSidebar(searchParams.get("from") === "sidebar");
+  }, [searchParams]);
+
   const isMobile = useIsMobile();
-  const fromSidebar = searchParams.get("from") === "sidebar";
 
   return (
     <div>
@@ -95,30 +99,27 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
 
           {/* Title Section with Back Button */}
           <div className="mb-3 flex flex-col md:flex-row md:items-center md:justify-start">
-            {backHref && !isMobile && !fromSidebar ? (
-              <Link href={backHref}>
-                <img
-                  src={AppIcons.Back}
-                  alt="back Icon"
-                  className="h-4 w-4 mr-5 text-muted-foreground"
-                />{" "}
-              </Link>
-            ) : back && !isMobile && !fromSidebar ? (
+            {back && !fromSidebar && !isMobile && (
               <Button
                 type="button"
                 variant="ghost"
+                size="icon"
+                className="rounded-full flex-shrink-0"
+                asChild
                 onClick={() => router.back()}
               >
                 <img
                   src={AppIcons.Back}
                   alt="back Icon"
                   className="h-4 w-4 mr-5 text-muted-foreground"
-                />{" "}
+                />
               </Button>
-            ) : null}
+            )}
 
             {title && (
-              <h3 className="text-2xl font-bold text-gray-900">{title}</h3>
+              <h3 className="lg:text-2xl text-lg font-bold text-gray-900">
+                {title}
+              </h3>
             )}
           </div>
 
@@ -126,7 +127,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             {/* Search input */}
             {onSearchChange && (
-              <div className="relative w-full md:w-[300px] group">
+              <div className="relative w-full md:w-[700px] group">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
@@ -146,8 +147,12 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
 
               {buttonText && buttonHref && (
                 <div>
-                  <Link href={buttonHref}>
-                    <Button className="bg-green-900 text-white hover:bg-green-950 flex gap-1 h-10 hover:shadow-lg hover:shadow-green-900/25">
+                  <Link
+                    href={{
+                      pathname: buttonHref,
+                    }}
+                  >
+                    <Button className="bg-teal-900 text-white hover:bg-teal-950 flex gap-1 h-10 hover:shadow-lg hover:shadow-green-900/25">
                       {buttonIcon && <span>{buttonIcon}</span>}
                       {buttonText}
                     </Button>
@@ -158,7 +163,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
               {buttonText && openModal && (
                 <div>
                   <Button
-                    className="bg-green-900 text-white hover:bg-green-950 flex gap-1 h-10 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-green-900/25 group"
+                    className="bg-teal-900 text-white hover:bg-teal-950 flex gap-1 h-10 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-green-900/25 group"
                     onClick={openModal}
                   >
                     {buttonIcon && (

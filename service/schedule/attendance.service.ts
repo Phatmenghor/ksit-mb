@@ -18,7 +18,7 @@ export async function getAllAttendanceGenerateService(
   }
 }
 
-export async function getAllAttedanceHistoryService(
+export async function getAllAttendanceHistoryService(
   data: AttendanceHistoryFilter
 ) {
   try {
@@ -111,6 +111,21 @@ export async function getAttendanceSessionByIdService(scheduleId: number) {
     return response.data.data;
   } catch (error: any) {
     console.error("Error get attendance session by Id:", error);
+    return null;
+  }
+}
+
+export async function getAttendanceHistoryAllService(
+  data: AttendanceHistoryFilter
+) {
+  try {
+    const response = await axiosClientWithAuth.post(
+      `/v1/attendance/history/all`,
+      data
+    );
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error fetching requests:", error);
     return null;
   }
 }

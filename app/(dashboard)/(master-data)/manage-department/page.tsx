@@ -55,6 +55,8 @@ import { Constants } from "@/constants/text-string";
 import Loading from "@/components/shared/loading";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import { baseAPI } from "@/constants/api";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useDebounce } from "@/utils/debounce/debounce";
 
 export default function ManageDepartmentPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -70,6 +72,7 @@ export default function ManageDepartmentPage() {
     DepartmentFormData | undefined
   >(undefined);
 
+  const searchDebounce = useDebounce(searchQuery, 500);
   // Fetch departments with filters
   const loadDepartments = useCallback(
     async (param: AllDepartmentFilterModel) => {
@@ -77,7 +80,7 @@ export default function ManageDepartmentPage() {
 
       try {
         const response = await getAllDepartmentService({
-          search: searchQuery,
+          search: searchDebounce,
           status: Constants.ACTIVE,
           ...param,
         });
@@ -93,12 +96,12 @@ export default function ManageDepartmentPage() {
         setIsLoading(false);
       }
     },
-    [searchQuery]
+    [searchDebounce]
   );
 
   useEffect(() => {
     loadDepartments({});
-  }, [searchQuery, loadDepartments]);
+  }, [searchDebounce, loadDepartments]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");
@@ -259,7 +262,7 @@ export default function ManageDepartmentPage() {
 
             <Button
               onClick={handleOpenAddModal}
-              className="bg-green-900 text-white hover:bg-green-950"
+              className="bg-teal-900 text-white hover:bg-teal-950"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -272,7 +275,7 @@ export default function ManageDepartmentPage() {
           </div>
         </CardContent>
       </Card>
-      <div className="overflow-x-auto mt-4">
+      <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
         {isLoading ? (
           <Loading />
         ) : (

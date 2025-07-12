@@ -136,3 +136,27 @@ export interface Semester {
   status: string;
   createdAt: string;
 }
+
+export interface DuplicateScheduleResponse {
+  status: string;
+  message: string;
+  data: {
+    sourceClassId: number;
+    sourceClassName: string;
+    sourceSemesterId: number;
+    sourceSemesterName: string;
+    sourceSemesterYear: number;
+    targetClassId: number;
+    targetClassName: string;
+    targetSemesterId: number;
+    targetSemesterName: string;
+    targetSemesterYear: number;
+    totalSourceSchedules: number;
+    successfullyDuplicated: number;
+    skipped: number;
+    failed: number;
+    duplicatedSchedules: any[];
+    errors: string[];
+    message: string;
+  };
+}

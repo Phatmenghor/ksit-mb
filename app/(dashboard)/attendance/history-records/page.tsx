@@ -1,171 +1,107 @@
 "use client";
 
-import ExcelJS from "exceljs";
-import { saveAs } from "file-saver";
-import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
-import { YearSelector } from "@/components/shared/year-selector";
+import React, { useRef, useState, useEffect, useCallback } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { SemesterFilter } from "@/constants/constant";
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { ROUTE } from "@/constants/routes";
-import { ClassModel } from "@/model/master-data/class/all-class-model";
-import { useDebounce } from "@/utils/debounce/debounce";
-import { useCallback, useEffect, useState } from "react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  AttendanceHistoryExcelTableHeader,
-  AttendanceHistoryTableHeader,
-} from "@/constants/table/attendance-history";
-import {
-  AttendanceHistoryFilter,
-  AttendanceHistoryModel,
-} from "@/model/attendance/attendance-history";
-import {
-  getAllAttedanceHistoryCountService,
-  getAllAttedanceHistoryExcelService,
-  getAllAttedanceHistoryService,
-} from "@/service/schedule/attendance.service";
-import { toast } from "sonner";
-import PaginationPage from "@/components/shared/pagination-page";
-import { Button } from "@/components/ui/button";
-import { Download, FileSpreadsheet, Search, Tally1, X } from "lucide-react";
-import { format } from "date-fns";
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Clock,
+  Users,
+  MapPin,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { DAYS_OF_WEEK, DayType, StatusEnum } from "@/constants/constant";
 import Loading from "@/components/shared/loading";
-import { formatDate } from "@/utils/date/dd-mm-yyyy-format";
-import { Badge } from "@/components/ui/badge";
-import { DateRangePicker } from "@/components/shared/start-end-date";
-import { Constants } from "@/constants/text-string";
-import { formatType } from "@/constants/format-enum/formate-type-attendance";
-import { AllAttendanceHistoryModel } from "@/model/attendance/attendance-history";
-import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
+import { toast } from "sonner";
+import {
+  getAllMyScheduleService,
+  getAllScheduleService,
+} from "@/service/schedule/schedule.service";
+import { AllScheduleModel } from "@/model/attendance/schedule/schedule-model";
+import { useDebounce } from "@/utils/debounce/debounce";
+import { Separator } from "@/components/ui/separator";
+import PaginationPage from "@/components/shared/pagination-page";
+import { ScheduleFilterModel } from "@/model/attendance/schedule/schedule-filter";
+import { useRouter } from "next/navigation";
 
-export default function HistoryRecordsPage() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+const HistoryRecordSchedulePage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [selectedSemester, setSelectedSemester] = useState<string>("ALL");
-  const [currentPage, setCurrentPage] = useState<number>(1);
-
-  const [selectAcademicYear, setSelectAcademicYear] = useState<
-    number | undefined
-  >();
-  const [selectedClass, setSelectedClass] = useState<ClassModel | undefined>(
-    undefined
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [selectedDay, setSelectedDay] = useState<DayType>({
+    label: "All",
+    value: "ALL",
+  });
+  const [scheduleData, setScheduleData] = useState<AllScheduleModel | null>(
+    null
   );
-  const [attendanceHistoryData, setAttendanceHistoryData] =
-    useState<AllAttendanceHistoryModel | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const router = useRouter();
 
-  // Date filter states
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  const fetchAttendanceHistory = useCallback(
-    async (filter: AttendanceHistoryFilter) => {
+  const fetchSchedule = useCallback(
+    async (filters: ScheduleFilterModel) => {
       setIsLoading(true);
       try {
-        const response = await getAllAttedanceHistoryService({
+        const response = await getAllMyScheduleService({
           search: debouncedSearchQuery,
-          academyYear: selectAcademicYear,
-          semester: selectedSemester != "ALL" ? selectedSemester : undefined,
-          classId: selectedClass?.id,
-          startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
-          endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined,
-          ...filter,
+          status: StatusEnum.ACTIVE,
+          dayOfWeek:
+            selectedDay && selectedDay.value !== "ALL"
+              ? selectedDay.value
+              : undefined,
+          ...filters,
         });
-        console.log(response);
-
-        setAttendanceHistoryData(response);
-      } catch (error: any) {
-        console.error("Error fetching requests:", error);
-        toast.error("An error occurred while loading attendance history");
-        setAttendanceHistoryData(null);
+        setScheduleData(response);
+      } catch (error) {
+        console.error("Error fetching schedule data:", error);
+        toast.error("An error occurred while loading classes");
+        setScheduleData(null);
       } finally {
         setIsLoading(false);
       }
     },
-    [
-      debouncedSearchQuery,
-      selectedClass,
-      selectAcademicYear,
-      selectedSemester,
-      startDate,
-      endDate,
-    ]
+    [debouncedSearchQuery, selectedDay]
   );
 
+  // Fetch schedule when selectedDay, search query, or page changes
   useEffect(() => {
-    fetchAttendanceHistory({ pageNo: currentPage });
-  }, [
-    fetchAttendanceHistory,
-    debouncedSearchQuery,
-    selectedClass,
-    selectAcademicYear,
-    selectedSemester,
-    currentPage,
-    startDate,
-    endDate,
-  ]);
-
-  const getStatusAttendance = (status: string) => {
-    if (!status) {
-      return null;
+    if (selectedDay) {
+      fetchSchedule({ pageNo: currentPage });
     }
-    const baseBadgeAttendance =
-      "w-24 h-8 flex items-center justify-center text-sm font-medium rounded-full";
-
-    switch (status.toUpperCase()) {
-      case "PRESENT":
-        return (
-          <Badge
-            className={`bg-green-100 text-green-800 hover:bg-green-100 ${baseBadgeAttendance}`}
-          >
-            Present
-          </Badge>
-        );
-      case "ABSENT":
-        return (
-          <Badge
-            className={`bg-red-100 text-red-800 hover:bg-red-100 ${baseBadgeAttendance}`}
-          >
-            Absent
-          </Badge>
-        );
-      default:
-        return (
-          <Badge
-            className={`bg-gray-100 text-gray-800 hover:bg-gray-100 ${baseBadgeAttendance}`}
-          >
-            {status}
-          </Badge>
-        );
-    }
-  };
+  }, [selectedDay, debouncedSearchQuery, currentPage, fetchSchedule]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
   };
 
-  const handleYearChange = (e: number) => {
-    setSelectAcademicYear(e);
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -200, behavior: "smooth" });
+    }
   };
 
-  const handleClassChange = (e: ClassModel | null) => {
-    setSelectedClass(e ?? undefined);
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 200, behavior: "smooth" });
+    }
+  };
+
+  const handleDaySelect = (day: DayType) => {
+    setSelectedDay(day);
     setCurrentPage(1);
   };
 
@@ -173,337 +109,214 @@ export default function HistoryRecordsPage() {
     setCurrentPage(page);
   };
 
-  const clearStartDate = () => {
-    setStartDate(undefined);
-    setCurrentPage(1);
-  };
-
-  const clearEndDate = () => {
-    setEndDate(undefined);
-    setCurrentPage(1);
-  };
-
-  // Export to Excel - Fixed version
-  const exportToExcel = async (): Promise<void> => {
-    setIsSubmitting(true);
-
-    try {
-      setIsLoading(true);
-      // Create a proper filter object for the API call
-      const exportFilter: AttendanceHistoryFilter = {
-        search: debouncedSearchQuery,
-        academyYear: selectAcademicYear,
-        semester: selectedSemester !== "ALL" ? selectedSemester : undefined,
-        classId: selectedClass?.id,
-        startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
-        endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined,
-      };
-
-      // count data
-      const countFilter = await getAllAttedanceHistoryCountService(
-        exportFilter
-      );
-
-      if ((countFilter || 0) === 0) {
-        toast.warning("No data available to export.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      // EXCEL_LIMIT : limit data to export
-      if (countFilter > Constants.EXCEL_LIMIT) {
-        toast.info(
-          `Only ${Constants.EXCEL_LIMIT} items were exported. Too many records. Please filter the data.`
-        );
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Fetch data for export
-      const allDataResponse: AttendanceHistoryModel[] =
-        await getAllAttedanceHistoryExcelService(exportFilter);
-
-      console.log("Export response:", allDataResponse);
-
-      // Use API data if available, otherwise use current data
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("Attendance History Data");
-
-      // Header table excel
-      const columns: string[] = AttendanceHistoryExcelTableHeader;
-
-      // Add title row at Row 1
-      worksheet.mergeCells(1, 1, 1, columns.length);
-      const titleCell = worksheet.getCell("A1");
-      titleCell.value = "List Attendance History Data";
-      titleCell.font = { size: 16, bold: true, color: { argb: "FFFFFFFF" } };
-      titleCell.alignment = { vertical: "middle", horizontal: "center" };
-      titleCell.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FF1F4E78" },
-      };
-
-      // Add header row at Row 3
-      const headerRow = worksheet.getRow(3);
-      columns.forEach((text: string, idx: number) => {
-        const cell = headerRow.getCell(idx + 1);
-        cell.value = text;
-        cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
-        cell.alignment = { vertical: "middle", horizontal: "center" };
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FF007ACC" },
-        };
-        cell.border = {
-          top: { style: "thin" },
-          bottom: { style: "thin" },
-          left: { style: "thin" },
-          right: { style: "thin" },
-        };
-
-        const columnWidths = [5, 15, 25, 27, 20, 15, 15, 15, 30];
-        worksheet.getColumn(idx + 1).width = columnWidths[idx];
-      });
-
-      // Add data rows starting at row 4
-      allDataResponse.forEach((item: any, i: number) => {
-        const row = worksheet.addRow([
-          i + 1,
-          item.identifyNumber || "---",
-          item.studentName || "---",
-          item.teacherName || "---",
-          item.courseName || "---",
-          item.status || "---",
-          item.attendanceType || "---",
-          item.createdAt || "---",
-          item.comment || "---",
-        ]);
-
-        // Zebra striping
-        row.eachCell((cell) => {
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: i % 2 === 0 ? "FFF3F3F3" : "FFFFFFFF" },
-          };
-          cell.border = {
-            top: { style: "thin" },
-            bottom: { style: "thin" },
-            left: { style: "thin" },
-            right: { style: "thin" },
-          };
-          cell.alignment = { vertical: "middle", horizontal: "center" };
-        });
-
-        // Color the "Attendance" column (6th column)
-        const attendanceCell = row.getCell(6);
-        const attendanceValue = item.status?.toLowerCase();
-
-        if (attendanceValue === "absent") {
-          attendanceCell.font = { color: { argb: "FFFF0000" }, bold: true };
-        } else if (attendanceValue === "present") {
-          attendanceCell.font = { color: { argb: "FF00AA00" }, bold: true };
-        }
-      });
-
-      // Format check-in time as date (column 8)
-      worksheet.getColumn(8).eachCell((cell, rowNumber: number) => {
-        if (rowNumber > 3 && cell.value) {
-          try {
-            cell.value = new Date(cell.value as string);
-            cell.numFmt = "dd-mm-yyyy";
-          } catch (error) {
-            console.warn("Date parsing failed for:", cell.value);
-          }
-        }
-      });
-
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-
-      // File name
-      const fileName = `attendance_history_${format(
-        new Date(),
-        "yyyy-MM-dd"
-      )}.xlsx`;
-      saveAs(blob, fileName);
-
-      toast.success(
-        `Excel file exported successfully! Total records: ${allDataResponse.length}`
-      );
-    } catch (error: unknown) {
-      console.error("Error exporting to Excel:", error);
-      toast.error("Error exporting to Excel. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-      setIsLoading(false);
-    }
+  const handleCardClick = (scheduleId: number) => {
+    // Navigate to the class detail page with the schedule ID
+    router.push(
+      `${ROUTE.ATTENDANCE.HISTORY_RECORD_DETAIL(String(scheduleId))}`
+    );
   };
 
   return (
-    <div>
-      <CardHeaderSection
-        breadcrumbs={[
-          { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "History Record", href: "" },
-        ]}
-        title="History Record"
-        customSelect={
-          <div className="flex flex-col gap-4">
-            {/* First row: Search, Class, Year, and Semester */}
-            <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end md:gap-2">
-              <div className="relative w-full min-w-[270px] md:w-auto md:flex-1">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search by name or ID..."
-                  className="pl-8 w-full"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                />
-              </div>
-              <div className="w-full min-w-[200px] md:w-auto md:flex-1">
-                <ComboboxSelectClass
-                  dataSelect={selectedClass ?? null}
-                  onChangeSelected={handleClassChange}
-                  disabled={isSubmitting}
-                />
-              </div>
-              <div className="w-full min-w-[200px] md:w-auto md:flex-1">
-                <YearSelector
-                  title="Select Year"
-                  onChange={handleYearChange}
-                  value={selectAcademicYear || 0}
-                />
-              </div>
-              <div className="w-full min-w-[200px] md:w-auto md:flex-1">
-                <Select
-                  onValueChange={setSelectedSemester}
-                  value={selectedSemester}
+    <div className="animate-in fade-in duration-700">
+      <Card className="animate-in slide-in-from-top-4 duration-500">
+        <CardContent className="p-6 space-y-2">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem className="animate-in fade-in duration-500 delay-100">
+                <BreadcrumbLink
+                  href={ROUTE.DASHBOARD}
+                  className="transition-all duration-300 hover:text-amber-600 hover:underline hover:underline-offset-4"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a semester" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SemesterFilter.map((semester) => (
-                      <SelectItem key={semester.value} value={semester.value}>
-                        {semester.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+                  Home
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="animate-in fade-in duration-500 delay-200" />
+              <BreadcrumbItem className="animate-in fade-in duration-500 delay-300">
+                <BreadcrumbPage>Schedule</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
 
-            {/* Second row: Date pickers */}
-            <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end md:gap-2 justify-between">
-              <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-2">
-                <DateRangePicker
-                  startDate={startDate}
-                  endDate={endDate}
-                  onStartDateChange={setStartDate}
-                  onEndDateChange={setEndDate}
-                  clearStartDate={clearStartDate}
-                  clearEndDate={clearEndDate}
-                />
-              </div>
+          <h3 className="text-xl font-bold animate-in slide-in-from-left-4 duration-600 delay-200">
+            Class Schedule List
+          </h3>
 
-              {/* export excel */}
-              <div>
-                <div className="flex items-center gap-2 justify-end">
-                  <span className="text-sm mr-2">Export Data by Class</span>
-                  <Button
-                    onClick={exportToExcel}
-                    variant="outline"
-                    size="sm"
-                    className="h-8 px-2 border-gray-200 py-5"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <Loading />
-                    ) : (
-                      <>
-                        <FileSpreadsheet className="h-4 w-4 text-green-500" />
-                        <span className="ml-1 text-xs font-medium">Excel</span>
-                        <Tally1 className="-mr-[12px] text-gray-300" />
-                        <Download className="h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
+          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-in slide-in-from-bottom-4 duration-600 delay-300">
+            <div className="relative w-full md:w-1/2 group">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-all duration-300 group-focus-within:text-amber-500 group-focus-within:scale-110" />
+              <Input
+                type="search"
+                placeholder="Search class..."
+                className="pl-8 w-full transition-all duration-300 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:shadow-lg focus:shadow-amber-100/50 hover:shadow-md"
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
             </div>
           </div>
-        }
-      />
+        </CardContent>
+      </Card>
 
-      <div className="overflow-x-auto mt-4">
+      <div className="relative flex items-center my-6 animate-in slide-in-from-left-6 duration-700 delay-400">
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute left-0 z-10 rounded-full transition-all duration-300 hover:bg-amber-50 hover:border-amber-300 hover:shadow-lg hover:scale-110 active:scale-95 group"
+          onClick={scrollLeft}
+        >
+          <ChevronLeft className="h-4 w-4 transition-all duration-300 group-hover:-translate-x-0.5 group-hover:text-amber-600" />
+        </Button>
+
+        <div
+          ref={scrollContainerRef}
+          className="flex overflow-x-auto scrollbar-hide gap-2 px-16 scroll-smooth"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {DAYS_OF_WEEK.map((day, index) => (
+            <Button
+              key={day.label}
+              variant={selectedDay?.value === day.value ? "default" : "outline"}
+              className={`whitespace-nowrap transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${
+                selectedDay?.value === day.value
+                  ? "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-200/50 scale-105"
+                  : "hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 hover:shadow-lg hover:shadow-amber-100/50 hover:scale-105 hover:-translate-y-1"
+              }`}
+              style={{ animationDelay: `${500 + index * 100}ms` }}
+              onClick={() => handleDaySelect(day)}
+            >
+              {day.label}
+            </Button>
+          ))}
+        </div>
+
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute right-0 z-10 rounded-full transition-all duration-300 hover:bg-amber-50 hover:border-amber-300 hover:shadow-lg hover:scale-110 active:scale-95 group"
+          onClick={scrollRight}
+        >
+          <ChevronRight className="h-4 w-4 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-amber-600" />
+        </Button>
+      </div>
+
+      <div className="bg-white rounded-lg p-6 shadow-sm border transition-all duration-300 hover:shadow-xl hover:shadow-amber-100/20 animate-in slide-in-from-bottom-6 duration-800 delay-600">
+        <div className="mb-4 animate-in fade-in duration-600 delay-700">
+          <h2 className="text-lg font-bold transition-all duration-300 hover:text-amber-600">
+            {selectedDay ? `${selectedDay.label}` : ""}
+          </h2>
+          <p className="text-sm text-muted-foreground animate-in slide-in-from-left-2 duration-500 delay-800">
+            Total Schedule: {scheduleData?.totalElements || 0}
+          </p>
+        </div>
+
         {isLoading ? (
           <Loading />
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {AttendanceHistoryTableHeader.map((header, index) => (
-                  <TableHead key={index} className={header.className}>
-                    {header.label}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {attendanceHistoryData?.content.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={9}
-                    className="text-center py-6 text-muted-foreground"
+          <div>
+            {scheduleData && scheduleData.totalElements > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {scheduleData.content.map((sche, index) => (
+                  <Card
+                    key={sche.id}
+                    className="group overflow-hidden bg-amber-50/30 transition-all duration-500 hover:bg-amber-50 hover:shadow-2xl hover:shadow-amber-200/30 cursor-pointer hover:scale-[1.03] hover:border-amber-200 hover:-translate-y-2 active:scale-[0.98] animate-in fade-in slide-in-from-bottom-4"
+                    style={{ animationDelay: `${800 + index * 150}ms` }}
+                    onClick={() => handleCardClick(sche.id)}
                   >
-                    No Record
-                  </TableCell>
-                </TableRow>
-              ) : (
-                attendanceHistoryData?.content.map((history, index) => {
-                  const indexDisplay =
-                    ((attendanceHistoryData.pageNo || 1) - 1) * 10 + index + 1;
-                  return (
-                    <TableRow key={history.id}>
-                      <TableCell>{indexDisplay}</TableCell>
-                      <TableCell>{history.identifyNumber || "---"}</TableCell>
-                      <TableCell>{history.studentName || "---"}</TableCell>
-                      <TableCell>{history.teacherName || "---"}</TableCell>
-                      <TableCell>{history.courseName || "---"}</TableCell>
-                      <TableCell>
-                        {getStatusAttendance(history.status) || "---"}
-                      </TableCell>
-                      <TableCell>
-                        {formatType(history.attendanceType) || "---"}
-                      </TableCell>
-                      <TableCell>
-                        {formatDate(history.createdAt) || "---"}
-                      </TableCell>
-                      <TableCell>{history.comment || "---"}</TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
+                    <CardContent className="p-0 relative overflow-hidden">
+                      {/* Animated background gradient on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-amber-100/0 via-amber-50/0 to-amber-200/0 transition-all duration-500 group-hover:from-amber-100/40 group-hover:via-amber-50/20 group-hover:to-amber-200/10" />
+
+                      <div className="relative">
+                        <div className="p-4 flex-1">
+                          <div className="flex gap-4">
+                            <div className="flex border-l-4 border-amber-500 rounded-xl transition-all duration-500 group-hover:border-amber-600 group-hover:shadow-lg group-hover:shadow-amber-200/50 animate-pulse group-hover:animate-none" />
+                            <div className="flex flex-col flex-1">
+                              <div className="flex items-center gap-1 justify-between">
+                                <div className="text-sm font-medium text-amber-500 transition-all duration-300 group-hover:text-amber-600 group-hover:scale-105 group-hover:font-semibold">
+                                  {sche.course.code}
+                                </div>
+                                <span className="text-sm font-medium text-muted-foreground transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">
+                                  {sche.day || "- - -"}
+                                </span>
+                              </div>
+                              <div className="text-sm font-medium transition-all duration-300 group-hover:text-gray-800 group-hover:font-semibold">
+                                {sche.course.nameKH || "- - -"}
+                              </div>
+                            </div>
+                          </div>
+
+                          <Separator className="my-2 transition-all duration-300 group-hover:bg-amber-300 group-hover:h-0.5" />
+
+                          <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">
+                              <Clock className="h-4 w-4 transition-all duration-300 group-hover:text-amber-500 group-hover:rotate-12 group-hover:scale-110" />
+                              <span className="transition-all duration-300 group-hover:font-medium">
+                                {sche.startTime} - {sche.endTime}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">
+                              <Users className="h-4 w-4 transition-all duration-300 group-hover:text-amber-500 group-hover:scale-110" />
+                              <span className="transition-all duration-300 group-hover:font-medium">
+                                {(sche.teacher &&
+                                  (sche.teacher.englishFirstName ||
+                                  sche.teacher.englishLastName
+                                    ? `${sche.teacher.englishFirstName || ""} ${
+                                        sche.teacher.englishLastName || ""
+                                      }`.trim()
+                                    : sche.teacher.khmerFirstName ||
+                                      sche.teacher.khmerLastName
+                                    ? `${sche.teacher.khmerFirstName || ""} ${
+                                        sche.teacher.khmerLastName || ""
+                                      }`.trim()
+                                    : "- - -")) ||
+                                  "- - -"}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">
+                              <MapPin className="h-4 w-4 transition-all duration-300 group-hover:text-amber-500 group-hover:bounce group-hover:scale-110" />
+                              <span className="transition-all duration-300 group-hover:font-medium">
+                                {sche.room.name || "- - -"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground animate-in fade-in slide-in-from-bottom-4 duration-600 delay-500">
+                <div className="mb-4">
+                  <div className="mx-auto w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center animate-pulse">
+                    <Clock className="h-8 w-8 text-amber-500" />
+                  </div>
+                </div>
+                <p className="text-lg font-medium">
+                  No classes scheduled for {selectedDay?.label}
+                </p>
+                <p className="text-sm mt-2 opacity-60">
+                  Try selecting a different day or check back later
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {!isLoading && scheduleData && scheduleData.totalPages > 1 && (
+          <div className="mt-8 flex justify-end animate-in slide-in-from-bottom-4 duration-500 delay-1000">
+            <div className="transition-all duration-300 hover:scale-105">
+              <PaginationPage
+                currentPage={scheduleData.pageNo}
+                totalPages={scheduleData.totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          </div>
         )}
       </div>
-
-      {attendanceHistoryData && (
-        <div className="mt-8 flex justify-end">
-          <PaginationPage
-            currentPage={attendanceHistoryData.pageNo}
-            totalPages={attendanceHistoryData.totalPages}
-            onPageChange={handlePageChange}
-          />
-        </div>
-      )}
     </div>
   );
-}
+};
+
+export default HistoryRecordSchedulePage;

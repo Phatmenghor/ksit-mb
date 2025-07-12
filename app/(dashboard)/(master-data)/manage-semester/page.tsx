@@ -53,6 +53,8 @@ import { semesterTableHeader } from "@/constants/table/master-data";
 import PaginationPage from "@/components/shared/pagination-page";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import { SemesterType } from "@/constants/constant";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useDebounce } from "@/utils/debounce/debounce";
 export default function ManageSemester() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
@@ -70,12 +72,14 @@ export default function ManageSemester() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
+  const searchDebounce = useDebounce(searchQuery, 500);
+
   const loadSemester = useCallback(
     async (param: AllSemesterFilterModel) => {
       setIsLoading(true);
       try {
         const response = await getAllSemesterService({
-          search: searchQuery,
+          search: searchDebounce,
           academyYear: selectedYear,
           status: Constants.ACTIVE,
           ...param,
@@ -91,12 +95,12 @@ export default function ManageSemester() {
         setIsLoading(false);
       }
     },
-    [searchQuery, selectedYear]
+    [searchDebounce, selectedYear]
   );
 
   useEffect(() => {
     loadSemester({});
-  }, [searchQuery, loadSemester, selectedYear]);
+  }, [searchDebounce, loadSemester, selectedYear]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");
@@ -254,7 +258,7 @@ export default function ManageSemester() {
 
               <Button
                 onClick={handleOpenAddModal}
-                className="bg-green-900 text-white hover:bg-green-950"
+                className="bg-teal-900 text-white hover:bg-teal-950"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add New
@@ -264,7 +268,7 @@ export default function ManageSemester() {
         </CardContent>
       </Card>
 
-      <div className="overflow-hidden mt-4">
+      <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
         {isLoading ? (
           <Loading />
         ) : (

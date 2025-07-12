@@ -28,33 +28,41 @@ export function CustomTable<T>({
 }: CustomTableProps<T>) {
   return (
     <div
-      className="relative overflow-x-visible"
+      className="relative overflow-x-auto border border-gray-300 rounded-2xl overflow-hidden"
       style={{
         scrollbarWidth: "thin",
         scrollbarColor: "#000000 #d1d5db",
       }}
     >
-      <Table>
+      <Table className="w-full border-collapse">
         <TableHeader>
-          <TableRow>
+          <TableRow className="bg-black text-white">
             {columns.map((col, index) => (
-              <TableHead key={index}>{col.header}</TableHead>
+              <TableHead
+                key={index}
+                className="p-3 border-r border-gray-400 text-white font-medium whitespace-nowrap last:border-r-0"
+              >
+                {col.header}
+              </TableHead>
             ))}
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="text-center py-4">
+            <TableRow className="border-t border-gray-300 bg-white">
+              <TableCell
+                colSpan={columns.length}
+                className="text-center py-4 p-3"
+              >
                 Loading...
               </TableCell>
             </TableRow>
           ) : data.length === 0 ? (
-            <TableRow>
+            <TableRow className="border-t border-gray-300 bg-white">
               {columns.map((_, colIndex) => (
                 <TableCell
                   key={colIndex}
-                  className="text-center text-muted-foreground"
+                  className="text-center text-muted-foreground p-3 border-r border-gray-300 whitespace-nowrap last:border-r-0"
                 >
                   ---
                 </TableCell>
@@ -62,9 +70,15 @@ export function CustomTable<T>({
             </TableRow>
           ) : (
             data.map((item, index) => (
-              <TableRow key={index}>
+              <TableRow
+                key={index}
+                className="border-t border-gray-300 bg-white hover:bg-gray-50"
+              >
                 {columns.map((col, colIndex) => (
-                  <TableCell key={colIndex}>
+                  <TableCell
+                    key={colIndex}
+                    className="p-3 border-r border-gray-300 whitespace-nowrap last:border-r-0"
+                  >
                     {col.render
                       ? col.render(item, index)
                       : (item as any)[col.key] || "---"}

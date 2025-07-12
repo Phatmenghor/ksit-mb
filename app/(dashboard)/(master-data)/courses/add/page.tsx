@@ -36,6 +36,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
 import { StaffModel } from "@/model/user/staff/staff.respond.model";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const courseFormSchema = z.object({
   subjectCode: z.string().min(1, "Subject code is required"),
@@ -142,35 +144,67 @@ export default function AddCoursePage() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Add course</h1>
-          <p className="text-muted-foreground">Institute Management System</p>
-        </div>
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/courses">Courses</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Add course</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
+    <div className="space-y-2">
+      {/* Mobile: Breadcrumb on top, Desktop: Breadcrumb on right */}
+      <div className={cn(useIsMobile() ? "p-4" : "")}>
+        <div className="flex flex-col gap-4">
+          {/* Mobile breadcrumb - shows only on mobile */}
+          <div className="block md:hidden">
+            <Breadcrumb>
+              <BreadcrumbList className="flex-wrap justify-start text-sm">
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/courses">Courses</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Add course</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
 
-      <div className="mb-4">
-        <Link href="/courses">
-          <Button variant="outline" size="sm" className="gap-1">
-            <ArrowLeft className="h-4 w-4" /> BACK
-          </Button>
-        </Link>
+          {/* Main content container */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-0">
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold">Add course</h1>
+              <p className="text-muted-foreground text-sm md:text-base">
+                Institute Management System
+              </p>
+            </div>
+
+            {/* Desktop breadcrumb - shows only on desktop */}
+            <div className="hidden md:block">
+              <Breadcrumb>
+                <BreadcrumbList className="flex-wrap justify-end">
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/courses">Courses</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Add course</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+          </div>
+        </div>
+
+        {/* Back button */}
+        <div className="mt-4">
+          <Link href="/courses">
+            <Button variant="outline" size="sm" className="gap-1">
+              <ArrowLeft className="h-4 w-4" /> BACK
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card>
@@ -449,7 +483,7 @@ export default function AddCoursePage() {
                 <Button
                   type="submit"
                   disabled={isUploading || isSubmitting}
-                  className="bg-green-900 text-white hover:bg-green-950"
+                  className="bg-teal-900 text-white hover:bg-teal-950"
                 >
                   {isUploading || isSubmitting ? (
                     <>

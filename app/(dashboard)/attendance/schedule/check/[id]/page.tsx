@@ -34,6 +34,7 @@ import {
   CheckCircle,
   AlertCircle,
   Timer,
+  Plus,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { getDetailScheduleService } from "@/service/schedule/schedule.service";
@@ -113,7 +114,6 @@ const AttendanceCheckPage = () => {
   const REFRESH_INTERVAL = 30; // 30 seconds
   const PROGRESS_UPDATE_INTERVAL = 100; // Update progress every 100ms
 
-  const isMobile = useIsMobile();
   // Get status color with smooth transitions
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -141,7 +141,7 @@ const AttendanceCheckPage = () => {
     }
   }, [id]);
 
-  const loadAttendanceData = useCallback(
+  const HandleInitAttendance = useCallback(
     async (forceRefresh = false, showLoader = true) => {
       if (!scheduleDetail?.id) return;
 
@@ -227,7 +227,7 @@ const AttendanceCheckPage = () => {
 
       refreshIntervalRef.current = setInterval(() => {
         if (unsavedChanges.size === 0) {
-          loadAttendanceData(false, false); // Silent refresh
+          HandleInitAttendance(false, false); // Silent refresh
           startRefreshProgress(); // Restart progress
         }
       }, REFRESH_INTERVAL);
@@ -254,7 +254,7 @@ const AttendanceCheckPage = () => {
     autoRefresh,
     isInitialized,
     unsavedChanges.size,
-    loadAttendanceData,
+    HandleInitAttendance,
     startRefreshProgress,
     isSubmitted,
   ]);
@@ -425,8 +425,8 @@ const AttendanceCheckPage = () => {
     // Clear unsaved changes
     setUnsavedChanges(new Set());
     // Reload original data
-    loadAttendanceData(true);
-  }, [loadAttendanceData, isSubmitted]);
+    HandleInitAttendance(true);
+  }, [HandleInitAttendance, isSubmitted]);
 
   // Remove specific item from unsaved changes
   const handleRemoveFromUnsaved = useCallback((attendanceId: number) => {
@@ -460,13 +460,6 @@ const AttendanceCheckPage = () => {
   useEffect(() => {
     loadScheduleData();
   }, [loadScheduleData]);
-
-  // Load attendance data when schedule is loaded
-  useEffect(() => {
-    if (scheduleDetail?.id) {
-      loadAttendanceData();
-    }
-  }, [scheduleDetail?.id, loadAttendanceData]);
 
   // Memoized filtered data
   const filteredAttendances = useMemo(() => {
@@ -522,438 +515,461 @@ const AttendanceCheckPage = () => {
         unsavedChanges={unsavedChanges}
       />
 
-      {/* Initialize Session Button */}
-      {!isInitialized && <Loading />}
-
-      {/* QR Code Section */}
-      {attendanceGenerate && !isSubmitted && (
-        <QRCodeSection sessionId={attendanceGenerate?.id} />
-      )}
-
-      {/* Student List */}
-      {attendanceGenerate && (
-        <Card>
-          <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            {/* Left Title Section */}
-            <div className="flex items-center gap-4">
-              <CardTitle className="text-base font-medium">
-                Attendance - Student List
-              </CardTitle>
-            </div>
-
-            {/* Right Button Actions Section */}
-            <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:justify-end">
-              {/* Auto-refresh Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleToggleAutoRefresh}
-                disabled={isSubmitted}
-                className={`transition-all duration-200 hover:scale-105 ${
-                  autoRefresh ? "bg-blue-100 text-blue-700 border-blue-300" : ""
-                } ${isSubmitted ? "opacity-50 cursor-not-allowed" : ""}`}
-                title={`Click to ${
-                  autoRefresh ? "disable" : "enable"
-                } auto-refresh`}
-              >
-                <RefreshCcw
-                  className={`h-4 w-4 mr-2 transition-transform duration-200 ${
-                    autoRefresh && !isSubmitted ? "animate-pulse" : ""
-                  }`}
-                />
-                Auto {autoRefresh ? "ON" : "OFF"}
-              </Button>
-
-              {/* Manual Refresh Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => loadAttendanceData(true)}
-                disabled={loading || isRefreshing}
-                className="transition-all duration-200 hover:scale-105"
-              >
-                <RefreshCw
-                  className={`h-4 w-4 mr-2 transition-transform duration-200 ${
-                    loading || isRefreshing ? "animate-spin" : ""
-                  }`}
-                />
-                Refresh
-              </Button>
-
-              {/* Submit to Staff Button */}
-              {!isSubmitted && (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleSubmitToStaff}
-                  disabled={isSubmittingToStaff || unsavedChanges.size > 0}
-                  className="bg-green-600 hover:bg-green-700 text-white transition-all duration-200 hover:scale-105"
-                >
-                  {isSubmittingToStaff ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4 mr-2" />
-                  )}
-                  Submit to Staff
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-
-          {/* Submission Status Banner */}
-          {isSubmitted && (
-            <div className="px-6 pb-4">
-              <div className="flex justify-between items-center bg-green-50 border-green-200 border p-3 rounded">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <span className="text-sm font-medium text-green-800">
-                    Attendance Successfully Submitted
-                  </span>
-                  {submissionTime && (
-                    <span className="text-xs text-green-600">
-                      on {submissionTime.toLocaleString()}
-                    </span>
-                  )}
-                </div>
-                <Badge variant="default" className="bg-green-600 text-white">
-                  Read-Only Mode
-                </Badge>
-              </div>
-            </div>
+      {!isInitialized ? (
+        <Card className="flex justify-center">
+          <CardContent className="p-4">
+            <Button
+              variant="outline"
+              onClick={() => HandleInitAttendance()}
+              disabled={isRefreshing}
+            >
+              <Plus />
+              {isRefreshing ? "Initializing..." : "Initialize Attendance"}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {/* QR Code Section */}
+          {attendanceGenerate && !isSubmitted && (
+            <QRCodeSection sessionId={attendanceGenerate?.id} />
           )}
 
-          <div className="px-6">
-            <Separator className="mb-4" />
+          {/* Student List */}
+          {attendanceGenerate && (
+            <Card>
+              <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                {/* Left Title Section */}
+                <div className="flex items-center gap-4">
+                  <CardTitle className="text-base font-medium">
+                    Attendance - Student List
+                  </CardTitle>
+                </div>
 
-            {/* Filters and Search */}
-            <div className="flex flex-wrap gap-4 mb-4">
-              <div className="flex-1 min-w-[200px]">
-                <div className="relative">
-                  <Search
-                    className={`h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground transition-all duration-300`}
-                  />
-                  <Input
-                    ref={searchInputRef}
-                    placeholder="Search students..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`pl-10 max-w-xl transition-all duration-300 ${
-                      searchQuery
-                        ? "border-blue-300 ring-1 ring-blue-200 shadow-sm"
-                        : ""
-                    }`}
+                {/* Right Button Actions Section */}
+                <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:justify-end">
+                  {/* Auto-refresh Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleToggleAutoRefresh}
                     disabled={isSubmitted}
-                  />
-                  {searchQuery && (
+                    className={`transition-all duration-200 hover:scale-105 ${
+                      autoRefresh
+                        ? "bg-blue-100 text-blue-700 border-blue-300"
+                        : ""
+                    } ${isSubmitted ? "opacity-50 cursor-not-allowed" : ""}`}
+                    title={`Click to ${
+                      autoRefresh ? "disable" : "enable"
+                    } auto-refresh`}
+                  >
+                    <RefreshCcw
+                      className={`h-4 w-4 mr-2 transition-transform duration-200 ${
+                        autoRefresh && !isSubmitted ? "animate-pulse" : ""
+                      }`}
+                    />
+                    Auto {autoRefresh ? "ON" : "OFF"}
+                  </Button>
+
+                  {/* Manual Refresh Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => HandleInitAttendance(true)}
+                    disabled={loading || isRefreshing}
+                    className="transition-all duration-200 hover:scale-105"
+                  >
+                    <RefreshCw
+                      className={`h-4 w-4 mr-2 transition-transform duration-200 ${
+                        loading || isRefreshing ? "animate-spin" : ""
+                      }`}
+                    />
+                    Refresh
+                  </Button>
+
+                  {/* Submit to Staff Button */}
+                  {!isSubmitted && (
                     <Button
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-red-500 transition-colors duration-200"
+                      variant="default"
+                      size="sm"
+                      onClick={handleSubmitToStaff}
+                      disabled={isSubmittingToStaff || unsavedChanges.size > 0}
+                      className="bg-teal-800 hover:bg-green-900 text-white transition-all duration-200 hover:scale-105"
                     >
-                      <X className="h-4 w-4" />
+                      {isSubmittingToStaff ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4 mr-2" />
+                      )}
+                      Submit to Staff
                     </Button>
                   )}
                 </div>
+              </CardHeader>
+
+              {/* Submission Status Banner */}
+              {isSubmitted && (
+                <div className="px-6 pb-4">
+                  <div className="flex justify-between items-center bg-green-50 border-green-200 border p-3 rounded">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="text-sm font-medium text-green-800">
+                        Attendance Successfully Submitted
+                      </span>
+                      {submissionTime && (
+                        <span className="text-xs text-green-600">
+                          on {submissionTime.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                    <Badge
+                      variant="default"
+                      className="bg-green-600 text-white"
+                    >
+                      Read-Only Mode
+                    </Badge>
+                  </div>
+                </div>
+              )}
+
+              <div className="px-6">
+                <Separator className="mb-4" />
+
+                {/* Filters and Search */}
+                <div className="flex flex-wrap gap-4 mb-4">
+                  <div className="flex-1 min-w-[200px]">
+                    <div className="relative">
+                      <Search
+                        className={`h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground transition-all duration-300`}
+                      />
+                      <Input
+                        ref={searchInputRef}
+                        placeholder="Search students..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className={`pl-10 max-w-xl transition-all duration-300 ${
+                          searchQuery
+                            ? "border-blue-300 ring-1 ring-blue-200 shadow-sm"
+                            : ""
+                        }`}
+                        disabled={isSubmitted}
+                      />
+                      {searchQuery && (
+                        <Button
+                          onClick={() => setSearchQuery("")}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-red-500 transition-colors duration-200"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-[150px] transition-all duration-200">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      {attendanceStatusOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="w-[150px] transition-all duration-200">
+                      <SelectValue placeholder="Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      {attendanceTypeOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Enhanced Statistics */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                  <div className="bg-gray-50 p-3 rounded-lg hover:scale-105 transition-transform duration-200">
+                    <div className="text-xs text-muted-foreground">
+                      Total Students
+                    </div>
+                    <div className="text-lg font-semibold">{stats.total}</div>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded-lg hover:scale-105 transition-transform duration-200">
+                    <div className="text-xs text-green-600">Present</div>
+                    <div className="text-lg font-semibold text-green-700">
+                      {stats.present}
+                    </div>
+                  </div>
+                  <div className="bg-red-50 p-3 rounded-lg hover:scale-105 transition-transform duration-200">
+                    <div className="text-xs text-red-600">Absent</div>
+                    <div className="text-lg font-semibold text-red-700">
+                      {stats.absent}
+                    </div>
+                  </div>
+                  <div className="bg-orange-50 p-3 rounded-lg hover:scale-105 transition-transform duration-200">
+                    <div className="text-xs text-orange-600">Late</div>
+                    <div className="text-lg font-semibold text-orange-700">
+                      {stats.late}
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[150px] transition-all duration-200">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  {attendanceStatusOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-[150px] transition-all duration-200">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  {attendanceTypeOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Enhanced Statistics */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-              <div className="bg-gray-50 p-3 rounded-lg hover:scale-105 transition-transform duration-200">
-                <div className="text-xs text-muted-foreground">
-                  Total Students
-                </div>
-                <div className="text-lg font-semibold">{stats.total}</div>
-              </div>
-              <div className="bg-green-50 p-3 rounded-lg hover:scale-105 transition-transform duration-200">
-                <div className="text-xs text-green-600">Present</div>
-                <div className="text-lg font-semibold text-green-700">
-                  {stats.present}
-                </div>
-              </div>
-              <div className="bg-red-50 p-3 rounded-lg hover:scale-105 transition-transform duration-200">
-                <div className="text-xs text-red-600">Absent</div>
-                <div className="text-lg font-semibold text-red-700">
-                  {stats.absent}
-                </div>
-              </div>
-              <div className="bg-orange-50 p-3 rounded-lg hover:scale-105 transition-transform duration-200">
-                <div className="text-xs text-orange-600">Late</div>
-                <div className="text-lg font-semibold text-orange-700">
-                  {stats.late}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <CardContent>
-            <div className="overflow-x-auto relative" ref={tableRef}>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>Student Name</TableHead>
-                    <TableHead>Student ID</TableHead>
-                    <TableHead>Attendance</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Check-in Time</TableHead>
-                    <TableHead>Comments</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="divide-y">
-                  {filteredAttendances.map((student, index) => (
-                    <TableRow
-                      key={student.id}
-                      className={`
+              <CardContent>
+                <div className="overflow-x-auto relative" ref={tableRef}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>#</TableHead>
+                        <TableHead>Student Name</TableHead>
+                        <TableHead>Student ID</TableHead>
+                        <TableHead>Attendance</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Check-in Time</TableHead>
+                        <TableHead>Comments</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody className="divide-y">
+                      {filteredAttendances.map((student, index) => (
+                        <TableRow
+                          key={student.id}
+                          className={`
                         ${unsavedChanges.has(student.id) ? "bg-yellow-50" : ""} 
                         ${isSubmitted ? "opacity-80" : ""}
                         transition-all duration-200
                       `}
-                    >
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {student.studentName || "- - -"}
-                          {unsavedChanges.has(student.id) && (
-                            <Badge
-                              variant="outline"
-                              className="text-xs animate-pulse"
+                        >
+                          <TableCell>{index + 1}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {student.studentName || "- - -"}
+                              {unsavedChanges.has(student.id) && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs animate-pulse"
+                                >
+                                  Unsaved
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>{student.identifyNumber}</TableCell>
+                          <TableCell className="py-2 px-3">
+                            <Select
+                              value={student.status}
+                              onValueChange={(value) =>
+                                handleFieldChange(student.id, "status", value)
+                              }
+                              disabled={isSubmitted}
                             >
-                              Unsaved
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>{student.identifyNumber}</TableCell>
-                      <TableCell className="py-2 px-3">
-                        <Select
-                          value={student.status}
-                          onValueChange={(value) =>
-                            handleFieldChange(student.id, "status", value)
-                          }
-                          disabled={isSubmitted}
-                        >
-                          <SelectTrigger
-                            className={`h-8 w-full border ${getStatusColor(
-                              student.status
-                            )} ${isSubmitted ? "cursor-not-allowed" : ""}`}
-                          >
-                            <SelectValue placeholder="Select" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {attendanceStatusOptions.map((option) => (
-                              <SelectItem
-                                key={option.value}
-                                value={option.value}
+                              <SelectTrigger
+                                className={`h-8 w-full border ${getStatusColor(
+                                  student.status
+                                )} ${isSubmitted ? "cursor-not-allowed" : ""}`}
                               >
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="py-2 px-3">
-                        <Select
-                          value={student.attendanceType}
-                          onValueChange={(value) =>
-                            handleFieldChange(
-                              student.id,
-                              "attendanceType",
-                              value
-                            )
-                          }
-                          disabled={isSubmitted}
-                        >
-                          <SelectTrigger
-                            className={`h-8 w-full border ${
-                              isSubmitted ? "cursor-not-allowed" : ""
-                            }`}
-                          >
-                            <SelectValue placeholder="Select" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {attendanceTypeOptions.map((option) => (
-                              <SelectItem
-                                key={option.value}
-                                value={option.value}
+                                <SelectValue placeholder="Select" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {attendanceStatusOptions.map((option) => (
+                                  <SelectItem
+                                    key={option.value}
+                                    value={option.value}
+                                  >
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell className="py-2 px-3">
+                            <Select
+                              value={student.attendanceType}
+                              onValueChange={(value) =>
+                                handleFieldChange(
+                                  student.id,
+                                  "attendanceType",
+                                  value
+                                )
+                              }
+                              disabled={isSubmitted}
+                            >
+                              <SelectTrigger
+                                className={`h-8 w-full border ${
+                                  isSubmitted ? "cursor-not-allowed" : ""
+                                }`}
                               >
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="py-2 px-3">
-                        {student.recordedTime || "--"}
-                      </TableCell>
-                      <TableCell className="py-2 px-3">
-                        <Input
-                          placeholder="Add Comment"
-                          className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
-                            unsavedChanges.has(student.id)
-                              ? "border-yellow-300 ring-1 ring-yellow-200"
-                              : ""
-                          } ${isSubmitted ? "cursor-not-allowed" : ""}`}
-                          value={student.comment || ""}
-                          onChange={(e) =>
-                            handleFieldChange(
-                              student.id,
-                              "comment",
-                              e.target.value
-                            )
-                          }
-                          disabled={isSubmitted}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        {isSubmitted ? (
-                          <Badge variant="secondary" className="text-xs">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Submitted
-                          </Badge>
-                        ) : unsavedChanges.has(student.id) ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveFromUnsaved(student.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        ) : (
-                          <Badge variant="secondary" className="text-xs">
-                            Saved
-                          </Badge>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                                <SelectValue placeholder="Select" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {attendanceTypeOptions.map((option) => (
+                                  <SelectItem
+                                    key={option.value}
+                                    value={option.value}
+                                  >
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell className="py-2 px-3">
+                            {student.recordedTime || "--"}
+                          </TableCell>
+                          <TableCell className="py-2 px-3">
+                            <Input
+                              placeholder="Add Comment"
+                              className={`h-8 text-sm w-full transition-all duration-100 ease-in-out ${
+                                unsavedChanges.has(student.id)
+                                  ? "border-yellow-300 ring-1 ring-yellow-200"
+                                  : ""
+                              } ${isSubmitted ? "cursor-not-allowed" : ""}`}
+                              value={student.comment || ""}
+                              onChange={(e) =>
+                                handleFieldChange(
+                                  student.id,
+                                  "comment",
+                                  e.target.value
+                                )
+                              }
+                              disabled={isSubmitted}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {isSubmitted ? (
+                              <Badge variant="secondary" className="text-xs">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Submitted
+                              </Badge>
+                            ) : unsavedChanges.has(student.id) ? (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  handleRemoveFromUnsaved(student.id)
+                                }
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            ) : (
+                              <Badge variant="secondary" className="text-xs">
+                                Saved
+                              </Badge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
 
-              {/* No Results Message */}
-              {filteredAttendances.length === 0 &&
-                attendanceGenerate?.attendances?.length > 0 && (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Search className="h-16 w-16 mx-auto mb-4 opacity-30" />
-                    <p className="text-lg font-medium">No students found</p>
-                    <p className="text-sm mt-1">
-                      Try adjusting your search criteria or filters
-                    </p>
-                  </div>
-                )}
+                  {/* No Results Message */}
+                  {filteredAttendances.length === 0 &&
+                    attendanceGenerate?.attendances?.length > 0 && (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Search className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                        <p className="text-lg font-medium">No students found</p>
+                        <p className="text-sm mt-1">
+                          Try adjusting your search criteria or filters
+                        </p>
+                      </div>
+                    )}
 
-              {/* Empty State when no attendance data */}
-              {(!attendanceGenerate?.attendances ||
-                attendanceGenerate.attendances.length === 0) &&
-                isInitialized && (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Users className="h-16 w-16 mx-auto mb-4 opacity-30" />
-                    <p className="text-lg font-medium">No students enrolled</p>
-                    <p className="text-sm mt-1">
-                      This class doesn't have any enrolled students yet
-                    </p>
-                  </div>
-                )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Quick Actions Panel - Only show when not submitted */}
-      {attendanceGenerate && unsavedChanges.size > 0 && !isSubmitted && (
-        <Card className="fixed bottom-4 right-4 w-80 shadow-lg border-yellow-300 bg-yellow-50 z-50 animate-in slide-in-from-bottom-4 duration-300">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Badge variant="destructive" className="animate-pulse">
-                  {unsavedChanges.size}
-                </Badge>
-                <span className="text-sm font-medium">Pending Changes</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setUnsavedChanges(new Set())}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleResetChanges}
-                className="flex-1 hover:bg-red-100 text-red-600"
-              >
-                <X className="h-4 w-4 mr-1" />
-                Reset
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSaveAllChanges}
-                disabled={isSavingAll}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {isSavingAll ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                ) : (
-                  <Upload className="h-4 w-4 mr-1" />
-                )}
-                Save All
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Warning for unsaved changes before submit */}
-      {attendanceGenerate && unsavedChanges.size > 0 && (
-        <Card className="border-orange-200 bg-orange-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-orange-600" />
-              <div className="flex-1">
-                <div className="text-sm font-medium text-orange-800">
-                  Save changes before submitting
+                  {/* Empty State when no attendance data */}
+                  {(!attendanceGenerate?.attendances ||
+                    attendanceGenerate.attendances.length === 0) &&
+                    isInitialized && (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Users className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                        <p className="text-lg font-medium">
+                          No students enrolled
+                        </p>
+                        <p className="text-sm mt-1">
+                          This class doesn't have any enrolled students yet
+                        </p>
+                      </div>
+                    )}
                 </div>
-                <div className="text-xs text-orange-700">
-                  You have {unsavedChanges.size} unsaved changes. Please save
-                  all changes before submitting attendance to staff.
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Quick Actions Panel - Only show when not submitted */}
+          {attendanceGenerate && unsavedChanges.size > 0 && !isSubmitted && (
+            <Card className="fixed bottom-4 right-4 w-80 shadow-lg border-yellow-300 bg-yellow-50 z-50 animate-in slide-in-from-bottom-4 duration-300">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="destructive" className="animate-pulse">
+                      {unsavedChanges.size}
+                    </Badge>
+                    <span className="text-sm font-medium">Pending Changes</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setUnsavedChanges(new Set())}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetChanges}
+                    className="flex-1 hover:bg-red-100 text-red-600"
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Reset
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSaveAllChanges}
+                    disabled={isSavingAll}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    {isSavingAll ? (
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-1" />
+                    )}
+                    Save All
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Warning for unsaved changes before submit */}
+          {attendanceGenerate && unsavedChanges.size > 0 && (
+            <Card className="border-orange-200 bg-orange-50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-orange-600" />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-orange-800">
+                      Save changes before submitting
+                    </div>
+                    <div className="text-xs text-orange-700">
+                      You have {unsavedChanges.size} unsaved changes. Please
+                      save all changes before submitting attendance to staff.
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
     </div>
   );

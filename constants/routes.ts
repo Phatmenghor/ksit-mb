@@ -67,7 +67,9 @@ export const ROUTE = {
     HISTORY_RECORD: "/attendance/history-records",
     STUDENT_RECORD: "/attendance/student-records",
     HISTORY_RECORD_DETAIL: (id: string) =>
-      `/attendance/history-records/view/${id}`,
+      `/attendance/history-records/class/${id}`,
+    STUDENT_RECORD_DETAIL: (id: string) =>
+      `/attendance/student-records/view/${id}`,
   },
 
   COURSES: {
@@ -152,6 +154,7 @@ export const sidebarRoutes = [
     subroutes: [
       { title: "Class Schedule", href: ROUTE.ATTENDANCE.CLASS_SCHEDULE },
       { title: "History Records", href: ROUTE.ATTENDANCE.HISTORY_RECORD },
+      { title: "Student Records", href: ROUTE.ATTENDANCE.STUDENT_RECORD },
     ],
   },
   {

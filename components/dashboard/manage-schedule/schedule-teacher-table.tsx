@@ -38,7 +38,7 @@ const ScheduleTeacherTable = ({
       <CardContent className="mx-auto p-6">
         {/* Header */}
         <div className="mb-6 flex items-center gap-3 bg-orange-50 p-4 rounded-lg border border-orange-200">
-          <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
+          <div className="w-8 h-8 bg-orange-200 rounded flex items-center justify-center">
             <Calendar className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -61,7 +61,13 @@ const ScheduleTeacherTable = ({
                 {daySchedule.day}
               </h2>
 
-              <div className="overflow-x-auto shadow-sm border border-gray-200 rounded-lg">
+              <div
+                className="overflow-x-auto shadow-sm border border-gray-200 rounded-lg"
+                style={{
+                  scrollbarWidth: "thin",
+                  scrollbarColor: "#000000 #d1d5db",
+                }}
+              >
                 <table className="w-full">
                   <TableHeader />
                   <tbody className="bg-white">

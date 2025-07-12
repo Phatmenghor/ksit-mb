@@ -43,6 +43,8 @@ import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmatio
 import { roomTableHeader } from "@/constants/table/master-data";
 import PaginationPage from "@/components/shared/pagination-page";
 import Loading from "@/components/shared/loading";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useDebounce } from "@/utils/debounce/debounce";
 
 export default function ManageRoomPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -57,13 +59,15 @@ export default function ManageRoomPage() {
     undefined
   );
 
+  const searchDebounceQuery = useDebounce(searchQuery, 500);
+
   const loadRooms = useCallback(
     async (param: AllRoomFilterModel) => {
       setIsLoading(true);
 
       try {
         const response = await getAllRoomService({
-          search: searchQuery,
+          search: searchDebounceQuery,
           status: Constants.ACTIVE,
           ...param,
         });
@@ -79,12 +83,12 @@ export default function ManageRoomPage() {
         setIsLoading(false);
       }
     },
-    [searchQuery]
+    [searchDebounceQuery]
   );
 
   useEffect(() => {
     loadRooms({});
-  }, [searchQuery, loadRooms]);
+  }, [searchDebounceQuery, loadRooms]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");
@@ -238,7 +242,7 @@ export default function ManageRoomPage() {
             </div>
             <Button
               onClick={handleOpenAddModal}
-              className="bg-green-900 text-white hover:bg-green-950"
+              className="bg-teal-900 text-white hover:bg-teal-950"
             >
               <Plus className="mr-2 h-2 w-2" />
               Add New
@@ -247,7 +251,7 @@ export default function ManageRoomPage() {
         </CardContent>
       </Card>
 
-      <div className="overflow-x-auto mt-4">
+      <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
         {isLoading ? (
           <Loading />
         ) : (

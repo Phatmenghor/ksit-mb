@@ -171,7 +171,7 @@ export default function GenerateMultiStudentForm() {
           </Button>
           <Button
             type="submit"
-            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="bg-teal-900 hover:bg-teal-950 text-white"
             disabled={isSubmitting || isLoading}
           >
             {isSubmitting || isLoading ? (

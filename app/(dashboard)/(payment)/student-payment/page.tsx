@@ -6,7 +6,6 @@ import { Eye } from "lucide-react";
 import { toast } from "sonner";
 import { getAllStudentsService } from "@/service/user/student.service";
 import { StatusEnum } from "@/constants/constant";
-import { Column, CustomTable } from "@/components/shared/layout/table-section";
 import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import { YearSelector } from "@/components/shared/year-selector";
@@ -16,17 +15,10 @@ import PaginationPage from "@/components/shared/pagination-page";
 import {
   AllStudentModel,
   RequestAllStudent,
-  StudentModel,
 } from "@/model/user/student/student.request.model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 import Loading from "@/components/shared/loading";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   Table,
   TableBody,
@@ -36,6 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { StudentTablePaymentHeader } from "@/constants/payment/payment";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function StudentsListPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -48,6 +41,7 @@ export default function StudentsListPage() {
   const [allStudentData, setAllStudentData] = useState<AllStudentModel | null>(
     null
   );
+  const isMobile = useIsMobile();
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const loadStudents = useCallback(
     async (param: RequestAllStudent) => {
@@ -129,7 +123,7 @@ export default function StudentsListPage() {
         }
       />
 
-      <div className="overflow-x-auto mt-4">
+      <div className={`overflow-x-auto mt-4 ${isMobile ? "pl-4" : ""}`}>
         {isLoading ? (
           <div>
             <Loading />
@@ -209,7 +203,7 @@ export default function StudentsListPage() {
       </div>
 
       {!isLoading && allStudentData && (
-        <div className="mt-4 flex justify-end ">
+        <div className="mt-8 flex justify-end animate-in slide-in-from-bottom-4 duration-500 delay-1000">
           <PaginationPage
             currentPage={allStudentData.pageNo}
             totalPages={allStudentData.totalPages}

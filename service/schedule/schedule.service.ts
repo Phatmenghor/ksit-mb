@@ -1,5 +1,8 @@
 import { UpdateSemesterModel } from "@/model/master-data/semester/type-semester-model";
-import { ScheduleFilterModel } from "@/model/attendance/schedule/schedule-filter";
+import {
+  DuplicateFilterModel,
+  ScheduleFilterModel,
+} from "@/model/attendance/schedule/schedule-filter";
 import { CreateScheduleModel } from "@/model/schedules/type-schedule-model";
 import { axiosClientWithAuth } from "@/utils/axios";
 
@@ -9,6 +12,19 @@ export async function getAllScheduleService(data: ScheduleFilterModel) {
     return response.data.data;
   } catch (error: any) {
     console.error("Error fetching all schedule:", error);
+    return null;
+  }
+}
+
+export async function duplicateScheduleService(data: DuplicateFilterModel) {
+  try {
+    const response = await axiosClientWithAuth.post(
+      `/v1/schedules/bulk-duplicate`,
+      data
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error("Error duplicate schedule:", error);
     return null;
   }
 }

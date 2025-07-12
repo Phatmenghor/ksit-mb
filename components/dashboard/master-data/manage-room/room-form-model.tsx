@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +22,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Upload, X, ImageIcon } from "lucide-react";
 import { Constants } from "@/constants/text-string";
 import { useIsMobile } from "@/hooks/use-mobile";
 const roomFormSchema = z.object({

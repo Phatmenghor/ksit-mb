@@ -54,6 +54,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AppIcons } from "@/constants/icons/icon";
 
 const MySchedulePage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -140,9 +141,6 @@ const MySchedulePage = () => {
   const handleClassListClick = () => {
     router.back();
   };
-  const handleToSurveypage = () => {
-    router.push(`/take-survey`);
-  };
 
   return (
     <div>
@@ -171,8 +169,22 @@ const MySchedulePage = () => {
             </BreadcrumbList>
           </Breadcrumb>
 
-          <h3 className="text-xl font-bold">Class Schedule List</h3>
-
+          <div className="flex items-center min-w-0 flex-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.back()}
+              asChild
+              className="rounded-full flex-shrink-0"
+            >
+              <img
+                src={AppIcons.Back}
+                alt="back Icon"
+                className="h-4 w-4 mr-3 sm:mr-5 text-muted-foreground"
+              />
+            </Button>
+            <h3 className="text-xl font-bold">Class Schedule List</h3>
+          </div>
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="relative w-full md:w-1/2">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

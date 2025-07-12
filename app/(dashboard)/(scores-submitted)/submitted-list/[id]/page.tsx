@@ -162,7 +162,7 @@ export default function ScoreSubmissionDetailPage() {
     <div className="container space-y-4">
       <StudentScoreHeader
         schedule={scheduleDetail}
-        title="View Score Submitted Detail"
+        title="Score Submitted Detail"
       />
 
       {!isScoreApproval && submission?.status === SubmissionEnum.SUBMITTED && (
@@ -184,57 +184,60 @@ export default function ScoreSubmissionDetailPage() {
       )}
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between w-full">
+        <CardHeader className="flex flex-col lg:flex-row sm:items-center sm:justify-between w-full gap-4">
           <div>
             <CardTitle className="font-bold text-xl">Student List</CardTitle>
           </div>
           {isScoreApproval ||
             (submission?.status !== SubmissionEnum.SUBMITTED && (
               <>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 lg:gap-6">
                   {/* Label */}
-                  <span className="text-muted-foreground font-medium">
+                  <span className="text-muted-foreground font-medium text-sm sm:text-base lg:text-lg">
                     Export Data By Class:
                   </span>
 
-                  {/* Excel Export Button */}
-                  <Button
-                    onClick={() =>
-                      handleExportToExcel({
-                        includeComments: false,
-                        includeCreatedAt: true,
-                      })
-                    }
-                    variant="outline"
-                    className="gap-2"
-                  >
-                    <img
-                      src={AppIcons.Excel}
-                      alt="excel Icon"
-                      className="h-4 w-4 text-muted-foreground"
-                    />
-                    <span>Excel</span>
-                    <Download className="w-4 h-4" />
-                  </Button>
+                  {/* Export Buttons Container */}
+                  <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-4">
+                    {/* Excel Export Button */}
+                    <Button
+                      onClick={() =>
+                        handleExportToExcel({
+                          includeComments: false,
+                          includeCreatedAt: true,
+                        })
+                      }
+                      variant="outline"
+                      className="gap-2 text-sm sm:text-base lg:text-lg px-3 sm:px-4 lg:px-6 py-2 lg:py-3"
+                    >
+                      <img
+                        src={AppIcons.Excel}
+                        alt="excel Icon"
+                        className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground flex-shrink-0"
+                      />
+                      <span>Excel</span>
+                      <Download className="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0" />
+                    </Button>
 
-                  {/* PDF Export Button */}
-                  <Button
-                    onClick={() =>
-                      handleExportToPDF({
-                        includeComments: false,
-                      })
-                    }
-                    variant="outline"
-                    className="gap-2"
-                  >
-                    <img
-                      src={AppIcons.Pdf}
-                      alt="excel Icon"
-                      className="h-4 w-4 text-muted-foreground"
-                    />
-                    <span>PDF</span>
-                    <Download className="w-4 h-4" />
-                  </Button>
+                    {/* PDF Export Button */}
+                    <Button
+                      onClick={() =>
+                        handleExportToPDF({
+                          includeComments: false,
+                        })
+                      }
+                      variant="outline"
+                      className="gap-2 text-sm sm:text-base lg:text-lg px-3 sm:px-4 lg:px-6 py-2 lg:py-3"
+                    >
+                      <img
+                        src={AppIcons.Pdf}
+                        alt="pdf Icon"
+                        className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground flex-shrink-0"
+                      />
+                      <span>PDF</span>
+                      <Download className="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0" />
+                    </Button>
+                  </div>
                 </div>
               </>
             ))}
@@ -374,6 +377,7 @@ export default function ScoreSubmissionDetailPage() {
         description="Are u sure u want to approve the students score?"
         onConfirm={handleApproval}
         cancelText="Discard"
+        confirmText="Approve"
         onOpenChange={() => {
           setApproveDialog(false);
         }}
@@ -384,6 +388,7 @@ export default function ScoreSubmissionDetailPage() {
         title="Confirm Return!"
         description="Are u sure u want to return the students score?"
         onConfirm={handleReturn}
+        confirmText="Return"
         cancelText="Discard"
         onOpenChange={() => {
           setReturnDialog(false);

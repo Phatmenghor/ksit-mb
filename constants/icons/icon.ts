@@ -7,14 +7,22 @@ export const AppIcons = {
   Pdf: "/icons/pdf.png",
   Back: "/icons/Back.png",
   Circle_alert: "/icons/circle-alert.png",
+  Circle_alert_teal: "/icons/circle-!-teal.png",
   transcript: "/icons/transcript.png",
   circle_alert_black: "/icons/circle-!-black.png",
+  score_submit: "/icons/score-submit.png",
+  menu: "/icons/menu.png",
+  reset: "/icons/reset.png",
+};
+
+export const AppResource = {
+  Logo: "/assets/KSIT.png",
 };
 
 export const AppSidebarIcons = {
   Home: "/sidebars/Home.png",
   Master_Data: "/sidebars/master-data.png",
-  Users: "/sidebars/users.png",
+  Users: "/sidebars/user-v3.png",
   Students: "/sidebars/students.png",
   Manage_Schedule: "/sidebars/manage-schedule.png",
   Attendance: "/sidebars/attendance.png",

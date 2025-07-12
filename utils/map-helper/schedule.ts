@@ -28,7 +28,7 @@ export function convertToWeeklySchedule(scheduleData: ScheduleModel[]): {
     classes: [],
   }));
 
-  // Add special fallback for entries with no day
+  // Add special fallback for invalid/missing day values
   EMPTY_WEEKLY_SCHEDULE.push({
     day: "---",
     classes: [],
@@ -45,10 +45,7 @@ export function convertToWeeklySchedule(scheduleData: ScheduleModel[]): {
     };
   }
 
-  const schedules: ScheduleModel[] = Array.isArray(scheduleData)
-    ? scheduleData
-    : [scheduleData];
-
+  const schedules = Array.isArray(scheduleData) ? scheduleData : [scheduleData];
   const firstSchedule = schedules[0];
 
   const classInfo = {
@@ -59,49 +56,45 @@ export function convertToWeeklySchedule(scheduleData: ScheduleModel[]): {
 
   const weeklyMap: Record<string, WeeklySchedule["classes"]> = {};
 
-  // Initialize known days + fallback
+  // Initialize days
   DAYS_OF_WEEK.forEach((day) => {
     if (day.value !== "ALL") {
       weeklyMap[day.value] = [];
     }
   });
-  weeklyMap["---"] = []; // fallback for missing/invalid days
+  weeklyMap["---"] = []; // fallback
 
   const getInstructorName = (teacher: any): string => {
     if (!teacher) return "---";
-
-    const englishName = `${teacher.englishFirstName || ""} ${
-      teacher.englishLastName || ""
+    const english = `${teacher.englishFirstName ?? ""} ${
+      teacher.englishLastName ?? ""
     }`.trim();
-    const khmerName = `${teacher.khmerFirstName || ""} ${
-      teacher.khmerLastName || ""
+    const khmer = `${teacher.khmerFirstName ?? ""} ${
+      teacher.khmerLastName ?? ""
     }`.trim();
-
-    return englishName || khmerName || teacher.username || "---";
+    return english || khmer || teacher.username || "---";
   };
 
   schedules.forEach((schedule) => {
     if (!schedule) return;
 
-    const dayKey = schedule.day || "---"; // fallback if missing
+    const isValidDay = DAYS_OF_WEEK.some((d) => d.value === schedule.day);
+    const dayKey = isValidDay ? schedule.day : "---";
+
     const instructorName = getInstructorName(schedule.teacher);
 
     const classItem = {
       subjectCode: schedule.course?.code || "---",
       subject: schedule.course?.nameKH || schedule.course?.nameEn || "---",
       credit: schedule.course?.credit
-        ? `${schedule.course.credit}(${schedule.course.totalHour || 0})`
+        ? `${schedule.course.credit}(${schedule.course.totalHour ?? "0"})`
         : "---",
       instructor: instructorName,
       datetime: `${schedule.startTime || "---"} - ${schedule.endTime || "---"}`,
       room: schedule.room?.name || "---",
     };
 
-    if (weeklyMap[dayKey]) {
-      weeklyMap[dayKey].push(classItem);
-    } else {
-      weeklyMap["---"].push(classItem);
-    }
+    weeklyMap[dayKey].push(classItem);
   });
 
   const weeklySchedule: WeeklySchedule[] = DAYS_OF_WEEK.filter(
@@ -111,13 +104,19 @@ export function convertToWeeklySchedule(scheduleData: ScheduleModel[]): {
     classes: weeklyMap[day.value] || [],
   }));
 
-  // Always include fallback group at the end (if any)
-  if (weeklyMap["---"].length > 0) {
+  // Include fallback group (---) at the end if it has any classes
+  if (weeklyMap["---"] && weeklyMap["---"].length > 0) {
     weeklySchedule.push({
       day: "---",
       classes: weeklyMap["---"],
     });
   }
+
+  weeklySchedule.sort(
+    (a, b) =>
+      DAYS_OF_WEEK.findIndex((d) => d.label === a.day) -
+      DAYS_OF_WEEK.findIndex((d) => d.label === b.day)
+  );
 
   return { classInfo, weeklySchedule };
 }

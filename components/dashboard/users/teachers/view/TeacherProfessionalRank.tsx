@@ -87,68 +87,69 @@ export default function TeacherProfessionalRank({ teacher }: TeacherProps) {
           <div className="space-y-7">
             {/* Table container with horizontal scroll */}
             <div
-              className="relative overflow-x-auto"
+              className="relative overflow-x-auto border border-gray-300 rounded-2xl overflow-hidden"
               style={{
                 scrollbarWidth: "thin",
                 maxHeight: "300px",
                 scrollbarColor: "#000000 #d1d5db",
               }}
             >
-              <div>
-                <table className="w-full text-sm border-collapse">
-                  <thead>
-                    <tr className="bg-black text-white text-left">
-                      <th className="p-2 border border-gray-300 min-w-[200px] whitespace-nowrap">
-                        ប្រភេទឋានៈវិជ្ជាជីវៈ
-                      </th>
-                      <th className="p-2 border border-gray-300 min-w-[150px] whitespace-nowrap">
-                        បរិយាយ
-                      </th>
-                      <th className="p-2 border border-gray-300 min-w-[120px] whitespace-nowrap">
-                        ប្រកាសលេខ
-                      </th>
-                      <th className="p-2 border border-gray-300 min-w-[150px] whitespace-nowrap">
-                        កាលបរិច្ឆេទទទួល
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {teacher?.teachersProfessionalRank?.length ? (
-                      teacher.teachersProfessionalRank.map((value) => (
-                        <tr key={value.id} className="border-t bg-white">
-                          <td className="p-2 border border-gray-300 whitespace-nowrap">
-                            {value?.typeOfProfessionalRank || "---"}
-                          </td>
-                          <td className="p-2 border border-gray-300 whitespace-nowrap">
-                            {value?.description || "---"}
-                          </td>
-                          <td className="p-2 border border-gray-300 whitespace-nowrap">
-                            {value?.announcementNumber || "---"}
-                          </td>
-                          <td className="p-2 border border-gray-300 whitespace-nowrap">
-                            {value?.dateAccepted || "---"}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr className="border-t bg-white">
-                        <td className="p-2 border border-gray-300 text-center whitespace-nowrap">
-                          ---
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="bg-black text-white text-left">
+                    <th className="p-3 border-r border-gray-400 min-w-[200px] whitespace-nowrap">
+                      ប្រភេទឋានៈវិជ្ជាជីវៈ
+                    </th>
+                    <th className="p-3 border-r border-gray-400 min-w-[150px] whitespace-nowrap">
+                      បរិយាយ
+                    </th>
+                    <th className="p-3 border-r border-gray-400 min-w-[120px] whitespace-nowrap">
+                      ប្រកាសលេខ
+                    </th>
+                    <th className="p-3 min-w-[150px] whitespace-nowrap">
+                      កាលបរិច្ឆេទទទួល
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {teacher?.teachersProfessionalRank?.length ? (
+                    teacher.teachersProfessionalRank.map((value) => (
+                      <tr
+                        key={value.id}
+                        className="border-t border-gray-300 bg-white hover:bg-gray-50"
+                      >
+                        <td className="p-3 border-r border-gray-300 whitespace-nowrap">
+                          {value?.typeOfProfessionalRank || "---"}
                         </td>
-                        <td className="p-2 border border-gray-300 text-center whitespace-nowrap">
-                          ---
+                        <td className="p-3 border-r border-gray-300 whitespace-nowrap">
+                          {value?.description || "---"}
                         </td>
-                        <td className="p-2 border border-gray-300 text-center whitespace-nowrap">
-                          ---
+                        <td className="p-3 border-r border-gray-300 whitespace-nowrap">
+                          {value?.announcementNumber || "---"}
                         </td>
-                        <td className="p-2 border border-gray-300 text-center whitespace-nowrap">
-                          ---
+                        <td className="p-3 whitespace-nowrap">
+                          {value?.dateAccepted || "---"}
                         </td>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    ))
+                  ) : (
+                    <tr className="border-t border-gray-300 bg-white">
+                      <td className="p-3 border-r border-gray-300 text-center whitespace-nowrap">
+                        ---
+                      </td>
+                      <td className="p-3 border-r border-gray-300 text-center whitespace-nowrap">
+                        ---
+                      </td>
+                      <td className="p-3 border-r border-gray-300 text-center whitespace-nowrap">
+                        ---
+                      </td>
+                      <td className="p-3 border-r border-gray-300 text-center whitespace-nowrap">
+                        ---
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
 
             <Separator />

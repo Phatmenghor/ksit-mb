@@ -19,6 +19,7 @@ import {
 } from "@/model/user/staff/staff.schema";
 import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { initialStaffValues } from "@/model/user/staff/staff.request.model";
+import Loading from "@/components/shared/loading";
 
 type Props = {
   mode: "Add" | "Edit";
@@ -94,12 +95,6 @@ export default function TeacherForm({
   }, [methods]);
 
   const handleClosePage = () => {
-    if (isFormDirty) {
-      const confirmed = window.confirm(
-        "You have unsaved changes. Are you sure you want to close?"
-      );
-      if (!confirmed) return;
-    }
     if (onDiscard) {
       onDiscard();
     }
@@ -114,14 +109,7 @@ export default function TeacherForm({
   };
 
   if (!initialValues && mode === "Edit") {
-    return (
-      <div className="flex justify-center items-center h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        <span className="ml-2 text-sm text-muted-foreground">
-          Loading teacher data...
-        </span>
-      </div>
-    );
+    return <Loading />;
   }
 
   const canSubmitForm = () => {

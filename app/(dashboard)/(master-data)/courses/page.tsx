@@ -41,6 +41,8 @@ import Loading from "@/components/shared/loading";
 import { ComboboxSelectDepartment } from "@/components/shared/ComboBox/combobox-department";
 import { DepartmentModel } from "@/model/master-data/department/all-department-model";
 import { useForm } from "react-hook-form";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useDebounce } from "@/utils/debounce/debounce";
 
 export default function CoursesPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -60,6 +62,8 @@ export default function CoursesPage() {
     departmentId: number;
   };
 
+  const searchDebounce = useDebounce(searchQuery, 500);
+
   const { setValue } = useForm<FormValues>();
 
   const loadCourses = useCallback(
@@ -68,7 +72,8 @@ export default function CoursesPage() {
 
       try {
         const response = await getAllCourseService({
-          search: searchQuery,
+          search: searchDebounce,
+          departmentId: selectedDepartment?.id,
           status: Constants.ACTIVE,
           ...param,
         });
@@ -84,12 +89,12 @@ export default function CoursesPage() {
         setIsLoading(false);
       }
     },
-    [searchQuery, selectedDepartment]
+    [searchDebounce, selectedDepartment]
   );
 
   useEffect(() => {
     loadCourses({});
-  }, [searchQuery, loadCourses, selectedDepartment]);
+  }, [searchDebounce, loadCourses, selectedDepartment]);
 
   async function handleDeleteClass() {
     if (!selectedCourse) return;
@@ -129,12 +134,20 @@ export default function CoursesPage() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
+
   const handleDepartmentChange = (department: DepartmentModel) => {
-    setSelectedDepartment(department);
-    setValue("departmentId", department.id as number, {
-      shouldValidate: true,
-    });
+    if (selectedDepartment?.id === department.id) {
+      // Unselect if the same department is clicked
+      setSelectedDepartment(null);
+    } else {
+      // Select new department
+      setSelectedDepartment(department);
+      setValue("departmentId", department.id as number, {
+        shouldValidate: true,
+      });
+    }
   };
+
   return (
     <div>
       <Card>
@@ -179,7 +192,7 @@ export default function CoursesPage() {
         </CardContent>
       </Card>
 
-      <div className="overflow-hidden mt-4">
+      <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
         {isLoading ? (
           <Loading />
         ) : (

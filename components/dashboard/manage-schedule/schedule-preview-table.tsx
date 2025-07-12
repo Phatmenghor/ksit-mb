@@ -31,7 +31,7 @@ const SchedulePreviewTable = ({
       </td>
       <td className="px-4 py-3 text-gray-700">{classInfo.subject || "---"}</td>
       <td className="px-4 py-3 text-gray-700">{classInfo.credit ?? "---"}</td>
-      <td className="px-4 py-3 text-blue-600">
+      <td className="px-4 py-3 text-gray-700">
         {classInfo.instructor || "---"}
       </td>
       <td className="px-4 py-3 text-gray-700">{classInfo.datetime || "---"}</td>
@@ -70,7 +70,13 @@ const SchedulePreviewTable = ({
                 </span>
               </h2>
 
-              <div className="overflow-x-auto shadow-sm border border-gray-200 rounded-lg">
+              <div
+                className="overflow-x-auto shadow-sm border border-gray-200 rounded-lg"
+                style={{
+                  scrollbarWidth: "thin",
+                  scrollbarColor: "#000000 #d1d5db",
+                }}
+              >
                 <table className="w-full">
                   <TableHeader />
                   <tbody className="bg-white">

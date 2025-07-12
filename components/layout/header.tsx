@@ -34,6 +34,8 @@ import { logoutUser } from "@/utils/local-storage/user-info/token";
 import { ConfirmDialog } from "../shared/custom-confirm-dialog";
 import { MobileSidebar } from "./mobile-sidebar";
 import { RoleEnum } from "@/constants/constant";
+import Image from "next/image";
+import { AppIcons, AppResource } from "@/constants/icons/icon";
 
 export function Header() {
   const isMobile = useIsMobile();
@@ -80,26 +82,41 @@ export function Header() {
 
   return (
     <>
-      <header className="flex h-16 items-center justify-between bg-[#024D3E] px-4 md:px-6">
+      <header
+        className={`flex items-center justify-between bg-[#024D3E] px-4 md:px-6 ${
+          isMobile ? "h-20" : "h-16"
+        }`}
+      >
         {/* Left: Logo or Sidebar toggle */}
         <div className="flex items-center">
           {isMobile && (
             <>
               <Button
                 variant="ghost"
+                asChild
                 size="icon"
-                className="text-white"
                 onClick={toggleMobileMenu}
               >
                 {mobileMenuOpen ? (
                   <X className="h-5 w-5" />
                 ) : (
-                  <Menu className="h-5 w-5" />
+                  <img
+                    src={AppIcons.menu}
+                    alt="menu Icon"
+                    className="h-3 w-4 mr-3 sm:mr-5 text-muted-foreground"
+                  />
                 )}
-                <span className="sr-only">Toggle navigation menu</span>
               </Button>
               <Link href="/" className="flex items-center ml-2 gap-2">
-                <div className="rounded-full bg-white p-1"></div>
+                <div className="relative h-12 w-12">
+                  <Image
+                    src={AppResource.Logo}
+                    alt="KSIT Logo"
+                    fill
+                    className="rounded-full object-contain"
+                    priority
+                  />
+                </div>
                 <span className="font-bold text-white text-lg">KSIT</span>
               </Link>
             </>

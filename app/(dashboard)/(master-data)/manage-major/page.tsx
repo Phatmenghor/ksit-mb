@@ -43,6 +43,8 @@ import { majorTableHeader } from "@/constants/table/master-data";
 import Loading from "@/components/shared/loading";
 import PaginationPage from "@/components/shared/pagination-page";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useDebounce } from "@/utils/debounce/debounce";
 
 export default function ManageMajorPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -56,13 +58,14 @@ export default function ManageMajorPage() {
   const [initialData, setInitialData] = useState<MajorFormData | undefined>(
     undefined
   );
+  const searchDebounce = useDebounce(searchQuery, 500);
 
   const loadMajors = useCallback(
     async (param: AllMajorFilterModel) => {
       setIsLoading(true);
       try {
         const response = await getAllMajorService({
-          search: searchQuery,
+          search: searchDebounce,
           status: Constants.ACTIVE,
           ...param,
         });
@@ -78,12 +81,12 @@ export default function ManageMajorPage() {
         setIsLoading(false);
       }
     },
-    [searchQuery]
+    [searchDebounce]
   );
 
   useEffect(() => {
     loadMajors({});
-  }, [searchQuery, loadMajors]);
+  }, [searchDebounce, loadMajors]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");
@@ -237,7 +240,7 @@ export default function ManageMajorPage() {
             </div>
             <Button
               onClick={handleOpenAddModal}
-              className="bg-green-900 text-white hover:bg-green-950"
+              className="bg-teal-900 text-white hover:bg-teal-950"
             >
               <Plus className="mr-2 h-2 w-2" />
               Add New
@@ -246,7 +249,7 @@ export default function ManageMajorPage() {
         </CardContent>
       </Card>
 
-      <div className="overflow-x-auto mt-4">
+      <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
         {isLoading ? (
           <Loading />
         ) : (

@@ -442,70 +442,88 @@ export default function AddSchedule() {
     <div className="space-y-6">
       {/* Enhanced Breadcrumb */}
       <Card>
-        <CardContent className="p-6 space-y-4">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.DASHBOARD}>
-                  Dashboard
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.SCHEDULE.DEPARTMENT}>
-                  Department List
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.DASHBOARD}>
-                  Class List
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Add Schedule</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+        <CardContent className="p-4 sm:p-6 space-y-4">
+          {/* Mobile-optimized Breadcrumb */}
+          <div className="overflow-x-auto">
+            <Breadcrumb>
+              <BreadcrumbList className="flex-nowrap">
+                <BreadcrumbItem className="whitespace-nowrap">
+                  <BreadcrumbLink
+                    href={ROUTE.DASHBOARD}
+                    className="text-xs sm:text-sm"
+                  >
+                    Dashboard
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem className="whitespace-nowrap">
+                  <BreadcrumbLink
+                    href={ROUTE.SCHEDULE.DEPARTMENT}
+                    className="text-xs sm:text-sm"
+                  >
+                    Department List
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem className="whitespace-nowrap">
+                  <BreadcrumbLink
+                    href={ROUTE.DASHBOARD}
+                    className="text-xs sm:text-sm"
+                  >
+                    Class List
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem className="whitespace-nowrap">
+                  <BreadcrumbPage className="text-xs sm:text-sm">
+                    Add Schedule
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
 
+          {/* Mobile-optimized Header */}
           <div className="flex items-center">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => router.back()}
-              className="rounded-full"
+              className="rounded-full mr-2 sm:mr-0"
+              asChild
             >
               <img
                 src={AppIcons.Back}
                 alt="back Icon"
-                className="h-4 w-4 mr-5 text-muted-foreground"
+                className="h-4 w-4 sm:mr-5 text-muted-foreground"
               />
             </Button>
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
               Add Schedule
             </h1>
           </div>
 
-          {/* Enhanced Class Info Card */}
+          {/* Mobile-responsive Schedule Info Card */}
           <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="text-lg font-semibold text-gray-900">
+            <CardContent className="p-3 sm:p-4">
+              <div className="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
+                <div className="text-base sm:text-lg font-semibold text-gray-900">
                   Schedule Information
                 </div>
-                <div className="flex gap-6 text-sm text-gray-600">
-                  <div>
-                    <span className="font-medium">Degree:</span> Associate
-                    Degree
+
+                {/* Mobile: Stack vertically, Desktop: Horizontal */}
+                <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:gap-6 text-xs sm:text-sm text-gray-600">
+                  <div className="flex justify-between sm:block">
+                    <span className="font-medium">Degree:</span>
+                    <span className="sm:ml-1">Associate Degree</span>
                   </div>
-                  <div>
-                    <span className="font-medium">Current Year:</span>{" "}
-                    {new Date().getFullYear()}
+                  <div className="flex justify-between sm:block">
+                    <span className="font-medium">Current Year:</span>
+                    <span className="sm:ml-1">{new Date().getFullYear()}</span>
                   </div>
-                  <div>
-                    <span className="font-medium">Academy Year:</span>{" "}
-                    {watchedAcademyYear}
+                  <div className="flex justify-between sm:block">
+                    <span className="font-medium">Academy Year:</span>
+                    <span className="sm:ml-1">{watchedAcademyYear}</span>
                   </div>
                 </div>
               </div>
@@ -513,7 +531,6 @@ export default function AddSchedule() {
           </Card>
         </CardContent>
       </Card>
-
       {/* Enhanced Form */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">

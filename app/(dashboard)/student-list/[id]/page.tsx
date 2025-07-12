@@ -37,6 +37,7 @@ import { getScheduleByIdService } from "@/service/schedule/schedule.service";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 import { Button } from "@/components/ui/button";
 import { AppIcons } from "@/constants/icons/icon";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function AddSchedule() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -198,7 +199,7 @@ export default function AddSchedule() {
       </Card>
 
       {/* Form */}
-      <div className="overflow-hidden mt-4">
+      <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
         {isLoading ? (
           <Loading />
         ) : (

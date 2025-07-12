@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  Check,
-  Eye,
-  Pencil,
-  Plus,
-  RotateCcw,
-  StopCircle,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Eye, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Table,
@@ -33,7 +24,7 @@ import ChangePasswordModal from "@/components/dashboard/users/shared/change-pass
 import { useDebounce } from "@/utils/debounce/debounce";
 import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import PaginationPage from "@/components/shared/pagination-page";
-import { RoleEnum, StatusEnum } from "@/constants/constant";
+import { RoleEnum } from "@/constants/constant";
 import { ROUTE } from "@/constants/routes";
 import {
   AllStaffModel,
@@ -47,6 +38,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Loading from "@/components/shared/loading";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function StuffOfficerListPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -146,7 +138,8 @@ export default function StuffOfficerListPage() {
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
       />
 
-      <div className="overflow-x-auto">
+      <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
+        {" "}
         {isLoading ? (
           <Loading />
         ) : (

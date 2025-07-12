@@ -23,6 +23,7 @@ import { Constants } from "@/constants/text-string";
 import PaginationPage from "@/components/shared/pagination-page";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/shared/loading";
+import { useDebounce } from "@/utils/debounce/debounce";
 
 export default function DepartmentListPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -31,13 +32,14 @@ export default function DepartmentListPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const router = useRouter();
 
+  const searchDebounce = useDebounce(searchQuery, 500);
   const loadDepartments = useCallback(
     async (param: AllDepartmentFilterModel) => {
       setIsLoading(true);
 
       try {
         const response = await getAllDepartmentService({
-          search: searchQuery,
+          search: searchDebounce,
           status: Constants.ACTIVE,
           ...param,
         });
@@ -53,12 +55,12 @@ export default function DepartmentListPage() {
         setIsLoading(false);
       }
     },
-    [searchQuery]
+    [searchDebounce]
   );
 
   useEffect(() => {
     loadDepartments({});
-  }, [loadDepartments]);
+  }, [searchDebounce, loadDepartments]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);

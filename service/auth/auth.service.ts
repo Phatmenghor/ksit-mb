@@ -5,10 +5,16 @@ import {
   ChangePasswordModel,
 } from "@/model/user/staff/staff.request.model";
 import { axiosClient, axiosClientWithAuth } from "@/utils/axios";
-import { storeRoles } from "@/utils/local-storage/user-info/roles";
-import { storeToken } from "@/utils/local-storage/user-info/token";
-import { storeUserId } from "@/utils/local-storage/user-info/userId";
-import { storeUsername } from "@/utils/local-storage/user-info/username";
+import { clearRoles, storeRoles } from "@/utils/local-storage/user-info/roles";
+import { logoutUser, storeToken } from "@/utils/local-storage/user-info/token";
+import {
+  clearUserId,
+  storeUserId,
+} from "@/utils/local-storage/user-info/userId";
+import {
+  clearUsername,
+  storeUsername,
+} from "@/utils/local-storage/user-info/username";
 import axios from "axios";
 
 export const loginService = async (credentail: LoginRequest) => {
@@ -38,6 +44,31 @@ export const loginService = async (credentail: LoginRequest) => {
     throw new Error("An unexpected error occurred. Please try again.");
   }
 };
+
+// export const logoutService = async () => {
+//   try {
+//     const response = await axios.post(`/v1/auth/logout`);
+
+//     const data = response.data.data;
+
+//     clearUserId();
+//     clearRoles();
+//     clearUsername();
+//     logoutUser();
+
+//     return data;
+//   } catch (error) {
+//     if (axios.isAxiosError(error)) {
+//       // Extract error message from backend if available
+//       const message =
+//         error.response?.data?.message || "Logout failed. Please try again.";
+//       throw new Error(message);
+//     }
+
+//     // Unexpected (non-Axios) error
+//     throw new Error("An unexpected error occurred. Please try again.");
+//   }
+// };
 
 export const AdminChangePasswordService = async (
   data: ChangePasswordByAdminModel

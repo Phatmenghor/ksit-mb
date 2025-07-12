@@ -5,6 +5,16 @@ export function cleanRequiredField(value?: string | null): string {
   return trimmed; // Return trimmed value
 }
 
+export function cleanRequiredFieldAdvance(
+  value?: string | null,
+  fieldName = "Field"
+): string {
+  if (!value) throw new Error(`${fieldName} is missing`);
+  const trimmed = value.trim();
+  if (trimmed === "") throw new Error(`${fieldName} is empty`);
+  return trimmed;
+}
+
 export function cleanField(value?: string | null): string | undefined {
   if (value == null) return undefined; // Skip if null or undefined
   const t = value.trim();

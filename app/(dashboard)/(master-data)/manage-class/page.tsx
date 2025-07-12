@@ -46,6 +46,7 @@ import {
 import { DegreeEnum } from "@/constants/constant";
 import Loading from "@/components/shared/loading";
 import { useDebounce } from "@/utils/debounce/debounce";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function ManageClassPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -254,7 +255,7 @@ export default function ManageClassPage() {
 
               <Button
                 onClick={handleOpenAddModal}
-                className="bg-green-900 text-white hover:bg-green-950"
+                className="bg-teal-900 text-white hover:bg-teal-950"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add New
@@ -263,7 +264,7 @@ export default function ManageClassPage() {
           </div>
         </CardContent>
       </Card>
-      <div className="overflow-x-auto">
+      <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
         {isLoading ? (
           <Loading />
         ) : (

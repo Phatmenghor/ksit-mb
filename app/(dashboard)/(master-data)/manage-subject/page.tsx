@@ -21,17 +21,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { ROUTE } from "@/constants/routes";
 import { useCallback, useEffect, useState } from "react";
-import {
-  AllRoomModel,
-  RoomModel,
-} from "@/model/master-data/room/all-room-model";
-import { AllRoomFilterModel } from "@/model/master-data/room/type-room-model";
-import {
-  createRoomService,
-  deletedRoomService,
-  getAllRoomService,
-  updateRoomService,
-} from "@/service/master-data/room.service";
+import { RoomModel } from "@/model/master-data/room/all-room-model";
 import { Constants } from "@/constants/text-string";
 import { toast } from "sonner";
 import { RoomFormData as SubjectFormData } from "@/components/dashboard/master-data/manage-room/room-form-model";
@@ -51,6 +41,8 @@ import {
   updateSubjectService,
 } from "@/service/master-data/subject.service";
 import { SubjectModal } from "@/components/dashboard/master-data/manage-subject/subject-form-model";
+import { useDebounce } from "@/utils/debounce/debounce";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function ManageSubjectPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -67,13 +59,15 @@ export default function ManageSubjectPage() {
     undefined
   );
 
+  const searchDebounce = useDebounce(searchQuery, 500);
+
   const loadSubjects = useCallback(
     async (param: AllSubjectFilterModel) => {
       setIsLoading(true);
 
       try {
         const response = await getAllSubjectService({
-          search: searchQuery,
+          search: searchDebounce,
           status: Constants.ACTIVE,
           ...param,
         });
@@ -89,12 +83,12 @@ export default function ManageSubjectPage() {
         setIsLoading(false);
       }
     },
-    [searchQuery]
+    [searchDebounce]
   );
 
   useEffect(() => {
     loadSubjects({});
-  }, [searchQuery, loadSubjects]);
+  }, [searchDebounce, loadSubjects]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");
@@ -250,7 +244,7 @@ export default function ManageSubjectPage() {
             </div>
             <Button
               onClick={handleOpenAddModal}
-              className="bg-green-900 text-white hover:bg-green-950"
+              className="bg-teal-900 text-white hover:bg-teal-950"
             >
               <Plus className="mr-2 h-2 w-2" />
               Add New
@@ -259,7 +253,7 @@ export default function ManageSubjectPage() {
         </CardContent>
       </Card>
 
-      <div className="overflow-x-auto mt-4">
+      <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
         {isLoading ? (
           <Loading />
         ) : (

@@ -37,7 +37,7 @@ export function ResetPasswordDialog({
 }: ResetPasswordDialogProps) {
   return (
     <Dialog open={open}>
-      <DialogContent className="max-w-xl mx-auto p-4 text-center">
+      <DialogContent className="md:max-w-xl max-w-sm mx-auto p-4 text-center">
         <div className="flex flex-col items-center space-y-6">
           {/* Info Icon */}
           <div className="flex items-center justify-center">

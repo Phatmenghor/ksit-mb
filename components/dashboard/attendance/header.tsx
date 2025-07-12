@@ -13,7 +13,7 @@ interface Props {
   schedule: ScheduleModel | null;
 }
 
-export default function StudentScoreHeader({ title, schedule }: Props) {
+export default function AttendanceHeader({ title, schedule }: Props) {
   const router = useRouter();
 
   return (

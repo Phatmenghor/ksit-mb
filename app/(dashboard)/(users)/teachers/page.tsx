@@ -36,6 +36,7 @@ import { useDebounce } from "@/utils/debounce/debounce";
 import { StaffListRequest } from "@/model/user/staff/staff.request.model";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import Loading from "@/components/shared/loading";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function TeachersListPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -140,7 +141,7 @@ export default function TeachersListPage() {
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
       />
 
-      <div className="overflow-x-auto">
+      <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
         {isLoading ? (
           <Loading />
         ) : (
@@ -158,7 +159,7 @@ export default function TeachersListPage() {
               {allTeachersData?.content.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={StaffTableHeader.length}
+                    colSpan={TeacherTableHeader.length}
                     className="text-center py-8 text-muted-foreground"
                   >
                     No teacher found

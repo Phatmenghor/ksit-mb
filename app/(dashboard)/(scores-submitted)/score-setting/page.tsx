@@ -30,6 +30,8 @@ import {
 import { toast } from "sonner";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useIsMobile } from "@/hooks/use-mobile";
+import Loading from "@/components/shared/loading";
 
 const ConfigureScoreSchema = z
   .object({
@@ -98,6 +100,7 @@ export default function ScoreSettingPage() {
 
   // Watch all form values to calculate total
   const watchedValues = watch();
+  const isMobile = useIsMobile();
 
   // Fetch initial configuration
   useEffect(() => {
@@ -274,193 +277,210 @@ export default function ScoreSettingPage() {
             </div>
           </CardContent>
         </Card>
-
-        <Table className="w-full">
-          <TableHeader>
-            <TableRow className="bg-gray-900 text-white">
-              <TableHead className="text-white">#</TableHead>
-              <TableHead className="text-white">Attendance (%)</TableHead>
-              <TableHead className="text-white">Assignment (%)</TableHead>
-              <TableHead className="text-white">Midterm (%)</TableHead>
-              <TableHead className="text-white">Final (%)</TableHead>
-              {!isEditing && (
-                <TableHead className="text-white">Actions</TableHead>
-              )}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell className="font-medium">
-                {scoreData?.id || 1}
-              </TableCell>
-
-              <TableCell>
-                <Controller
-                  name="attendancePercentage"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="space-y-1">
-                      {isEditing ? (
-                        <Input
-                          {...field}
-                          type="number"
-                          className={`h-8 px-2 text-sm ${
-                            errors.attendancePercentage ? "border-red-500" : ""
-                          }`}
-                          onChange={(e) => {
-                            const value =
-                              e.target.value === ""
-                                ? 0
-                                : Number(e.target.value);
-                            if (value >= 0 && value <= 100) {
-                              field.onChange(value);
-                            }
-                          }}
-                          min={0}
-                          max={100}
-                          placeholder="0"
-                        />
-                      ) : (
-                        <span className="font-medium">{field.value || 0}%</span>
-                      )}
-                      {errors.attendancePercentage && (
-                        <p className="text-xs text-red-500">
-                          {errors.attendancePercentage.message}
-                        </p>
-                      )}
-                    </div>
+        <div className={`overflow-x-auto mt-4 ${isMobile ? "pl-4" : ""}`}>
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow className="bg-gray-900 text-white">
+                  <TableHead className="text-white">#</TableHead>
+                  <TableHead className="text-white">Attendance (%)</TableHead>
+                  <TableHead className="text-white">Assignment (%)</TableHead>
+                  <TableHead className="text-white">Midterm (%)</TableHead>
+                  <TableHead className="text-white">Final (%)</TableHead>
+                  {!isEditing && (
+                    <TableHead className="text-white">Actions</TableHead>
                   )}
-                />
-              </TableCell>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">
+                    {scoreData?.id || 1}
+                  </TableCell>
 
-              <TableCell>
-                <Controller
-                  name="assignmentPercentage"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="space-y-1">
-                      {isEditing ? (
-                        <Input
-                          {...field}
-                          type="number"
-                          className={`h-8 px-2 text-sm ${
-                            errors.assignmentPercentage ? "border-red-500" : ""
-                          }`}
-                          onChange={(e) => {
-                            const value =
-                              e.target.value === ""
-                                ? 0
-                                : Number(e.target.value);
-                            if (value >= 0 && value <= 100) {
-                              field.onChange(value);
-                            }
-                          }}
-                          min={0}
-                          max={100}
-                          placeholder="0"
-                        />
-                      ) : (
-                        <span className="font-medium">{field.value || 0}%</span>
+                  <TableCell>
+                    <Controller
+                      name="attendancePercentage"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="space-y-1">
+                          {isEditing ? (
+                            <Input
+                              {...field}
+                              type="number"
+                              className={`h-8 px-2 text-sm ${
+                                errors.attendancePercentage
+                                  ? "border-red-500"
+                                  : ""
+                              }`}
+                              onChange={(e) => {
+                                const value =
+                                  e.target.value === ""
+                                    ? 0
+                                    : Number(e.target.value);
+                                if (value >= 0 && value <= 100) {
+                                  field.onChange(value);
+                                }
+                              }}
+                              min={0}
+                              max={100}
+                              placeholder="0"
+                            />
+                          ) : (
+                            <span className="font-medium">
+                              {field.value || 0}%
+                            </span>
+                          )}
+                          {errors.attendancePercentage && (
+                            <p className="text-xs text-red-500">
+                              {errors.attendancePercentage.message}
+                            </p>
+                          )}
+                        </div>
                       )}
-                      {errors.assignmentPercentage && (
-                        <p className="text-xs text-red-500">
-                          {errors.assignmentPercentage.message}
-                        </p>
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    <Controller
+                      name="assignmentPercentage"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="space-y-1">
+                          {isEditing ? (
+                            <Input
+                              {...field}
+                              type="number"
+                              className={`h-8 px-2 text-sm ${
+                                errors.assignmentPercentage
+                                  ? "border-red-500"
+                                  : ""
+                              }`}
+                              onChange={(e) => {
+                                const value =
+                                  e.target.value === ""
+                                    ? 0
+                                    : Number(e.target.value);
+                                if (value >= 0 && value <= 100) {
+                                  field.onChange(value);
+                                }
+                              }}
+                              min={0}
+                              max={100}
+                              placeholder="0"
+                            />
+                          ) : (
+                            <span className="font-medium">
+                              {field.value || 0}%
+                            </span>
+                          )}
+                          {errors.assignmentPercentage && (
+                            <p className="text-xs text-red-500">
+                              {errors.assignmentPercentage.message}
+                            </p>
+                          )}
+                        </div>
                       )}
-                    </div>
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    <Controller
+                      name="midtermPercentage"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="space-y-1">
+                          {isEditing ? (
+                            <Input
+                              {...field}
+                              type="number"
+                              className={`h-8 px-2 text-sm ${
+                                errors.midtermPercentage ? "border-red-500" : ""
+                              }`}
+                              onChange={(e) => {
+                                const value =
+                                  e.target.value === ""
+                                    ? 0
+                                    : Number(e.target.value);
+                                if (value >= 0 && value <= 100) {
+                                  field.onChange(value);
+                                }
+                              }}
+                              min={0}
+                              max={100}
+                              placeholder="0"
+                            />
+                          ) : (
+                            <span className="font-medium">
+                              {field.value || 0}%
+                            </span>
+                          )}
+                          {errors.midtermPercentage && (
+                            <p className="text-xs text-red-500">
+                              {errors.midtermPercentage.message}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    <Controller
+                      name="finalPercentage"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="space-y-1">
+                          {isEditing ? (
+                            <Input
+                              {...field}
+                              type="number"
+                              className={`h-8 px-2 text-sm ${
+                                errors.finalPercentage ? "border-red-500" : ""
+                              }`}
+                              onChange={(e) => {
+                                const value =
+                                  e.target.value === ""
+                                    ? 0
+                                    : Number(e.target.value);
+                                if (value >= 0 && value <= 100) {
+                                  field.onChange(value);
+                                }
+                              }}
+                              min={0}
+                              max={100}
+                              placeholder="0"
+                            />
+                          ) : (
+                            <span className="font-medium">
+                              {field.value || 0}%
+                            </span>
+                          )}
+                          {errors.finalPercentage && (
+                            <p className="text-xs text-red-500">
+                              {errors.finalPercentage.message}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    />
+                  </TableCell>
+
+                  {!isEditing && (
+                    <TableCell>
+                      <Button onClick={handleEdit} variant="outline" size="sm">
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </Button>
+                    </TableCell>
                   )}
-                />
-              </TableCell>
-
-              <TableCell>
-                <Controller
-                  name="midtermPercentage"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="space-y-1">
-                      {isEditing ? (
-                        <Input
-                          {...field}
-                          type="number"
-                          className={`h-8 px-2 text-sm ${
-                            errors.midtermPercentage ? "border-red-500" : ""
-                          }`}
-                          onChange={(e) => {
-                            const value =
-                              e.target.value === ""
-                                ? 0
-                                : Number(e.target.value);
-                            if (value >= 0 && value <= 100) {
-                              field.onChange(value);
-                            }
-                          }}
-                          min={0}
-                          max={100}
-                          placeholder="0"
-                        />
-                      ) : (
-                        <span className="font-medium">{field.value || 0}%</span>
-                      )}
-                      {errors.midtermPercentage && (
-                        <p className="text-xs text-red-500">
-                          {errors.midtermPercentage.message}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                />
-              </TableCell>
-
-              <TableCell>
-                <Controller
-                  name="finalPercentage"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="space-y-1">
-                      {isEditing ? (
-                        <Input
-                          {...field}
-                          type="number"
-                          className={`h-8 px-2 text-sm ${
-                            errors.finalPercentage ? "border-red-500" : ""
-                          }`}
-                          onChange={(e) => {
-                            const value =
-                              e.target.value === ""
-                                ? 0
-                                : Number(e.target.value);
-                            if (value >= 0 && value <= 100) {
-                              field.onChange(value);
-                            }
-                          }}
-                          min={0}
-                          max={100}
-                          placeholder="0"
-                        />
-                      ) : (
-                        <span className="font-medium">{field.value || 0}%</span>
-                      )}
-                      {errors.finalPercentage && (
-                        <p className="text-xs text-red-500">
-                          {errors.finalPercentage.message}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                />
-              </TableCell>
-
-              {!isEditing && (
-                <TableCell>
-                  <Button onClick={handleEdit} variant="outline" size="sm">
-                    <Edit className="w-4 h-4 mr-1" />
-                    Edit
-                  </Button>
-                </TableCell>
-              )}
-            </TableRow>
-          </TableBody>
-        </Table>
+                </TableRow>
+              </TableBody>
+            </Table>
+          )}
+        </div>
 
         {/* Validation Error Summary */}
         {isEditing && errors.root && (

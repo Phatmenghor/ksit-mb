@@ -3,7 +3,7 @@
 import StudentScoreHeader from "@/components/dashboard/student-scores/layout/header-section";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useParams, useRouter } from "next/navigation";
@@ -62,7 +62,6 @@ export default function StudentScoreDetailsPage() {
   const REFRESH_INTERVAL = 30; // 30 seconds
   const PROGRESS_UPDATE_INTERVAL = 100; // Update progress every 100ms
 
-  const router = useRouter();
   const params = useParams();
   const id = params?.id ? Number(params.id) : null;
 
@@ -437,15 +436,20 @@ export default function StudentScoreDetailsPage() {
     <div className="space-y-4">
       <StudentScoreHeader schedule={scheduleDetail} title="View Class Detail" />
       {!isInitialized ? (
-        <div className="flex justify-end">
-          <Button
-            onClick={() => HandleInitStudentScore()}
-            className="bg-green-600 hover:bg-green-700 text-white"
-            disabled={isRefreshing}
-          >
-            {isRefreshing ? "Initializing..." : "Initialize Score"}
-          </Button>
-        </div>
+        <Card className="flex justify-center">
+          <CardContent className="p-4">
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                onClick={() => HandleInitStudentScore()}
+                disabled={isRefreshing}
+              >
+                <Plus />
+                {isRefreshing ? "Initializing..." : "Initialize Score"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
         <div>
           <div>

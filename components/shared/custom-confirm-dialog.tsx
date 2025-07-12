@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
 import { Separator } from "../ui/separator";
+import { AppIcons } from "@/constants/icons/icon";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -32,11 +33,15 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md mx-auto p-8 text-center">
+      <DialogContent className="md:max-w-md max-w-sm mx-auto border-r-2 p-8 text-center">
         <div className="flex flex-col items-center space-y-6">
           {/* Info Icon */}
-          <div className="w-16 h-16 flex items-center justify-center">
-            <Info className="w-10 h-10 rounded-full bg-emerald-700 text-white" />
+          <div className="flex items-center justify-center">
+            <img
+              src={AppIcons.Circle_alert_teal}
+              alt="back Icon"
+              className="h-10 w-10 text-muted-foreground"
+            />{" "}
           </div>
 
           {/* Title and Description */}
@@ -64,7 +69,7 @@ export function ConfirmDialog({
                 onConfirm();
                 onOpenChange(false);
               }}
-              className="px-8 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white"
+              className="px-8 py-2.5 bg-teal-900 hover:bg-teal-950 text-white"
             >
               {confirmText}
             </Button>

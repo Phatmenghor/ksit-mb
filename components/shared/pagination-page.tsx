@@ -74,49 +74,165 @@ export default function PaginationPage({
 
   return (
     <div className={`p-4 ${className}`}>
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={handlePreviousPage}
-              className={
-                currentPage === 1
-                  ? "pointer-events-none opacity-50"
-                  : "cursor-pointer"
-              }
-            />
-          </PaginationItem>
+      {/* Desktop Pagination */}
+      <div className="hidden md:block">
+        <div className="flex justify-center items-center gap-2">
+          <button
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+            className={`flex items-center gap-1 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+              currentPage === 1
+                ? "opacity-50 cursor-not-allowed text-gray-400 border-gray-200"
+                : "text-gray-700 border-gray-300 hover:bg-gray-50 cursor-pointer"
+            }`}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            Previous
+          </button>
 
           {getPageNumbers().map((pageNumber) => (
-            <PaginationItem key={pageNumber}>
-              <PaginationLink
-                isActive={currentPage === pageNumber}
-                onClick={() => onPageChange(pageNumber)}
-                className="cursor-pointer"
-              >
-                {pageNumber}
-              </PaginationLink>
-            </PaginationItem>
+            <button
+              key={pageNumber}
+              onClick={() => onPageChange(pageNumber)}
+              className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
+                currentPage === pageNumber
+                  ? "bg-black text-white"
+                  : "text-gray-700 border border-gray-300 hover:bg-gray-50"
+              }`}
+            >
+              {pageNumber}
+            </button>
           ))}
 
           {totalPages > 5 && currentPage < totalPages - 2 && (
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
+            <span className="px-2 text-gray-400">...</span>
           )}
 
-          <PaginationItem>
-            <PaginationNext
-              onClick={handleNextPage}
-              className={
-                currentPage === totalPages
-                  ? "pointer-events-none opacity-50"
-                  : "cursor-pointer"
-              }
+          <button
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            className={`flex items-center gap-1 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+              currentPage === totalPages
+                ? "opacity-50 cursor-not-allowed text-gray-400 border-gray-200"
+                : "text-gray-700 border-gray-300 hover:bg-gray-50 cursor-pointer"
+            }`}
+          >
+            Next
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Pagination - Matches the design in your image */}
+      <div className="flex justify-center items-center gap-2 md:hidden">
+        <button
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1}
+          className={`flex items-center gap-1 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+            currentPage === 1
+              ? "opacity-50 cursor-not-allowed text-gray-400 border-gray-200"
+              : "text-gray-700 border-gray-300 hover:bg-gray-50"
+          }`}
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
             />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+          </svg>
+          Previous
+        </button>
+
+        {/* Show limited page numbers on mobile */}
+        {(() => {
+          const mobilePagesToShow = [];
+
+          if (totalPages <= 4) {
+            // Show all pages if 4 or fewer
+            for (let i = 1; i <= totalPages; i++) {
+              mobilePagesToShow.push(i);
+            }
+          } else {
+            // Show current page and adjacent pages
+            const start = Math.max(1, currentPage - 1);
+            const end = Math.min(totalPages, currentPage + 1);
+
+            for (let i = start; i <= end; i++) {
+              mobilePagesToShow.push(i);
+            }
+          }
+
+          return mobilePagesToShow.map((pageNumber) => (
+            <button
+              key={pageNumber}
+              onClick={() => onPageChange(pageNumber)}
+              className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
+                currentPage === pageNumber
+                  ? "bg-black text-white"
+                  : "text-gray-700 border border-gray-300 hover:bg-gray-50"
+              }`}
+            >
+              {pageNumber}
+            </button>
+          ));
+        })()}
+
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          className={`flex items-center gap-1 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+            currentPage === totalPages
+              ? "opacity-50 cursor-not-allowed text-gray-400 border-gray-200"
+              : "text-gray-700 border-gray-300 hover:bg-gray-50"
+          }`}
+        >
+          Next
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }

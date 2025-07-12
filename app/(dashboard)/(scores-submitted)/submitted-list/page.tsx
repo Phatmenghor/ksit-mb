@@ -27,6 +27,8 @@ import { SubmissionEnum, tabs } from "@/constants/constant";
 import { useRouter } from "next/navigation";
 import PaginationPage from "@/components/shared/pagination-page";
 import { AllStudentScoreModel } from "@/model/score/student-score/student-score.response";
+import Loading from "@/components/shared/loading";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function ScoreSubmittedPage() {
   const [activeTab, setActiveTab] = useState("all");
@@ -98,14 +100,6 @@ export default function ScoreSubmittedPage() {
     setSearchQuery(e.target.value);
   };
 
-  const handleYearChange = (e: number) => {
-    setSelectAcademicYear(e);
-  };
-
-  const handleSemesterChange = (e: SemesterModel | null) => {
-    setSelectedSemester(e ?? undefined);
-  };
-
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
@@ -113,11 +107,7 @@ export default function ScoreSubmittedPage() {
   // Get table content based on active tab
   const renderTableContent = () => {
     if (isLoading) {
-      return (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-700"></div>
-        </div>
-      );
+      return <Loading />;
     }
 
     if ((submissions?.content?.length ?? 0) === 0) {
@@ -191,6 +181,7 @@ export default function ScoreSubmittedPage() {
       className="w-full space-y-4"
     >
       <CardHeaderSection
+        title="Submitted List"
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
           { label: "Score Submitted", href: ROUTE.STUDENTS.LIST },
@@ -198,23 +189,6 @@ export default function ScoreSubmittedPage() {
         searchValue={searchQuery}
         searchPlaceholder="Search..."
         onSearchChange={handleSearchChange}
-        customSelect={
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
-            <div className="w-full min-w-[200px] md:w-1/2">
-              <YearSelector
-                title="Select Year"
-                onChange={handleYearChange}
-                value={selectAcademicYear || 0}
-              />
-            </div>
-            <div className="w-full min-w-[200px] md:w-1/2">
-              <ComboboxSelectSemester
-                dataSelect={selectedSemester ?? null}
-                onChangeSelected={handleSemesterChange}
-              />
-            </div>
-          </div>
-        }
         tabs={
           <div className="container mx-auto mt-3">
             <TabsList className="flex w-full border-b gap-6 pb-1 bg-transparent justify-start">
@@ -261,7 +235,9 @@ export default function ScoreSubmittedPage() {
 
       {/* Accept List Tab */}
       <TabsContent value="accept" className="space-y-4 w-full">
-        {renderTableContent()}
+        <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
+          {renderTableContent()}
+        </div>
 
         {!isLoading && submissions && (
           <div className="mt-4 flex justify-end">

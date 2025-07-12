@@ -41,6 +41,8 @@ import { toast } from "sonner";
 import { useRouter, useParams } from "next/navigation";
 import { ROUTE } from "@/constants/routes";
 import { StaffModel } from "@/model/user/staff/staff.respond.model";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/components/ui/use-mobile";
 
 const courseFormSchema = z.object({
   subjectCode: z.string().min(1, "Subject code is required"),
@@ -214,38 +216,67 @@ export default function CourseFormPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">
-            {isEditMode ? "Update" : "Add"} course
-          </h1>
-          <p className="text-muted-foreground">Institute Management System</p>
-        </div>
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/courses">Courses</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>
-                {isEditMode ? "Update" : "Add"} course
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
+      <div className="p-4 md:p-2">
+        <div className="flex flex-col gap-4">
+          <div className="block md:hidden">
+            <Breadcrumb>
+              <BreadcrumbList className="flex-wrap justify-start text-sm">
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/courses">Courses</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>
+                    {isEditMode ? "Update" : "Add"} course
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
 
-      <div className="mb-4">
-        <Link href="/courses">
-          <Button variant="outline" size="sm" className="gap-1">
-            <ArrowLeft className="h-4 w-4" /> BACK
-          </Button>
-        </Link>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-0">
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold">
+                {isEditMode ? "Update" : "Add"} course
+              </h1>
+              <p className="text-muted-foreground text-sm md:text-base">
+                Institute Management System
+              </p>
+            </div>
+
+            <div className="hidden md:block">
+              <Breadcrumb>
+                <BreadcrumbList className="flex-wrap justify-end">
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/courses">Courses</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>
+                      {isEditMode ? "Update" : "Add"} course
+                    </BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <Link href="/courses">
+            <Button variant="outline" size="sm" className="gap-1">
+              <ArrowLeft className="h-4 w-4" /> BACK
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card>

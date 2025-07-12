@@ -153,7 +153,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="w-full bg-emerald-800 hover:bg-emerald-700"
+                className="w-full bg-teal-800 hover:bg-teal-700"
               >
                 {isLoading ? "Signing in..." : "Login"}
               </Button>

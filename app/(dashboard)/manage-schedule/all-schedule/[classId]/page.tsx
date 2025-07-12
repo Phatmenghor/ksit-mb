@@ -49,6 +49,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AppIcons } from "@/constants/icons/icon";
+import DuplicateScheduleModal from "@/components/dashboard/manage-schedule/duplicate-schedule-modal";
 
 const AllSchedulePage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -60,6 +61,8 @@ const AllSchedulePage = () => {
   const [scheduleData, setScheduleData] = useState<AllScheduleModel | null>(
     null
   );
+  const [isDuplicateScheduleModalOpen, setIsDuplicateScheduleModalOpen] =
+    useState(false);
   const [selectedSemester, setSelectedSemester] = useState<string>("ALL");
 
   const [selectedYear, setSelectedYear] = useState<number>(
@@ -144,43 +147,51 @@ const AllSchedulePage = () => {
   return (
     <div>
       <Card>
-        <CardContent className="p-6 space-y-2">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.DASHBOARD}>Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href={ROUTE.MANAGE_SCHEDULE.DEPARTMENT}>
-                  Department List
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Class</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+        <CardContent className="p-3 sm:p-6 space-y-3 sm:space-y-4">
+          {/* Breadcrumb - Hide on very small screens */}
+          <div className="hidden sm:block">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href={ROUTE.DASHBOARD}>Home</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href={ROUTE.MANAGE_SCHEDULE.DEPARTMENT}>
+                    Department List
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Class</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
 
-          <div className="flex items-center">
+          {/* Header with back button and title */}
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => router.back()}
-              className="rounded-full"
+              className="rounded-full shrink-0"
             >
               <img
                 src={AppIcons.Back}
                 alt="back Icon"
-                className="h-4 w-4 mr-5 text-muted-foreground"
+                className="h-4 w-4 text-muted-foreground"
               />
             </Button>
-            <h3 className="text-xl font-bold">Class Schedule List</h3>
+            <h3 className="text-lg sm:text-xl font-bold truncate">
+              Class Schedule List
+            </h3>
           </div>
 
-          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="relative w-full md:w-1/2">
+          {/* Search and filters section */}
+          <div className="space-y-3 sm:space-y-4">
+            {/* Search input - full width on mobile */}
+            <div className="relative w-full">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
@@ -190,26 +201,43 @@ const AllSchedulePage = () => {
                 onChange={handleSearchChange}
               />
             </div>
-            <div className="flex items-center gap-2">
-              <YearSelector value={selectedYear} onChange={setSelectedYear} />
-              <Select
-                onValueChange={setSelectedSemester}
-                value={selectedSemester}
+
+            {/* Filters and actions */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-center sm:justify-end">
+              {/* Year and Semester selectors */}
+              <div className="flex gap-2 sm:gap-2">
+                <div className="flex-1 sm:flex-none">
+                  <YearSelector
+                    value={selectedYear}
+                    onChange={setSelectedYear}
+                  />
+                </div>
+                <div className="flex-1 sm:flex-none">
+                  <Select
+                    onValueChange={setSelectedSemester}
+                    value={selectedSemester}
+                  >
+                    <SelectTrigger className="w-full sm:w-auto">
+                      <SelectValue placeholder="Select semester" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SemesterFilter.map((semester) => (
+                        <SelectItem key={semester.value} value={semester.value}>
+                          {semester.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Duplicate button */}
+              <Button
+                onClick={() => setIsDuplicateScheduleModalOpen(true)}
+                className="bg-teal-900 hover:bg-teal-950 w-full sm:w-auto"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a semester" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SemesterFilter.map((semester) => (
-                    <SelectItem key={semester.value} value={semester.value}>
-                      {semester.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button className="bg-teal-900 hover:bg-teal-950">
-                <Copy />
-                Duplicate
+                <Copy className="h-4 w-4 mr-2" />
+                <span className="sm:inline">Duplicate</span>
               </Button>
             </div>
           </div>
@@ -361,6 +389,27 @@ const AllSchedulePage = () => {
             )}
           </div>
         )}
+
+        <DuplicateScheduleModal
+          sources={
+            scheduleData?.content
+              ? Array.from(
+                  new Set(
+                    scheduleData.content.map(
+                      (s) => `${s.classes.id}-${s.semester.id}`
+                    )
+                  )
+                ).map((key) => {
+                  const [sourceClassId, sourceSemesterId] = key
+                    .split("-")
+                    .map((v) => parseInt(v));
+                  return { sourceClassId, sourceSemesterId };
+                })
+              : []
+          }
+          isOpen={isDuplicateScheduleModalOpen}
+          onOpenChange={() => setIsDuplicateScheduleModalOpen(false)}
+        />
 
         {/* Pagination - FIXED to use handlePageChange */}
         {!isLoading && scheduleData && (

@@ -162,7 +162,6 @@ export default function StudentForm({
         >
           <CardHeaderSection
             back
-            backHref={ROUTE.STUDENTS.LIST}
             title={title}
             breadcrumbs={[
               { label: "Dashboard", href: ROUTE.DASHBOARD },

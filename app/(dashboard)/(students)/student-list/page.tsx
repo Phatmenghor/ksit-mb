@@ -40,6 +40,7 @@ import {
 import Loading from "@/components/shared/loading";
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 import PaginationPage from "@/components/shared/pagination-page";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function StudentsListPage() {
   // Core state
@@ -195,7 +196,7 @@ export default function StudentsListPage() {
         }
       />
 
-      <div className="overflow-x-auto">
+      <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
         {isLoading ? (
           <Loading />
         ) : (

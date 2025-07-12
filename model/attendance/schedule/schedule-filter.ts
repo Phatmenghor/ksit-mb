@@ -11,3 +11,10 @@ export interface ScheduleFilterModel {
   pageNo?: number;
   pageSize?: number;
 }
+
+export interface DuplicateFilterModel {
+  sourceClassId: number;
+  sourceSemesterId: number;
+  targetClassId: number;
+  targetSemesterId: number;
+}
