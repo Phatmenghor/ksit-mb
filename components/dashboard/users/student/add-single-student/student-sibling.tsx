@@ -100,7 +100,7 @@ export default function StudentSibling() {
 
       const currentSiblings = watch("studentSiblings");
       const currentMaleCount = currentSiblings.filter(
-        (s) => s.gender === "MALE"
+        (s: any) => s.gender === "MALE"
       ).length;
 
       const diff = male - currentMaleCount;
@@ -138,10 +138,10 @@ export default function StudentSibling() {
       const female = Math.min(parseInt(value) || 0, MAX_SIBLINGS);
       const currentSiblings = watch("studentSiblings");
       const currentFemaleCount = currentSiblings.filter(
-        (s) => s.gender === "FEMALE"
+        (s: any) => s.gender === "FEMALE"
       ).length;
       const maleCount = currentSiblings.filter(
-        (s) => s.gender === "MALE"
+        (s: any) => s.gender === "MALE"
       ).length;
       const newTotal = maleCount + female;
 

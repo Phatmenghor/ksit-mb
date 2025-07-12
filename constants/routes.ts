@@ -8,6 +8,12 @@ export const ROUTE = {
   },
   MASTER_DATA: {
     MANAGE_CLASS: "/manage-class",
+    COURSES: {
+      INDEX: "/courses",
+      ADD: "/courses/add",
+      UPDATE: (id: string) => `/courses/update/${id}`,
+      VIEW: (id: string) => `/courses/${id}`,
+    },
     MANAGE_SEMESTER: "/manage-semester",
     MANAGE_MAJOR: "/manage-major",
     MANAGE_DEPARTMENT: "/manage-department",
@@ -16,9 +22,11 @@ export const ROUTE = {
   },
 
   USERS: {
-    ADMIN: "/admin",
+    ADMIN: {
+      INDEX: "/admin",
+      ADMIN_VIEW: (id: string) => `/admin/view/${id}`,
+    },
     ADMIN_PROFILE: "/admin/profile",
-    ADMIN_VIEW: (id: string) => `/admin/view/${id}`,
     EDIT_STAFF: (id: string) => `/staff-officer/edit/${id}`,
     VIEW_STAFF: (id: string) => `/staff-officer/view/${id}`,
     ADD_STAFF: "/staff-officer/add",
@@ -41,6 +49,7 @@ export const ROUTE = {
   STUDENTS: {
     ADD_MULTIPLE: "/add-multiple",
     ADD_SINGLE: "/add-single",
+    ADD_NEW: "/student-list/new",
     LIST: "/student-list",
     EDIT_STUDENT_PROFILE: "/profile/student/edit",
     VIEW: (id: string) => `/view/${id}`,
@@ -70,11 +79,6 @@ export const ROUTE = {
       `/attendance/history-records/class/${id}`,
     STUDENT_RECORD_DETAIL: (id: string) =>
       `/attendance/student-records/view/${id}`,
-  },
-
-  COURSES: {
-    INDEX: "/courses",
-    ADD: "/courses/add",
   },
 
   SCORES: {
@@ -123,7 +127,7 @@ export const sidebarRoutes = [
       { title: "Manage major", href: ROUTE.MASTER_DATA.MANAGE_MAJOR },
       { title: "Manage department", href: ROUTE.MASTER_DATA.MANAGE_DEPARTMENT },
       { title: "Manage room", href: ROUTE.MASTER_DATA.MANAGE_ROOM },
-      { title: "Manage Course", href: ROUTE.COURSES.INDEX },
+      { title: "Manage Course", href: ROUTE.MASTER_DATA.COURSES.INDEX },
       { title: "Manage Subject", href: "/manage-subject" },
     ],
   },

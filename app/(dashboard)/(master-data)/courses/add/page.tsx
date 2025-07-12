@@ -133,7 +133,7 @@ export default function AddCoursePage() {
       };
       await createCourseService(courseData);
       toast.success("Course created successfully");
-      router.replace(ROUTE.COURSES.INDEX);
+      router.replace(ROUTE.MASTER_DATA.COURSES.INDEX);
     } catch (error: any) {
       toast.error(error.message || "Failed to create course");
       console.error("Error submitting course:", error);

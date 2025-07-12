@@ -24,9 +24,10 @@ import { getAllDepartmentService } from "@/service/master-data/department.servic
 import { ClassModel } from "@/model/master-data/class/all-class-model";
 import React from "react";
 import { getAllClassService } from "@/service/master-data/class.service";
+
 interface ComboboxSelectedProps {
   dataSelect: ClassModel | null;
-  onChangeSelected: (item: ClassModel) => void; // Callback to notify parent about the selection change
+  onChangeSelected: (item: ClassModel) => void;
   disabled?: boolean;
 }
 
@@ -118,12 +119,14 @@ export function ComboboxSelectClass({
           )}
           disabled={disabled}
         >
-          {/* Always show the name directly from dataSelect prop if available */}
           {dataSelect ? dataSelect.code : "Select a class..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full flex p-0">
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+        align="start"
+      >
         <Command>
           <CommandInput
             placeholder="Search class..."
@@ -138,10 +141,10 @@ export function ComboboxSelectClass({
                   key={item.id}
                   value={item.code}
                   onSelect={() => {
-                    onChangeSelected(item); // Notify parent about the change
+                    onChangeSelected(item);
                     setOpen(false);
                   }}
-                  ref={index === data.length - 1 ? ref : null} // Attach observer to last item
+                  ref={index === data.length - 1 ? ref : null}
                 >
                   <Check
                     className={cn(
@@ -154,10 +157,9 @@ export function ComboboxSelectClass({
               ))}
             </CommandGroup>
 
-            {/* Loading spinner */}
             {loading && (
               <div className="text-center py-2">
-                <Loader2 className="animate-spin text-gray-500 h-5 w-5 mx-auto" />
+                <Loader2 className="h-5 w-5 mx-auto text-gray-500" />
               </div>
             )}
           </CommandList>

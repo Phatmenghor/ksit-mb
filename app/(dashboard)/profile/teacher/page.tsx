@@ -2,7 +2,7 @@
 import { UserProfileSection } from "@/components/dashboard/users/shared/user-profile";
 import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import TeacherPersonal from "@/components/dashboard/users/teachers/view/TeacherPersonalInfo";
@@ -17,6 +17,7 @@ import TeacherFamilySection from "@/components/dashboard/users/teachers/view/Tea
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 import { getStaffByTokenService } from "@/service/user/user.service";
 import { useIsMobile } from "@/components/ui/use-mobile";
+import Loading from "@/components/shared/loading";
 
 export default function TeacherViewPage() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -88,7 +89,6 @@ export default function TeacherViewPage() {
               ]
         }
       />
-
       {/* Content - full width on mobile */}
       {renderContent()}
     </div>

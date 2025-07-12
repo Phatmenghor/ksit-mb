@@ -210,12 +210,11 @@ export default function AllSchedulePage() {
             <Button
               key={day.label}
               variant={selectedDay?.value === day.value ? "default" : "outline"}
-              className={`whitespace-nowrap transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${
+              className={`whitespace-nowrap transition-colors duration-200 ${
                 selectedDay?.value === day.value
-                  ? "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-200/50 scale-105"
-                  : "hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 hover:shadow-lg hover:shadow-amber-100/50 hover:scale-105 hover:-translate-y-1"
+                  ? "bg-amber-500 text-white"
+                  : "hover:bg-amber-100"
               }`}
-              style={{ animationDelay: `${500 + index * 100}ms` }}
               onClick={() => handleDaySelect(day)}
             >
               {day.label}
@@ -225,19 +224,19 @@ export default function AllSchedulePage() {
         <Button
           variant="outline"
           size="icon"
-          className="absolute right-0 z-10 rounded-full transition-all duration-300 hover:bg-amber-50 hover:border-amber-300 hover:shadow-lg hover:scale-110 active:scale-95 group"
+          className="absolute right-0 z-10 rounded-full"
           onClick={scrollRight}
         >
-          <ChevronRight className="h-4 w-4 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-amber-600" />
+          <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="bg-white rounded-lg p-6 shadow-sm border transition-all duration-300 hover:shadow-xl hover:shadow-amber-100/20 animate-in slide-in-from-bottom-6 duration-800 delay-600">
-        <div className="mb-4 animate-in fade-in duration-600 delay-700">
-          <h2 className="text-lg font-bold transition-all duration-300 hover:text-amber-600">
+      <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="mb-4">
+          <h2 className="text-lg font-bold">
             {selectedDay ? `${selectedDay.label}` : ""}
           </h2>
-          <p className="text-sm text-muted-foreground animate-in slide-in-from-left-2 duration-500 delay-800">
+          <p className="text-sm text-muted-foreground">
             Total Schedule: {scheduleData?.totalElements || 0}
           </p>
         </div>
@@ -251,8 +250,7 @@ export default function AllSchedulePage() {
                 {scheduleData.content.map((sche, index) => (
                   <Card
                     key={sche.id}
-                    className="group overflow-hidden bg-amber-50/30 transition-all duration-500 hover:bg-amber-50 hover:shadow-2xl hover:shadow-amber-200/30 cursor-pointer hover:scale-[1.03] hover:border-amber-200 hover:-translate-y-2 active:scale-[0.98] animate-in fade-in slide-in-from-bottom-4"
-                    style={{ animationDelay: `${800 + index * 150}ms` }}
+                    className="overflow-hidden bg-amber-50/30 cursor-pointer transition-transform duration-200 hover:scale-[1.01] hover:shadow-md"
                     onClick={() =>
                       router.push(
                         ROUTE.SCORES.STUDENT_SCORE_DETAIL(String(sche.id))
@@ -260,40 +258,37 @@ export default function AllSchedulePage() {
                     }
                   >
                     <CardContent className="p-0 relative overflow-hidden">
-                      {/* Animated background gradient on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-amber-100/0 via-amber-50/0 to-amber-200/0 transition-all duration-500 group-hover:from-amber-100/40 group-hover:via-amber-50/20 group-hover:to-amber-200/10" />
-
                       <div className="relative">
                         <div className="p-4 flex-1">
                           <div className="flex gap-4">
-                            <div className="flex border-l-4 border-amber-500 rounded-xl transition-all duration-500 group-hover:border-amber-600 group-hover:shadow-lg group-hover:shadow-amber-200/50 animate-pulse group-hover:animate-none" />
+                            <div className="flex border-l-4 border-amber-500 rounded-xl" />
                             <div className="flex flex-col flex-1">
                               <div className="flex items-center gap-1 justify-between">
-                                <div className="text-sm font-medium text-amber-500 transition-all duration-300 group-hover:text-amber-600 group-hover:scale-105 group-hover:font-semibold">
+                                <div className="text-sm font-medium text-amber-500">
                                   {sche.course.code}
                                 </div>
-                                <span className="text-sm font-medium text-muted-foreground transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">
+                                <span className="text-sm font-medium text-muted-foreground">
                                   {sche.day || "- - -"}
                                 </span>
                               </div>
-                              <div className="text-sm font-medium transition-all duration-300 group-hover:text-gray-800 group-hover:font-semibold">
+                              <div className="text-sm font-medium">
                                 {sche.course.nameKH || "- - -"}
                               </div>
                             </div>
                           </div>
 
-                          <Separator className="my-2 transition-all duration-300 group-hover:bg-amber-300 group-hover:h-0.5" />
+                          <Separator className="my-2" />
 
                           <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">
-                              <Clock className="h-4 w-4 transition-all duration-300 group-hover:text-amber-500 group-hover:rotate-12 group-hover:scale-110" />
-                              <span className="transition-all duration-300 group-hover:font-medium">
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              <span>
                                 {sche.startTime} - {sche.endTime}
                               </span>
                             </div>
-                            <div className="flex items-center gap-1 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">
-                              <Users className="h-4 w-4 transition-all duration-300 group-hover:text-amber-500 group-hover:scale-110" />
-                              <span className="transition-all duration-300 group-hover:font-medium">
+                            <div className="flex items-center gap-1">
+                              <Users className="h-4 w-4" />
+                              <span>
                                 {(sche.teacher &&
                                   (sche.teacher.englishFirstName ||
                                   sche.teacher.englishLastName
@@ -309,11 +304,9 @@ export default function AllSchedulePage() {
                                   "- - -"}
                               </span>
                             </div>
-                            <div className="flex items-center gap-1 transition-all duration-300 group-hover:text-gray-600 group-hover:scale-105">
-                              <MapPin className="h-4 w-4 transition-all duration-300 group-hover:text-amber-500 group-hover:bounce group-hover:scale-110" />
-                              <span className="transition-all duration-300 group-hover:font-medium">
-                                {sche.room.name || "- - -"}
-                              </span>
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              <span>{sche.room.name || "- - -"}</span>
                             </div>
                           </div>
                         </div>
@@ -323,9 +316,9 @@ export default function AllSchedulePage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground animate-in fade-in slide-in-from-bottom-4 duration-600 delay-500">
+              <div className="text-center py-8 text-muted-foreground">
                 <div className="mb-4">
-                  <div className="mx-auto w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center animate-pulse">
+                  <div className="mx-auto w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
                     <Clock className="h-8 w-8 text-amber-500" />
                   </div>
                 </div>
@@ -342,8 +335,8 @@ export default function AllSchedulePage() {
 
         {/* Pagination */}
         {!isLoading && scheduleData && scheduleData.totalPages > 1 && (
-          <div className="mt-8 flex justify-end animate-in slide-in-from-bottom-4 duration-500 delay-1000">
-            <div className="transition-all duration-300 hover:scale-105">
+          <div className="mt-8 flex justify-end">
+            <div>
               <PaginationPage
                 currentPage={scheduleData.pageNo}
                 totalPages={scheduleData.totalPages}

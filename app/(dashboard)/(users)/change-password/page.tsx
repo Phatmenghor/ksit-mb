@@ -58,6 +58,7 @@ export default function ChangePasswordPage() {
     <div>
       <CardHeaderSection
         title="Account Settings"
+        back
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
           {

@@ -222,6 +222,7 @@ const ClassSchedulePage = () => {
             <Button
               variant="ghost"
               size="icon"
+              asChild
               onClick={() => router.back()}
               className="rounded-full"
             >

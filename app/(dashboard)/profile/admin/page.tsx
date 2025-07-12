@@ -5,7 +5,6 @@ import { CardHeaderSection } from "@/components/shared/layout/card-header-sectio
 import { ROUTE } from "@/constants/routes";
 import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 import { getStaffByTokenService } from "@/service/user/user.service";
-import { Pencil } from "lucide-react";
 import { useParams } from "next/navigation";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
@@ -44,7 +43,10 @@ export default function AdminProfilePage() {
         back
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "View Admin", href: ROUTE.USERS.ADMIN_VIEW(adminId) },
+          {
+            label: "View Admin",
+            href: ROUTE.USERS.ADMIN.ADMIN_VIEW(adminId),
+          },
         ]}
       />
       <div className="mt-4 space-y-4">

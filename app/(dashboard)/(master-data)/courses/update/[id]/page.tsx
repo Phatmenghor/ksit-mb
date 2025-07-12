@@ -126,7 +126,7 @@ export default function CourseFormPage() {
           setSelectedInstructor(courseDetails.user || null);
         } else {
           toast.error("Course not found");
-          router.replace(ROUTE.COURSES.INDEX);
+          router.replace(ROUTE.MASTER_DATA.COURSES.INDEX);
         }
       } catch (error) {
         console.error("Error fetching course details:", error);
@@ -190,7 +190,7 @@ export default function CourseFormPage() {
         toast.success("Course created successfully");
       }
 
-      router.replace(ROUTE.COURSES.INDEX);
+      router.replace(ROUTE.MASTER_DATA.COURSES.INDEX);
     } catch (error: any) {
       toast.error(
         error.message || `Failed to ${isEditMode ? "update" : "create"} course`

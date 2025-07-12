@@ -189,9 +189,9 @@ const AllSchedulePage = () => {
           </div>
 
           {/* Search and filters section */}
-          <div className="space-y-3 sm:space-y-4">
-            {/* Search input - full width on mobile */}
-            <div className="relative w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 flex-wrap">
+            {/* Search input - full width on mobile, limited on desktop */}
+            <div className="relative w-full sm:max-w-xs">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
@@ -203,9 +203,9 @@ const AllSchedulePage = () => {
             </div>
 
             {/* Filters and actions */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-center sm:justify-end">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-center">
               {/* Year and Semester selectors */}
-              <div className="flex gap-2 sm:gap-2">
+              <div className="flex gap-2">
                 <div className="flex-1 sm:flex-none">
                   <YearSelector
                     value={selectedYear}

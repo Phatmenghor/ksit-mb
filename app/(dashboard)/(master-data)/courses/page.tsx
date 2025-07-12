@@ -43,6 +43,7 @@ import { DepartmentModel } from "@/model/master-data/department/all-department-m
 import { useForm } from "react-hook-form";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDebounce } from "@/utils/debounce/debounce";
+import { string } from "zod";
 
 export default function CoursesPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -181,7 +182,7 @@ export default function CoursesPage() {
                 onChangeSelected={handleDepartmentChange}
               />
 
-              <Link href={ROUTE.COURSES.ADD}>
+              <Link href={ROUTE.MASTER_DATA.COURSES.ADD}>
                 <Button className="bg-green-900 text-white hover:bg-green-950">
                   <Plus className="mr-2 h-2 w-2" />
                   Add New
@@ -232,7 +233,13 @@ export default function CoursesPage() {
                       <TableCell>
                         <div className="flex justify-start space-x-2">
                           <Button
-                            onClick={() => router.push(`/courses/${course.id}`)}
+                            onClick={() =>
+                              router.push(
+                                ROUTE.MASTER_DATA.COURSES.VIEW(
+                                  String(course.id)
+                                )
+                              )
+                            }
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 bg-gray-200"
@@ -241,7 +248,11 @@ export default function CoursesPage() {
                           </Button>
                           <Button
                             onClick={() =>
-                              router.push(`/courses/update/${course.id}`)
+                              router.push(
+                                ROUTE.MASTER_DATA.COURSES.UPDATE(
+                                  String(course.id)
+                                )
+                              )
                             }
                             variant="ghost"
                             size="icon"

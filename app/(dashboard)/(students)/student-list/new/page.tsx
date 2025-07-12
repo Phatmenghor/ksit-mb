@@ -11,7 +11,7 @@ import { cleanField } from "@/utils/map-helper/student";
 import { AddStudentFormData } from "@/model/user/student/student.schema";
 import { AddStudentModel } from "@/model/user/student/student.request.model";
 
-export default function AddSingleStudentPage() {
+export default function AddNewStudentPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -84,7 +84,7 @@ export default function AddSingleStudentPage() {
   return (
     <StudentForm
       mode="Add"
-      showBackButton={false}
+      fromSidebar={false}
       title="Add Student"
       onSubmit={onSubmit}
       loading={loading}

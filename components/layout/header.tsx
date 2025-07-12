@@ -36,11 +36,13 @@ import { MobileSidebar } from "./mobile-sidebar";
 import { RoleEnum } from "@/constants/constant";
 import Image from "next/image";
 import { AppIcons, AppResource } from "@/constants/icons/icon";
+import { getStaffByTokenService } from "@/service/user/user.service";
 
 export function Header() {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false); // state to open/close confirm dialog
+  const [user, setUser] = useState();
   const router = useRouter();
 
   const getProfileUrl = () => {
@@ -79,6 +81,15 @@ export function Header() {
     logoutUser();
     router.push(ROUTE.AUTH.LOGIN);
   };
+
+  useEffect(() => {
+    try {
+      const response: any = getStaffByTokenService();
+      setUser(response);
+    } catch (error) {
+      console.log("Error to fetch user profile: ", error);
+    }
+  }, []);
 
   return (
     <>
@@ -125,17 +136,6 @@ export function Header() {
 
         {/* Right: Controls */}
         <div className="flex items-center gap-3">
-          {/* Notification bell */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative text-white hover:bg-[#033d31]"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-600" />
-            <span className="sr-only">Notifications</span>
-          </Button>
-
           {/* User avatar dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

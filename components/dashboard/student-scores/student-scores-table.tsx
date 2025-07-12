@@ -13,17 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  AlertCircle,
-  CheckCircle,
-  Download,
-  Edit,
-  Eye,
-  Loader2,
-  Save,
-  Upload,
-  X,
-} from "lucide-react";
+import { CheckCircle, Eye, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";

@@ -4,13 +4,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
-import { CircleAlert, DollarSign, FileText } from "lucide-react";
+import { CircleAlert, FileText } from "lucide-react";
 import { UserProfileSection } from "@/components/dashboard/users/shared/user-profile";
 import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import StudentDetails from "@/components/dashboard/users/student/view/tab/student-detail-tab";
-import StudentDetailsTabs from "@/components/dashboard/users/student/view/tab/student-detail-tab";
-import PaymentTabs from "@/components/dashboard/users/student/view/tab/student-payment-tab";
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 import { getStudentByTokenService } from "@/service/user/user.service";
 import { TranscriptTabs } from "@/components/dashboard/users/student/view/tab/student-transcript-tab";
@@ -103,7 +101,6 @@ export default function StudentViewPage() {
           </div>
         }
       />
-
       {/* Tab Content outside the header */}
       <UserProfileSection user={studentDetail} />
       <TabsContent value="information" className="space-y-4 w-full">

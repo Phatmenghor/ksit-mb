@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SemesterFilter, StatusEnum } from "@/constants/constant";
+import { StatusEnum } from "@/constants/constant";
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
 import { Separator } from "@/components/ui/separator";
@@ -174,7 +174,7 @@ export default function DuplicateScheduleModal({
 
         if (total.success > 0) {
           parts.push(
-            `✅ Successfully duplicated ${total.success} schedule${
+            `Successfully duplicated ${total.success} schedule${
               total.success > 1 ? "s" : ""
             }`
           );
@@ -273,14 +273,6 @@ export default function DuplicateScheduleModal({
       <DialogContent className="md:max-w-lg max-w-sm w-full p-6 rounded-lg shadow-lg">
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle>Duplicate Schedule</DialogTitle>
-          <Button
-            onClick={() => onOpenChange(false)}
-            variant="ghost"
-            size="icon"
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X size={20} />
-          </Button>
         </DialogHeader>
 
         {/* Content */}

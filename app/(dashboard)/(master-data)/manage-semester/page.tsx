@@ -313,7 +313,7 @@ export default function ManageSemester() {
                         )}
                         {semesters.semesterType === SemesterType.PROCESSING && (
                           <div className="flex items-center gap-2 text-blue-600">
-                            <Loader className="animate-spin" size={16} />
+                            <Loader size={16} />
                             <span>Processing</span>
                           </div>
                         )}

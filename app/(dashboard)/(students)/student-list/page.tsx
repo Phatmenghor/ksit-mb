@@ -171,7 +171,7 @@ export default function StudentsListPage() {
         searchPlaceholder="Search..."
         onSearchChange={handleSearchChange}
         buttonText="Add New"
-        buttonHref={ROUTE.STUDENTS.ADD_SINGLE}
+        buttonHref={ROUTE.STUDENTS.ADD_NEW}
         buttonIcon={<Plus className="mr-2 h-2 w-2" />}
         customSelect={
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">

@@ -160,7 +160,7 @@ export function YearSelector({
               variant="outline"
               role="combobox"
               aria-expanded={isOpen}
-              className="w-full justify-between"
+              className="w-full h-10 md:h-11 justify-between px-4 text-sm md:text-base"
             >
               <div className="flex items-center space-x-2">
                 <img
@@ -183,17 +183,21 @@ export function YearSelector({
             </Button>
           </PopoverTrigger>
 
-          <PopoverContent className="w-full p-0" align="start">
-            <div className="flex items-center p-3 border-b">
+          <PopoverContent
+            className="w-fit min-w-[220px] max-w-xs p-0"
+            align="center"
+          >
+            <div className="flex items-center px-2 py-2 gap-1 border-b">
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                className="h-7 w-7 p-0"
                 onClick={decrementYear}
                 disabled={value <= minYear}
               >
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-3.5 w-3.5" />
               </Button>
+
               <Input
                 value={inputValue}
                 onChange={handleInputChange}
@@ -204,30 +208,32 @@ export function YearSelector({
                     setIsOpen(false);
                   }
                 }}
-                className="h-8 w-20 text-center mx-2"
+                className="h-7 w-[60px] text-center text-sm"
               />
+
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                className="h-7 w-7 p-0"
                 onClick={incrementYear}
                 disabled={value >= maxYear}
               >
-                <ChevronUp className="h-4 w-4" />
+                <ChevronUp className="h-3.5 w-3.5" />
               </Button>
             </div>
+
             <div
               ref={scrollRef}
               onScroll={handleScroll}
               className="max-h-52 overflow-y-auto"
             >
-              <div className="grid grid-cols-4 gap-1 p-2">
+              <div className="grid grid-cols-3 gap-1 p-2">
                 {visibleYears.map((year) => (
                   <Button
                     key={year}
                     variant="ghost"
                     className={cn(
-                      "h-8 px-2",
+                      "h-8 text-sm px-1",
                       year === value
                         ? "bg-[#14532D] text-white hover:bg-[#14532D]/90"
                         : "hover:bg-gray-100"

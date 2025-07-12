@@ -132,8 +132,10 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                         >
                           <Link
                             href={{
-                              pathname: subroute.href,
-                              query: { from: "sidebar" },
+                              pathname:
+                                typeof subroute.href === "string"
+                                  ? subroute.href
+                                  : "",
                             }}
                             onClick={onClose}
                           >

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -213,7 +213,6 @@ export default function ScoreSubmittedPage() {
           </div>
         }
       />
-
       {/* All Submitted Tab */}
       <TabsContent value="all" className="space-y-4 w-full">
         <Card>

@@ -50,7 +50,7 @@ export default function AdminDetailPage() {
         back
         breadcrumbs={[
           { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "View Admin", href: ROUTE.USERS.ADMIN_VIEW(adminId) },
+          { label: "View Admin", href: ROUTE.USERS.ADMIN.ADMIN_VIEW(adminId) },
         ]}
       />
       <div className="mt-4 space-y-4">

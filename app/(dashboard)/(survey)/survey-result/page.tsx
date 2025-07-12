@@ -48,6 +48,16 @@ import { format } from "date-fns";
 import { Download, FileSpreadsheet, Search, Tally1 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function SurveyResultPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -387,102 +397,124 @@ export default function SurveyResultPage() {
 
   return (
     <div>
-      <CardHeaderSection
-        breadcrumbs={[
-          { label: "Dashboard", href: ROUTE.DASHBOARD },
-          { label: "Survey Result", href: "" },
-        ]}
-        title="Survey Result"
-        customSelect={
-          <div className="flex flex-col gap-4">
-            {/* First row: Search, Class, Year, and Semester */}
-            <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end md:gap-2">
-              <div className="relative w-full min-w-[270px] md:w-auto md:flex-1">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search by name or ID..."
-                  className="pl-8 w-full"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                />
-              </div>
-              <div className="w-full min-w-[200px] md:w-auto md:flex-1">
-                <ComboboxSelectClass
-                  dataSelect={selectedClass ?? null}
-                  onChangeSelected={handleClassChange}
-                  disabled={isSubmitting}
-                />
-              </div>
-              <div className="w-full min-w-[200px] md:w-auto md:flex-1">
-                <YearSelector
-                  title="Select Year"
-                  onChange={handleYearChange}
-                  value={selectAcademicYear || 0}
-                />
-              </div>
-              <div className="w-full min-w-[200px] md:w-auto md:flex-1">
-                <Select
-                  onValueChange={setSelectedSemester}
-                  value={selectedSemester}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a semester" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SemesterFilter.map((semester) => (
-                      <SelectItem key={semester.value} value={semester.value}>
-                        {semester.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+      <div className="w-full">
+        <Card className="w-full">
+          <CardContent className="py-6 space-y-3 w-full">
+            {/* Breadcrumb Section */}
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href={ROUTE.DASHBOARD}>
+                    Dashboard
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Survey Result</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
+            {/* Title Section */}
+            <div className="mb-3">
+              <h3 className="lg:text-2xl text-lg font-bold text-gray-900">
+                Survey Result
+              </h3>
             </div>
 
-            {/* Second row: Date pickers */}
-            <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end md:gap-2 justify-between">
-              <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-2">
-                <DateRangePicker
-                  startDate={startDate}
-                  endDate={endDate}
-                  onStartDateChange={setStartDate}
-                  onEndDateChange={setEndDate}
-                  clearStartDate={clearStartDate}
-                  clearEndDate={clearEndDate}
-                />
+            {/* Full Width Content Section */}
+            <div className="w-full space-y-4 -mx-6 px-6">
+              {/* Grid: Search, Class, Year, Semester */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+                <div className="relative w-full">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search by name or ID..."
+                    className="pl-8 w-full"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                  />
+                </div>
+
+                <div className="w-full">
+                  <ComboboxSelectClass
+                    dataSelect={selectedClass ?? null}
+                    onChangeSelected={handleClassChange}
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div className="w-full">
+                  <YearSelector
+                    title="Select Year"
+                    onChange={handleYearChange}
+                    value={selectAcademicYear || 0}
+                  />
+                </div>
+
+                <div className="w-full">
+                  <Select
+                    onValueChange={setSelectedSemester}
+                    value={selectedSemester}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a semester" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SemesterFilter.map((semester) => (
+                        <SelectItem key={semester.value} value={semester.value}>
+                          {semester.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              {/* export excel */}
-              <div>
-                <div className="flex items-center gap-2 justify-end">
-                  <span className="text-sm mr-2">Export Data by Class</span>
+              {/* Date Range Picker & Export Section */}
+              <div className="flex flex-col lg:flex-row justify-between gap-4 w-full">
+                <div className="flex-1 lg:flex-none min-w-0">
+                  <DateRangePicker
+                    startDate={startDate}
+                    endDate={endDate}
+                    onStartDateChange={setStartDate}
+                    onEndDateChange={setEndDate}
+                    clearStartDate={clearStartDate}
+                    clearEndDate={clearEndDate}
+                  />
+                </div>
+
+                <div className="flex justify-start lg:justify-end items-center gap-2 flex-shrink-0">
+                  <span className="text-sm whitespace-nowrap">
+                    Export Data by Class
+                  </span>
                   <Button
                     onClick={exportToExcel}
                     variant="outline"
                     size="sm"
-                    className="h-8 px-2 border-gray-200 py-5"
+                    className="h-8 px-2 border-gray-200 py-5 flex items-center gap-1"
                     disabled={isLoading}
                   >
                     {isLoading ? (
                       <Loading />
                     ) : (
                       <>
-                        <FileSpreadsheet className="h-4 w-4 text-green-500" />
+                        <FileSpreadsheet className="h-4 w-4 text-green-500 flex-shrink-0" />
                         <span className="ml-1 text-xs font-medium">Excel</span>
-                        <Tally1 className="-mr-[12px] text-gray-300" />
-                        <Download className="h-4 w-4" />
+                        <Tally1 className="-mr-[12px] text-gray-300 flex-shrink-0" />
+                        <Download className="h-4 w-4 flex-shrink-0" />
                       </>
                     )}
                   </Button>
                 </div>
               </div>
             </div>
-          </div>
-        }
-      />
+          </CardContent>
+        </Card>
+      </div>
 
-      <div className="overflow-x-auto mt-4">
+      <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
         {isLoading ? (
           <Loading />
         ) : (

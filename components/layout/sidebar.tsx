@@ -104,8 +104,12 @@ export function Sidebar() {
                       >
                         <Link
                           href={{
-                            pathname: subroute.href,
-                            query: { from: "sidebar" },
+                            pathname:
+                              typeof subroute.href === "string"
+                                ? subroute.href
+                                : typeof subroute.href?.INDEX === "string"
+                                ? subroute.href.INDEX
+                                : "#",
                           }}
                           className="flex items-center gap-2"
                         >
@@ -134,7 +138,6 @@ export function Sidebar() {
             <Link
               href={{
                 pathname: route.href || "#",
-                query: { from: "sidebar" },
               }}
               className="flex items-center gap-3 px-3 py-2"
             >

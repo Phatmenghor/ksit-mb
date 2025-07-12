@@ -14,7 +14,7 @@ import { Search, ArrowLeft, Ghost } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AppIcons } from "@/constants/icons/icon";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -23,7 +23,7 @@ interface BreadcrumbItemType {
   href?: string;
 }
 
-interface CardHeaderSectionProps {
+interface StudentCardHeaderSectionProps {
   breadcrumbs: BreadcrumbItemType[];
   title?: string;
   searchPlaceholder?: string;
@@ -40,7 +40,9 @@ interface CardHeaderSectionProps {
   tabs?: React.ReactNode;
 }
 
-export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
+export const StudentCardHeaderSection: React.FC<
+  StudentCardHeaderSectionProps
+> = ({
   breadcrumbs,
   title,
   searchPlaceholder = "Search...",
@@ -48,6 +50,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
   customAddNewButton,
   onSearchChange,
   buttonText,
+  showBackButton,
   buttonIcon,
   backHref,
   back,

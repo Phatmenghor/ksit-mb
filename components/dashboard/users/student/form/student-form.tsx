@@ -30,7 +30,9 @@ type Props = {
   loading: boolean;
   title: string;
   mode: "Add" | "Edit";
+  fromSidebar?: boolean;
   onDiscard?: () => void;
+  showBackButton?: boolean;
   back?: string;
 };
 
@@ -38,8 +40,10 @@ export default function StudentForm({
   initialValues,
   onSubmit,
   loading,
+  fromSidebar = true,
   title,
   mode,
+  showBackButton = true,
   onDiscard,
   back,
 }: Props) {
@@ -160,14 +164,25 @@ export default function StudentForm({
           className="space-y-4"
           noValidate
         >
-          <CardHeaderSection
-            back
-            title={title}
-            breadcrumbs={[
-              { label: "Dashboard", href: ROUTE.DASHBOARD },
-              { label: "Add single student", href: "" },
-            ]}
-          />
+          {fromSidebar ? (
+            <CardHeaderSection
+              back={showBackButton}
+              title={title}
+              breadcrumbs={[
+                { label: "Dashboard", href: ROUTE.DASHBOARD },
+                { label: "Add single student", href: "" },
+              ]}
+            />
+          ) : (
+            <CardHeaderSection
+              back={showBackButton}
+              title={title}
+              breadcrumbs={[
+                { label: "Dashboard", href: ROUTE.DASHBOARD },
+                { label: "Add New student", href: "" },
+              ]}
+            />
+          )}
 
           {mode === "Add" && <StudentBasicForm />}
           <StudentProfileUploadCard />

@@ -156,20 +156,6 @@ export default function GenerateMultiStudentForm() {
       <Card>
         <CardContent className="pt-4 flex justify-end gap-3">
           <Button
-            type="button"
-            variant="outline"
-            className="text-red-600 border-red-600 hover:bg-red-50"
-            onClick={() => {
-              // Optional: reset form or navigate
-            }}
-            disabled={isSubmitting || isLoading}
-          >
-            {isSubmitting || isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : null}
-            Discard
-          </Button>
-          <Button
             type="submit"
             className="bg-teal-900 hover:bg-teal-950 text-white"
             disabled={isSubmitting || isLoading}

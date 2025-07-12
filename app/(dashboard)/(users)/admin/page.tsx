@@ -307,7 +307,7 @@ export default function AdminsListPage() {
                                 <Button
                                   onClick={() => {
                                     route.push(
-                                      `${ROUTE.USERS.ADMIN_VIEW(
+                                      `${ROUTE.USERS.ADMIN.ADMIN_VIEW(
                                         String(admin.id)
                                       )}`
                                     );
