@@ -2,20 +2,10 @@
 
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 import Loading from "@/components/shared/loading";
 import PaginationPage from "@/components/shared/pagination-page";
-import { DateRangePicker } from "@/components/shared/start-end-date";
-import { YearSelector } from "@/components/shared/year-selector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -24,8 +14,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { SemesterFilter } from "@/constants/constant";
-import { formatSemester } from "@/constants/format-enum/format-semester";
 import { formatSemesterOne } from "@/constants/format-enum/format-semester-1";
 import { ROUTE } from "@/constants/routes";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
@@ -63,28 +51,21 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useParams } from "next/navigation";
 
-export default function SurveyResultPage() {
+export default function AllStudentResultPage() {
+  const params = useParams();
+  const rawId = params?.id;
+  const id = rawId && !isNaN(Number(rawId)) ? Number(rawId) : null;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [selectedSemester, setSelectedSemester] = useState<string>("ALL");
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const [selectAcademicYear, setSelectAcademicYear] = useState<
-    number | undefined
-  >();
-  const [selectedClass, setSelectedClass] = useState<ClassModel | undefined>(
-    undefined
-  );
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const [surveyHeaders, setSurveyHeaders] = useState<SurveyReportHeader[]>([]);
   const [surveyData, setSurveyData] = useState<SurveyResponseData | null>(null);
-
-  // Date filter states
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   // Hidden headers state - you can modify this to control which headers to hide
   const hiddenHeaders = [
@@ -113,6 +94,10 @@ export default function SurveyResultPage() {
     async (filter: AllSurveyFilterModel = {}) => {
       setIsLoading(true);
       try {
+        if (!id) {
+          toast.error("Invalid schedule ID");
+          return;
+        }
         // Prepare headers request body
         const headersRequestBody: SurveyReportHeadersRequest = {
           hiddenHeaders: hiddenHeaders,
@@ -120,11 +105,7 @@ export default function SurveyResultPage() {
 
         const surveyFilter: AllSurveyFilterModel = {
           search: debouncedSearchQuery,
-          academyYear: selectAcademicYear,
-          semester: selectedSemester != "ALL" ? selectedSemester : undefined,
-          classId: selectedClass?.id,
-          startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
-          endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined,
+          scheduleId: id,
           ...filter,
         };
 
@@ -147,28 +128,12 @@ export default function SurveyResultPage() {
         setIsLoading(false);
       }
     },
-    [
-      debouncedSearchQuery,
-      selectedClass,
-      selectAcademicYear,
-      selectedSemester,
-      startDate,
-      endDate,
-    ]
+    [debouncedSearchQuery]
   );
 
   useEffect(() => {
     fetchSurveyResults({ pageNo: currentPage });
-  }, [
-    fetchSurveyResults,
-    debouncedSearchQuery,
-    selectedClass,
-    selectAcademicYear,
-    selectedSemester,
-    currentPage,
-    startDate,
-    endDate,
-  ]);
+  }, [fetchSurveyResults, debouncedSearchQuery, currentPage]);
 
   // Render cell value based on type
   const renderCellValue = (
@@ -201,41 +166,15 @@ export default function SurveyResultPage() {
     setCurrentPage(1);
   };
 
-  const handleYearChange = (e: number) => {
-    setSelectAcademicYear(e);
-  };
-
-  const handleClassChange = (e: ClassModel | null) => {
-    setSelectedClass(e ?? undefined);
-    setCurrentPage(1);
-  };
-
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-  };
-
-  const clearStartDate = () => {
-    setStartDate(undefined);
-    setCurrentPage(1);
-  };
-
-  const clearEndDate = () => {
-    setEndDate(undefined);
-    setCurrentPage(1);
   };
 
   const exportToExcel = async () => {
     setIsSubmitting(true);
 
     try {
-      const filter: AllSurveyFilterModel = {
-        search: debouncedSearchQuery,
-        academyYear: selectAcademicYear,
-        semester: selectedSemester !== "ALL" ? selectedSemester : undefined,
-        classId: selectedClass?.id,
-        startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
-        endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined,
-      };
+      const filter: AllSurveyFilterModel = {};
 
       // Call the service to export data
       const response: SurveyResponseItem[] =
@@ -412,7 +351,7 @@ export default function SurveyResultPage() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Survey Result</BreadcrumbPage>
+                  <BreadcrumbPage>Survey Student Result</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -425,94 +364,43 @@ export default function SurveyResultPage() {
             </div>
 
             {/* Full Width Content Section */}
-            <div className="w-full space-y-4 -mx-6 px-6">
-              {/* Grid: Search, Class, Year, Semester */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-                <div className="relative w-full">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search by name or ID..."
-                    className="pl-8 w-full"
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                  />
-                </div>
-
-                <div className="w-full">
-                  <ComboboxSelectClass
-                    dataSelect={selectedClass ?? null}
-                    onChangeSelected={handleClassChange}
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <div className="w-full">
-                  <YearSelector
-                    title="Select Year"
-                    onChange={handleYearChange}
-                    value={selectAcademicYear || 0}
-                  />
-                </div>
-
-                <div className="w-full">
-                  <Select
-                    onValueChange={setSelectedSemester}
-                    value={selectedSemester}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a semester" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SemesterFilter.map((semester) => (
-                        <SelectItem key={semester.value} value={semester.value}>
-                          {semester.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className="w-full flex flex-col md:flex-row md:items-center justify-between">
+              <div className="relative w-full  max-w-[65%]">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search by name or ID..."
+                  className="pl-8 w-full"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
               </div>
 
-              {/* Date Range Picker & Export Section */}
-              <div className="flex flex-col lg:flex-row justify-between gap-4 w-full">
-                <div className="flex-1 lg:flex-none min-w-0">
-                  <DateRangePicker
-                    startDate={startDate}
-                    endDate={endDate}
-                    onStartDateChange={setStartDate}
-                    onEndDateChange={setEndDate}
-                    clearStartDate={clearStartDate}
-                    clearEndDate={clearEndDate}
-                  />
-                </div>
-
-                <div className="flex justify-start lg:justify-end items-center gap-2 flex-shrink-0">
-                  <span className="text-sm whitespace-nowrap">
-                    Export Data by Class
-                  </span>
-                  <Button
-                    onClick={exportToExcel}
-                    variant="outline"
-                    size="sm"
-                    className="h-8 px-2 border-gray-200 py-5 flex items-center gap-1"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <div className="flex items-center justify-center">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        <span className="ml-2">Exporting...</span>
-                      </div>
-                    ) : (
-                      <>
-                        <FileSpreadsheet className="h-4 w-4 text-green-500 flex-shrink-0" />
-                        <span className="ml-1 text-xs font-medium">Excel</span>
-                        <Tally1 className="-mr-[12px] text-gray-300 flex-shrink-0" />
-                        <Download className="h-4 w-4 flex-shrink-0" />
-                      </>
-                    )}
-                  </Button>
-                </div>
+              <div className="flex justify-start lg:justify-end items-center gap-2 flex-shrink-0">
+                <span className="text-sm whitespace-nowrap">
+                  Export Data by Class
+                </span>
+                <Button
+                  onClick={exportToExcel}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-2 border-gray-200 py-5 flex items-center gap-1"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <span className="ml-2">Exporting...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <FileSpreadsheet className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      <span className="ml-1 text-xs font-medium">Excel</span>
+                      <Tally1 className="-mr-[12px] text-gray-300 flex-shrink-0" />
+                      <Download className="h-4 w-4 flex-shrink-0" />
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
           </CardContent>
@@ -545,7 +433,10 @@ export default function SurveyResultPage() {
               ) : (
                 surveyData?.content.map((survey, index) => {
                   const indexDisplay =
-                    ((surveyData.pageNo || 1) - 1) * 10 + index + 1;
+                    ((surveyData.pageNo || 1) - 1) *
+                      (surveyData?.pageSize || 10) +
+                    index +
+                    1;
                   return (
                     <TableRow key={survey.responseId}>
                       <TableCell>{indexDisplay}</TableCell>

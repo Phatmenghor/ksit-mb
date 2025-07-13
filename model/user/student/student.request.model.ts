@@ -93,6 +93,7 @@ export interface StudentModel {
   username: string;
   email: string;
   status: string;
+  identifyNumber: string;
   khmerFirstName: string;
   studentClass: StudentClass;
   khmerLastName: string;

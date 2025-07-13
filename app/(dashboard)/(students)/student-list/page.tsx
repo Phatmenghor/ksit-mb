@@ -241,7 +241,6 @@ export default function StudentsListPage() {
                           student.englishLastName || ""
                         }`.trim() || "---"}
                       </TableCell>
-                      <TableCell>{student.id || "---"}</TableCell>
                       <TableCell>{student.gender || "---"}</TableCell>
                       <TableCell>{student.dateOfBirth || "---"}</TableCell>
                       <TableCell>

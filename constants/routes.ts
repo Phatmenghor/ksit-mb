@@ -107,7 +107,10 @@ export const ROUTE = {
   SURVEY: {
     RESULT_LIST: "/survey-result",
     MANAGE_QA: "/manage-question",
+    STUDENT: "/survey/student",
     SURVEY_FORM: (id: string) => `/survey-form/${id}`,
+    STUDENT_ALL: (id: string) => `/survey/student/all/${id}`,
+    STUDENT_RECORD: (id: string) => `/survey/student-records/all/${id}`,
   },
 };
 
