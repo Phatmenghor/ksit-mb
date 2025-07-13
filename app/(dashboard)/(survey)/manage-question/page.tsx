@@ -36,6 +36,8 @@ import {
   SurveyMainModel,
 } from "@/model/survey/survey-main-model";
 import Loading from "@/components/shared/loading";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
+import { ROUTE } from "@/constants/routes";
 
 const RatingOptionSchema = z.object({
   value: z.number().nullable().optional(),
@@ -867,21 +869,21 @@ const SurveyManager: React.FC = () => {
   }
 
   return (
-    <div className="bg-white py-8 px-4">
-      <div>
-        {/* Header */}
-        <div className="mb-6">
-          <nav className="text-sm text-muted-foreground mb-2">
-            Dashboard → Manage Q&As
-          </nav>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {surveyData?.title || "Manage Q&As"}
-          </h1>
+    <div className="space-y-4 py-8 px-4">
+      <CardHeaderSection
+        title=" User and Role permission"
+        breadcrumbs={[
+          { label: "Dashboard", href: ROUTE.DASHBOARD },
+          { label: "manage Q&As", href: "" },
+        ]}
+      >
+        <div className="-mt-4">
           {surveyData?.description && (
             <p className="text-gray-600 mt-1">{surveyData.description}</p>
           )}
         </div>
-
+      </CardHeaderSection>
+      <div className="space-y-4">
         {/* Sections */}
         {sections.map((section, index) => {
           // Use tempId for new sections, id for existing ones
@@ -912,23 +914,27 @@ const SurveyManager: React.FC = () => {
         </Card>
 
         {/* Save Button */}
-        <div className="mt-6 flex justify-end">
-          <Button
-            type="submit"
-            onClick={handleSave}
-            className="bg-[#024D3E] hover:bg-teal-700"
-            disabled={!surveyData || isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                {isSubmitting && "Saving..."}
-              </>
-            ) : (
-              "Save Survey"
-            )}
-          </Button>
-        </div>
+        <Card>
+          <CardContent>
+            <div className="mt-6 flex justify-end">
+              <Button
+                type="submit"
+                onClick={handleSave}
+                className="bg-[#024D3E] hover:bg-teal-700"
+                disabled={!surveyData || isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    {isSubmitting && "Saving..."}
+                  </>
+                ) : (
+                  "Save Survey"
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

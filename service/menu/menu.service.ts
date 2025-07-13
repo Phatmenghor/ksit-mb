@@ -1,4 +1,3 @@
-import { AllMenuModel } from "@/model/menu/menu-respond";
 import { axiosClientWithAuth } from "@/utils/axios";
 
 export async function getAccessibleMenuService() {

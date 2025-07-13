@@ -38,6 +38,7 @@ interface CardHeaderSectionProps {
   openModal?: () => void;
   customSelect?: React.ReactNode;
   tabs?: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
@@ -49,6 +50,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
   onSearchChange,
   buttonText,
   buttonIcon,
+  children,
   backHref,
   back,
   buttonHref,
@@ -171,6 +173,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
               )}
             </div>
           </div>
+          {children && <div className="px-0 pb-0">{children}</div>}
         </CardContent>
 
         {/* Tabs Section */}

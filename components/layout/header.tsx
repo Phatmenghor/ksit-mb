@@ -37,12 +37,13 @@ import { RoleEnum } from "@/constants/constant";
 import Image from "next/image";
 import { AppIcons, AppResource } from "@/constants/icons/icon";
 import { getStaffByTokenService } from "@/service/user/user.service";
+import { StaffModel } from "@/model/user/staff/staff.respond.model";
 
 export function Header() {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false); // state to open/close confirm dialog
-  const [user, setUser] = useState<string | undefined>(undefined);
+  const [user, setUser] = useState<any | undefined>(undefined);
   const router = useRouter();
 
   const getProfileUrl = () => {
@@ -82,15 +83,19 @@ export function Header() {
     router.push(ROUTE.AUTH.LOGIN);
   };
 
-  useEffect(() => {
+  const fetchUser = async () => {
     try {
-      const response: any = getStaffByTokenService();
-      console.log("fetch user profile: ", response);
+      const response = await getStaffByTokenService();
+      console.log("fetch user profile by token: ", response);
 
       setUser(response?.profileUrl);
     } catch (error) {
       console.log("Error to fetch user profile: ", error);
     }
+  };
+
+  useEffect(() => {
+    fetchUser();
   }, []);
 
   return (
@@ -141,13 +146,18 @@ export function Header() {
           {/* User avatar dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar className="h-8 w-8 border-2 border-gray-200">
+              <Button
+                variant="ghost"
+                asChild
+                size="icon"
+                className="rounded-full hover:bg-none"
+              >
+                <Avatar className="h-8 w-8 border-2">
                   <AvatarImage
                     src={`${process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE}${user}`}
                     alt="User"
                   />
-                  <AvatarFallback>RA</AvatarFallback>
+                  <AvatarFallback>USER</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>

@@ -5,7 +5,6 @@ import { X, ChevronDown, ChevronUp, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { sidebarRoutes } from "@/constants/routes";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
