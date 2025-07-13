@@ -51,7 +51,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { AppIcons } from "@/constants/icons/icon";
 
 export default function AllStudentResultPage() {
   const params = useParams();
@@ -67,6 +68,7 @@ export default function AllStudentResultPage() {
   const [surveyHeaders, setSurveyHeaders] = useState<SurveyReportHeader[]>([]);
   const [surveyData, setSurveyData] = useState<SurveyResponseData | null>(null);
 
+  const router = useRouter();
   // Hidden headers state - you can modify this to control which headers to hide
   const hiddenHeaders = [
     "responseId",
@@ -356,8 +358,20 @@ export default function AllStudentResultPage() {
               </BreadcrumbList>
             </Breadcrumb>
 
-            {/* Title Section */}
-            <div className="mb-3">
+            <div className="flex items-center min-w-0 flex-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => router.back()}
+                asChild
+                className="rounded-full flex-shrink-0"
+              >
+                <img
+                  src={AppIcons.Back}
+                  alt="back Icon"
+                  className="h-4 w-4 mr-3 sm:mr-5 text-muted-foreground"
+                />
+              </Button>
               <h3 className="lg:text-2xl text-lg font-bold text-gray-900">
                 Survey Result
               </h3>
