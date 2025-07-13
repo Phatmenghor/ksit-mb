@@ -84,25 +84,6 @@ export default function Permissions() {
     setSelectedPermissions(initialPermissions);
   }, [menuData]);
 
-  const loadUsers = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await getAllStaffService({
-        roles: [RoleEnum.STAFF, RoleEnum.TEACHER],
-        status: StatusEnum.ACTIVE,
-      });
-      if (response) {
-        setUsers(response);
-      } else {
-        console.error("Failed to fetch staff:");
-      }
-    } catch (error) {
-      toast.error("An error occurred while loading staff");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   const loadUserRoles = useCallback(async () => {
     if (selectedUser === null) {
       setUserRoles([]); // Clear roles when no user selected
@@ -164,10 +145,6 @@ export default function Permissions() {
   }, [selectedUser]);
 
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
-
-  useEffect(() => {
     loadUserDataAndMenu();
   }, [loadUserDataAndMenu]);
 
@@ -205,7 +182,6 @@ export default function Permissions() {
         await loadUserRoles();
 
         // Optionally reload users list if needed
-        await loadUsers();
       } catch (error) {
         console.error("Error updating roles:", error);
 
@@ -214,7 +190,7 @@ export default function Permissions() {
         setIsLoading(false);
       }
     },
-    [selectedUser, loadUserRoles, loadUsers]
+    [selectedUser, loadUserRoles]
   );
 
   // Updated handleApplyPermissions to use the API

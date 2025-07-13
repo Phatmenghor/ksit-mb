@@ -1,28 +1,15 @@
 "use client";
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  FC,
-  Dispatch,
-  SetStateAction,
-} from "react";
+import React, { useState, Dispatch, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { UserPermissionModel } from "@/model/permission/permission-response-model";
 import { toast } from "sonner";
-import { getUserForPermissionService } from "@/service/permission/permission.service";
 import {
   AllStaffModel,
   StaffModel,
 } from "@/model/user/staff/staff.respond.model";
+import { ComboboxSelectUser } from "@/components/shared/ComboBox/combobox-user";
+import { Loader2 } from "lucide-react";
 
 interface UserRoleManagementProps {
   users: AllStaffModel | null;
@@ -64,18 +51,14 @@ const UserRoleManagement: React.FC<UserRoleManagementProps> = ({
 
       console.log("Applying roles:", selectedRoles); // Debug log
       await onApplyRoles(selectedRoles);
-
-      toast.success("Roles applied successfully");
     } catch (error) {
       console.error("Error applying roles:", error);
-      toast.error("Failed to apply roles");
     } finally {
       setIsApplying(false);
     }
   };
 
-  const handleUserSelect = (userId: string) => {
-    const user = users?.content.find((u) => u.id === parseInt(userId));
+  const handleUserSelect = (user: StaffModel) => {
     console.log("Selected user:", user); // Debug log
     setSelectedUser(user || null);
   };
@@ -87,18 +70,10 @@ const UserRoleManagement: React.FC<UserRoleManagementProps> = ({
           <h3 className="text-sm font-medium text-gray-900">User</h3>
           <span className="text-red-500">*</span>
         </div>
-        <Select onValueChange={handleUserSelect}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Please Select User" />
-          </SelectTrigger>
-          <SelectContent>
-            {users?.content?.map((user) => (
-              <SelectItem key={user.id} value={String(user.id)}>
-                {user.username}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <ComboboxSelectUser
+          dataSelect={selectedUser}
+          onChangeSelected={handleUserSelect}
+        />
       </div>
 
       <div>
@@ -148,7 +123,14 @@ const UserRoleManagement: React.FC<UserRoleManagementProps> = ({
           onClick={handleApplyRoles}
           disabled={!selectedUser || isApplying || isLoading}
         >
-          {isApplying ? "APPLYING..." : "APPLY"}
+          {isApplying ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              APPLYING...
+            </>
+          ) : (
+            "APPLY"
+          )}
         </Button>
       </div>
     </div>
