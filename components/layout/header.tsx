@@ -42,7 +42,7 @@ export function Header() {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false); // state to open/close confirm dialog
-  const [user, setUser] = useState();
+  const [user, setUser] = useState<string | undefined>(undefined);
   const router = useRouter();
 
   const getProfileUrl = () => {
@@ -85,7 +85,9 @@ export function Header() {
   useEffect(() => {
     try {
       const response: any = getStaffByTokenService();
-      setUser(response);
+      console.log("fetch user profile: ", response);
+
+      setUser(response?.profileUrl);
     } catch (error) {
       console.log("Error to fetch user profile: ", error);
     }
@@ -142,7 +144,7 @@ export function Header() {
               <Button variant="ghost" size="icon" className="rounded-full">
                 <Avatar className="h-8 w-8 border-2 border-gray-200">
                   <AvatarImage
-                    src="/placeholder.svg?height=32&width=32"
+                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE}${user}`}
                     alt="User"
                   />
                   <AvatarFallback>RA</AvatarFallback>
