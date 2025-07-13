@@ -1,12 +1,10 @@
 import { paymentTypes } from "@/constants/constant";
-import { MajorModel } from "@/model/master-data/major/all-major-model";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -30,12 +28,11 @@ import {
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
+
 export const paymentFormSchema = z.object({
   item: z.string().min(1, { message: "Item is required" }),
   type: z.string().min(1, { message: "Type is required" }),
-  // percentage: z.string().min(1, { message: "Percentage is required" }),
-  // amount: z.string().min(1, { message: "Amount is required" }),
-   percentage: z
+  percentage: z
     .string()
     .min(1, { message: "Percentage is required" })
     .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
@@ -50,7 +47,6 @@ export const paymentFormSchema = z.object({
   comment: z.string().min(1, { message: "Comment is required" }),
 });
 
-// Export the type for use across your application
 export type PaymentFormData = z.infer<typeof paymentFormSchema> & {
   id?: number;
 };
@@ -72,13 +68,8 @@ export function PaymentFormModal({
   mode,
   isSubmitting = false,
 }: PaymentFormModalProps) {
-  // Initialize selectedMajor with initialData.selectedMajor if available
-  const [selectedMajor, setSelectedMajor] = useState<MajorModel | null>(null);
   const [isFormDirty, setIsFormDirty] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  //const currentYear = new Date().getFullYear();
 
-  // Initialize the form with Zod validation
   const form = useForm<PaymentFormData>({
     resolver: zodResolver(paymentFormSchema),
     defaultValues: {
@@ -88,14 +79,13 @@ export function PaymentFormModal({
       amount: "0",
       comment: "",
     },
-    mode: "onChange", // Validate on change for better UX
+    mode: "onChange",
   });
 
   // Reset form when modal opens/closes or initialData changes
   useEffect(() => {
     if (isOpen) {
       if (initialData && mode === "edit") {
-        // Set the form values
         form.reset({
           item: initialData.item || "",
           type: initialData.type || "",
@@ -104,7 +94,6 @@ export function PaymentFormModal({
           comment: initialData.comment || "",
         });
       } else {
-        // Reset for add mode
         form.reset({
           item: "",
           type: "",
@@ -112,7 +101,6 @@ export function PaymentFormModal({
           amount: "0",
           comment: "",
         });
-        setSelectedMajor(null);
       }
       setIsFormDirty(false);
     }
@@ -129,7 +117,6 @@ export function PaymentFormModal({
   // Handle close with confirmation if form is dirty
   const handleCloseModal = () => {
     if (isFormDirty) {
-      // Use native confirm for simplicity, could be replaced with a custom dialog
       const confirmed = window.confirm(
         "You have unsaved changes. Are you sure you want to close?"
       );
@@ -152,9 +139,10 @@ export function PaymentFormModal({
       onSubmit(submitData);
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast.error("An error occurred while saving class");
+      toast.error("An error occurred while saving payment");
     }
   };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleCloseModal}>
       <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
@@ -220,25 +208,8 @@ export function PaymentFormModal({
                 </FormItem>
               )}
             />
-            <div className="flex gap-4">
-              <div className="w-1/2">
-                <FormField
-                  control={form.control}
-                  name="percentage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Percentage (%) <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter percentage" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
 
+            <div className="flex gap-4">
               <div className="w-1/2">
                 <FormField
                   control={form.control}
@@ -250,6 +221,24 @@ export function PaymentFormModal({
                       </FormLabel>
                       <FormControl>
                         <Input placeholder="Enter amount" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="w-1/2">
+                <FormField
+                  control={form.control}
+                  name="percentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Percentage (%) <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter percentage" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -270,7 +259,6 @@ export function PaymentFormModal({
                     <Input
                       placeholder="Enter comment"
                       {...field}
-                      autoFocus
                       maxLength={50}
                     />
                   </FormControl>
@@ -282,7 +270,6 @@ export function PaymentFormModal({
             <DialogFooter className="mt-6 sticky -bottom-8 z-10 bg-white py-4">
               <Button
                 type="button"
-                // variant="outline"
                 className="bg-white border text-gray-700 border-gray-300 hover:bg-transparent"
                 onClick={handleCloseModal}
                 disabled={isSubmitting}
@@ -300,7 +287,7 @@ export function PaymentFormModal({
                     {mode === "add" ? "Creating..." : "Updating..."}
                   </>
                 ) : (
-                  `${mode === "add" ? "Save" : "Update"} `
+                  `${mode === "add" ? "Save" : "Update"}`
                 )}
               </Button>
             </DialogFooter>

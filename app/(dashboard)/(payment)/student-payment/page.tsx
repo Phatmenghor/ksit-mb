@@ -140,13 +140,13 @@ export default function StudentsListPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {allStudentData?.content.length === 0 ? (
+              {allStudentData?.totalElements === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={StudentTablePaymentHeader.length}
                     className="text-center py-8 text-muted-foreground"
                   >
-                    No classes found
+                    No student found
                   </TableCell>
                 </TableRow>
               ) : (
@@ -159,7 +159,7 @@ export default function StudentsListPage() {
                   return (
                     <TableRow key={student.id}>
                       <TableCell>{indexDisplay}</TableCell>
-                      <TableCell>{student.id || "---"}</TableCell>
+                      <TableCell>{student.username || "---"}</TableCell>
                       <TableCell>
                         {`${student.khmerFirstName || ""} ${
                           student.khmerLastName || ""
@@ -172,6 +172,8 @@ export default function StudentsListPage() {
                       </TableCell>
 
                       <TableCell>{student.gender || "---"}</TableCell>
+                      <TableCell>{student.dateOfBirth || "---"}</TableCell>
+
                       <TableCell>
                         <div className="flex justify-start space-x-2">
                           <BreadcrumbLink

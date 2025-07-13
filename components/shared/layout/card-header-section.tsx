@@ -100,7 +100,7 @@ export const CardHeaderSection: React.FC<CardHeaderSectionProps> = ({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="rounded-full flex-shrink-0"
+                className="rounded-full flex-shrink-0 hover:cursor-pointer"
                 asChild
                 onClick={() => router.back()}
               >

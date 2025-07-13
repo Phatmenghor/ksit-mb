@@ -12,11 +12,11 @@ export const PaymentTableHeader = [
     className: "",
   },
   {
-    label: "Percentage (%)",
+    label: "Amount ($)",
     className: "text-left",
   },
   {
-    label: "Amount ($)",
+    label: "Percentage (%)",
     className: "text-left",
   },
   {
@@ -57,11 +57,11 @@ export const PaymentTableHeaderList = [
 ];
 
 export const StudentTablePaymentHeader = [
-  { label: "#", className: "w-[10%]" },
-    { label: "Student Id", className: "w-[10%]" },
-  { label: "Fullname (KH)", className: "w-[30%]" },
-  { label: "Fullname (EN)", className: "w-[30%]" },
-  { label: "Gender", className: "w-[20%]" },
-  { label: "Actions", className: "w-[10%]" },
+  { label: "#", className: "max-w-[20%]" },
+  { label: "Username", className: "max-w-[20%]" },
+  { label: "Fullname (KH)", className: "max-w-[20%]" },
+  { label: "Fullname (EN)", className: "max-w-[20%]" },
+  { label: "Gender", className: "max-w-[20%]" },
+  { label: "Date Of Birth", className: "max-w-[20%]" },
+  { label: "Actions", className: "max-w-[20%]" },
 ];
-
