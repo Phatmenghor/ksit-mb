@@ -169,8 +169,8 @@ install_dependencies() {
     
     npm cache clean --force
     rm -rf node_modules package-lock.json
-    npm i next --force
-    
+    npm install --force
+
     if [ $? -eq 0 ]; then
         print_success "Dependencies installed successfully"
     else
