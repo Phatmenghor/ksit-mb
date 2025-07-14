@@ -43,6 +43,8 @@ import {
 import { SubjectModal } from "@/components/dashboard/master-data/manage-subject/subject-form-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSearchParams } from "next/navigation";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function ManageSubjectPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -58,8 +60,31 @@ export default function ManageSubjectPage() {
   const [initialData, setInitialData] = useState<SubjectFormData | undefined>(
     undefined
   );
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.MASTER_DATA.MANAGE_SUBJECT,
+      defaultPageSize: 10,
+    });
 
   const searchDebounce = useDebounce(searchQuery, 500);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const loadSubjects = useCallback(
     async (param: AllSubjectFilterModel) => {
@@ -74,6 +99,11 @@ export default function ManageSubjectPage() {
 
         if (response) {
           setAllSubjectData(response);
+          // Handle case where current page exceeds total pages
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           console.error("Failed to fetch subject:");
         }
@@ -110,9 +140,7 @@ export default function ManageSubjectPage() {
     setInitialData(formData);
     setIsModalOpen(true);
   };
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
+
   async function handleSubmit(formData: SubjectFormData) {
     setIsSubmitting(true);
 
@@ -203,6 +231,15 @@ export default function ManageSubjectPage() {
         });
 
         toast.success("Subject deleted successfully");
+        if (
+          allSubjectData &&
+          allSubjectData.content.length === 1 &&
+          currentPage > 1
+        ) {
+          updateUrlWithPage(currentPage - 1);
+        } else {
+          await loadSubjects({});
+        }
       } else {
         toast.error("Failed to delete subject");
       }
@@ -279,11 +316,9 @@ export default function ManageSubjectPage() {
                 </TableRow>
               ) : (
                 allSubjectData?.content.map((subject, index) => {
-                  const indexDisplay =
-                    ((allSubjectData.pageNo || 1) - 1) * 10 + index + 1;
                   return (
                     <TableRow key={subject.id}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       <TableCell>{subject.name}</TableCell>
 
                       <TableCell>
@@ -324,9 +359,9 @@ export default function ManageSubjectPage() {
       {!isLoading && allSubjectData && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={allSubjectData.pageNo}
+            currentPage={currentPage}
             totalPages={allSubjectData.totalPages}
-            onPageChange={(page: number) => loadSubjects({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

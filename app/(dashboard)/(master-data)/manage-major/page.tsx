@@ -45,6 +45,8 @@ import PaginationPage from "@/components/shared/pagination-page";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDebounce } from "@/utils/debounce/debounce";
+import { useSearchParams } from "next/navigation";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function ManageMajorPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -58,7 +60,31 @@ export default function ManageMajorPage() {
   const [initialData, setInitialData] = useState<MajorFormData | undefined>(
     undefined
   );
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.MASTER_DATA.MANAGE_MAJOR,
+      defaultPageSize: 10,
+    });
+
   const searchDebounce = useDebounce(searchQuery, 500);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const loadMajors = useCallback(
     async (param: AllMajorFilterModel) => {
@@ -72,6 +98,10 @@ export default function ManageMajorPage() {
 
         if (response) {
           setAllMajorData(response);
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           console.error("Failed to fetch rooms:");
         }
@@ -175,9 +205,6 @@ export default function ManageMajorPage() {
     }
   }
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
   async function handleDeleteMajor() {
     if (!majors) return;
 
@@ -201,6 +228,15 @@ export default function ManageMajorPage() {
         });
 
         toast.success("Major deleted successfully");
+        if (
+          allMajorData &&
+          allMajorData.content.length === 1 &&
+          currentPage > 1
+        ) {
+          updateUrlWithPage(currentPage - 1);
+        } else {
+          await loadMajors({});
+        }
       } else {
         toast.error("Failed to delete major");
       }
@@ -275,11 +311,9 @@ export default function ManageMajorPage() {
                 </TableRow>
               ) : (
                 allMajorData?.content.map((major, index) => {
-                  const indexDisplay =
-                    ((allMajorData.pageNo || 1) - 1) * 10 + index + 1;
                   return (
                     <TableRow key={major.id}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       <TableCell>
                         <span className="rounded bg-gray-100 px-2 py-1">
                           {major.code}
@@ -324,9 +358,9 @@ export default function ManageMajorPage() {
       {!isLoading && allMajorData && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={allMajorData.pageNo}
+            currentPage={currentPage}
             totalPages={allMajorData.totalPages}
-            onPageChange={(page: number) => loadMajors({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

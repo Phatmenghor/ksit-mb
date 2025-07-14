@@ -24,16 +24,14 @@ import { Button } from "@/components/ui/button";
 import { DAYS_OF_WEEK, DayType, StatusEnum } from "@/constants/constant";
 import Loading from "@/components/shared/loading";
 import { toast } from "sonner";
-import {
-  getAllMyScheduleService,
-  getAllScheduleService,
-} from "@/service/schedule/schedule.service";
+import { getAllMyScheduleService } from "@/service/schedule/schedule.service";
 import { AllScheduleModel } from "@/model/attendance/schedule/schedule-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
 import PaginationPage from "@/components/shared/pagination-page";
 import { ScheduleFilterModel } from "@/model/attendance/schedule/schedule-filter";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { usePagination } from "@/hooks/use-pagination";
 
 const HistoryRecordSchedulePage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -46,10 +44,32 @@ const HistoryRecordSchedulePage = () => {
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const router = useRouter();
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.ATTENDANCE.HISTORY_RECORD,
+      defaultPageSize: 10,
+    });
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const fetchSchedule = useCallback(
     async (filters: ScheduleFilterModel) => {
@@ -65,6 +85,11 @@ const HistoryRecordSchedulePage = () => {
           ...filters,
         });
         setScheduleData(response);
+        // Handle case where current page exceeds total pages
+        if (response.totalPages > 0 && currentPage > response.totalPages) {
+          updateUrlWithPage(response.totalPages);
+          return;
+        }
       } catch (error) {
         console.error("Error fetching schedule data:", error);
         toast.error("An error occurred while loading classes");
@@ -83,11 +108,6 @@ const HistoryRecordSchedulePage = () => {
     }
   }, [selectedDay, debouncedSearchQuery, currentPage, fetchSchedule]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
-  };
-
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({ left: -200, behavior: "smooth" });
@@ -102,11 +122,7 @@ const HistoryRecordSchedulePage = () => {
 
   const handleDaySelect = (day: DayType) => {
     setSelectedDay(day);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    updateUrlWithPage(1);
   };
 
   const handleCardClick = (scheduleId: number) => {
@@ -293,7 +309,7 @@ const HistoryRecordSchedulePage = () => {
           <div className="mt-8 flex justify-end">
             <div>
               <PaginationPage
-                currentPage={scheduleData.pageNo}
+                currentPage={currentPage}
                 totalPages={scheduleData.totalPages}
                 onPageChange={handlePageChange}
               />

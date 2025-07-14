@@ -21,9 +21,10 @@ import { ROUTE } from "@/constants/routes";
 import { AllDepartmentFilterModel } from "@/model/master-data/department/type-department-model";
 import { Constants } from "@/constants/text-string";
 import PaginationPage from "@/components/shared/pagination-page";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Loading from "@/components/shared/loading";
 import { useDebounce } from "@/utils/debounce/debounce";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function DepartmentListPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -31,21 +32,50 @@ export default function DepartmentListPage() {
     useState<AllDepartmentModel | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const searchDebounce = useDebounce(searchQuery, 500);
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.MANAGE_SCHEDULE.DEPARTMENT,
+      defaultPageSize: 10,
+    });
+
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
+
   const loadDepartments = useCallback(
     async (param: AllDepartmentFilterModel) => {
       setIsLoading(true);
 
       try {
         const response = await getAllDepartmentService({
-          search: searchDebounce,
+          search: debouncedSearchQuery,
           status: Constants.ACTIVE,
           ...param,
         });
 
         if (response) {
           setAllDepartmentData(response);
+          // Handle case where current page exceeds total pages
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           console.error("Failed to fetch departments:");
         }
@@ -55,16 +85,12 @@ export default function DepartmentListPage() {
         setIsLoading(false);
       }
     },
-    [searchDebounce]
+    [debouncedSearchQuery]
   );
 
   useEffect(() => {
     loadDepartments({});
-  }, [searchDebounce, loadDepartments]);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
+  }, [debouncedSearchQuery, loadDepartments]);
 
   function onClickDepartmentCard(departmentId: number) {
     router.push(ROUTE.MANAGE_SCHEDULE.DEPARTMENT_CLASS + `/${departmentId}`);
@@ -152,9 +178,9 @@ export default function DepartmentListPage() {
       {!isLoading && allDepartmentData && (
         <div className="mt-4 flex justify-end animate-in fade-in slide-in-from-bottom-2 duration-500 delay-700">
           <PaginationPage
-            currentPage={allDepartmentData.pageNo}
+            currentPage={currentPage}
             totalPages={allDepartmentData.totalPages}
-            onPageChange={(page: number) => loadDepartments({ pageNo: page })}
+            onPageChange={handlePageChange}
             className="transition-all duration-300"
           />
         </div>

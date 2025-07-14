@@ -38,12 +38,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@radix-ui/react-tooltip";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { UserProfileSection } from "@/components/dashboard/users/shared/user-profile";
 import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { StudentByIdModel } from "@/model/user/student/student.respond.model";
 import { getStudentByIdService } from "@/service/user/student.service";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function PaymentPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -66,6 +67,22 @@ export default function PaymentPage() {
 
   const params = useParams();
   const id = params?.id ? Number(params.id) : 0;
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.PAYMENT.VIEW_PAYMENT(String(id)),
+      defaultPageSize: 10,
+    });
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const handleOpenEditModal = (data: PaymentModel) => {
     const formData: PaymentFormData = {
@@ -184,6 +201,11 @@ export default function PaymentPage() {
 
         if (response) {
           setAllPaymentData(response);
+          // Handle case where current page exceeds total pages
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           console.error("Failed to fetch payments");
         }
@@ -224,6 +246,15 @@ export default function PaymentPage() {
         });
 
         toast.success("Payment deleted successfully");
+        if (
+          allPaymentData &&
+          allPaymentData.content.length === 1 &&
+          currentPage > 1
+        ) {
+          updateUrlWithPage(currentPage - 1);
+        } else {
+          await payment({});
+        }
       } else {
         toast.error("Failed to delete payment");
       }
@@ -303,14 +334,9 @@ export default function PaymentPage() {
                     </TableRow>
                   ) : (
                     allPaymentData?.content.map((pay, index) => {
-                      const indexDisplay =
-                        ((allPaymentData.pageNo || 1) - 1) *
-                          (allPaymentData.pageSize || 10) +
-                        index +
-                        1;
                       return (
                         <TableRow key={pay.id}>
-                          <TableCell>{indexDisplay}</TableCell>
+                          <TableCell>{getDisplayIndex(index)}</TableCell>
                           <TableCell>{pay.item}</TableCell>
                           <TableCell>{pay.type}</TableCell>
                           <TableCell>{pay.amount}</TableCell>
@@ -371,9 +397,9 @@ export default function PaymentPage() {
       {!isLoading && allPaymentData && allPaymentData.totalPages > 1 && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={allPaymentData.pageNo}
+            currentPage={currentPage}
             totalPages={allPaymentData.totalPages}
-            onPageChange={(page: number) => payment({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

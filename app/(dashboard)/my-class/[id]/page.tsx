@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { AllMajorFilterModel } from "@/model/master-data/major/type-major-model";
 import { getAllMajorService } from "@/service/master-data/major.service";
 import { Constants } from "@/constants/text-string";
@@ -35,6 +35,7 @@ import { ClassCard } from "@/components/dashboard/schedule/class/class-card";
 import Loading from "@/components/shared/loading";
 import { AppIcons } from "@/constants/icons/icon";
 import { useDebounce } from "@/utils/debounce/debounce";
+import { usePagination } from "@/hooks/use-pagination";
 
 // Empty state components
 const EmptyMajorsState = ({ searchQuery }: { searchQuery: string }) => (
@@ -88,10 +89,16 @@ const MyClassPage = () => {
   const [isLoadingClasses, setIsLoadingClasses] = useState<boolean>(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState<boolean>(false);
   const params = useParams();
-  const depId = params?.depId ? Number(params.depId) : null;
+  const depId = params?.id ? Number(params.id) : null;
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const searchDebounce = useDebounce(searchQuery, 500);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
   const loadMajors = useCallback(
     async (param: AllMajorFilterModel) => {
       try {
@@ -109,6 +116,8 @@ const MyClassPage = () => {
 
         if (response) {
           setAllMajorData(response);
+          // Handle case where current page exceeds total pages
+
           if (
             !selectedMajor &&
             response.content &&
@@ -145,10 +154,6 @@ const MyClassPage = () => {
   useEffect(() => {
     loadMajors({});
   }, [searchDebounce, loadMajors]);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {

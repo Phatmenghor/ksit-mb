@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, Pencil, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
 import {
@@ -37,6 +37,7 @@ import { StaffListRequest } from "@/model/user/staff/staff.request.model";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import Loading from "@/components/shared/loading";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function TeachersListPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -54,10 +55,29 @@ export default function TeachersListPage() {
 
   const router = useRouter();
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.USERS.TEACHERS,
+      defaultPageSize: 10,
+    });
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
   };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const loadTeachers = useCallback(
     async (param: StaffListRequest) => {
@@ -72,6 +92,11 @@ export default function TeachersListPage() {
 
         if (response) {
           setAllTeachersData(response);
+          // Handle case where current page exceeds total pages
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           console.error("Failed to fetch teachers:");
         }
@@ -112,6 +137,15 @@ export default function TeachersListPage() {
         toast.success(
           `Teacher ${selectedTeacher.username ?? ""} deleted successfully`
         );
+        if (
+          allTeachersData &&
+          allTeachersData.content.length === 1 &&
+          currentPage > 1
+        ) {
+          updateUrlWithPage(currentPage - 1);
+        } else {
+          await loadTeachers({});
+        }
       } else {
         setAllTeachersData(originalData);
         toast.error("Failed to delete teacher");
@@ -167,14 +201,9 @@ export default function TeachersListPage() {
                 </TableRow>
               ) : (
                 allTeachersData?.content.map((teacher, index) => {
-                  const indexDisplay =
-                    ((allTeachersData.pageNo || 1) - 1) *
-                      (allTeachersData.pageSize || 10) +
-                    index +
-                    1;
                   return (
                     <TableRow key={teacher.id}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       <TableCell>{teacher.username.trim() || "---"}</TableCell>
                       <TableCell>
                         {`${teacher.khmerFirstName || ""} ${
@@ -313,9 +342,9 @@ export default function TeachersListPage() {
       {!isLoading && allTeachersData && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={allTeachersData.pageNo}
+            currentPage={currentPage}
             totalPages={allTeachersData.totalPages}
-            onPageChange={(page: number) => loadTeachers({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

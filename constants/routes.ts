@@ -63,6 +63,8 @@ export const ROUTE = {
     DEPARTMENT_CLASS: "/manage-schedule/class",
     UPDATE_SCHEDULE: "/manage-schedule/all-schedule/update/",
     ROOT: "/schedule",
+    CLASS: (id: string) => `/manage-schedule/class/${id}`,
+    All_SCHEDULE_DETAIL: (id: string) => `/manage-schedule/all-schedule/${id}`,
   },
 
   SCHEDULE: {
@@ -96,6 +98,7 @@ export const ROUTE = {
   MY_CLASS: {
     CLASS: "/my-class",
     MY_SCHEDULE: "/my-schedule",
+    MY_SCHEDULE_DETAIL: (id: string) => `/my-schedule/${id}`,
   },
 
   PERMISSIONS: "/permissions",
@@ -108,6 +111,7 @@ export const ROUTE = {
     RESULT_LIST: "/survey-result",
     MANAGE_QA: "/manage-question",
     STUDENT: "/survey/student",
+    STUDENT_RECORDS: "/survey/student-records",
     SURVEY_FORM: (id: string) => `/survey-form/${id}`,
     STUDENT_ALL: (id: string) => `/survey/student/all/${id}`,
     STUDENT_RECORD: (id: string) => `/survey/student-records/all/${id}`,

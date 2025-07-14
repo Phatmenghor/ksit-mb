@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   editStudentService,
   getAllStudentsService,
@@ -41,6 +41,7 @@ import Loading from "@/components/shared/loading";
 import { ComboboxSelectClass } from "@/components/shared/ComboBox/combobox-class";
 import PaginationPage from "@/components/shared/pagination-page";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function StudentsListPage() {
   // Core state
@@ -70,6 +71,29 @@ export default function StudentsListPage() {
   // Debounced search to reduce API call frequency
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.STUDENTS.LIST,
+      defaultPageSize: 10,
+    });
+
+  // Handlers for search, year, class change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   // Fetch student data from server
   const loadStudents = useCallback(
@@ -87,6 +111,11 @@ export default function StudentsListPage() {
 
         if (response) {
           setAllStudentData(response);
+          // Handle case where current page exceeds total pages
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           console.error("Failed to fetch student:");
         }
@@ -103,11 +132,6 @@ export default function StudentsListPage() {
   useEffect(() => {
     loadStudents({});
   }, [loadStudents, selectedClass, debouncedSearchQuery, selectAcademicYear]);
-
-  // Handlers for search, year, class change
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
 
   const handleYearChange = (e: number) => {
     setSelectAcademicYear(e);
@@ -146,6 +170,15 @@ export default function StudentsListPage() {
         toast.success(
           `Student ${selectedStudent.username ?? ""} deleted successfully`
         );
+        if (
+          allStudentData &&
+          allStudentData.content.length === 1 &&
+          currentPage > 1
+        ) {
+          updateUrlWithPage(currentPage - 1);
+        } else {
+          await loadStudents({});
+        }
       } else {
         setAllStudentData(originalData);
         toast.error("Failed to delete student");
@@ -222,14 +255,9 @@ export default function StudentsListPage() {
                 </TableRow>
               ) : (
                 allStudentData?.content.map((student, index) => {
-                  const indexDisplay =
-                    ((allStudentData.pageNo || 1) - 1) *
-                      (allStudentData.pageSize || 10) +
-                    index +
-                    1;
                   return (
                     <TableRow key={student.id}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       <TableCell>{student.username || "---"}</TableCell>
                       <TableCell>
                         {`${student.khmerFirstName || ""} ${
@@ -365,9 +393,9 @@ export default function StudentsListPage() {
       {!isLoading && allStudentData && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={allStudentData.pageNo}
+            currentPage={currentPage}
             totalPages={allStudentData.totalPages}
-            onPageChange={(page: number) => loadStudents({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

@@ -35,7 +35,7 @@ import { AllScheduleModel } from "@/model/attendance/schedule/schedule-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
 import PaginationPage from "@/components/shared/pagination-page";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { AllScheduleFilterModel } from "@/model/schedules/type-schedule-model";
 import { YearSelector } from "@/components/shared/year-selector";
@@ -47,6 +47,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AppIcons } from "@/constants/icons/icon";
+import { usePagination } from "@/hooks/use-pagination";
 
 const ScheduleAllPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -63,10 +64,32 @@ const ScheduleAllPage = () => {
     new Date().getFullYear()
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.SURVEY.STUDENT,
+      defaultPageSize: 10,
+    });
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const fetchSchedule = useCallback(
     async (filters: AllScheduleFilterModel) => {
@@ -85,6 +108,11 @@ const ScheduleAllPage = () => {
         const response = await getAllMyScheduleService(baseFilters);
 
         setScheduleData(response);
+        // Handle case where current page exceeds total pages
+        if (response.totalPages > 0 && currentPage > response.totalPages) {
+          updateUrlWithPage(response.totalPages);
+          return;
+        }
       } catch (error) {
         console.error("Error fetching schedule data:", error);
         toast.error("An error occurred while loading classes");
@@ -110,19 +138,14 @@ const ScheduleAllPage = () => {
     fetchSchedule,
   ]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
-  };
-
   const handleYearChange = (year: number) => {
     setSelectedYear(year);
-    setCurrentPage(1);
+    updateUrlWithPage(1);
   };
 
   const handleSemesterChange = (semester: string) => {
     setSelectedSemester(semester);
-    setCurrentPage(1);
+    updateUrlWithPage(1);
   };
 
   const scrollLeft = () => {
@@ -139,11 +162,7 @@ const ScheduleAllPage = () => {
 
   const handleDaySelect = (day: DayType) => {
     setSelectedDay(day);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    updateUrlWithPage(1);
   };
 
   const handleCardClick = (scheduleId: number) => {
@@ -390,7 +409,7 @@ const ScheduleAllPage = () => {
           <div className="mt-8 flex justify-end">
             <div>
               <PaginationPage
-                currentPage={scheduleData.pageNo}
+                currentPage={currentPage}
                 totalPages={scheduleData.totalPages}
                 onPageChange={handlePageChange}
               />

@@ -30,7 +30,8 @@ import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
 import PaginationPage from "@/components/shared/pagination-page";
 import { ScheduleFilterModel } from "@/model/attendance/schedule/schedule-filter";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { usePagination } from "@/hooks/use-pagination";
 
 const AttendanceScheduleCheckPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -43,10 +44,23 @@ const AttendanceScheduleCheckPage = () => {
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const router = useRouter();
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.ATTENDANCE.CLASS_SCHEDULE,
+      defaultPageSize: 10,
+    });
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
 
   const fetchSchedule = useCallback(
     async (filters: ScheduleFilterModel) => {
@@ -80,11 +94,6 @@ const AttendanceScheduleCheckPage = () => {
     }
   }, [selectedDay, debouncedSearchQuery, currentPage, fetchSchedule]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
-  };
-
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({ left: -200, behavior: "smooth" });
@@ -99,11 +108,7 @@ const AttendanceScheduleCheckPage = () => {
 
   const handleDaySelect = (day: DayType) => {
     setSelectedDay(day);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    updateUrlWithPage(1);
   };
 
   const handleCardClick = (scheduleId: number) => {
@@ -288,7 +293,7 @@ const AttendanceScheduleCheckPage = () => {
           <div className="mt-8 flex justify-end">
             <div>
               <PaginationPage
-                currentPage={scheduleData.pageNo}
+                currentPage={currentPage}
                 totalPages={scheduleData.totalPages}
                 onPageChange={handlePageChange}
               />

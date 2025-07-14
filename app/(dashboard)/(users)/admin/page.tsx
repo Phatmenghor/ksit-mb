@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Pencil, Trash2, Plus, RotateCcw, View, Eye } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
@@ -49,10 +49,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Loading from "@/components/shared/loading";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ResetPasswordModal from "@/components/dashboard/users/shared/change-password-modal";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function AdminsListPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,42 +71,69 @@ export default function AdminsListPage() {
   const [selectedAdmin, setSelectedAdmin] = useState<StaffModel | null>(null);
   const [statusFilter, setStatusFilter] = useState("ACTIVE");
 
-  const iconColor = "text-black";
-  const route = useRouter();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.USERS.ADMIN.INDEX,
+      defaultPageSize: 10,
+    });
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    // Reset to page 1 when searching
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
   };
 
-  const loadData = useCallback(
-    async (param: StaffListRequest) => {
-      setIsLoading(true);
-      try {
-        const response = await getAllStaffService({
-          ...param,
-          roles: [RoleEnum.ADMIN],
-          search: searchQuery,
-          status: statusFilter,
-        });
-        if (response) {
-          setData(response);
-        } else {
-          console.error("Failed to fetch admin:");
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
+
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await getAllStaffService({
+        roles: [RoleEnum.ADMIN],
+        search: debouncedSearchQuery,
+        pageNo: currentPage,
+        pageSize: 10,
+        status: statusFilter,
+      });
+
+      if (response) {
+        setData(response);
+
+        // Handle case where current page exceeds total pages
+        if (response.totalPages > 0 && currentPage > response.totalPages) {
+          updateUrlWithPage(response.totalPages);
+          return;
         }
-      } catch (error) {
-        toast.error("An error occurred while loading admins");
-      } finally {
-        setIsLoading(false);
+      } else {
+        console.error("Failed to fetch admin data");
+        setData(null);
       }
-    },
-    [debouncedSearchQuery, statusFilter]
-  );
+    } catch (error) {
+      console.error("Error loading admins:", error);
+      toast.error("An error occurred while loading admins");
+      setData(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [debouncedSearchQuery, currentPage, statusFilter, updateUrlWithPage]);
 
   useEffect(() => {
-    loadData({});
-  }, [debouncedSearchQuery, statusFilter, loadData]);
+    loadData();
+  }, [loadData]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");
@@ -129,7 +157,6 @@ export default function AdminsListPage() {
   async function handleSubmit(formData: AdminFormData) {
     setIsSubmitting(true);
     try {
-      // Prepare common payload fields
       const basePayload = {
         username: cleanRequiredFieldAdvance(formData.username, "username"),
         email: cleanRequiredFieldAdvance(formData.email, "email"),
@@ -142,59 +169,32 @@ export default function AdminsListPage() {
       };
 
       if (modalMode === "add") {
-        // Only create addPayload when in add mode
         const addPayload: AddStaffModel = {
           ...basePayload,
           roles: formData.roles ?? undefined,
           password: cleanRequiredFieldAdvance(formData.password, "password"),
         };
 
-        try {
-          let response = await addStaffService(addPayload);
-
-          if (response) {
-            setData((prevData) => {
-              if (!prevData) return null;
-              return {
-                ...prevData,
-                content: [response!, ...prevData.content],
-                totalElements: prevData.totalElements + 1,
-              };
-            });
-            toast.success(`Admin ${response.username} added successfully`);
-            setIsModalOpen(false);
-          }
-        } catch (error: any) {
-          toast.error(error.message || "Failed to add admin");
+        const response = await addStaffService(addPayload);
+        if (response) {
+          // Refresh data instead of manual state update for consistency
+          await loadData();
+          toast.success(`Admin ${response.username} added successfully`);
+          setIsModalOpen(false);
         }
       } else if (modalMode === "edit" && formData.id) {
-        // Only create updatePayload when in edit mode
         const updatePayload: EditStaffModel = {
           ...basePayload,
           status: formData.status ?? undefined,
           roles: formData.roles ?? undefined,
         };
 
-        try {
-          let response = await updateStaffService(formData.id, updatePayload);
-          console.log("##response from update api:", response);
-          if (response) {
-            setData((prevData) => {
-              if (!prevData) return null;
-              const updatedContent = prevData.content.map((admin) =>
-                admin.id === formData.id && response ? response : admin
-              );
-              return {
-                ...prevData,
-                content: updatedContent,
-              };
-            });
-
-            toast.success(`Admin ${response.username} updated successfully`);
-            setIsModalOpen(false);
-          }
-        } catch (error: any) {
-          toast.error(error.message || "Failed to update admin");
+        const response = await updateStaffService(formData.id, updatePayload);
+        if (response) {
+          // Refresh data instead of manual state update for consistency
+          await loadData();
+          toast.success(`Admin ${response.username} updated successfully`);
+          setIsModalOpen(false);
         }
       }
     } catch (error: any) {
@@ -210,33 +210,25 @@ export default function AdminsListPage() {
 
     setIsSubmitting(true);
     try {
-      const originalData = data;
-      setData((prevData) => {
-        if (!prevData) return null;
-        const updatedContent = prevData.content.filter(
-          (item) => item.id !== selectedAdmin.id
-        );
-        return {
-          ...prevData,
-          content: updatedContent,
-          totalElements: prevData.totalElements - 1,
-        };
-      });
-
       const response = await deletedStaffService(selectedAdmin.id);
 
       if (response) {
         toast.success(
           `Admin ${selectedAdmin.username ?? ""} deleted successfully`
         );
+
+        // After deletion, check if we need to go back a page
+        if (data && data.content.length === 1 && currentPage > 1) {
+          updateUrlWithPage(currentPage - 1);
+        } else {
+          await loadData();
+        }
       } else {
-        setData(originalData);
         toast.error("Failed to delete admin");
       }
     } catch (error) {
       console.error("Error deleting admin:", error);
       toast.error("An error occurred while deleting the admin");
-      loadData({});
     } finally {
       setIsSubmitting(false);
       setIsDeleteDialogOpen(false);
@@ -259,7 +251,6 @@ export default function AdminsListPage() {
       />
 
       <div className={`overflow-x-auto mt-4 ${useIsMobile() ? "pl-4" : ""}`}>
-        {" "}
         {isLoading ? (
           <Loading />
         ) : (
@@ -277,123 +268,118 @@ export default function AdminsListPage() {
               {data?.content.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={StaffTableHeader.length}
+                    colSpan={AdminTableHeader.length}
                     className="text-center py-8 text-muted-foreground"
                   >
                     No admin found
                   </TableCell>
                 </TableRow>
               ) : (
-                data?.content.map((admin, index) => {
-                  const indexDisplay =
-                    ((data.pageNo || 1) - 1) * (data.pageSize || 10) +
-                    index +
-                    1;
-                  return (
-                    <TableRow key={admin.id}>
-                      <TableCell>{indexDisplay}</TableCell>
-                      <TableCell>{admin.username.trim() || "---"}</TableCell>
-                      <TableCell>{admin?.email || "---"}</TableCell>
-                      <TableCell>
-                        {`${admin.khmerFirstName || ""} ${
-                          admin.khmerLastName || ""
-                        }`.trim() || "---"}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-start space-x-2">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  onClick={() => {
-                                    route.push(
-                                      `${ROUTE.USERS.ADMIN.ADMIN_VIEW(
-                                        String(admin.id)
-                                      )}`
-                                    );
-                                  }}
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
-                                  disabled={isSubmitting}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Admin Detail</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  onClick={() => handleOpenEditModal(admin)}
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
-                                  disabled={isSubmitting}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Edit</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  onClick={() =>
-                                    setIsChangePasswordDialogOpen(true)
-                                  }
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
-                                  disabled={isSubmitting}
-                                >
-                                  <RotateCcw className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Reset Password</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                data?.content.map((admin, index) => (
+                  <TableRow key={admin.id}>
+                    <TableCell>{getDisplayIndex(index)}</TableCell>
+                    <TableCell>{admin.username.trim() || "---"}</TableCell>
+                    <TableCell>{admin?.email || "---"}</TableCell>
+                    <TableCell>
+                      {`${admin.khmerFirstName || ""} ${
+                        admin.khmerLastName || ""
+                      }`.trim() || "---"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-start space-x-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                onClick={() => {
+                                  router.push(
+                                    `${ROUTE.USERS.ADMIN.ADMIN_VIEW(
+                                      String(admin.id)
+                                    )}`
+                                  );
+                                }}
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                disabled={isSubmitting}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Admin Detail</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                onClick={() => handleOpenEditModal(admin)}
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                disabled={isSubmitting}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Edit</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                onClick={() => {
+                                  setSelectedAdmin(admin);
+                                  setIsChangePasswordDialogOpen(true);
+                                }}
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 bg-gray-200 hover:bg-gray-300"
+                                disabled={isSubmitting}
+                              >
+                                <RotateCcw className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Reset Password</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
 
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  onClick={() => {
-                                    setSelectedAdmin(admin);
-                                    setIsDeleteDialogOpen(true);
-                                  }}
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 bg-red-500 text-white hover:text-gray-100 hover:bg-red-600"
-                                  disabled={isSubmitting}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Delete</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                onClick={() => {
+                                  setSelectedAdmin(admin);
+                                  setIsDeleteDialogOpen(true);
+                                }}
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 bg-red-500 text-white hover:text-gray-100 hover:bg-red-600"
+                                disabled={isSubmitting}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
             </TableBody>
           </Table>
         )}
       </div>
 
-      {!isLoading && data && (
+      {!isLoading && data && data.totalPages > 1 && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={data.pageNo}
+            currentPage={currentPage}
             totalPages={data.totalPages}
-            onPageChange={(page: number) => loadData({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

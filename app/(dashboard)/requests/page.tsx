@@ -33,10 +33,11 @@ import { useDebounce } from "@/utils/debounce/debounce";
 import { RequestFilterModel } from "@/model/request/request-filter";
 import { getAllRequestService } from "@/service/request/request.service";
 import { Badge } from "@/components/ui/badge";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { formatDate } from "@/utils/date/dd-mm-yyyy-format";
 import { truncateText } from "@/utils/format/format-width-text";
 import { formatGender } from "@/constants/format-enum/formate-gender";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function RequestPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,7 +49,6 @@ export default function RequestPage() {
     icon: Logs,
   });
   const [requestData, setRequestData] = useState<AllRequestModel | null>(null);
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // New state for storing counts
@@ -58,7 +58,30 @@ export default function RequestPage() {
   const [isLoadingCounts, setIsLoadingCounts] = useState<boolean>(false);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.REQUESTS,
+      defaultPageSize: 10,
+    });
+
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const fetchRequests = useCallback(
     async (filters: RequestFilterModel) => {
@@ -70,6 +93,11 @@ export default function RequestPage() {
           ...filters,
         });
         setRequestData(response);
+        // Handle case where current page exceeds total pages
+        if (response.totalPages > 0 && currentPage > response.totalPages) {
+          updateUrlWithPage(response.totalPages);
+          return;
+        }
       } catch (error: any) {
         console.error("Error fetching requests:", error);
         toast.error("An error occurred while loading classes");
@@ -122,11 +150,6 @@ export default function RequestPage() {
     fetchRequestCounts();
   }, [fetchRequestCounts, debouncedSearchQuery]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
-  };
-
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({ left: -200, behavior: "smooth" });
@@ -141,11 +164,7 @@ export default function RequestPage() {
 
   const handleTypeSelect = (type: RequestType) => {
     setSelectedType(type);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    updateUrlWithPage(1);
   };
 
   // Check in history
@@ -329,8 +348,6 @@ export default function RequestPage() {
                 </TableRow>
               ) : (
                 requestData?.content.map((req, index) => {
-                  const indexDisplay =
-                    ((requestData.pageNo || 1) - 1) * 10 + index + 1;
                   return (
                     <TableRow
                       key={req.id}
@@ -339,7 +356,7 @@ export default function RequestPage() {
                         animationFillMode: "backwards",
                       }}
                     >
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       <TableCell>
                         {req.user
                           ? `${req.user?.identifyNumber || "---"}`
@@ -396,7 +413,7 @@ export default function RequestPage() {
       {!isLoading && requestData && requestData.totalPages > 1 && (
         <div className="mt-8 flex justify-end">
           <PaginationPage
-            currentPage={requestData.pageNo}
+            currentPage={currentPage}
             totalPages={requestData.totalPages}
             onPageChange={handlePageChange}
           />

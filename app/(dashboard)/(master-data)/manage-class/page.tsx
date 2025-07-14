@@ -47,6 +47,8 @@ import { DegreeEnum } from "@/constants/constant";
 import Loading from "@/components/shared/loading";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePagination } from "@/hooks/use-pagination";
+import { useSearchParams } from "next/navigation";
 
 export default function ManageClassPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -63,7 +65,32 @@ export default function ManageClassPage() {
   const [initialData, setInitialData] = useState<ClassFormData | undefined>(
     undefined
   );
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.MASTER_DATA.MANAGE_CLASS,
+      defaultPageSize: 10,
+    });
+
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
+
   const loadClass = useCallback(
     async (param: AllMajorFilterModel = {}) => {
       setIsLoading(true);
@@ -77,6 +104,11 @@ export default function ManageClassPage() {
 
         if (response) {
           setAllClassData(response);
+          // Handle case where current page exceeds total pages
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           toast.error("Failed to fetch class data");
         }
@@ -93,10 +125,6 @@ export default function ManageClassPage() {
   useEffect(() => {
     loadClass();
   }, [loadClass, debouncedSearchQuery, selectedYear]);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
 
   const handleOpenAddModal = () => {
     setModalMode("add");
@@ -143,6 +171,15 @@ export default function ManageClassPage() {
 
       if (response) {
         toast.success(`Class ${selectedClass.code} deleted successfully`);
+        if (
+          allClassData &&
+          allClassData.content.length === 1 &&
+          currentPage > 1
+        ) {
+          updateUrlWithPage(currentPage - 1);
+        } else {
+          await loadClass({});
+        }
       } else {
         setAllClassData(originalData);
         toast.error("Failed to delete class");
@@ -184,6 +221,15 @@ export default function ManageClassPage() {
               };
             });
             toast.success(`Class ${response.code} added successfully`);
+            if (
+              allClassData &&
+              allClassData.content.length === 1 &&
+              currentPage > 1
+            ) {
+              updateUrlWithPage(currentPage - 1);
+            } else {
+              await loadClass({});
+            }
             setIsModalOpen(false);
           }
         } catch (error: any) {
@@ -290,14 +336,9 @@ export default function ManageClassPage() {
                 </TableRow>
               ) : (
                 allClassData?.content.map((cls, index) => {
-                  const indexDisplay =
-                    ((allClassData.pageNo || 1) - 1) *
-                      (allClassData.pageSize || 10) +
-                    index +
-                    1;
                   return (
                     <TableRow key={cls.id}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       <TableCell>
                         <span className="rounded bg-gray-100 px-2 py-1 font-medium">
                           {cls.code}
@@ -346,9 +387,9 @@ export default function ManageClassPage() {
       {!isLoading && allClassData && allClassData.totalPages > 1 && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={allClassData.pageNo}
+            currentPage={currentPage}
             totalPages={allClassData.totalPages}
-            onPageChange={(page: number) => loadClass({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

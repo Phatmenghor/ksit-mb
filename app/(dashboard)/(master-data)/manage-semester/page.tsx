@@ -55,6 +55,8 @@ import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmatio
 import { SemesterType } from "@/constants/constant";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDebounce } from "@/utils/debounce/debounce";
+import { useSearchParams } from "next/navigation";
+import { usePagination } from "@/hooks/use-pagination";
 export default function ManageSemester() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
@@ -72,8 +74,30 @@ export default function ManageSemester() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const searchDebounce = useDebounce(searchQuery, 500);
+  const searchParams = useSearchParams();
 
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.MASTER_DATA.MANAGE_SEMESTER,
+      defaultPageSize: 10,
+    });
+
+  const searchDebounce = useDebounce(searchQuery, 500);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
   const loadSemester = useCallback(
     async (param: AllSemesterFilterModel) => {
       setIsLoading(true);
@@ -86,6 +110,10 @@ export default function ManageSemester() {
         });
         if (response) {
           setAllSemesterData(response);
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           console.error("Failed to fetch semesters:");
         }
@@ -189,10 +217,6 @@ export default function ManageSemester() {
     }
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
   async function handleDeleteSemester() {
     if (!semesters) return;
     setIsSubmitting(true);
@@ -215,6 +239,15 @@ export default function ManageSemester() {
         });
 
         toast.success("Semester deleted successfully");
+        if (
+          allSemesterData &&
+          allSemesterData.content.length === 1 &&
+          currentPage > 1
+        ) {
+          updateUrlWithPage(currentPage - 1);
+        } else {
+          await loadSemester({});
+        }
       } else {
         toast.error("Failed to delete semester");
       }
@@ -294,11 +327,9 @@ export default function ManageSemester() {
                 </TableRow>
               ) : (
                 allSemesterData?.content.map((semesters, index) => {
-                  const indexDisplay =
-                    ((allSemesterData.pageNo || 1) - 1) * 10 + index + 1;
                   return (
                     <TableRow key={semesters.id}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       <TableCell>{semesters.semester}</TableCell>
                       <TableCell>{formatDate(semesters.startDate)}</TableCell>
                       <TableCell>{formatDate(semesters.endDate)}</TableCell>
@@ -362,9 +393,9 @@ export default function ManageSemester() {
       {!isLoading && allSemesterData && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={allSemesterData.pageNo}
+            currentPage={currentPage}
             totalPages={allSemesterData.totalPages}
-            onPageChange={(page: number) => loadSemester({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

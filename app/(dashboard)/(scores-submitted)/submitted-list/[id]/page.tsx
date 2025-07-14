@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import StudentScoreHeader from "@/components/dashboard/student-scores/layout/header-section";
-import { ScoreSubmittedModel } from "@/model/score/submitted-score/submitted-score.response.model";
 import {
   getSubmissionScoreByIdService,
   submittedScoreService,

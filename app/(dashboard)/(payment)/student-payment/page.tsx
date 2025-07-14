@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/table";
 import { StudentTablePaymentHeader } from "@/constants/payment/payment";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSearchParams } from "next/navigation";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function StudentsListPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -42,7 +44,31 @@ export default function StudentsListPage() {
     null
   );
   const isMobile = useIsMobile();
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.PAYMENT.LIST,
+      defaultPageSize: 10,
+    });
+
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
+
   const loadStudents = useCallback(
     async (param: RequestAllStudent) => {
       setIsLoading(true);
@@ -58,6 +84,11 @@ export default function StudentsListPage() {
 
         if (response) {
           setAllStudentData(response);
+          // Handle case where current page exceeds total pages
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
           console.log(">>>", response);
         } else {
           console.error("Failed to fetch departments:");
@@ -74,10 +105,6 @@ export default function StudentsListPage() {
   useEffect(() => {
     loadStudents({});
   }, [searchQuery, loadStudents, debouncedSearchQuery, selectAcademicYear]);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
 
   const handleYearChange = (e: number) => {
     setSelectAcademicYear(e);
@@ -151,14 +178,9 @@ export default function StudentsListPage() {
                 </TableRow>
               ) : (
                 allStudentData?.content.map((student, index) => {
-                  const indexDisplay =
-                    ((allStudentData.pageNo || 1) - 1) *
-                      (allStudentData.pageSize || 10) +
-                    index +
-                    1;
                   return (
                     <TableRow key={student.id}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       <TableCell>{student.username || "---"}</TableCell>
                       <TableCell>
                         {`${student.khmerFirstName || ""} ${
@@ -207,9 +229,9 @@ export default function StudentsListPage() {
       {!isLoading && allStudentData && (
         <div className="mt-8 flex justify-end animate-in slide-in-from-bottom-4 duration-500 delay-1000">
           <PaginationPage
-            currentPage={allStudentData.pageNo}
+            currentPage={currentPage}
             totalPages={allStudentData.totalPages}
-            onPageChange={(page: number) => loadStudents({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

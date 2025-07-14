@@ -63,6 +63,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSearchParams } from "next/navigation";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function SurveyResultPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -70,7 +72,6 @@ export default function SurveyResultPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [selectedSemester, setSelectedSemester] = useState<string>("ALL");
-  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const [selectAcademicYear, setSelectAcademicYear] = useState<
     number | undefined
@@ -85,6 +86,30 @@ export default function SurveyResultPage() {
   // Date filter states
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.SURVEY.RESULT_LIST,
+      defaultPageSize: 20,
+    });
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
 
   // Hidden headers state - you can modify this to control which headers to hide
   const hiddenHeaders = [
@@ -123,6 +148,7 @@ export default function SurveyResultPage() {
           academyYear: selectAcademicYear,
           semester: selectedSemester != "ALL" ? selectedSemester : undefined,
           classId: selectedClass?.id,
+          pageSize: 20,
           startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
           endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined,
           ...filter,
@@ -140,6 +166,14 @@ export default function SurveyResultPage() {
 
         if (previewData) {
           setSurveyData(previewData);
+          // Handle case where current page exceeds total pages
+          if (
+            previewData.totalPages > 0 &&
+            currentPage > previewData.totalPages
+          ) {
+            updateUrlWithPage(previewData.totalPages);
+            return;
+          }
         }
       } catch (error) {
         console.error("Error fetching survey results:", error);
@@ -196,32 +230,23 @@ export default function SurveyResultPage() {
     return value;
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
-  };
-
   const handleYearChange = (e: number) => {
     setSelectAcademicYear(e);
   };
 
   const handleClassChange = (e: ClassModel | null) => {
     setSelectedClass(e ?? undefined);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    updateUrlWithPage(1);
   };
 
   const clearStartDate = () => {
     setStartDate(undefined);
-    setCurrentPage(1);
+    updateUrlWithPage(1);
   };
 
   const clearEndDate = () => {
     setEndDate(undefined);
-    setCurrentPage(1);
+    updateUrlWithPage(1);
   };
 
   const exportToExcel = async () => {
@@ -544,11 +569,9 @@ export default function SurveyResultPage() {
                 </TableRow>
               ) : (
                 surveyData?.content.map((survey, index) => {
-                  const indexDisplay =
-                    ((surveyData.pageNo || 1) - 1) * 10 + index + 1;
                   return (
                     <TableRow key={survey.responseId}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       {surveyHeaders.map((header) => (
                         <TableCell key={`${survey.responseId}-${header.key}`}>
                           {renderCellValue(survey, header)}
@@ -566,7 +589,7 @@ export default function SurveyResultPage() {
       {surveyData && (
         <div className="mt-8 flex justify-end">
           <PaginationPage
-            currentPage={surveyData.pageNo}
+            currentPage={currentPage}
             totalPages={surveyData.totalPages}
             onPageChange={handlePageChange}
           />

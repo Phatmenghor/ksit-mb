@@ -51,8 +51,9 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { AppIcons } from "@/constants/icons/icon";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function AllStudentResultPage() {
   const params = useParams();
@@ -61,12 +62,18 @@ export default function AllStudentResultPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const [surveyHeaders, setSurveyHeaders] = useState<SurveyReportHeader[]>([]);
   const [surveyData, setSurveyData] = useState<SurveyResponseData | null>(null);
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.SURVEY.STUDENT_RECORD(String(rawId)),
+      defaultPageSize: 10,
+    });
 
   const router = useRouter();
   // Hidden headers state - you can modify this to control which headers to hide
@@ -91,6 +98,22 @@ export default function AllStudentResultPage() {
     "departmentName",
     "timeSlot",
   ];
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const fetchSurveyResults = useCallback(
     async (filter: AllSurveyFilterModel = {}) => {
@@ -123,6 +146,13 @@ export default function AllStudentResultPage() {
 
         if (previewData) {
           setSurveyData(previewData);
+          if (
+            previewData.totalPages > 0 &&
+            currentPage > previewData.totalPages
+          ) {
+            updateUrlWithPage(previewData.totalPages);
+            return;
+          }
         }
       } catch (error) {
         console.error("Error fetching survey results:", error);
@@ -161,15 +191,6 @@ export default function AllStudentResultPage() {
         return formatDate(value as string);
     }
     return value;
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
   };
 
   const exportToExcel = async () => {
@@ -446,14 +467,9 @@ export default function AllStudentResultPage() {
                 </TableRow>
               ) : (
                 surveyData?.content.map((survey, index) => {
-                  const indexDisplay =
-                    ((surveyData.pageNo || 1) - 1) *
-                      (surveyData?.pageSize || 10) +
-                    index +
-                    1;
                   return (
                     <TableRow key={survey.responseId}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       {surveyHeaders.map((header) => (
                         <TableCell key={`${survey.responseId}-${header.key}`}>
                           {renderCellValue(survey, header)}
@@ -471,7 +487,7 @@ export default function AllStudentResultPage() {
       {surveyData && (
         <div className="mt-8 flex justify-end">
           <PaginationPage
-            currentPage={surveyData.pageNo}
+            currentPage={currentPage}
             totalPages={surveyData.totalPages}
             onPageChange={handlePageChange}
           />

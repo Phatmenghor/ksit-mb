@@ -22,7 +22,6 @@ import {
   AttendanceHistoryModel,
 } from "@/model/attendance/attendance-history";
 import {
-  getAllAttedanceHistoryCountService,
   getAllAttedanceHistoryExcelService,
   getAllAttendanceHistoryService,
 } from "@/service/schedule/attendance.service";
@@ -32,22 +31,20 @@ import { format } from "date-fns";
 import Loading from "@/components/shared/loading";
 import { formatDate } from "@/utils/date/dd-mm-yyyy-format";
 import { Badge } from "@/components/ui/badge";
-import { Constants } from "@/constants/text-string";
 import { formatType } from "@/constants/format-enum/formate-type-attendance";
 import { AllAttendanceHistoryModel } from "@/model/attendance/attendance-history";
 import { getDetailScheduleService } from "@/service/schedule/schedule.service";
-import { useParams } from "next/navigation";
-import AttendanceCheckHeader from "@/components/dashboard/attendance/schedule/attendance-check-header";
+import { useParams, useSearchParams } from "next/navigation";
 import AttendanceHeader from "@/components/dashboard/attendance/header";
 import { Button } from "@/components/ui/button";
 import { AppIcons } from "@/constants/icons/icon";
 import { Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useExportAttendanceHandlers } from "@/components/shared/export/attendance-export-handler";
-import { AllAttendanceModel } from "@/model/attendance/attendance-get";
 import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePagination } from "@/hooks/use-pagination";
+import { ROUTE } from "@/constants/routes";
 
 export default function HistoryRecordsPage() {
   const params = useParams();
@@ -55,12 +52,27 @@ export default function HistoryRecordsPage() {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const [scheduleDetail, setScheduleDetail] = useState<ScheduleModel | null>(
     null
   );
   const [attendanceHistoryData, setAttendanceHistoryData] =
     useState<AllAttendanceHistoryModel | null>(null);
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.ATTENDANCE.HISTORY_RECORD_DETAIL(String(id)),
+      defaultPageSize: 10,
+    });
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const fetchAttendanceHistory = useCallback(
     async (filter: AttendanceHistoryFilter) => {
@@ -74,6 +86,11 @@ export default function HistoryRecordsPage() {
         console.log(response);
 
         setAttendanceHistoryData(response);
+        // Handle case where current page exceeds total pages
+        if (response.totalPages > 0 && currentPage > response.totalPages) {
+          updateUrlWithPage(response.totalPages);
+          return;
+        }
       } catch (error: any) {
         console.error("Error fetching requests:", error);
         toast.error("An error occurred while loading attendance history");
@@ -137,10 +154,6 @@ export default function HistoryRecordsPage() {
       setIsLoading(false);
     }
   }, [id]);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
 
   useEffect(() => {
     loadScheduleData();
@@ -376,13 +389,9 @@ export default function HistoryRecordsPage() {
                     </TableRow>
                   ) : (
                     attendanceHistoryData?.content.map((history, index) => {
-                      const indexDisplay =
-                        ((attendanceHistoryData.pageNo || 1) - 1) * 10 +
-                        index +
-                        1;
                       return (
                         <TableRow key={history.id}>
-                          <TableCell>{indexDisplay}</TableCell>
+                          <TableCell>{getDisplayIndex(index)}</TableCell>
                           <TableCell>
                             {history.identifyNumber || "---"}
                           </TableCell>
@@ -413,7 +422,7 @@ export default function HistoryRecordsPage() {
       {attendanceHistoryData && (
         <div className="mt-8 flex justify-end">
           <PaginationPage
-            currentPage={attendanceHistoryData.pageNo}
+            currentPage={currentPage}
             totalPages={attendanceHistoryData.totalPages}
             onPageChange={handlePageChange}
           />

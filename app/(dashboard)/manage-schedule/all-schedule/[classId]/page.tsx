@@ -37,7 +37,7 @@ import { AllScheduleModel } from "@/model/attendance/schedule/schedule-model";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { Separator } from "@/components/ui/separator";
 import PaginationPage from "@/components/shared/pagination-page";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import { AllScheduleFilterModel } from "@/model/schedules/type-schedule-model";
 import { YearSelector } from "@/components/shared/year-selector";
@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/select";
 import { AppIcons } from "@/constants/icons/icon";
 import DuplicateScheduleModal from "@/components/dashboard/manage-schedule/duplicate-schedule-modal";
+import { usePagination } from "@/hooks/use-pagination";
 
 const AllSchedulePage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -69,11 +70,33 @@ const AllSchedulePage = () => {
     new Date().getFullYear()
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-
+  const params = useParams();
+  const classId = params?.classId ? Number(params.classId) : null;
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.MANAGE_SCHEDULE.All_SCHEDULE_DETAIL(String(classId)),
+      defaultPageSize: 10,
+    });
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const fetchSchedule = useCallback(
     async (filters: AllScheduleFilterModel) => {
@@ -81,6 +104,7 @@ const AllSchedulePage = () => {
       try {
         // Create base filters object
         const baseFilters = {
+          classId: Number(classId),
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
           academyYear: selectedYear,
@@ -93,6 +117,11 @@ const AllSchedulePage = () => {
         const response = await getAllScheduleService(baseFilters);
 
         setScheduleData(response);
+        // Handle case where current page exceeds total pages
+        if (response.totalPages > 0 && currentPage > response.totalPages) {
+          updateUrlWithPage(response.totalPages);
+          return;
+        }
       } catch (error) {
         console.error("Error fetching schedule data:", error);
         toast.error("An error occurred while loading classes");
@@ -110,11 +139,6 @@ const AllSchedulePage = () => {
     }
   }, [selectedDay, debouncedSearchQuery, currentPage, fetchSchedule]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
-  };
-
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({ left: -200, behavior: "smooth" });
@@ -129,11 +153,7 @@ const AllSchedulePage = () => {
 
   const handleDaySelect = (day: DayType) => {
     setSelectedDay(day);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    updateUrlWithPage(1);
   };
 
   const handleEditClick = (scheduleId: number) => {
@@ -415,7 +435,7 @@ const AllSchedulePage = () => {
         {!isLoading && scheduleData && (
           <div className="mt-8 flex justify-end">
             <PaginationPage
-              currentPage={scheduleData.pageNo}
+              currentPage={currentPage}
               totalPages={scheduleData.totalPages}
               onPageChange={handlePageChange}
             />

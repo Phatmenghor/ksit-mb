@@ -34,7 +34,7 @@ import {
 import { Constants } from "@/constants/text-string";
 import { toast } from "sonner";
 import { CourseTableHeader } from "@/constants/table/master-data";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import PaginationPage from "@/components/shared/pagination-page";
 import Loading from "@/components/shared/loading";
@@ -44,6 +44,7 @@ import { useForm } from "react-hook-form";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDebounce } from "@/utils/debounce/debounce";
 import { string } from "zod";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function CoursesPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -63,7 +64,31 @@ export default function CoursesPage() {
     departmentId: number;
   };
 
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.MASTER_DATA.COURSES.INDEX,
+      defaultPageSize: 10,
+    });
+
   const searchDebounce = useDebounce(searchQuery, 500);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const { setValue } = useForm<FormValues>();
 
@@ -81,6 +106,10 @@ export default function CoursesPage() {
 
         if (response) {
           setAllCourseData(response);
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           console.error("Failed to fetch departments:");
         }
@@ -118,6 +147,15 @@ export default function CoursesPage() {
 
       if (response) {
         toast.success(`Class ${selectedCourse.code} deleted successfully`);
+        if (
+          allCourseData &&
+          allCourseData.content.length === 1 &&
+          currentPage > 1
+        ) {
+          updateUrlWithPage(currentPage - 1);
+        } else {
+          await loadCourses({});
+        }
       } else {
         setAllCourseData(originalData);
         toast.error("Failed to delete class");
@@ -131,10 +169,6 @@ export default function CoursesPage() {
       setIsDeleteDialogOpen(false);
     }
   }
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
 
   const handleDepartmentChange = (department: DepartmentModel) => {
     if (selectedDepartment?.id === department.id) {
@@ -219,11 +253,9 @@ export default function CoursesPage() {
                 </TableRow>
               ) : (
                 allCourseData?.content.map((course, index) => {
-                  const indexDisplay =
-                    ((allCourseData.pageNo || 1) - 1) * 10 + index + 1;
                   return (
                     <TableRow key={course.id}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
 
                       <TableCell>{course.code}</TableCell>
                       <TableCell>{course.subject.name}</TableCell>
@@ -285,9 +317,9 @@ export default function CoursesPage() {
       {!isLoading && allCourseData && allCourseData.totalPages > 1 && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={allCourseData.pageNo}
+            currentPage={currentPage}
             totalPages={allCourseData.totalPages}
-            onPageChange={(page: number) => loadCourses({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

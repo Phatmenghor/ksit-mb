@@ -38,8 +38,9 @@ import { ScheduleModel } from "@/model/schedules/all-schedule-model";
 import { Button } from "@/components/ui/button";
 import { AppIcons } from "@/constants/icons/icon";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePagination } from "@/hooks/use-pagination";
 
-export default function AddSchedule() {
+export default function StudentListPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [students, setStudents] = useState<AllStudentModel | null>(null);
   const [schedule, setSchedule] = useState<ScheduleModel | null>(null);
@@ -47,6 +48,23 @@ export default function AddSchedule() {
   const params = useParams();
 
   const scheduleId = params?.id ? Number(params.id) : null;
+
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.STUDENT_LIST(String(scheduleId)),
+      defaultPageSize: 10,
+    });
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const fetchSchedule = useCallback(async (filters: RequestAllStudent) => {
     setIsLoading(true);
@@ -61,6 +79,11 @@ export default function AddSchedule() {
 
       console.log(response);
       setStudents(response);
+      // Handle case where current page exceeds total pages
+      if (response.totalPages > 0 && currentPage > response.totalPages) {
+        updateUrlWithPage(response.totalPages);
+        return;
+      }
     } catch (error) {
       console.error("Error fetching schedule data:", error);
       toast.error("An error occurred while loading classes");
@@ -225,11 +248,9 @@ export default function AddSchedule() {
                 </TableRow>
               ) : (
                 students?.content.map((student, index) => {
-                  const indexDisplay =
-                    ((students.pageNo || 1) - 1) * 10 + index + 1;
                   return (
                     <TableRow key={student.id}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       <TableCell>{student.username || "---"}</TableCell>
                       <TableCell>
                         {`${student.khmerFirstName || ""} ${
@@ -258,9 +279,9 @@ export default function AddSchedule() {
       {!isLoading && students && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={students.pageNo}
+            currentPage={currentPage}
             totalPages={students.totalPages}
-            onPageChange={(page: number) => fetchSchedule({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

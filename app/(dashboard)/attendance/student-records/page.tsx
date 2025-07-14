@@ -53,6 +53,8 @@ import { AllAttendanceHistoryModel } from "@/model/attendance/attendance-history
 import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { AppIcons } from "@/constants/icons/icon";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSearchParams } from "next/navigation";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function StudentRecordsPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -60,7 +62,6 @@ export default function StudentRecordsPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [selectedSemester, setSelectedSemester] = useState<string>("ALL");
-  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const [selectAcademicYear, setSelectAcademicYear] = useState<
     number | undefined
@@ -74,6 +75,29 @@ export default function StudentRecordsPage() {
   // Date filter states
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.ATTENDANCE.STUDENT_RECORD,
+      defaultPageSize: 10,
+    });
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const fetchAttendanceHistory = useCallback(
     async (filter: AttendanceHistoryFilter) => {
@@ -91,6 +115,10 @@ export default function StudentRecordsPage() {
         console.log(response);
 
         setAttendanceHistoryData(response);
+        if (response.totalPages > 0 && currentPage > response.totalPages) {
+          updateUrlWithPage(response.totalPages);
+          return;
+        }
       } catch (error: any) {
         console.error("Error fetching requests:", error);
         toast.error("An error occurred while loading attendance history");
@@ -157,32 +185,23 @@ export default function StudentRecordsPage() {
     }
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
-  };
-
   const handleYearChange = (e: number) => {
     setSelectAcademicYear(e);
   };
 
   const handleClassChange = (e: ClassModel | null) => {
     setSelectedClass(e ?? undefined);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    updateUrlWithPage(1);
   };
 
   const clearStartDate = () => {
     setStartDate(undefined);
-    setCurrentPage(1);
+    updateUrlWithPage(1);
   };
 
   const clearEndDate = () => {
     setEndDate(undefined);
-    setCurrentPage(1);
+    updateUrlWithPage(1);
   };
 
   // Export to Excel - Fixed version
@@ -473,11 +492,9 @@ export default function StudentRecordsPage() {
                 </TableRow>
               ) : (
                 attendanceHistoryData?.content.map((history, index) => {
-                  const indexDisplay =
-                    ((attendanceHistoryData.pageNo || 1) - 1) * 10 + index + 1;
                   return (
                     <TableRow key={history.id}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       <TableCell>{history.identifyNumber || "---"}</TableCell>
                       <TableCell>{history.studentName || "---"}</TableCell>
                       <TableCell>{history.teacherName || "---"}</TableCell>
@@ -504,7 +521,7 @@ export default function StudentRecordsPage() {
       {attendanceHistoryData && (
         <div className="mt-8 flex justify-end animate-in slide-in-from-bottom-4 duration-500 delay-1000">
           <PaginationPage
-            currentPage={attendanceHistoryData.pageNo}
+            currentPage={currentPage}
             totalPages={attendanceHistoryData.totalPages}
             onPageChange={handlePageChange}
           />

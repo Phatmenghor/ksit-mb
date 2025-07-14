@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { AllMajorFilterModel } from "@/model/master-data/major/type-major-model";
 import { getAllMajorService } from "@/service/master-data/major.service";
 import { Constants } from "@/constants/text-string";
@@ -35,6 +35,8 @@ import { ClassCard } from "@/components/dashboard/schedule/class/class-card";
 import Loading from "@/components/shared/loading";
 import { AppIcons } from "@/constants/icons/icon";
 import { useDebounce } from "@/utils/debounce/debounce";
+import PaginationPage from "@/components/shared/pagination-page";
+import { usePagination } from "@/hooks/use-pagination";
 
 // Empty state components
 const EmptyMajorsState = ({ searchQuery }: { searchQuery: string }) => (
@@ -91,7 +93,32 @@ const ClassSchedulePage = () => {
   const depId = params?.depId ? Number(params.depId) : null;
   const router = useRouter();
 
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.MANAGE_SCHEDULE.CLASS(String(depId)),
+      defaultPageSize: 10,
+    });
+
   const searchDebounce = useDebounce(searchQuery, 500);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
+
   const loadMajors = useCallback(
     async (param: AllMajorFilterModel) => {
       try {
@@ -123,6 +150,14 @@ const ClassSchedulePage = () => {
                 majorId: response.content[0].id || undefined,
               });
               setAllClassData(responseListClass);
+              // Handle case where current page exceeds total pages
+              if (
+                response.totalPages > 0 &&
+                currentPage > response.totalPages
+              ) {
+                updateUrlWithPage(response.totalPages);
+                return;
+              }
             } catch (error) {
               toast.error("Failed to load classes");
             } finally {
@@ -145,10 +180,6 @@ const ClassSchedulePage = () => {
   useEffect(() => {
     loadMajors({});
   }, [searchDebounce, loadMajors]);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -322,6 +353,16 @@ const ClassSchedulePage = () => {
                       onAddSchedule={() => handleAddSchedule(classItem)}
                     />
                   ))}
+                  {allClassData && (
+                    <div className="mt-4 flex justify-end animate-in fade-in slide-in-from-bottom-2 duration-500 delay-700">
+                      <PaginationPage
+                        currentPage={currentPage}
+                        totalPages={allClassData.totalPages}
+                        onPageChange={handlePageChange}
+                        className="transition-all duration-300"
+                      />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <EmptyClassesState

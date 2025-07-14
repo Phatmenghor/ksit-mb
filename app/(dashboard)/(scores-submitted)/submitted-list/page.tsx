@@ -14,8 +14,6 @@ import {
 import { Eye } from "lucide-react";
 import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 import { ROUTE } from "@/constants/routes";
-import { YearSelector } from "@/components/shared/year-selector";
-import { ComboboxSelectSemester } from "@/components/shared/ComboBox/combobox-semester";
 import { SemesterModel } from "@/model/master-data/semester/semester-model";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScoreSubmittedTableHeader } from "@/constants/table/score";
@@ -24,11 +22,12 @@ import { SubmittedScoreParam } from "@/model/score/submitted-score/submitted-sco
 import { useDebounce } from "@/utils/debounce/debounce";
 import { getAllSubmittedScoreService } from "@/service/score/score.service";
 import { SubmissionEnum, tabs } from "@/constants/constant";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import PaginationPage from "@/components/shared/pagination-page";
 import { AllStudentScoreModel } from "@/model/score/student-score/student-score.response";
 import Loading from "@/components/shared/loading";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function ScoreSubmittedPage() {
   const [activeTab, setActiveTab] = useState("all");
@@ -44,7 +43,31 @@ export default function ScoreSubmittedPage() {
     SemesterModel | undefined
   >(undefined);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.SCORES.SUBMITTED,
+      defaultPageSize: 10,
+    });
+
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   // Get current tab's status
   const getCurrentTabStatus = useCallback(() => {
@@ -67,6 +90,11 @@ export default function ScoreSubmittedPage() {
 
         if (response) {
           setSubmissions(response);
+          // Handle case where current page exceeds total pages
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           console.error("Failed to fetch submissions:");
         }
@@ -95,10 +123,6 @@ export default function ScoreSubmittedPage() {
     setSubmissions(null); // Clear current data
     loadSubmittedScore({ pageNo: 1 }); // Load first page of new tab
   }, [activeTab]);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -136,14 +160,9 @@ export default function ScoreSubmittedPage() {
         </TableHeader>
         <TableBody>
           {submissions?.content.map((submission, index) => {
-            const indexDisplay =
-              ((submissions.pageNo || 1) - 1) * (submissions.pageSize || 10) +
-              index +
-              1;
-
             return (
               <TableRow key={submission.id}>
-                <TableCell>{indexDisplay}</TableCell>
+                <TableCell>{getDisplayIndex(index)}</TableCell>
                 <TableCell>{submission.teacherId}</TableCell>
                 <TableCell className="font-medium">
                   {submission.teacherName}
@@ -241,11 +260,9 @@ export default function ScoreSubmittedPage() {
         {!isLoading && submissions && (
           <div className="mt-4 flex justify-end">
             <PaginationPage
-              currentPage={submissions.pageNo}
+              currentPage={currentPage}
               totalPages={submissions.totalPages}
-              onPageChange={(page: number) =>
-                loadSubmittedScore({ pageNo: page })
-              }
+              onPageChange={handlePageChange}
             />
           </div>
         )}

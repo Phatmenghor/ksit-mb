@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import {
   deletedStaffService,
@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/tooltip";
 import Loading from "@/components/shared/loading";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function StuffOfficerListPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -52,10 +53,30 @@ export default function StuffOfficerListPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.USERS.STUFF_OFFICER,
+      defaultPageSize: 10,
+    });
+
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
   };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const loadData = useCallback(
     async (param: StaffListRequest) => {
@@ -69,6 +90,11 @@ export default function StuffOfficerListPage() {
         });
         if (response) {
           setData(response);
+          // Handle case where current page exceeds total pages
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           console.error("Failed to fetch staff:");
         }
@@ -109,6 +135,12 @@ export default function StuffOfficerListPage() {
         toast.success(
           `Staff ${selectedStaff.username ?? ""} deleted successfully`
         );
+
+        if (data && data.content.length === 1 && currentPage > 1) {
+          updateUrlWithPage(currentPage - 1);
+        } else {
+          await loadData({});
+        }
       } else {
         setData(originalData);
         toast.error("Failed to delete staff");
@@ -165,13 +197,9 @@ export default function StuffOfficerListPage() {
                 </TableRow>
               ) : (
                 data?.content.map((staff, index) => {
-                  const indexDisplay =
-                    ((data.pageNo || 1) - 1) * (data.pageSize || 10) +
-                    index +
-                    1;
                   return (
                     <TableRow key={staff.id}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       <TableCell>{staff.username.trim() || "---"}</TableCell>
                       <TableCell>
                         {`${staff.khmerFirstName || ""} ${
@@ -303,9 +331,9 @@ export default function StuffOfficerListPage() {
       {!isLoading && data && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={data.pageNo}
+            currentPage={currentPage}
             totalPages={data.totalPages}
-            onPageChange={(page: number) => loadData({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

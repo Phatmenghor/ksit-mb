@@ -15,7 +15,7 @@ import PaginationPage from "@/components/shared/pagination-page";
 import DepartmentCard from "@/components/dashboard/schedule/department/department-card";
 import { AllDepartmentModel } from "@/model/master-data/department/all-department-model";
 import { ROUTE } from "@/constants/routes";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AllDepartmentFilterModel } from "@/model/master-data/department/type-department-model";
 import { getMyDepartmentService } from "@/service/master-data/department.service";
 import { Constants } from "@/constants/text-string";
@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { getAllStatisticService } from "@/service/statistic/statistic.service";
 import { StatisticModel } from "@/model/statistic/statistic-model";
 import { Separator } from "@/components/ui/separator";
+import { usePagination } from "@/hooks/use-pagination";
 
 interface MetricCardProps {
   title: string;
@@ -54,6 +55,23 @@ export default function ManageClassPage() {
   );
   const router = useRouter();
 
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.DASHBOARD,
+      defaultPageSize: 10,
+    });
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
+
   const loadDepartments = useCallback(
     async (param: AllDepartmentFilterModel) => {
       setIsLoading(true);
@@ -66,6 +84,10 @@ export default function ManageClassPage() {
 
         if (response) {
           setAllDepartmentData(response);
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           console.error("Failed to fetch departments:");
         }
@@ -202,9 +224,9 @@ export default function ManageClassPage() {
         {!isLoading && allDepartmentData && (
           <div className="mt-4 flex justify-end">
             <PaginationPage
-              currentPage={allDepartmentData.pageNo}
+              currentPage={currentPage}
               totalPages={allDepartmentData.totalPages}
-              onPageChange={(page: number) => loadDepartments({ pageNo: page })}
+              onPageChange={handlePageChange}
             />
           </div>
         )}

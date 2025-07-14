@@ -45,6 +45,8 @@ import PaginationPage from "@/components/shared/pagination-page";
 import Loading from "@/components/shared/loading";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDebounce } from "@/utils/debounce/debounce";
+import { useSearchParams } from "next/navigation";
+import { usePagination } from "@/hooks/use-pagination";
 
 export default function ManageRoomPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -59,7 +61,31 @@ export default function ManageRoomPage() {
     undefined
   );
 
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.MASTER_DATA.MANAGE_ROOM,
+      defaultPageSize: 10,
+    });
+
   const searchDebounceQuery = useDebounce(searchQuery, 500);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
 
   const loadRooms = useCallback(
     async (param: AllRoomFilterModel) => {
@@ -74,6 +100,10 @@ export default function ManageRoomPage() {
 
         if (response) {
           setAllRoomData(response);
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           console.error("Failed to fetch rooms:");
         }
@@ -107,9 +137,7 @@ export default function ManageRoomPage() {
     setInitialData(formData);
     setIsModalOpen(true);
   };
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
+
   async function handleSubmit(formData: RoomFormData) {
     setIsSubmitting(true);
 
@@ -201,6 +229,15 @@ export default function ManageRoomPage() {
         });
 
         toast.success("Room deleted successfully");
+        if (
+          allRoomData &&
+          allRoomData.content.length === 1 &&
+          currentPage > 1
+        ) {
+          updateUrlWithPage(currentPage - 1);
+        } else {
+          await loadRooms({});
+        }
       } else {
         toast.error("Failed to delete Room");
       }
@@ -277,11 +314,9 @@ export default function ManageRoomPage() {
                 </TableRow>
               ) : (
                 allRoomData?.content.map((room, index) => {
-                  const indexDisplay =
-                    ((allRoomData.pageNo || 1) - 1) * 10 + index + 1;
                   return (
                     <TableRow key={room.id}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       <TableCell>{room?.name}</TableCell>
 
                       <TableCell>
@@ -322,9 +357,9 @@ export default function ManageRoomPage() {
       {!isLoading && allRoomData && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={allRoomData.pageNo}
+            currentPage={currentPage}
             totalPages={allRoomData.totalPages}
-            onPageChange={(page: number) => loadRooms({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}

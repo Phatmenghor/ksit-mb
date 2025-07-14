@@ -57,6 +57,8 @@ import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmatio
 import { baseAPI } from "@/constants/api";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDebounce } from "@/utils/debounce/debounce";
+import { usePagination } from "@/hooks/use-pagination";
+import { useSearchParams } from "next/navigation";
 
 export default function ManageDepartmentPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -71,8 +73,32 @@ export default function ManageDepartmentPage() {
   const [initialData, setInitialData] = useState<
     DepartmentFormData | undefined
   >(undefined);
+  const searchParams = useSearchParams();
+
+  const { currentPage, updateUrlWithPage, handlePageChange, getDisplayIndex } =
+    usePagination({
+      baseRoute: ROUTE.MASTER_DATA.MANAGE_DEPARTMENT,
+      defaultPageSize: 10,
+    });
 
   const searchDebounce = useDebounce(searchQuery, 500);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (currentPage !== 1) {
+      updateUrlWithPage(1);
+    }
+  };
+
+  // Then add this effect for initial URL setup
+  useEffect(() => {
+    const pageParam = searchParams.get("pageNo");
+    if (!pageParam) {
+      // Use replace: true to avoid adding to browser history
+      updateUrlWithPage(1, true);
+    }
+  }, [searchParams, updateUrlWithPage]);
+
   // Fetch departments with filters
   const loadDepartments = useCallback(
     async (param: AllDepartmentFilterModel) => {
@@ -87,6 +113,10 @@ export default function ManageDepartmentPage() {
 
         if (response) {
           setAllDepartmentData(response);
+          if (response.totalPages > 0 && currentPage > response.totalPages) {
+            updateUrlWithPage(response.totalPages);
+            return;
+          }
         } else {
           console.error("Failed to fetch departments:");
         }
@@ -121,10 +151,6 @@ export default function ManageDepartmentPage() {
     setModalMode("edit");
     setInitialData(formData);
     setIsModalOpen(true);
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
   };
 
   async function handleSubmit(formData: DepartmentFormData) {
@@ -221,6 +247,15 @@ export default function ManageDepartmentPage() {
         });
 
         toast.success("Department deleted successfully");
+        if (
+          allDepartmentData &&
+          allDepartmentData.content.length === 1 &&
+          currentPage > 1
+        ) {
+          updateUrlWithPage(currentPage - 1);
+        } else {
+          await loadDepartments({});
+        }
       } else {
         toast.error("Failed to delete department");
       }
@@ -301,14 +336,9 @@ export default function ManageDepartmentPage() {
                 </TableRow>
               ) : (
                 allDepartmentData?.content.map((dept, index) => {
-                  const indexDisplay =
-                    ((allDepartmentData.pageNo || 1) - 1) *
-                      (allDepartmentData.pageSize || 10) +
-                    index +
-                    1;
                   return (
                     <TableRow key={dept.id || index}>
-                      <TableCell>{indexDisplay}</TableCell>
+                      <TableCell>{getDisplayIndex(index)}</TableCell>
                       <TableCell>{dept.code}</TableCell>
                       <TableCell>{dept.name}</TableCell>
                       <TableCell>
@@ -380,9 +410,9 @@ export default function ManageDepartmentPage() {
       {!isLoading && allDepartmentData && (
         <div className="mt-4 flex justify-end">
           <PaginationPage
-            currentPage={allDepartmentData.pageNo}
+            currentPage={currentPage}
             totalPages={allDepartmentData.totalPages}
-            onPageChange={(page: number) => loadDepartments({ pageNo: page })}
+            onPageChange={handlePageChange}
           />
         </div>
       )}
