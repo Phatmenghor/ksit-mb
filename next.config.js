@@ -7,10 +7,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    esmExternals: false,
-    serverComponentsExternalPackages: ["@prisma/client", "prisma"],
-  },
   images: {
     unoptimized: false,
     remotePatterns: [
@@ -38,4 +34,4 @@ const nextConfig = {
   // No headers = No CSP restrictions for full-stack flexibility
 };
 
-export default nextConfig;
+module.exports = nextConfig;
