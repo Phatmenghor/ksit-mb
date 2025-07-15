@@ -19,7 +19,7 @@ import { debounce } from "@/utils/debounce/debounce";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import { StatusEnum } from "@/constants/constant";
+import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { StaffModel } from "@/model/user/staff/staff.respond.model";
 import { getAllStaffService } from "@/service/user/user.service";
 
@@ -51,6 +51,7 @@ export function ComboboxSelectInstructor({
     try {
       const result = await getAllStaffService({
         search,
+        roles: [RoleEnum.TEACHER, RoleEnum.STAFF],
         pageSize: 10,
         pageNo: newPage,
         status: StatusEnum.ACTIVE,
