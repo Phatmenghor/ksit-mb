@@ -67,6 +67,20 @@ export default function PaginationPage({
     return pages;
   }, [currentPage, totalPages]);
 
+  // Check if we should show ellipsis after page numbers
+  const shouldShowEllipsis = useCallback((): boolean => {
+    if (totalPages <= 5) return false;
+
+    // Don't show ellipsis if we're showing pages 1-5 (near start)
+    if (currentPage <= 3) return false;
+
+    // Don't show ellipsis if we're showing the last 5 pages (near end)
+    if (currentPage >= totalPages - 2) return false;
+
+    // Show ellipsis when we're in the middle
+    return true;
+  }, [currentPage, totalPages]);
+
   // Don't render if there's only one page or no pages
   if (totalPages <= 1) {
     return null;
@@ -116,7 +130,7 @@ export default function PaginationPage({
             </button>
           ))}
 
-          {totalPages > 5 && currentPage < totalPages - 2 && (
+          {shouldShowEllipsis() && (
             <span className="px-2 text-gray-400">...</span>
           )}
 

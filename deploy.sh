@@ -96,7 +96,3 @@ print_status "🎉 Deployment completed! App running on http://152.42.219.13:844
 # Show PM2 status
 print_status "Current PM2 status:"
 pm2 status
-
-# Show PM2 logs for verification
-print_status "Recent logs:"
-pm2 logs ksit --lines 10
