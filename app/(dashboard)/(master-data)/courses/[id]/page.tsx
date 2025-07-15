@@ -1,6 +1,20 @@
 "use client";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import {
+  ArrowLeft,
+  BookOpen,
+  Clock,
+  User,
+  Building,
+  GraduationCap,
+  FileText,
+  Target,
+  Lightbulb,
+  Award,
+  Calendar,
+  Users,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 
 import {
   Breadcrumb,
@@ -9,182 +23,315 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Card, CardContent } from "@/components/ui/card";
-import { DetialCourseModel } from "@/model/master-data/course/type-course-model";
-import { useEffect, useState } from "react";
-import { DetailCourseService } from "@/service/master-data/course.service";
-import { useParams, useRouter } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { DetialCourseModel } from "@/model/master-data/course/type-course-model";
+import { DetailCourseService } from "@/service/master-data/course.service";
 import { AppIcons } from "@/constants/icons/icon";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function CourseDetailPage() {
   const params = useParams();
-  const id = params?.id ? Number(params.id) : null;
-  const [courseData, setCourseData] = useState<DetialCourseModel | null>(null);
-
-  const isMobile = useIsMobile();
   const router = useRouter();
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const data = await DetailCourseService(Number(id));
-        if (data) {
-          setCourseData(data);
-        }
-      } catch (err: any) {
-        console.error("Error fetching course detail:", err);
-      } finally {
-      }
-    }
+  const isMobile = useIsMobile();
 
-    fetchData();
-  }, [id]);
+  const [courseData, setCourseData] = useState<DetialCourseModel | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const courseId = params?.id ? Number(params.id) : null;
+
+  const fetchCourseData = useCallback(async () => {
+    if (!courseId) return;
+
+    try {
+      setIsLoading(true);
+      const data = await DetailCourseService(courseId);
+      if (data) {
+        setCourseData(data);
+      }
+    } catch (err: any) {
+      console.error("Error fetching course detail:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [courseId]);
+
+  useEffect(() => {
+    fetchCourseData();
+  }, [fetchCourseData]);
+
+  const handleBack = useCallback(() => {
+    router.back();
+  }, [router]);
+
+  if (isLoading) {
+    return <LoadingSkeleton />;
+  }
+
+  if (!courseData) {
+    return <div>Course not found</div>;
+  }
 
   return (
-    <div className="container space-y-6">
-      <Card className="md:p-3 py-2 rounded-md shadow-sm">
-        <CardContent>
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/courses">Courses</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink>View Course Detail</BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div className="flex items-center mt-2 justify-between">
-            <div className="flex items-center min-w-0 flex-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => router.back()}
-                asChild
-                className="rounded-full flex-shrink-0"
-              >
-                <img
-                  src={AppIcons.Back}
-                  alt="back Icon"
-                  className="h-4 w-4 mr-3 sm:mr-5 text-muted-foreground"
-                />
-              </Button>
-              <h1 className="text-2xl font-semibold">
-                Course Detail ({courseData?.code})
-              </h1>
+    <div className="min-h-screen">
+      <div className="mx-auto space-y-6">
+        {/* Header Section */}
+        <Card className="transition-shadow duration-200">
+          <CardContent className="p-6">
+            <Breadcrumb className="mb-4">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    href="/dashboard"
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    Dashboard
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    href="/courses"
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    Courses
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink className="text-gray-500">
+                    View Course Detail
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  asChild
+                  onClick={() => router.back()}
+                  className="rounded-full flex-shrink-0"
+                >
+                  <img
+                    src={AppIcons.Back}
+                    alt="back Icon"
+                    className="h-4 w-4 mr-3 sm:mr-5 text-muted-foreground"
+                  />
+                </Button>
+                <div>
+                  <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                    {courseData.nameEn || courseData.nameKH}
+                  </h1>
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Badge
+                      variant="secondary"
+                      className="bg-gray-100 text-gray-700"
+                    >
+                      {courseData.code}
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className="border-gray-300 text-gray-600"
+                    >
+                      {courseData.credit} Credits
+                    </Badge>
+                  </div>
+                </div>
+              </div>
             </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Course Overview */}
+            <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="border-b bg-gray-50 dark:bg-gray-800">
+                <CardTitle className="flex items-center space-x-3">
+                  <BookOpen className="h-5 w-5 text-gray-600" />
+                  <span>Course Overview</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InfoCard
+                    icon={<FileText className="h-4 w-4" />}
+                    label="Subject Code"
+                    value={courseData.code}
+                  />
+                  <InfoCard
+                    icon={<GraduationCap className="h-4 w-4" />}
+                    label="Subject Name (KH)"
+                    value={courseData.nameKH}
+                  />
+                  <InfoCard
+                    icon={<Award className="h-4 w-4" />}
+                    label="Credits"
+                    value={courseData.credit}
+                  />
+                  <InfoCard
+                    icon={<Clock className="h-4 w-4" />}
+                    label="Total Hours"
+                    value={courseData.totalHour}
+                  />
+                  <InfoCard
+                    icon={<BookOpen className="h-4 w-4" />}
+                    label="Theory Hours"
+                    value={courseData.theory}
+                  />
+                  <InfoCard
+                    icon={<Users className="h-4 w-4" />}
+                    label="Applied Hours"
+                    value={courseData.apply}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Course Details */}
+            <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="border-b bg-gray-50 dark:bg-gray-800">
+                <CardTitle className="flex items-center space-x-3">
+                  <Building className="h-5 w-5 text-gray-600" />
+                  <span>Academic Information</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InfoCard
+                    icon={<Building className="h-4 w-4" />}
+                    label="Department"
+                    value={courseData.department?.name}
+                  />
+                  <InfoCard
+                    icon={<User className="h-4 w-4" />}
+                    label="Instructor"
+                    value={courseData.user?.username}
+                  />
+                  <InfoCard
+                    icon={<BookOpen className="h-4 w-4" />}
+                    label="Subject Type"
+                    value={courseData.subject?.name}
+                  />
+                  <InfoCard
+                    icon={<Calendar className="h-4 w-4" />}
+                    label="Execute"
+                    value={courseData.subject?.id}
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
-      <Card className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CourseInfoRow label="Subject Code" value={courseData?.code} />
-          <CourseInfoRow label="Subject Name (KH)" value={courseData?.nameKH} />
 
-          <CourseInfoRow label="Credit" value={courseData?.credit} />
-          <CourseInfoRow label="Execute" value={courseData?.subject.id} />
-
-          <CourseInfoRow
-            label="Department"
-            value={courseData?.department.name}
-          />
-          <CourseInfoRow label="Instructor" value={courseData?.user.username} />
-
-          <CourseInfoRow label="Subject Name (EN)" value={courseData?.nameEn} />
-          <CourseInfoRow label="Thoery" value={courseData?.theory} />
-
-          <CourseInfoRow label="Apply" value={courseData?.apply} />
-          <CourseInfoRow
-            label="Subject Type"
-            value={courseData?.subject.name}
-          />
-
-          <CourseInfoRow label="Total Hours" value={courseData?.totalHour} />
-        </div>
-      </Card>
-
-      {/* Course Additional Information Card */}
-      {isMobile ? (
-        <Card className="p-4 sm:p-6">
+          {/* Sidebar */}
           <div className="space-y-6">
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Description
-              </h3>
-              <p className="text-sm sm:text-base leading-relaxed break-words hyphens-auto">
-                {courseData?.description || "Not specified"}
-              </p>
-            </div>
+            {/* Description */}
+            <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="border-b bg-gray-50 dark:bg-gray-800">
+                <CardTitle className="flex items-center space-x-3">
+                  <FileText className="h-5 w-5 text-gray-600" />
+                  <span>Description</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  {courseData.description || "No description provided"}
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Purpose
-              </h3>
-              <p className="text-sm sm:text-base leading-relaxed break-words hyphens-auto">
-                {courseData?.purpose || "Not specified"}
-              </p>
-            </div>
+            {/* Purpose */}
+            <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="border-b bg-gray-50 dark:bg-gray-800">
+                <CardTitle className="flex items-center space-x-3">
+                  <Target className="h-5 w-5 text-gray-600" />
+                  <span>Purpose</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  {courseData.purpose || "No purpose specified"}
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Anticipated Outcome
-              </h3>
-              <p className="text-sm sm:text-base leading-relaxed break-words hyphens-auto">
-                {courseData?.expectedOutcome || "Not specified"}
-              </p>
-            </div>
+            {/* Expected Outcome */}
+            <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="border-b bg-gray-50 dark:bg-gray-800">
+                <CardTitle className="flex items-center space-x-3">
+                  <Lightbulb className="h-5 w-5 text-gray-600" />
+                  <span>Expected Outcome</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  {courseData.expectedOutcome ||
+                    "No expected outcome specified"}
+                </p>
+              </CardContent>
+            </Card>
           </div>
-        </Card>
-      ) : (
-        <Card className="p-6">
-          <div className="grid grid-cols-1 gap-4">
-            <CourseInfoRow
-              label="Description"
-              value={courseData?.description}
-            />
-            <CourseInfoRow label="Purpose" value={courseData?.purpose} />
-            <CourseInfoRow
-              label="Anticipated Outcome"
-              value={courseData?.expectedOutcome}
-            />
-          </div>
-        </Card>
-      )}
+        </div>
+      </div>
     </div>
   );
 }
 
-// Helper component for displaying course information rows
-function CourseInfoRow({
+// Simplified Info Card Component
+function InfoCard({
+  icon,
   label,
   value,
-  additionalLabel,
-  additionalValue,
 }: {
+  icon: React.ReactNode;
   label: string;
   value?: string | number;
-  additionalLabel?: string | "";
-  additionalValue?: string | number;
 }) {
   return (
-    <div className="flex flex-col md:grid md:grid-cols-[200px_1fr_200px_1fr] gap-y-2 md:gap-4">
-      <div className="text-muted-foreground font-medium">{label}</div>
-      <div className="break-words">{value ?? "-"}</div>
+    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 cursor-pointer">
+      <div className="flex items-center space-x-3">
+        <div className="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200">
+          {icon}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            {label}
+          </p>
+          <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+            {value ?? "Not specified"}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-      {additionalLabel && additionalValue !== undefined && (
-        <>
-          <div className="text-muted-foreground font-medium">
-            {additionalLabel}
+// Loading Skeleton Component
+function LoadingSkeleton() {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        <div className="animate-pulse">
+          <div className="h-32 bg-white dark:bg-gray-800 rounded-lg mb-6"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="h-64 bg-white dark:bg-gray-800 rounded-lg"></div>
+              <div className="h-48 bg-white dark:bg-gray-800 rounded-lg"></div>
+            </div>
+            <div className="space-y-6">
+              <div className="h-32 bg-white dark:bg-gray-800 rounded-lg"></div>
+              <div className="h-32 bg-white dark:bg-gray-800 rounded-lg"></div>
+              <div className="h-32 bg-white dark:bg-gray-800 rounded-lg"></div>
+            </div>
           </div>
-          <div className="break-words">{additionalValue}</div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }

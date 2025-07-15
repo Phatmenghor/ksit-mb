@@ -816,7 +816,7 @@ export default function AddSchedule() {
               <Button
                 type="submit"
                 disabled={isSubmitting || !form.formState.isValid}
-                className="bg-green-700 hover:bg-green-800 text-white px-6 min-w-[100px]"
+                className="bg-teal-900 hover:bg-teal-950 text-white px-6 min-w-[100px]"
               >
                 {isSubmitting ? (
                   <>

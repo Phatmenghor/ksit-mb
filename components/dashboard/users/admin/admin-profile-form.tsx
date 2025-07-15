@@ -30,6 +30,16 @@ import { StaffModel } from "@/model/user/staff/staff.respond.model";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AdminProfileUploadCard from "./admin-profile-upload";
+import { AppIcons } from "@/constants/icons/icon";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { ROUTE } from "@/constants/routes";
 
 interface AdminFormProps {
   onSubmit: (data: AdminFormData) => void;
@@ -175,15 +185,36 @@ export default function AdminForm({
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-2">
-            <CardTitle>Edit your profile</CardTitle>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-start gap-4">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href={ROUTE.DASHBOARD}>
+                    Dashboard
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Edit Profile</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+            <div className="flex items-center min-w-0 flex-1">
               <Button
                 variant="ghost"
+                size="icon"
                 onClick={() => router.back()}
-                className="w-fit focus:outline-none p-0"
+                asChild
+                className="rounded-full flex-shrink-0"
               >
-                <ArrowLeft className="h-6 w-6" />
+                <img
+                  src={AppIcons.Back}
+                  alt="back Icon"
+                  className="h-4 w-4 mr-3 sm:mr-5 text-muted-foreground"
+                />
               </Button>
+              <h1 className="text-lg sm:text-2xl font-bold text-foreground truncate">
+                Edit your profile
+              </h1>
             </div>
             <CardDescription>
               Fill in the information below to update your profile.

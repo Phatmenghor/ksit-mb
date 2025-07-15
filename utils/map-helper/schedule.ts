@@ -21,18 +21,13 @@ export function convertToWeeklySchedule(scheduleData: ScheduleModel[]): {
   };
   weeklySchedule: WeeklySchedule[];
 } {
+  // Filter out "ALL" when creating empty schedule
   const EMPTY_WEEKLY_SCHEDULE: WeeklySchedule[] = DAYS_OF_WEEK.filter(
     (day) => day.value !== "ALL"
   ).map((day) => ({
     day: day.label,
     classes: [],
   }));
-
-  // Add special fallback for invalid/missing day values
-  EMPTY_WEEKLY_SCHEDULE.push({
-    day: "---",
-    classes: [],
-  });
 
   if (!scheduleData || scheduleData.length === 0) {
     return {
@@ -56,13 +51,13 @@ export function convertToWeeklySchedule(scheduleData: ScheduleModel[]): {
 
   const weeklyMap: Record<string, WeeklySchedule["classes"]> = {};
 
-  // Initialize days
+  // Initialize days (excluding "ALL")
   DAYS_OF_WEEK.forEach((day) => {
     if (day.value !== "ALL") {
       weeklyMap[day.value] = [];
     }
   });
-  weeklyMap["---"] = []; // fallback
+  weeklyMap["---"] = []; // fallback for invalid days
 
   const getInstructorName = (teacher: any): string => {
     if (!teacher) return "---";
@@ -78,7 +73,9 @@ export function convertToWeeklySchedule(scheduleData: ScheduleModel[]): {
   schedules.forEach((schedule) => {
     if (!schedule) return;
 
-    const isValidDay = DAYS_OF_WEEK.some((d) => d.value === schedule.day);
+    const isValidDay = DAYS_OF_WEEK.some(
+      (d) => d.value === schedule.day && d.value !== "ALL"
+    );
     const dayKey = isValidDay ? schedule.day : "---";
 
     const instructorName = getInstructorName(schedule.teacher);
@@ -97,6 +94,7 @@ export function convertToWeeklySchedule(scheduleData: ScheduleModel[]): {
     weeklyMap[dayKey].push(classItem);
   });
 
+  // Create weekly schedule (excluding "ALL")
   const weeklySchedule: WeeklySchedule[] = DAYS_OF_WEEK.filter(
     (day) => day.value !== "ALL"
   ).map((day) => ({
@@ -112,11 +110,16 @@ export function convertToWeeklySchedule(scheduleData: ScheduleModel[]): {
     });
   }
 
-  weeklySchedule.sort(
-    (a, b) =>
-      DAYS_OF_WEEK.findIndex((d) => d.label === a.day) -
-      DAYS_OF_WEEK.findIndex((d) => d.label === b.day)
-  );
+  // Sort by day order (excluding "ALL" from sorting)
+  weeklySchedule.sort((a, b) => {
+    const indexA = DAYS_OF_WEEK.findIndex(
+      (d) => d.label === a.day && d.value !== "ALL"
+    );
+    const indexB = DAYS_OF_WEEK.findIndex(
+      (d) => d.label === b.day && d.value !== "ALL"
+    );
+    return indexA - indexB;
+  });
 
   return { classInfo, weeklySchedule };
 }
