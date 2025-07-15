@@ -181,7 +181,7 @@ pull_code() {
     fi
 }
 
-# Install dependencies efficiently
+# Install dependencies efficiently with force flag
 install_dependencies() {
     print_status "Installing dependencies..."
     
@@ -189,15 +189,15 @@ install_dependencies() {
     if [ -f "package-lock.json" ] && [ -f "node_modules/.package-lock.json" ]; then
         # Compare package-lock.json with the one in node_modules
         if cmp -s "package-lock.json" "node_modules/.package-lock.json"; then
-            print_status "Dependencies are already up to date, running npm ci for verification..."
-            npm ci --only=production=false
+            print_status "Dependencies are already up to date, running npm ci with force for verification..."
+            npm ci --force --only=production=false
         else
-            print_status "Package lock has changed, updating dependencies..."
-            npm install
+            print_status "Package lock has changed, updating dependencies with force..."
+            npm install --force
         fi
     else
-        print_status "Installing fresh dependencies..."
-        npm install
+        print_status "Installing fresh dependencies with force..."
+        npm install --force
     fi
 
     if [ $? -eq 0 ]; then
