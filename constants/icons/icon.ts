@@ -5,7 +5,7 @@ export const AppIcons = {
   Filter: "/icons/Filter.png",
   Excel: "/icons/excel.png",
   Pdf: "/icons/pdf.png",
-  Back: "/icons/Back.png",
+  Back: "/icons/back.png",
   Circle_alert: "/icons/circle-alert.png",
   Circle_alert_teal: "/icons/circle-teal.png",
   transcript: "/icons/transcript.png",

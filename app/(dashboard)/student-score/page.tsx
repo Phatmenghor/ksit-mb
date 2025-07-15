@@ -231,7 +231,7 @@ export default function AllSchedulePage() {
               variant={selectedDay?.value === day.value ? "default" : "outline"}
               className={`whitespace-nowrap transition-colors duration-200 ${
                 selectedDay?.value === day.value
-                  ? "bg-amber-500 text-white"
+                  ? "bg-amber-500 hover:bg-amber-600 text-white"
                   : "hover:bg-amber-100"
               }`}
               onClick={() => handleDaySelect(day)}

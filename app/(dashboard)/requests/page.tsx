@@ -285,10 +285,10 @@ export default function RequestPage() {
               <Button
                 key={type.label}
                 variant={isActive ? "default" : "outline"}
-                className={`whitespace-nowrap transition-all duration-300  ${
+                className={`whitespace-nowrap  ${
                   selectedType?.value === type.value
-                    ? "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-200/50 scale-105"
-                    : "hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 hover:shadow-lg hover:shadow-amber-100/50 hover:scale-105 hover:-translate-y-1"
+                    ? "bg-amber-500 hover:bg-amber-600 text-white"
+                    : "hover:bg-amber-100"
                 }`}
                 onClick={() => handleTypeSelect(type)}
                 disabled={isLoadingCounts}
