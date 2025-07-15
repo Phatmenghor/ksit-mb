@@ -22,7 +22,7 @@ print_error() {
 # Exit on any error
 set -e
 
-print_status "Starting deployment process..."
+print_status "Starting deployment process for KSIT Mobile on port 8443..."
 
 # Pull latest code from development branch
 print_status "Pulling latest code from development branch..."
@@ -48,8 +48,8 @@ pm2 stop ksit 2>/dev/null || true
 print_status "Deleting existing PM2 process..."
 pm2 delete ksit 2>/dev/null || true
 
-# Create PM2 configuration file
-print_status "Creating PM2 configuration..."
+# Create PM2 configuration file with port 8443
+print_status "Creating PM2 configuration for port 8443..."
 cat > pm2.config.js << 'EOF'
 module.exports = {
   apps: [
@@ -60,6 +60,11 @@ module.exports = {
       instances: 1,
       exec_mode: 'fork',
       watch: false,
+      env: {
+        NODE_ENV: 'production',
+        PORT: '8443',
+        EXTERNAL_PORT: '8443'
+      },
       env_file: '.env.production',
       log_file: './logs/app.log',
       out_file: './logs/out.log',
@@ -79,7 +84,7 @@ module.exports = {
 EOF
 
 # Start PM2 process
-print_status "Starting PM2 process..."
+print_status "Starting PM2 process on port 8443..."
 pm2 start pm2.config.js
 
 # Save PM2 configuration
@@ -91,3 +96,7 @@ print_status "🎉 Deployment completed! App running on http://152.42.219.13:844
 # Show PM2 status
 print_status "Current PM2 status:"
 pm2 status
+
+# Show PM2 logs for verification
+print_status "Recent logs:"
+pm2 logs ksit --lines 10
