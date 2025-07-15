@@ -275,9 +275,31 @@ install_dependencies() {
         print_status "📦 Installing dependencies with --force..."
         
         # Clear npm cache first to avoid potential issues
+        print_status "Cleaning npm cache..."
         npm cache clean --force
         
-        # Install with force flag
+        # Remove node_modules and package-lock.json for clean install (like your manual process)
+        if [ -d "node_modules" ]; then
+            print_status "Removing existing node_modules..."
+            rm -rf node_modules
+        fi
+        
+        if [ -f "package-lock.json" ]; then
+            print_status "Removing existing package-lock.json..."
+            rm -f package-lock.json
+        fi
+        
+        # Install Next.js specifically first (matching your manual process)
+        print_status "Installing Next.js with --force..."
+        npm install next --force
+        
+        if [ $? -ne 0 ]; then
+            print_error "Failed to install Next.js"
+            exit 1
+        fi
+        
+        # Then install all other dependencies
+        print_status "Installing all dependencies with --force..."
         npm install --force
         
         if [ $? -eq 0 ]; then
@@ -288,6 +310,12 @@ install_dependencies() {
         fi
     else
         print_status "📦 Skipping dependency installation"
+        
+        # Check if dependencies exist
+        if [ ! -d "node_modules" ]; then
+            print_error "No node_modules found! Please install dependencies first."
+            exit 1
+        fi
     fi
 }
 
