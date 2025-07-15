@@ -1,6 +1,5 @@
 "use client";
 import {
-  ArrowLeft,
   BookOpen,
   Clock,
   User,
@@ -26,7 +25,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { DetialCourseModel } from "@/model/master-data/course/type-course-model";
 import { DetailCourseService } from "@/service/master-data/course.service";
 import { AppIcons } from "@/constants/icons/icon";

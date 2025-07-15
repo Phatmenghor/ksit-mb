@@ -19,7 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -38,6 +38,7 @@ import { ROUTE } from "@/constants/routes";
 import { StaffModel } from "@/model/user/staff/staff.respond.model";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { CardHeaderSection } from "@/components/shared/layout/card-header-section";
 
 const courseFormSchema = z.object({
   subjectCode: z.string().min(1, "Subject code is required"),
@@ -144,68 +145,17 @@ export default function AddCoursePage() {
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       {/* Mobile: Breadcrumb on top, Desktop: Breadcrumb on right */}
-      <div className={cn(useIsMobile() ? "p-4" : "")}>
-        <div className="flex flex-col gap-4">
-          {/* Mobile breadcrumb - shows only on mobile */}
-          <div className="block md:hidden">
-            <Breadcrumb>
-              <BreadcrumbList className="flex-wrap justify-start text-sm">
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/courses">Courses</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Add course</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-
-          {/* Main content container */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-0">
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold">Add course</h1>
-              <p className="text-muted-foreground text-sm md:text-base">
-                Institute Management System
-              </p>
-            </div>
-
-            {/* Desktop breadcrumb - shows only on desktop */}
-            <div className="hidden md:block">
-              <Breadcrumb>
-                <BreadcrumbList className="flex-wrap justify-end">
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/courses">Courses</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Add course</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
-          </div>
-        </div>
-
-        {/* Back button */}
-        <div className="mt-4">
-          <Link href="/courses">
-            <Button variant="outline" size="sm" className="gap-1">
-              <ArrowLeft className="h-4 w-4" /> BACK
-            </Button>
-          </Link>
-        </div>
-      </div>
+      <CardHeaderSection
+        back
+        title="Add course"
+        breadcrumbs={[
+          { label: "Home", href: ROUTE.DASHBOARD },
+          { label: "Courses", href: "" },
+          { label: "Add course", href: "" },
+        ]}
+      />
 
       <Card>
         <CardContent className="p-6">
