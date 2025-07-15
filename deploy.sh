@@ -274,6 +274,10 @@ install_dependencies() {
     if [ "$INSTALL_DEPS" = true ]; then
         print_status "📦 Installing dependencies with --force..."
         
+        # Clear npm cache first to avoid potential issues
+        npm cache clean --force
+        
+        # Install with force flag
         npm install --force
         
         if [ $? -eq 0 ]; then
@@ -294,20 +298,59 @@ build_project() {
         
         # Clean previous build
         if [ -d ".next" ]; then
+            print_status "Cleaning previous build..."
             rm -rf .next
         fi
         
-        # Set build environment variables
+        # Reload environment variables to ensure they're fresh
+        load_env_vars
+        
+        # Set essential build environment variables explicitly
         export NODE_ENV=production
         export NEXT_TELEMETRY_DISABLED=1
         
-        npm run build
+        # Print environment variables being used for build (for debugging)
+        print_status "Build environment:"
+        echo "NODE_ENV: $NODE_ENV"
+        echo "NEXT_PUBLIC_API_BASE_URL: $NEXT_PUBLIC_API_BASE_URL"
+        echo "BACKEND_API_URL: $BACKEND_API_URL"
+        echo "NODE_OPTIONS: $NODE_OPTIONS"
+        
+        # Run build with explicit environment variable passing
+        print_status "Running: npm run build"
+        
+        # Build with all environment variables explicitly set
+        env \
+            NODE_ENV="$NODE_ENV" \
+            NEXT_PUBLIC_NODE_ENV="$NEXT_PUBLIC_NODE_ENV" \
+            NEXT_PUBLIC_API_BASE_URL="$NEXT_PUBLIC_API_BASE_URL" \
+            BACKEND_API_URL="$BACKEND_API_URL" \
+            NODE_OPTIONS="$NODE_OPTIONS" \
+            NEXT_TELEMETRY_DISABLED="$NEXT_TELEMETRY_DISABLED" \
+            ENABLE_HOT_RELOAD="$ENABLE_HOT_RELOAD" \
+            ENABLE_SOURCE_MAPS="$ENABLE_SOURCE_MAPS" \
+            ANALYZE="$ANALYZE" \
+            LOG_LEVEL="$LOG_LEVEL" \
+            DEBUG_MODE="$DEBUG_MODE" \
+            SECURE_COOKIES="$SECURE_COOKIES" \
+            TRUST_PROXY="$TRUST_PROXY" \
+            npm run build
         
         if [ $? -eq 0 ]; then
             print_success "Build completed successfully"
         else
             print_error "Build failed"
-            exit 1
+            print_error "Trying alternative build approach..."
+            
+            # Fallback: try building without explicit env passing
+            npm run build
+            
+            if [ $? -eq 0 ]; then
+                print_success "Build completed with fallback approach"
+            else
+                print_error "Build failed completely"
+                exit 1
+            fi
         fi
     else
         print_status "🔨 Skipping build step"
