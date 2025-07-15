@@ -11,7 +11,7 @@ PM2_INSTANCES=1
 MEMORY_LIMIT="1G"
 
 # ========================================================================
-# 🚀 SMART DEPLOYMENT SCRIPT FOR NEXT.JS WITH PM2
+# 🚀 OPTIMIZED DEPLOYMENT SCRIPT FOR KSIT MOBILE WITH PM2
 # ========================================================================
 
 set -e  # Exit on any error
@@ -68,11 +68,9 @@ load_env_vars() {
 init_environment() {
     load_env_vars
     
-    # Use environment variables from .env.production (no fallback defaults)
-    # These will be loaded from your .env.production file
     echo ""
     echo -e "${PURPLE}============================================${NC}"
-    echo -e "${PURPLE}🚀 STARTING KSIT FRONTEND DEPLOYMENT${NC}"
+    echo -e "${PURPLE}🚀 STARTING KSIT MOBILE FRONTEND DEPLOYMENT${NC}"
     echo -e "${PURPLE}============================================${NC}"
     echo "APP_NAME: $APP_NAME"
     echo "FRONTEND_PORT: $EXTERNAL_PORT"
@@ -82,6 +80,7 @@ init_environment() {
     echo "NEXT_PUBLIC_API_BASE_URL: $NEXT_PUBLIC_API_BASE_URL"
     echo "NODE_OPTIONS: $NODE_OPTIONS"
     echo "GIT_USERNAME: $GIT_USERNAME"
+    echo "GIT_REPO_URL: $GIT_REPO_URL"
     echo -e "${PURPLE}============================================${NC}"
 }
 
@@ -135,8 +134,9 @@ setup_git_credentials() {
     
     # For GitHub, use token as password
     if [[ "$GIT_REPO_URL" == https* ]]; then
-        REST_URL=$(echo "$GIT_REPO_URL" | sed 's|https://||')
-        GIT_URL_WITH_CREDS="https://${GIT_USERNAME}:${GIT_PASSWORD}@${REST_URL}"
+        # Extract the repository part from the full URL
+        REPO_PART=$(echo "$GIT_REPO_URL" | sed 's|https://github.com/||')
+        GIT_URL_WITH_CREDS="https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${REPO_PART}"
     else
         GIT_URL_WITH_CREDS="https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${GIT_REPO_URL}"
     fi
@@ -181,13 +181,24 @@ pull_code() {
     fi
 }
 
-# Install dependencies
+# Install dependencies efficiently
 install_dependencies() {
     print_status "Installing dependencies..."
     
-    npm cache clean --force
-    # rm -rf node_modules package-lock.json
-    npm install --force
+    # Check if package-lock.json exists and package.json hasn't changed
+    if [ -f "package-lock.json" ] && [ -f "node_modules/.package-lock.json" ]; then
+        # Compare package-lock.json with the one in node_modules
+        if cmp -s "package-lock.json" "node_modules/.package-lock.json"; then
+            print_status "Dependencies are already up to date, running npm ci for verification..."
+            npm ci --only=production=false
+        else
+            print_status "Package lock has changed, updating dependencies..."
+            npm install
+        fi
+    else
+        print_status "Installing fresh dependencies..."
+        npm install
+    fi
 
     if [ $? -eq 0 ]; then
         print_success "Dependencies installed successfully"
@@ -201,13 +212,16 @@ install_dependencies() {
 build_project() {
     print_status "Building Next.js project..."
     
-    # Clean previous build
-    rm -rf .next
+    # Clean previous build only if it exists
+    if [ -d ".next" ]; then
+        print_status "Cleaning previous build..."
+        rm -rf .next
+    fi
     
     # Reload environment variables to ensure they're available during build
     load_env_vars
     
-    # Print environment variables for debugging
+    # Print key environment variables for debugging
     print_status "Build environment variables:"
     echo "NODE_ENV: $NODE_ENV"
     echo "NEXT_PUBLIC_NODE_ENV: $NEXT_PUBLIC_NODE_ENV"
@@ -264,12 +278,6 @@ build_project() {
             print_error "package.json not found"
         fi
         
-        # Show last few lines of npm debug log if it exists
-        if [ -f "npm-debug.log" ]; then
-            print_error "Last 10 lines of npm-debug.log:"
-            tail -10 npm-debug.log
-        fi
-        
         exit 1
     fi
 }
@@ -311,6 +319,9 @@ module.exports = {
         BACKEND_API_URL: '${BACKEND_API_URL}',
         NODE_OPTIONS: '${NODE_OPTIONS}',
         NEXT_TELEMETRY_DISABLED: '${NEXT_TELEMETRY_DISABLED}',
+        ENABLE_HOT_RELOAD: '${ENABLE_HOT_RELOAD}',
+        ENABLE_SOURCE_MAPS: '${ENABLE_SOURCE_MAPS}',
+        ANALYZE: '${ANALYZE}',
         LOG_LEVEL: '${LOG_LEVEL}',
         DEBUG_MODE: '${DEBUG_MODE}',
         SECURE_COOKIES: '${SECURE_COOKIES}',
@@ -383,18 +394,22 @@ health_check() {
 show_deployment_summary() {
     echo ""
     echo -e "${PURPLE}============================================${NC}"
-    echo -e "${PURPLE}🎉 DEPLOYMENT COMPLETED SUCCESSFULLY!${NC}"
+    echo -e "${PURPLE}🎉 KSIT MOBILE DEPLOYMENT COMPLETED!${NC}"
     echo -e "${PURPLE}============================================${NC}"
     echo -e "${CYAN}App Name: ${APP_NAME}${NC}"
     echo -e "${CYAN}Frontend Port: ${EXTERNAL_PORT}${NC}"
     echo -e "${CYAN}PM2 Internal Port: ${PORT}${NC}"
     echo -e "${CYAN}Environment: ${NODE_ENV}${NC}"
     echo -e "${CYAN}Git Branch: ${GIT_BRANCH}${NC}"
+    echo -e "${CYAN}Git Repository: ${GIT_REPO_URL}${NC}"
     echo -e "${CYAN}API Base URL: ${NEXT_PUBLIC_API_BASE_URL}${NC}"
     echo -e "${CYAN}Backend API: ${BACKEND_API_URL}${NC}"
-    echo -e "${CYAN}Frontend URL: http://152.42.219.13:${EXTERNAL_PORT}${NC}"
-    echo -e "${CYAN}Backend API: http://152.42.219.13:9090${NC}"
-    echo -e "${CYAN}Swagger UI: http://152.42.219.13:9090/swagger-ui/swagger-ui/index.html${NC}"
+    echo -e "${PURPLE}============================================${NC}"
+    echo -e "${YELLOW}📱 Application URLs:${NC}"
+    echo -e "  ${BLUE}Frontend:${NC} http://152.42.219.13:${EXTERNAL_PORT}"
+    echo -e "  ${BLUE}Backend API:${NC} http://152.42.219.13:9090"
+    echo -e "  ${BLUE}Swagger UI:${NC} http://152.42.219.13:9090/swagger-ui/swagger-ui/index.html"
+    echo -e "  ${BLUE}API Flow:${NC} Frontend → ${EXTERNAL_PORT}/api/* → nginx proxy → 9090/api/*"
     echo -e "${PURPLE}============================================${NC}"
     echo -e "${YELLOW}📋 Useful Commands:${NC}"
     echo -e "  ${BLUE}pm2 logs ${APP_NAME}${NC}     - View logs"
