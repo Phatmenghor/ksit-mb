@@ -35,7 +35,6 @@ import { ClassCard } from "@/components/dashboard/schedule/class/class-card";
 import Loading from "@/components/shared/loading";
 import { AppIcons } from "@/constants/icons/icon";
 import { useDebounce } from "@/utils/debounce/debounce";
-import { usePagination } from "@/hooks/use-pagination";
 
 // Empty state components
 const EmptyMajorsState = ({ searchQuery }: { searchQuery: string }) => (

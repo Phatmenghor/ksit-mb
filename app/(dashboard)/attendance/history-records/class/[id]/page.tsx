@@ -80,7 +80,7 @@ export default function HistoryRecordsPage() {
       try {
         const response = await getAllAttendanceHistoryService({
           scheduleId: Number(id),
-          pageNo: filter.pageNo || 1,
+          pageNo: currentPage || 1,
           pageSize: filter.pageSize || 10,
         });
         console.log(response);
@@ -99,12 +99,12 @@ export default function HistoryRecordsPage() {
         setIsLoading(false);
       }
     },
-    [id] // Added id to dependencies
+    [id, currentPage] // Added id to dependencies
   );
 
   useEffect(() => {
     fetchAttendanceHistory({ pageNo: currentPage });
-  }, [fetchAttendanceHistory, currentPage]);
+  }, [currentPage]);
 
   const getStatusAttendance = (status: string) => {
     if (!status) {

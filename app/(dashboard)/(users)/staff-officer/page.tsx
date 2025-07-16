@@ -87,6 +87,7 @@ export default function StuffOfficerListPage() {
           roles: [RoleEnum.STAFF],
           search: searchQuery,
           status: statusFilter,
+          pageNo: currentPage,
         });
         if (response) {
           setData(response);
@@ -104,12 +105,12 @@ export default function StuffOfficerListPage() {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, statusFilter]
+    [debouncedSearchQuery, currentPage, statusFilter]
   );
 
   useEffect(() => {
     loadData({});
-  }, [debouncedSearchQuery, loadData, statusFilter]);
+  }, [debouncedSearchQuery, currentPage, statusFilter]);
 
   const handleDeleteStaff = async () => {
     if (!selectedStaff) return;

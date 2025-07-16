@@ -130,6 +130,7 @@ const ClassSchedulePage = () => {
         const response = await getAllMajorService({
           search: searchDebounce,
           status: Constants.ACTIVE,
+          pageNo: currentPage,
           departmentId: depId || undefined,
           ...param,
         });
@@ -174,12 +175,12 @@ const ClassSchedulePage = () => {
         setHasLoadedOnce(true);
       }
     },
-    [searchDebounce, selectedMajor, depId, hasLoadedOnce]
+    [searchDebounce, selectedMajor, currentPage, depId, hasLoadedOnce]
   );
 
   useEffect(() => {
     loadMajors({});
-  }, [searchDebounce, loadMajors]);
+  }, [searchDebounce, currentPage]);
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {

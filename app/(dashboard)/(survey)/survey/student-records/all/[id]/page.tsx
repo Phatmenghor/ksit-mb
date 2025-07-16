@@ -131,6 +131,7 @@ export default function AllStudentResultPage() {
         const surveyFilter: AllSurveyFilterModel = {
           search: debouncedSearchQuery,
           scheduleId: id,
+          pageNo: currentPage,
           ...filter,
         };
 
@@ -160,12 +161,12 @@ export default function AllStudentResultPage() {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery]
+    [debouncedSearchQuery, currentPage]
   );
 
   useEffect(() => {
     fetchSurveyResults({ pageNo: currentPage });
-  }, [fetchSurveyResults, debouncedSearchQuery, currentPage]);
+  }, [debouncedSearchQuery, currentPage]);
 
   // Render cell value based on type
   const renderCellValue = (
