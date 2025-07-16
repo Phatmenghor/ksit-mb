@@ -101,6 +101,7 @@ export default function CoursesPage() {
           search: searchDebounce,
           departmentId: selectedDepartment?.id,
           status: Constants.ACTIVE,
+          pageNo: currentPage,
           ...param,
         });
 
@@ -119,12 +120,12 @@ export default function CoursesPage() {
         setIsLoading(false);
       }
     },
-    [searchDebounce, selectedDepartment]
+    [searchDebounce, currentPage, selectedDepartment]
   );
 
   useEffect(() => {
     loadCourses({});
-  }, [searchDebounce, loadCourses, selectedDepartment]);
+  }, [searchDebounce, currentPage, selectedDepartment]);
 
   async function handleDeleteClass() {
     if (!selectedCourse) return;

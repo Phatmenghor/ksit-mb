@@ -65,6 +65,7 @@ export default function DepartmentListPage() {
       try {
         const response = await getAllDepartmentService({
           search: debouncedSearchQuery,
+          pageNo: currentPage,
           status: Constants.ACTIVE,
           ...param,
         });
@@ -85,12 +86,12 @@ export default function DepartmentListPage() {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery]
+    [debouncedSearchQuery, currentPage]
   );
 
   useEffect(() => {
     loadDepartments({});
-  }, [debouncedSearchQuery, loadDepartments]);
+  }, [debouncedSearchQuery, currentPage]);
 
   function onClickDepartmentCard(departmentId: number) {
     router.push(ROUTE.MANAGE_SCHEDULE.DEPARTMENT_CLASS + `/${departmentId}`);

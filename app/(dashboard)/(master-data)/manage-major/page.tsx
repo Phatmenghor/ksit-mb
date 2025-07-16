@@ -93,6 +93,7 @@ export default function ManageMajorPage() {
         const response = await getAllMajorService({
           search: searchDebounce,
           status: Constants.ACTIVE,
+          pageNo: currentPage,
           ...param,
         });
 
@@ -111,12 +112,12 @@ export default function ManageMajorPage() {
         setIsLoading(false);
       }
     },
-    [searchDebounce]
+    [searchDebounce, currentPage]
   );
 
   useEffect(() => {
     loadMajors({});
-  }, [searchDebounce, loadMajors]);
+  }, [searchDebounce, currentPage]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");

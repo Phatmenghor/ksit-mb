@@ -148,6 +148,7 @@ export default function SurveyResultPage() {
           academyYear: selectAcademicYear,
           semester: selectedSemester != "ALL" ? selectedSemester : undefined,
           classId: selectedClass?.id,
+          pageNo: currentPage,
           pageSize: 20,
           startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
           endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined,
@@ -187,6 +188,7 @@ export default function SurveyResultPage() {
       selectAcademicYear,
       selectedSemester,
       startDate,
+      currentPage,
       endDate,
     ]
   );
@@ -194,9 +196,9 @@ export default function SurveyResultPage() {
   useEffect(() => {
     fetchSurveyResults({ pageNo: currentPage });
   }, [
-    fetchSurveyResults,
     debouncedSearchQuery,
     selectedClass,
+    currentPage,
     selectAcademicYear,
     selectedSemester,
     currentPage,

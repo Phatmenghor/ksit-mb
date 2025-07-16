@@ -87,6 +87,8 @@ export default function TeachersListPage() {
           roles: [RoleEnum.TEACHER],
           search: searchQuery,
           status: StatusEnum.ACTIVE,
+          pageNo: currentPage,
+          pageSize: 10,
           ...param,
         });
 
@@ -106,12 +108,12 @@ export default function TeachersListPage() {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery]
+    [debouncedSearchQuery, currentPage]
   );
 
   useEffect(() => {
     loadTeachers({});
-  }, [debouncedSearchQuery, loadTeachers]);
+  }, [debouncedSearchQuery, currentPage]);
 
   async function handleDeleteTeacher() {
     if (!selectedTeacher) return;

@@ -98,6 +98,7 @@ export default function ManageClassPage() {
         const response = await getAllClassService({
           search: debouncedSearchQuery,
           status: Constants.ACTIVE,
+          pageNo: currentPage,
           academyYear: selectedYear,
           ...param,
         });
@@ -119,12 +120,12 @@ export default function ManageClassPage() {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, selectedYear]
+    [debouncedSearchQuery, currentPage, selectedYear]
   );
 
   useEffect(() => {
     loadClass();
-  }, [loadClass, debouncedSearchQuery, selectedYear]);
+  }, [currentPage, debouncedSearchQuery, selectedYear]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");

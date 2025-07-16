@@ -108,6 +108,7 @@ export default function StudentRecordsPage() {
           academyYear: selectAcademicYear,
           semester: selectedSemester != "ALL" ? selectedSemester : undefined,
           classId: selectedClass?.id,
+          pageNo: currentPage,
           startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
           endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined,
           ...filter,
@@ -131,6 +132,7 @@ export default function StudentRecordsPage() {
       debouncedSearchQuery,
       selectedClass,
       selectAcademicYear,
+      currentPage,
       selectedSemester,
       startDate,
       endDate,
@@ -140,7 +142,6 @@ export default function StudentRecordsPage() {
   useEffect(() => {
     fetchAttendanceHistory({ pageNo: currentPage });
   }, [
-    fetchAttendanceHistory,
     debouncedSearchQuery,
     selectedClass,
     selectAcademicYear,

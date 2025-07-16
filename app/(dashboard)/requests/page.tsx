@@ -89,6 +89,7 @@ export default function RequestPage() {
       try {
         const response = await getAllRequestService({
           search: debouncedSearchQuery,
+          pageNo: currentPage,
           status: selectedType?.value,
           ...filters,
         });
@@ -106,7 +107,7 @@ export default function RequestPage() {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, selectedType]
+    [debouncedSearchQuery, currentPage, selectedType]
   );
 
   // New function to fetch counts for all request types
@@ -143,7 +144,7 @@ export default function RequestPage() {
     if (selectedType) {
       fetchRequests({ pageNo: currentPage });
     }
-  }, [selectedType, debouncedSearchQuery, currentPage, fetchRequests]);
+  }, [selectedType, debouncedSearchQuery, currentPage]);
 
   // Fetch counts on component mount and when search query changes
   useEffect(() => {

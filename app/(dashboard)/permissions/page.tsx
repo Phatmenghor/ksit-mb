@@ -1,7 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { RoleEnum, StatusEnum } from "@/constants/constant";
 import { UserPermissionModel } from "@/model/permission/permission-response-model";
 import {
   AllStaffModel,
@@ -13,8 +12,7 @@ import {
   updateUserPermissionService,
   updateUserRolesService,
 } from "@/service/permission/permission.service";
-import { getAllStaffService } from "@/service/user/user.service";
-import { AlertCircle, CheckSquare, Loader2, Users } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { MenuModel } from "@/model/menu/menu-respond";
@@ -23,11 +21,12 @@ import { CardHeaderSection } from "@/components/shared/layout/card-header-sectio
 import { ROUTE } from "@/constants/routes";
 import MenuPermissionItem from "@/components/dashboard/Role&Permission/sections/MenuPermissionItemProps";
 import UserRoleManagement from "@/components/dashboard/Role&Permission/sections/user-roles";
-import { identity } from "lodash";
 import { Separator } from "@/components/ui/separator";
+import Loading from "@/components/shared/loading";
 
 export default function Permissions() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isUserLoading, setIsUserLoading] = useState(false);
+  const [isMenuLoading, setMenuIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [users, setUsers] = useState<AllStaffModel | null>(null);
   const [userRoles, setUserRoles] = useState<UserPermissionModel[]>([]);
@@ -44,7 +43,7 @@ export default function Permissions() {
       return;
     }
 
-    setIsLoading(true);
+    setMenuIsLoading(true);
     try {
       console.log("Loading menu data for user:", selectedUser.id);
       const response = await getMenuByUserIdService(selectedUser.id);
@@ -61,7 +60,7 @@ export default function Permissions() {
       toast.error("An error occurred while loading menu data");
       setMenuData([]);
     } finally {
-      setIsLoading(false);
+      setMenuIsLoading(false);
     }
   }, [selectedUser]);
 
@@ -90,7 +89,7 @@ export default function Permissions() {
       return;
     }
 
-    setIsLoading(true);
+    setIsUserLoading(true);
     try {
       console.log("Loading roles for user:", selectedUser.id); // Debug log
       const response = await getUserForPermissionService(selectedUser.id);
@@ -101,7 +100,7 @@ export default function Permissions() {
       toast.error("An error occurred while loading user roles");
       setUserRoles([]); // Clear roles on error
     } finally {
-      setIsLoading(false);
+      setIsUserLoading(false);
     }
   }, [selectedUser]); // Added selectedUser dependency
 
@@ -113,7 +112,8 @@ export default function Permissions() {
       return;
     }
 
-    setIsLoading(true);
+    setIsUserLoading(true);
+    setMenuIsLoading(true);
     try {
       // Load both user roles and menu data in parallel
       const [userRolesResponse, menuDataResponse] = await Promise.all([
@@ -140,7 +140,8 @@ export default function Permissions() {
       setUserRoles([]);
       setMenuData([]);
     } finally {
-      setIsLoading(false);
+      setIsUserLoading(false);
+      setMenuIsLoading(false);
     }
   }, [selectedUser]);
 
@@ -170,7 +171,7 @@ export default function Permissions() {
   const handleApplyRoles = useCallback(
     async (selectedRoles: string[]) => {
       if (selectedUser === null) return;
-      setIsLoading(true);
+      setIsUserLoading(true);
       try {
         const response = await updateUserRolesService(selectedUser?.id, {
           roles: selectedRoles,
@@ -187,7 +188,7 @@ export default function Permissions() {
 
         toast.error("An error occurred while updating roles");
       } finally {
-        setIsLoading(false);
+        setIsUserLoading(false);
       }
     },
     [selectedUser, loadUserRoles]
@@ -294,7 +295,9 @@ export default function Permissions() {
               {/* Content area with consistent height */}
               <div className="min-h-[148px] flex flex-col">
                 <div className="flex-1 space-y-4">
-                  {sortedMenuData.length > 0 ? (
+                  {isMenuLoading ? (
+                    <Loading />
+                  ) : sortedMenuData.length > 0 ? (
                     sortedMenuData.map((menu, index) => (
                       <MenuPermissionItem
                         key={menu.id}
@@ -359,14 +362,18 @@ export default function Permissions() {
 
             <Separator className="bg-slate-200 mb-4" />
 
-            <UserRoleManagement
-              users={users}
-              setUserRoles={setUserRoles}
-              userRoles={userRoles}
-              onApplyRoles={handleApplyRoles}
-              selectedUser={selectedUser}
-              setSelectedUser={setSelectedUser}
-            />
+            {isUserLoading ? (
+              <Loading />
+            ) : (
+              <UserRoleManagement
+                users={users}
+                setUserRoles={setUserRoles}
+                userRoles={userRoles}
+                onApplyRoles={handleApplyRoles}
+                selectedUser={selectedUser}
+                setSelectedUser={setSelectedUser}
+              />
+            )}
           </CardContent>
         </Card>
       </div>
