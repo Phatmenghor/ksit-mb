@@ -95,6 +95,7 @@ export default function ManageRoomPage() {
         const response = await getAllRoomService({
           search: searchDebounceQuery,
           status: Constants.ACTIVE,
+          pageNo: currentPage,
           ...param,
         });
 
@@ -113,12 +114,12 @@ export default function ManageRoomPage() {
         setIsLoading(false);
       }
     },
-    [searchDebounceQuery]
+    [searchDebounceQuery, currentPage]
   );
 
   useEffect(() => {
     loadRooms({});
-  }, [searchDebounceQuery, loadRooms]);
+  }, [searchDebounceQuery, currentPage]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");

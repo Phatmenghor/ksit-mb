@@ -103,6 +103,8 @@ export default function StudentsListPage() {
       try {
         const response = await getAllStudentsService({
           ...param,
+          pageNo: currentPage,
+          pageSize: 10,
           academicYear: selectAcademicYear,
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
@@ -125,13 +127,13 @@ export default function StudentsListPage() {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, selectedClass, selectAcademicYear]
+    [debouncedSearchQuery, currentPage, selectedClass, selectAcademicYear]
   );
 
   // Run fetch on mount and when filters change
   useEffect(() => {
     loadStudents({});
-  }, [loadStudents, selectedClass, debouncedSearchQuery, selectAcademicYear]);
+  }, [selectedClass, currentPage, debouncedSearchQuery, selectAcademicYear]);
 
   const handleYearChange = (e: number) => {
     setSelectAcademicYear(e);

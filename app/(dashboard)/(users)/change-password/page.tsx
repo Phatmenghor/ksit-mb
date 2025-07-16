@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,7 @@ import { CardHeaderSection } from "@/components/shared/layout/card-header-sectio
 import { ROUTE } from "@/constants/routes";
 import { ChangePasswordService } from "@/service/auth/auth.service";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 const changePasswordSchema = z
   .object({
@@ -33,6 +34,10 @@ const changePasswordSchema = z
 type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 
 export default function ChangePasswordPage() {
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -80,49 +85,88 @@ export default function ChangePasswordPage() {
               <Label htmlFor="currentPassword" className="text-sm">
                 Current Password *
               </Label>
-              <Input
-                id="currentPassword"
-                placeholder="••••••••"
-                type="password"
-                className="h-10 text-sm placeholder:text-gray-400"
-                {...register("currentPassword")}
-              />
+              <div className="relative">
+                <Input
+                  id="currentPassword"
+                  placeholder="••••••••"
+                  type={showCurrentPassword ? "text" : "password"}
+                  className="h-10 text-sm placeholder:text-gray-400"
+                  {...register("currentPassword")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  {showCurrentPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               {errors.currentPassword && (
                 <p className="text-xs text-red-500">
                   {errors.currentPassword.message}
                 </p>
               )}
             </div>
-
             <div className="space-y-1">
               <Label htmlFor="newPassword" className="text-sm">
                 New Password *
               </Label>
-              <Input
-                id="newPassword"
-                placeholder="••••••••"
-                type="password"
-                className="h-10 text-sm placeholder:text-gray-400"
-                {...register("newPassword")}
-              />
+              <div className="relative">
+                <Input
+                  id="newPassword"
+                  placeholder="••••••••"
+                  type={showNewPassword ? "text" : "password"}
+                  className="h-10 text-sm placeholder:text-gray-400"
+                  {...register("newPassword")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  {showNewPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               {errors.newPassword && (
                 <p className="text-xs text-red-500">
                   {errors.newPassword.message}
                 </p>
               )}
             </div>
-
             <div className="space-y-1">
               <Label htmlFor="confirmNewPassword" className="text-sm">
                 Confirm New Password *
               </Label>
-              <Input
-                id="confirmNewPassword"
-                placeholder="••••••••"
-                type="password"
-                className="h-10 text-sm placeholder:text-gray-400"
-                {...register("confirmNewPassword")}
-              />
+              <div className="relative">
+                <Input
+                  id="confirmNewPassword"
+                  placeholder="••••••••"
+                  type={showConfirmNewPassword ? "text" : "password"}
+                  className="h-10 text-sm placeholder:text-gray-400 pr-10"
+                  {...register("confirmNewPassword")}
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowConfirmNewPassword(!showConfirmNewPassword)
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  {showConfirmNewPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               {errors.confirmNewPassword && (
                 <p className="text-xs text-red-500">
                   {errors.confirmNewPassword.message}

@@ -94,6 +94,7 @@ export default function ManageSubjectPage() {
         const response = await getAllSubjectService({
           search: searchDebounce,
           status: Constants.ACTIVE,
+          pageNo: currentPage,
           ...param,
         });
 
@@ -113,12 +114,12 @@ export default function ManageSubjectPage() {
         setIsLoading(false);
       }
     },
-    [searchDebounce]
+    [searchDebounce, currentPage]
   );
 
   useEffect(() => {
     loadSubjects({});
-  }, [searchDebounce, loadSubjects]);
+  }, [searchDebounce, currentPage]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");

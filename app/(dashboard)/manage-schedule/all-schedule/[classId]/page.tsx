@@ -107,6 +107,7 @@ const AllSchedulePage = () => {
           classId: Number(classId),
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
+          pageNo: currentPage,
           academyYear: selectedYear,
           semester: selectedSemester != "ALL" ? selectedSemester : undefined,
           dayOfWeek:
@@ -130,14 +131,20 @@ const AllSchedulePage = () => {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, selectedDay, selectedYear, selectedSemester]
+    [
+      debouncedSearchQuery,
+      selectedDay,
+      selectedYear,
+      currentPage,
+      selectedSemester,
+    ]
   );
 
   useEffect(() => {
     if (selectedDay) {
       fetchSchedule({ pageNo: currentPage });
     }
-  }, [selectedDay, debouncedSearchQuery, currentPage, fetchSchedule]);
+  }, [selectedDay, debouncedSearchQuery, currentPage]);
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {

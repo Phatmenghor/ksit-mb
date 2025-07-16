@@ -78,6 +78,7 @@ const HistoryRecordSchedulePage = () => {
         const response = await getAllMyScheduleService({
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
+          pageNo: currentPage,
           dayOfWeek:
             selectedDay && selectedDay.value !== "ALL"
               ? selectedDay.value
@@ -98,7 +99,7 @@ const HistoryRecordSchedulePage = () => {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, selectedDay]
+    [debouncedSearchQuery, currentPage, selectedDay]
   );
 
   // Fetch schedule when selectedDay, search query, or page changes
@@ -106,7 +107,7 @@ const HistoryRecordSchedulePage = () => {
     if (selectedDay) {
       fetchSchedule({ pageNo: currentPage });
     }
-  }, [selectedDay, debouncedSearchQuery, currentPage, fetchSchedule]);
+  }, [selectedDay, debouncedSearchQuery, currentPage, currentPage]);
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {

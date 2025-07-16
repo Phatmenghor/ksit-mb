@@ -133,7 +133,7 @@ export default function AdminsListPage() {
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, [currentPage]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");

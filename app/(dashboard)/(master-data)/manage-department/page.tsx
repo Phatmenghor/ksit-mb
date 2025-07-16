@@ -108,6 +108,7 @@ export default function ManageDepartmentPage() {
         const response = await getAllDepartmentService({
           search: searchDebounce,
           status: Constants.ACTIVE,
+          pageNo: currentPage,
           ...param,
         });
 
@@ -126,12 +127,12 @@ export default function ManageDepartmentPage() {
         setIsLoading(false);
       }
     },
-    [searchDebounce]
+    [searchDebounce, currentPage]
   );
 
   useEffect(() => {
     loadDepartments({});
-  }, [searchDebounce, loadDepartments]);
+  }, [searchDebounce, currentPage]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");

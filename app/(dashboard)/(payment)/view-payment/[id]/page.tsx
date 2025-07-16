@@ -196,6 +196,7 @@ export default function PaymentPage() {
         const response = await getAllPaymentService({
           status: Constants.ACTIVE,
           userId: id,
+          pageNo: currentPage,
           ...param,
         });
 
@@ -215,7 +216,7 @@ export default function PaymentPage() {
         setIsLoading(false);
       }
     },
-    [id]
+    [id, currentPage]
   );
 
   useEffect(() => {
@@ -224,7 +225,7 @@ export default function PaymentPage() {
 
   useEffect(() => {
     payment({});
-  }, [payment]);
+  }, [currentPage]);
 
   async function handleDeletePayment() {
     if (!selectedPayment) return;

@@ -85,6 +85,7 @@ export default function ScoreSubmittedPage() {
           ...param,
           status: currentStatus,
           search: debouncedSearchQuery,
+          pageNo: currentPage,
         });
         console.log("Submission: ", response);
 
@@ -109,6 +110,7 @@ export default function ScoreSubmittedPage() {
       debouncedSearchQuery,
       getCurrentTabStatus,
       selectAcademicYear,
+      currentPage,
       selectedSemester,
     ]
   );
@@ -116,12 +118,12 @@ export default function ScoreSubmittedPage() {
   // Load data when dependencies change
   useEffect(() => {
     loadSubmittedScore({});
-  }, [loadSubmittedScore]);
+  }, [currentPage]);
 
   // Reset pagination when tab changes
   useEffect(() => {
     setSubmissions(null); // Clear current data
-    loadSubmittedScore({ pageNo: 1 }); // Load first page of new tab
+    updateUrlWithPage(1);
   }, [activeTab]);
 
   const handleTabChange = (value: string) => {

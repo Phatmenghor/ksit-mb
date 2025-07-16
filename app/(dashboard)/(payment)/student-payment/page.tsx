@@ -79,6 +79,7 @@ export default function StudentsListPage() {
           academicYear: selectAcademicYear,
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
+          pageNo: currentPage,
           classId: selectedClass?.id,
         });
 
@@ -99,12 +100,12 @@ export default function StudentsListPage() {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, selectedClass, selectAcademicYear]
+    [debouncedSearchQuery, currentPage, selectedClass, selectAcademicYear]
   );
 
   useEffect(() => {
     loadStudents({});
-  }, [searchQuery, loadStudents, debouncedSearchQuery, selectAcademicYear]);
+  }, [searchQuery, currentPage, debouncedSearchQuery, selectAcademicYear]);
 
   const handleYearChange = (e: number) => {
     setSelectAcademicYear(e);
@@ -227,7 +228,7 @@ export default function StudentsListPage() {
       </div>
 
       {!isLoading && allStudentData && (
-        <div className="mt-8 flex justify-end animate-in slide-in-from-bottom-4 duration-500 delay-1000">
+        <div className="mt-8 flex justify-end duration-500 delay-1000">
           <PaginationPage
             currentPage={currentPage}
             totalPages={allStudentData.totalPages}

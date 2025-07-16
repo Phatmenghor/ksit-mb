@@ -106,6 +106,7 @@ export default function ManageSemester() {
           search: searchDebounce,
           academyYear: selectedYear,
           status: Constants.ACTIVE,
+          pageNo: currentPage,
           ...param,
         });
         if (response) {
@@ -123,12 +124,12 @@ export default function ManageSemester() {
         setIsLoading(false);
       }
     },
-    [searchDebounce, selectedYear]
+    [searchDebounce, currentPage, selectedYear]
   );
 
   useEffect(() => {
     loadSemester({});
-  }, [searchDebounce, loadSemester, selectedYear]);
+  }, [searchDebounce, currentPage, selectedYear]);
 
   const handleOpenAddModal = () => {
     setModalMode("add");

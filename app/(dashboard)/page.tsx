@@ -79,6 +79,7 @@ export default function ManageClassPage() {
       try {
         const response = await getMyDepartmentService({
           status: Constants.ACTIVE,
+          pageNo: currentPage,
           ...param,
         });
 
@@ -97,7 +98,7 @@ export default function ManageClassPage() {
         setIsLoading(false);
       }
     },
-    []
+    [currentPage]
   );
 
   const loadStatistics = useCallback(async () => {
@@ -120,7 +121,7 @@ export default function ManageClassPage() {
   useEffect(() => {
     loadDepartments({});
     loadStatistics();
-  }, [loadDepartments, loadStatistics]);
+  }, [currentPage, loadStatistics]);
 
   function onClickDepartmentCard(departmentId: number) {
     router.push(ROUTE.MY_CLASS.CLASS + `/${departmentId}`);

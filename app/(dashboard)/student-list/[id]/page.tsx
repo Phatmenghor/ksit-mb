@@ -66,32 +66,36 @@ export default function StudentListPage() {
     }
   }, [searchParams, updateUrlWithPage]);
 
-  const fetchSchedule = useCallback(async (filters: RequestAllStudent) => {
-    setIsLoading(true);
-    try {
-      const baseFilters = {
-        scheduleId: scheduleId || 0,
-        status: Constants.ACTIVE,
-        ...filters,
-      };
+  const fetchSchedule = useCallback(
+    async (filters: RequestAllStudent) => {
+      setIsLoading(true);
+      try {
+        const baseFilters = {
+          scheduleId: scheduleId || 0,
+          pageNo: currentPage,
+          status: Constants.ACTIVE,
+          ...filters,
+        };
 
-      const response = await getAllStudentsService(baseFilters);
+        const response = await getAllStudentsService(baseFilters);
 
-      console.log(response);
-      setStudents(response);
-      // Handle case where current page exceeds total pages
-      if (response.totalPages > 0 && currentPage > response.totalPages) {
-        updateUrlWithPage(response.totalPages);
-        return;
+        console.log(response);
+        setStudents(response);
+        // Handle case where current page exceeds total pages
+        if (response.totalPages > 0 && currentPage > response.totalPages) {
+          updateUrlWithPage(response.totalPages);
+          return;
+        }
+      } catch (error) {
+        console.error("Error fetching schedule data:", error);
+        toast.error("An error occurred while loading classes");
+        setStudents(null);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching schedule data:", error);
-      toast.error("An error occurred while loading classes");
-      setStudents(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [currentPage]
+  );
 
   const fetchClassDetail = useCallback(async () => {
     setIsLoading(true);
@@ -111,7 +115,7 @@ export default function StudentListPage() {
   useEffect(() => {
     fetchSchedule({});
     fetchClassDetail(); // Call with empty filters or your default filters
-  }, [fetchSchedule, fetchClassDetail]);
+  }, [currentPage, fetchClassDetail]);
   const router = useRouter();
 
   const handleBackNavigation = () => {

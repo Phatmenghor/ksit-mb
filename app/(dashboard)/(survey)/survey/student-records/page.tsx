@@ -98,6 +98,7 @@ const ScheduleAllPage = () => {
         const baseFilters = {
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
+          pageNo: currentPage,
           academyYear: selectedYear,
           semester: selectedSemester !== "ALL" ? selectedSemester : undefined,
           dayOfWeek:
@@ -120,7 +121,13 @@ const ScheduleAllPage = () => {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, selectedDay, selectedYear, selectedSemester]
+    [
+      debouncedSearchQuery,
+      currentPage,
+      selectedDay,
+      selectedYear,
+      selectedSemester,
+    ]
   );
 
   // Fetch schedule when any filter changes
@@ -133,7 +140,7 @@ const ScheduleAllPage = () => {
     selectedYear,
     selectedSemester,
     debouncedSearchQuery,
-    fetchSchedule,
+    currentPage,
   ]);
 
   const handleYearChange = (year: number) => {

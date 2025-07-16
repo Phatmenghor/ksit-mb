@@ -17,7 +17,6 @@ import { StudentSurveyModel } from "@/model/survey/student-survey-model";
 import { getAllStudentSurveyService } from "@/service/survey/history-survey.service";
 import { toast } from "sonner";
 import { useParams, useSearchParams } from "next/navigation";
-import { usePagination } from "@/hooks/use-pagination";
 
 const AllStduentView = () => {
   const params = useParams();

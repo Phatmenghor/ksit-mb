@@ -69,6 +69,7 @@ const AttendanceScheduleCheckPage = () => {
         const response = await getAllMyScheduleService({
           search: debouncedSearchQuery,
           status: StatusEnum.ACTIVE,
+          pageNo: currentPage,
           dayOfWeek:
             selectedDay && selectedDay.value !== "ALL"
               ? selectedDay.value
@@ -84,7 +85,7 @@ const AttendanceScheduleCheckPage = () => {
         setIsLoading(false);
       }
     },
-    [debouncedSearchQuery, selectedDay]
+    [debouncedSearchQuery, selectedDay, currentPage]
   );
 
   // Fetch schedule when selectedDay, search query, or page changes
@@ -92,7 +93,7 @@ const AttendanceScheduleCheckPage = () => {
     if (selectedDay) {
       fetchSchedule({ pageNo: currentPage });
     }
-  }, [selectedDay, debouncedSearchQuery, currentPage, fetchSchedule]);
+  }, [selectedDay, debouncedSearchQuery, currentPage]);
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
