@@ -40,3 +40,8 @@ next-env.d.ts
 .yarn/install-state.gz
 .pnp.*
 yarn.lock
+
+# environment variables
+.env
+.env.development
+.env.production
