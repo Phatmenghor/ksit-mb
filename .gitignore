@@ -41,7 +41,3 @@ next-env.d.ts
 .pnp.*
 yarn.lock
 
-# environment variables
-.env
-.env.development
-.env.production
