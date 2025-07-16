@@ -46,7 +46,7 @@ export default function AttendanceHeader({ title, schedule }: Props) {
               size="icon"
               onClick={() => router.back()}
               asChild
-              className="rounded-full flex-shrink-0"
+              className="rounded-full flex-shrink-0 hover:cursor-pointer"
             >
               <img
                 src={AppIcons.Back}

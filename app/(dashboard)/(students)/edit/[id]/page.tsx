@@ -15,6 +15,7 @@ import {
 } from "@/model/user/student/student.schema";
 import { EditStudentModel } from "@/model/user/student/student.request.model";
 import { cleanField } from "@/utils/map-helper/student";
+import Loading from "@/components/shared/loading";
 
 export default function EditSingleStudentPage() {
   const [loading, setLoading] = useState(false);
@@ -133,8 +134,8 @@ export default function EditSingleStudentPage() {
     }
   };
 
-  if (!initialValues) {
-    return <div>Loading...</div>;
+  if (!initialValues && loading) {
+    return <Loading />;
   }
 
   return (

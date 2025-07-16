@@ -70,6 +70,7 @@ export default function AttendanceCheckHeader({
               variant="ghost"
               size="icon"
               asChild
+              className="hover:cursor-pointer"
             >
               <img
                 src={AppIcons.Back}

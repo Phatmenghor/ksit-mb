@@ -285,26 +285,27 @@ export default function StudentForm({
                       </Button>
                     </div>
                   </div>
-                  <ResetPasswordDialog
-                    onConfirm={handleResetPassword}
-                    onDiscard={() => setIsResetPasswordDialogOpen(false)}
-                    description={`Password will reset for: ${
-                      initialValues?.englishFirstName || "---"
-                    } ${initialValues?.englishLastName || "---"} `}
-                    subDescription="Password reset: 88889999"
-                    open={isResetPasswordDialogOpen}
-                    cancelText="Discard"
-                    onOpenChange={() =>
-                      setIsResetPasswordDialogOpen(!isResetPasswordDialogOpen)
-                    }
-                    title="Confirm Reset!"
-                  />
                 </CardContent>
               </Card>
             )}
           </div>
         </form>
       </FormProvider>
+
+      <ResetPasswordDialog
+        onConfirm={handleResetPassword}
+        onDiscard={() => setIsResetPasswordDialogOpen(false)}
+        description={`Password will reset for: ${
+          initialValues?.englishFirstName || "---"
+        } ${initialValues?.englishLastName || "---"} `}
+        subDescription="Password reset: 88889999"
+        open={isResetPasswordDialogOpen}
+        cancelText="Discard"
+        onOpenChange={() =>
+          setIsResetPasswordDialogOpen(!isResetPasswordDialogOpen)
+        }
+        title="Confirm Reset!"
+      />
     </div>
   );
 }

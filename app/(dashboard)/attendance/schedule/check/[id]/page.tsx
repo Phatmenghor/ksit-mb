@@ -157,7 +157,6 @@ const AttendanceCheckPage = () => {
         const response = await getAllAttendanceGenerateService({
           scheduleId: scheduleDetail.id,
         });
-        console.log("##init attendance: ", response);
 
         setAttendanceGenerate(response);
         setLastUpdated(new Date());

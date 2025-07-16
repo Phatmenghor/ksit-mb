@@ -1,3 +1,4 @@
+// 2. Fixed InputFieldController (components/shared/inputFieldController.tsx)
 import { Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 
@@ -32,11 +33,16 @@ const InputFieldController = ({
       render={({ field }) => (
         <Input
           id={id || name}
-          {...field}
+          name={field.name}
           type={type}
           disabled={disabled}
           placeholder={placeholder}
           className={className}
+          // Explicitly handle the value and onChange to prevent undefined
+          value={field.value ?? ""}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          ref={field.ref}
         />
       )}
     />

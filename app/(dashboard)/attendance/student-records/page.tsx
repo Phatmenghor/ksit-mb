@@ -109,6 +109,7 @@ export default function StudentRecordsPage() {
           semester: selectedSemester != "ALL" ? selectedSemester : undefined,
           classId: selectedClass?.id,
           pageNo: currentPage,
+          finalizationStatus: "FINAL",
           startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
           endDate: endDate ? format(endDate, "yyyy-MM-dd") : undefined,
           ...filter,
@@ -215,6 +216,7 @@ export default function StudentRecordsPage() {
       const exportFilter: AttendanceHistoryFilter = {
         search: debouncedSearchQuery,
         academyYear: selectAcademicYear,
+        finalizationStatus: "FINAL",
         semester: selectedSemester !== "ALL" ? selectedSemester : undefined,
         classId: selectedClass?.id,
         startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,

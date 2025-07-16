@@ -1,9 +1,12 @@
-import * as React from "react"
-
-import { cn } from "@/lib/utils"
+// 1. Fixed Input Component (components/ui/input.tsx)
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, value, ...props }, ref) => {
+    // Ensure value is always controlled (never undefined)
+    const controlledValue = value !== undefined ? value : "";
+
     return (
       <input
         type={type}
@@ -12,11 +15,12 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           className
         )}
         ref={ref}
+        value={controlledValue}
         {...props}
       />
-    )
+    );
   }
-)
-Input.displayName = "Input"
+);
+Input.displayName = "Input";
 
-export { Input }
+export { Input };

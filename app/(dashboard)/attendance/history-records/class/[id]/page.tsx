@@ -80,6 +80,7 @@ export default function HistoryRecordsPage() {
       try {
         const response = await getAllAttendanceHistoryService({
           scheduleId: Number(id),
+          finalizationStatus: "FINAL",
           pageNo: currentPage || 1,
           pageSize: filter.pageSize || 10,
         });
@@ -169,9 +170,8 @@ export default function HistoryRecordsPage() {
       const allDataResponse: AttendanceHistoryModel[] =
         await getAllAttedanceHistoryExcelService({
           scheduleId: Number(id),
+          finalizationStatus: "FINAL",
         });
-
-      console.log("Export response:", allDataResponse);
 
       // Use API data if available, otherwise use current data
       const workbook = new ExcelJS.Workbook();
