@@ -20,10 +20,6 @@ import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { StatusEnum } from "@/constants/constant";
-import { getAllMajorService } from "@/service/master-data/major.service";
-import { MajorModel } from "@/model/master-data/major/all-major-model";
-import { RoomModel } from "@/model/master-data/room/all-room-model";
-import { getAllRoomService } from "@/service/master-data/room.service";
 import { getAllSemesterService } from "@/service/master-data/semester.service";
 import { SemesterModel } from "@/model/master-data/semester/semester-model";
 
@@ -31,12 +27,14 @@ interface ComboboxSelectedProps {
   dataSelect: SemesterModel | null;
   onChangeSelected: (item: SemesterModel) => void; // Callback to notify parent about the selection change
   disabled?: boolean;
+  academyYear?: number; // Optional academy year filter
 }
 
 export function ComboboxSelectSemester({
   dataSelect,
   onChangeSelected,
   disabled = false,
+  academyYear = 2025,
 }: ComboboxSelectedProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,12 +55,17 @@ export function ComboboxSelectSemester({
         search,
         pageSize: 10,
         pageNo: newPage,
-        academyYear: 2025,
+        academyYear: academyYear,
         status: StatusEnum.ACTIVE,
       });
 
+      if (!result) {
+        console.error("No data returned from getAllSemesterService");
+        return;
+      }
+
       if (newPage === 1) {
-        setData(result?.content);
+        setData(result.content);
       } else {
         setData((prev) => [...prev, ...result.content]);
       }
@@ -96,11 +99,6 @@ export function ComboboxSelectSemester({
     }
   }, [inView]);
 
-  // Check if the current selection exists in the loaded data
-  const isSelectedItemInList = dataSelect
-    ? data.some((item) => item.id === dataSelect.id)
-    : false;
-
   async function onChangeSearch(value: string) {
     setSearchTerm(value);
     onSearchClick(value);
@@ -127,19 +125,29 @@ export function ComboboxSelectSemester({
           )}
           disabled={disabled}
         >
-          {/* Always show the name from the dataSelect prop if available */}
+          {/* Always show the semester directly from dataSelect prop if available */}
           {dataSelect ? dataSelect.semester : "Select a semester..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full flex p-0">
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+        align="start"
+      >
         <Command>
           <CommandInput
             placeholder="Search semester..."
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
-          <CommandList className="max-h-60 overflow-y-auto">
+          <CommandList
+            className="max-h-60 overflow-y-auto"
+            onWheel={(e) => {
+              e.stopPropagation();
+              const target = e.currentTarget;
+              target.scrollTop += e.deltaY;
+            }}
+          >
             <CommandEmpty>No semester found.</CommandEmpty>
             <CommandGroup>
               {data?.map((item, index) => (
@@ -158,7 +166,7 @@ export function ComboboxSelectSemester({
                       dataSelect?.id === item.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {item.semester} ({item.semester})
+                  {item.semester}
                 </CommandItem>
               ))}
             </CommandGroup>

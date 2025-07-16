@@ -266,14 +266,6 @@ export default function PaymentPage() {
     }
   }
 
-  const profile = studentDetail
-    ? {
-        id: studentDetail.id,
-        username: studentDetail.username,
-        profileUrl: studentDetail.profileUrl,
-      }
-    : null;
-
   return (
     <div className="space-y-4">
       <CardHeaderSection
@@ -288,7 +280,7 @@ export default function PaymentPage() {
         ]}
       />
 
-      <UserProfileSection user={profile} />
+      <UserProfileSection user={studentDetail} />
 
       <Card>
         <CardContent className="p-6 space-y-2">

@@ -4,9 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import clsx from "clsx";
 import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { StudentByIdModel } from "@/model/user/student/student.respond.model";
+import { StaffRespondModel } from "@/model/user/staff/staff.respond.model";
 
 interface ProfileProps {
-  user: any;
+  user?: StudentByIdModel | null | StaffRespondModel;
   className?: string;
 }
 
@@ -38,7 +40,7 @@ export const UserProfileSection: React.FC<ProfileProps> = ({
           </h3>
           <div className="text-sm text-muted-foreground">
             <Badge className="bg-green-100 hover:bg-green-200 text-green-900 p-2">
-              ID: {user?.id ?? "N/A"}
+              ID: {user?.identifyNumber ?? "N/A"}
             </Badge>
           </div>
         </Card>
@@ -60,7 +62,7 @@ export const UserProfileSection: React.FC<ProfileProps> = ({
             </h3>
             <div className="text-sm text-muted-foreground">
               <Badge className="bg-green-100 hover:bg-green-200 text-green-900 p-2">
-                ID: {user?.id ?? "N/A"}
+                ID: {user?.identifyNumber ?? "N/A"}
               </Badge>
             </div>
           </CardContent>

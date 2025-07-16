@@ -196,11 +196,12 @@ export function ClassFormModal({
   return (
     <Dialog open={isOpen} onOpenChange={handleCloseModal}>
       <DialogContent
-        className={`max-h-[90vh] rounded-xl overflow-y-auto ${
+        className={cn(
+          "max-h-[90vh] rounded-xl flex flex-col",
           isMobile ? "max-w-sm" : "max-w-lg"
-        }`}
+        )}
       >
-        <DialogHeader>
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>
             {mode === "add" ? "Add Class" : "Edit Class"}
           </DialogTitle>
@@ -210,174 +211,176 @@ export function ClassFormModal({
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4 mt-4"
-          >
-            <FormField
-              control={form.control}
-              name="code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Class Code <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter class code"
-                      {...field}
-                      autoFocus
-                      maxLength={50}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="majorId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Major <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <ComboboxSelectMajor
-                      dataSelect={selectedMajor}
-                      onChangeSelected={handleMajorChange}
-                      disabled={isSubmitting}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="degree"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Degree <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={(value) =>
-                        field.onChange(value as DegreeEnum)
-                      }
-                      value={field.value}
-                      disabled={isSubmitting}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select degree" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={DegreeEnum.BACHELOR}>
-                          Bachelor
-                        </SelectItem>
-                        <SelectItem value={DegreeEnum.ASSOCIATE}>
-                          Associate
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="yearLevel"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Year Level <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      disabled={isSubmitting}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select year level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={YearLevelEnum.FIRST_YEAR}>
-                          Year 1
-                        </SelectItem>
-                        <SelectItem value={YearLevelEnum.SECOND_YEAR}>
-                          Year 2
-                        </SelectItem>
-                        <SelectItem value={YearLevelEnum.THIRD_YEAR}>
-                          Year 3
-                        </SelectItem>
-                        <SelectItem value={YearLevelEnum.FOURTH_YEAR}>
-                          Year 4
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="academyYear"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Academy Year <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <YearSelector
-                      value={field.value}
-                      onChange={handleYearChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex space-x-4 justify-end mr-auto">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCloseModal}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-
-              <Button
-                type="submit"
-                disabled={
-                  isSubmitting ||
-                  !form.formState.isDirty ||
-                  !form.formState.isValid
-                }
-                className="bg-green-900 text-white hover:bg-green-950"
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                    {mode === "add" ? "Creating..." : "Updating..."}
-                  </>
-                ) : (
-                  `${mode === "add" ? "Create" : "Update"} Class`
+        <div className="flex-1 overflow-y-auto pr-2">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-4 mt-4"
+            >
+              <FormField
+                control={form.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Class Code <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter class code"
+                        {...field}
+                        autoFocus
+                        maxLength={50}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </Button>
-            </div>
-          </form>
-        </Form>
+              />
+
+              <FormField
+                control={form.control}
+                name="majorId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Major <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <ComboboxSelectMajor
+                        dataSelect={selectedMajor}
+                        onChangeSelected={handleMajorChange}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="degree"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Degree <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={(value) =>
+                          field.onChange(value as DegreeEnum)
+                        }
+                        value={field.value}
+                        disabled={isSubmitting}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select degree" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={DegreeEnum.BACHELOR}>
+                            Bachelor
+                          </SelectItem>
+                          <SelectItem value={DegreeEnum.ASSOCIATE}>
+                            Associate
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="yearLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Year Level <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={isSubmitting}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select year level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={YearLevelEnum.FIRST_YEAR}>
+                            Year 1
+                          </SelectItem>
+                          <SelectItem value={YearLevelEnum.SECOND_YEAR}>
+                            Year 2
+                          </SelectItem>
+                          <SelectItem value={YearLevelEnum.THIRD_YEAR}>
+                            Year 3
+                          </SelectItem>
+                          <SelectItem value={YearLevelEnum.FOURTH_YEAR}>
+                            Year 4
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="academyYear"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Academy Year <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <YearSelector
+                        value={field.value}
+                        onChange={handleYearChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex space-x-4 justify-end mr-auto pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCloseModal}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  type="submit"
+                  disabled={
+                    isSubmitting ||
+                    !form.formState.isDirty ||
+                    !form.formState.isValid
+                  }
+                  className="bg-green-900 text-white hover:bg-green-950"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                      {mode === "add" ? "Creating..." : "Updating..."}
+                    </>
+                  ) : (
+                    `${mode === "add" ? "Create" : "Update"} Class`
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );

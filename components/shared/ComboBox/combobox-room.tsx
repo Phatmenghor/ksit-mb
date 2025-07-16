@@ -20,8 +20,6 @@ import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { StatusEnum } from "@/constants/constant";
-import { getAllMajorService } from "@/service/master-data/major.service";
-import { MajorModel } from "@/model/master-data/major/all-major-model";
 import { RoomModel } from "@/model/master-data/room/all-room-model";
 import { getAllRoomService } from "@/service/master-data/room.service";
 
@@ -58,6 +56,11 @@ export function ComboboxSelectRoom({
         status: StatusEnum.ACTIVE,
       });
 
+      if (!result) {
+        console.error("No data returned from getAllRoomService");
+        return;
+      }
+
       if (newPage === 1) {
         setData(result.content);
       } else {
@@ -66,7 +69,7 @@ export function ComboboxSelectRoom({
       setPage(result.pageNo);
       setLastPage(result.last);
     } catch (error) {
-      console.error("Error fetching majors:", error);
+      console.error("Error fetching rooms:", error);
     } finally {
       setLoading(false);
     }
@@ -92,11 +95,6 @@ export function ComboboxSelectRoom({
       fetchData(searchTerm, page + 1);
     }
   }, [inView]);
-
-  // Check if the current selection exists in the loaded data
-  const isSelectedItemInList = dataSelect
-    ? data.some((item) => item.id === dataSelect.id)
-    : false;
 
   async function onChangeSearch(value: string) {
     setSearchTerm(value);
@@ -124,20 +122,30 @@ export function ComboboxSelectRoom({
           )}
           disabled={disabled}
         >
-          {/* Always show the name from the dataSelect prop if available */}
-          {dataSelect ? dataSelect.name : "Select a major..."}
+          {/* Always show the name directly from dataSelect prop if available */}
+          {dataSelect ? dataSelect.name : "Select a room..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full flex p-0">
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+        align="start"
+      >
         <Command>
           <CommandInput
-            placeholder="Search major..."
+            placeholder="Search room..."
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
-          <CommandList className="max-h-60 overflow-y-auto">
-            <CommandEmpty>No majors found.</CommandEmpty>
+          <CommandList
+            className="max-h-60 overflow-y-auto"
+            onWheel={(e) => {
+              e.stopPropagation();
+              const target = e.currentTarget;
+              target.scrollTop += e.deltaY;
+            }}
+          >
+            <CommandEmpty>No room found.</CommandEmpty>
             <CommandGroup>
               {data?.map((item, index) => (
                 <CommandItem
@@ -155,7 +163,7 @@ export function ComboboxSelectRoom({
                       dataSelect?.id === item.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {item.name} ({item.name})
+                  {item.name}
                 </CommandItem>
               ))}
             </CommandGroup>

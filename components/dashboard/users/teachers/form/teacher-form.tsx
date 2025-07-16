@@ -163,8 +163,8 @@ export default function TeacherForm({
           {mode === "Edit" ? (
             <Card>
               <CardContent>
-                <div className="flex justify-between items-center pt-5 gap-3">
-                  <Button
+                <div className="flex justify-end items-center pt-5 gap-3">
+                  {/* <Button
                     type="button"
                     disabled={loading || isSubmitting}
                     onClick={handleDisableUser}
@@ -174,7 +174,7 @@ export default function TeacherForm({
                       <Ban size={18} strokeWidth={3} className="text-red-600" />
                     </span>
                     {isSubmitting ? "Disabling..." : "Disable User"}
-                  </Button>
+                  </Button> */}
                   {/* Right side: Discard and Save buttons */}
                   <div className="flex gap-3">
                     <Button

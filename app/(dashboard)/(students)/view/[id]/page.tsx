@@ -69,14 +69,6 @@ export default function StudentViewPage() {
     loadInfo();
   }, [id]);
 
-  const profile = studentDetail
-    ? {
-        id: studentDetail.id,
-        username: studentDetail.username,
-        profileUrl: studentDetail.profileUrl,
-      }
-    : null;
-
   return (
     <Tabs
       value={activeTab}
@@ -117,7 +109,7 @@ export default function StudentViewPage() {
       />
 
       {/* Tab Content outside the header */}
-      <UserProfileSection user={profile} />
+      <UserProfileSection user={studentDetail} />
       <TabsContent value="information" className="space-y-4 w-full">
         <StudentDetails studentDetail={studentDetail} />
         <StudentDetailsTabs studentDetail={studentDetail} />

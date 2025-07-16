@@ -35,14 +35,6 @@ export default function AdminDetailPage() {
     loadAdmin();
   }, [adminId]);
 
-  const profile = admin
-    ? {
-        id: admin.identifyNumber,
-        username: admin.username,
-        profileUrl: admin.profileUrl,
-      }
-    : null;
-
   return (
     <div>
       <CardHeaderSection
@@ -54,7 +46,7 @@ export default function AdminDetailPage() {
         ]}
       />
       <div className="mt-4 space-y-4">
-        <UserProfileSection user={profile} />
+        <UserProfileSection user={admin} />
         <AdminPersonal admin={admin} />
       </div>
     </div>

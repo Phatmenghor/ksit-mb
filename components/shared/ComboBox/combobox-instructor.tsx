@@ -58,7 +58,7 @@ export function ComboboxSelectInstructor({
       });
 
       if (!result) {
-        console.error("No data returned from getAllStuffService");
+        console.error("No data returned from getAllStaffService");
         return;
       }
 
@@ -70,7 +70,7 @@ export function ComboboxSelectInstructor({
       setPage(result.pageNo);
       setLastPage(result.last);
     } catch (error) {
-      console.error("Error fetching departments:", error);
+      console.error("Error fetching instructors:", error);
     } finally {
       setLoading(false);
     }
@@ -128,14 +128,24 @@ export function ComboboxSelectInstructor({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full flex p-0">
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+        align="start"
+      >
         <Command>
           <CommandInput
             placeholder="Search instructor..."
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
-          <CommandList className="max-h-60 overflow-y-auto">
+          <CommandList
+            className="max-h-60 overflow-y-auto"
+            onWheel={(e) => {
+              e.stopPropagation();
+              const target = e.currentTarget;
+              target.scrollTop += e.deltaY;
+            }}
+          >
             <CommandEmpty>No instructor found.</CommandEmpty>
             <CommandGroup>
               {data?.map((item, index) => (

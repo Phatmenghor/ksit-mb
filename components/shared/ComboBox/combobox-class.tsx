@@ -20,7 +20,6 @@ import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { StatusEnum } from "@/constants/constant";
-import { getAllDepartmentService } from "@/service/master-data/department.service";
 import { ClassModel } from "@/model/master-data/class/all-class-model";
 import React from "react";
 import { getAllClassService } from "@/service/master-data/class.service";
@@ -58,6 +57,11 @@ export function ComboboxSelectClass({
         status: StatusEnum.ACTIVE,
       });
 
+      if (!result) {
+        console.error("No data returned from getAllClassService");
+        return;
+      }
+
       if (newPage === 1) {
         setData(result.content);
       } else {
@@ -66,7 +70,7 @@ export function ComboboxSelectClass({
       setPage(result.pageNo);
       setLastPage(result.last);
     } catch (error) {
-      console.error("Error fetching departments:", error);
+      console.error("Error fetching classes:", error);
     } finally {
       setLoading(false);
     }
@@ -119,6 +123,7 @@ export function ComboboxSelectClass({
           )}
           disabled={disabled}
         >
+          {/* Always show the code directly from dataSelect prop if available */}
           {dataSelect ? dataSelect.code : "Select a class..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -133,7 +138,14 @@ export function ComboboxSelectClass({
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
-          <CommandList className="max-h-60 overflow-y-auto">
+          <CommandList
+            className="max-h-60 overflow-y-auto"
+            onWheel={(e) => {
+              e.stopPropagation();
+              const target = e.currentTarget;
+              target.scrollTop += e.deltaY;
+            }}
+          >
             <CommandEmpty>No class found.</CommandEmpty>
             <CommandGroup>
               {data?.map((item, index) => (
@@ -141,10 +153,10 @@ export function ComboboxSelectClass({
                   key={item.id}
                   value={item.code}
                   onSelect={() => {
-                    onChangeSelected(item);
+                    onChangeSelected(item); // Notify parent about the change
                     setOpen(false);
                   }}
-                  ref={index === data.length - 1 ? ref : null}
+                  ref={index === data.length - 1 ? ref : null} // Attach observer to last item
                 >
                   <Check
                     className={cn(
@@ -157,9 +169,10 @@ export function ComboboxSelectClass({
               ))}
             </CommandGroup>
 
+            {/* Loading spinner */}
             {loading && (
               <div className="text-center py-2">
-                <Loader2 className="h-5 w-5 mx-auto text-gray-500" />
+                <Loader2 className="animate-spin text-gray-500 h-5 w-5 mx-auto" />
               </div>
             )}
           </CommandList>

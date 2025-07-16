@@ -150,6 +150,7 @@ export interface StudentByIdModel {
   englishLastName: string;
   gender: string;
   profileUrl: string;
+  identifyNumber: string;
   dateOfBirth: string;
   phoneNumber: string;
   currentAddress: string;

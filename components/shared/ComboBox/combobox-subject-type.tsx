@@ -56,6 +56,11 @@ export function ComboboxSelectSubject({
         status: StatusEnum.ACTIVE,
       });
 
+      if (!result) {
+        console.error("No data returned from getAllSubjectService");
+        return;
+      }
+
       if (newPage === 1) {
         setData(result.content);
       } else {
@@ -64,7 +69,7 @@ export function ComboboxSelectSubject({
       setPage(result.pageNo);
       setLastPage(result.last);
     } catch (error) {
-      console.error("Error fetching departments:", error);
+      console.error("Error fetching subjects:", error);
     } finally {
       setLoading(false);
     }
@@ -118,19 +123,29 @@ export function ComboboxSelectSubject({
           disabled={disabled}
         >
           {/* Always show the name directly from dataSelect prop if available */}
-          {dataSelect ? dataSelect.name : "Select a subject type..."}
+          {dataSelect ? dataSelect.name : "Select a subject..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full flex p-0">
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+        align="start"
+      >
         <Command>
           <CommandInput
-            placeholder="Search subject type..."
+            placeholder="Search subject..."
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
-          <CommandList className="max-h-60 overflow-y-auto">
-            <CommandEmpty>No subject type found.</CommandEmpty>
+          <CommandList
+            className="max-h-60 overflow-y-auto"
+            onWheel={(e) => {
+              e.stopPropagation();
+              const target = e.currentTarget;
+              target.scrollTop += e.deltaY;
+            }}
+          >
+            <CommandEmpty>No subject found.</CommandEmpty>
             <CommandGroup>
               {data?.map((item, index) => (
                 <CommandItem

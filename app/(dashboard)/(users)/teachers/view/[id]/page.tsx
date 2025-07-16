@@ -43,14 +43,6 @@ export default function TeacherViewPage() {
     loadTeacher();
   }, [teacherId]);
 
-  const profile = teacher
-    ? {
-        id: teacher.identifyNumber,
-        username: teacher.username,
-        profileUrl: teacher.profileUrl,
-      }
-    : null;
-
   return (
     <div>
       {/* Header with TabsList injected via prop */}
@@ -65,7 +57,7 @@ export default function TeacherViewPage() {
 
       {/* Tab Content outside the header */}
       <div className="mt-4 space-y-4">
-        <UserProfileSection user={profile} />
+        <UserProfileSection user={teacher} />
         <TeacherPersonal teacher={teacher} />
         <TeacherProfessionalRank teacher={teacher} />
         <TeacherExperienceSection

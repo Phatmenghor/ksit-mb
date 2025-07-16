@@ -56,6 +56,11 @@ export function ComboboxSelectDepartment({
         status: StatusEnum.ACTIVE,
       });
 
+      if (!result) {
+        console.error("No data returned from getAllDepartmentService");
+        return;
+      }
+
       if (newPage === 1) {
         setData(result.content);
       } else {
@@ -122,15 +127,25 @@ export function ComboboxSelectDepartment({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full flex p-0">
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+        align="start"
+      >
         <Command>
           <CommandInput
             placeholder="Search department..."
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
-          <CommandList className="max-h-60 overflow-y-auto">
-            <CommandEmpty>No departments found.</CommandEmpty>
+          <CommandList
+            className="max-h-60 overflow-y-auto"
+            onWheel={(e) => {
+              e.stopPropagation();
+              const target = e.currentTarget;
+              target.scrollTop += e.deltaY;
+            }}
+          >
+            <CommandEmpty>No department found.</CommandEmpty>
             <CommandGroup>
               {data?.map((item, index) => (
                 <CommandItem

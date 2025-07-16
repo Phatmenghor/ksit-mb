@@ -165,7 +165,6 @@ export default function AdminModalForm({
 
       if (mode === "add") {
         submitData.password = (data as AdminFormData).password;
-
         submitData.confirmPassword = (data as AdminFormData).confirmPassword;
       }
 
@@ -218,11 +217,13 @@ export default function AdminModalForm({
   return (
     <Dialog open={isOpen} onOpenChange={handleCloseModal}>
       <DialogContent
-        className={`max-h-[90vh] rounded-xl overflow-y-auto ${
+        className={`max-h-[90vh] rounded-xl flex flex-col ${
           isMobile ? "max-w-[95vw] w-full p-4" : "max-w-lg w-full"
         }`}
       >
-        <DialogHeader className={isMobile ? "text-center" : ""}>
+        <DialogHeader
+          className={`flex-shrink-0 ${isMobile ? "text-center" : ""}`}
+        >
           <DialogTitle className={isMobile ? "text-lg" : "text-xl"}>
             {mode === "add" ? "Add Admin" : "Edit Admin"}
           </DialogTitle>
@@ -232,241 +233,209 @@ export default function AdminModalForm({
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className={`space-y-3 mt-4 ${isMobile ? "space-y-4" : ""}`}
-          >
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={isMobile ? "text-sm font-medium" : ""}>
-                    Username <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Enter username"
-                      maxLength={50}
-                      className={isMobile ? "h-12 text-base" : ""}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {mode === "add" && (
-              <div className={`space-y-3 ${isMobile ? "space-y-4" : ""}`}>
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel
-                        className={isMobile ? "text-sm font-medium" : ""}
-                      >
-                        Password <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="Enter password"
-                          maxLength={50}
-                          className={isMobile ? "h-12 text-base" : ""}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel
-                        className={isMobile ? "text-sm font-medium" : ""}
-                      >
-                        Confirm Password <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="Enter confirm Password"
-                          maxLength={50}
-                          className={isMobile ? "h-12 text-base" : ""}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={isMobile ? "text-sm font-medium" : ""}>
-                    Email <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Enter email"
-                      maxLength={50}
-                      className={isMobile ? "h-12 text-base" : ""}
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 gap-4">
-              <FormField
-                control={form.control}
-                name="first_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel
-                      className={isMobile ? "text-sm font-medium" : ""}
-                    >
-                      First Name <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Enter first name"
-                        autoFocus
-                        maxLength={50}
-                        className={isMobile ? "h-12 text-base" : ""}
-                        {...field}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="last_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel
-                      className={isMobile ? "text-sm font-medium" : ""}
-                    >
-                      Last Name <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Enter last name"
-                        autoFocus
-                        maxLength={50}
-                        className={isMobile ? "h-12 text-base" : ""}
-                        {...field}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <DialogFooter
-              className={`bg-white w-full ${isMobile ? "mt-6" : "mt-4"}`}
+        <div className="flex-1 overflow-y-auto pl-1 pr-2 pb-8">
+          <Form {...form}>
+            <form
+              id="admin-form"
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className={`space-y-3 mt-4 ${isMobile ? "space-y-4" : ""}`}
             >
-              <div
-                className={`flex items-center w-full gap-3 ${
-                  isMobile
-                    ? "flex-col-reverse space-y-reverse space-y-3"
-                    : "justify-between"
-                }`}
-              >
-                {/* Disable User button */}
-                {mode === "edit" && (
-                  <div className={`${isMobile ? "w-full" : "flex-shrink-0"}`}>
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      onClick={() =>
-                        form.setValue("status", StatusEnum.INACTIVE)
-                      }
-                      className={`flex items-center justify-center gap-2 bg-red-600 bg-opacity-30 text-red-600 hover:bg-red-700 hover:bg-opacity-40 disabled:pointer-events-none ${
-                        isMobile ? "w-full h-12 text-base" : ""
-                      }`}
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel
+                      className={isMobile ? "text-sm font-medium" : ""}
                     >
-                      <span className="flex items-center justify-center w-2 h-2 rounded-full">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="text-red-600"
-                        >
-                          <circle cx="12" cy="12" r="10" />
-                          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-                        </svg>
-                      </span>
-                      Disable User
-                    </Button>
-                  </div>
+                      Username <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        placeholder="Enter username"
+                        maxLength={50}
+                        className={isMobile ? "h-12 text-base" : ""}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
+              />
 
-                {/* Cancel and Submit buttons */}
-                <div
-                  className={`flex gap-3 ${
-                    isMobile
-                      ? "w-full"
-                      : mode === "edit"
-                      ? "ml-auto"
-                      : "w-full justify-end"
-                  }`}
-                >
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleCloseModal}
-                    disabled={isSubmitting}
-                    className={isMobile ? "flex-1 h-12 text-base" : ""}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={!canSubmitForm()}
-                    className={`bg-green-900 text-white hover:bg-green-950 ${
-                      isMobile ? "flex-1 h-12 text-base" : ""
-                    }`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                        {mode === "add" ? "Creating..." : "Updating..."}
-                      </>
-                    ) : (
-                      `${mode === "add" ? "Create" : "Update"} Admin`
+              {mode === "add" && (
+                <div className={`space-y-3 ${isMobile ? "space-y-4" : ""}`}>
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel
+                          className={isMobile ? "text-sm font-medium" : ""}
+                        >
+                          Password <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="Enter password"
+                            maxLength={50}
+                            className={isMobile ? "h-12 text-base" : ""}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                  </Button>
+                  />
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel
+                          className={isMobile ? "text-sm font-medium" : ""}
+                        >
+                          Confirm Password{" "}
+                          <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="Enter confirm Password"
+                            maxLength={50}
+                            className={isMobile ? "h-12 text-base" : ""}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
+              )}
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel
+                      className={isMobile ? "text-sm font-medium" : ""}
+                    >
+                      Email <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="Enter email"
+                        maxLength={50}
+                        className={isMobile ? "h-12 text-base" : ""}
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 gap-4">
+                <FormField
+                  control={form.control}
+                  name="first_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel
+                        className={isMobile ? "text-sm font-medium" : ""}
+                      >
+                        First Name <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="Enter first name"
+                          autoFocus
+                          maxLength={50}
+                          className={isMobile ? "h-12 text-base" : ""}
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="last_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel
+                        className={isMobile ? "text-sm font-medium" : ""}
+                      >
+                        Last Name <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="Enter last name"
+                          autoFocus
+                          maxLength={50}
+                          className={isMobile ? "h-12 text-base" : ""}
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
-            </DialogFooter>
-          </form>
-        </Form>
+            </form>
+          </Form>
+        </div>
+
+        {/* Fixed footer with buttons */}
+        <div
+          className={`flex-shrink-0 border-t bg-white pt-4 ${
+            isMobile ? "mt-6" : "mt-4"
+          }`}
+        >
+          <div
+            className={`flex items-center w-full gap-3 ${
+              isMobile
+                ? "flex-col-reverse space-y-reverse space-y-3"
+                : "justify-end"
+            }`}
+          >
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCloseModal}
+              disabled={isSubmitting}
+              className={`transition-all duration-200 hover:scale-105 active:scale-95 ${
+                isMobile ? "w-full h-12 text-base" : "px-6 h-10"
+              }`}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="admin-form"
+              disabled={!canSubmitForm()}
+              className={`bg-green-900 text-white hover:bg-green-950 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+                isMobile ? "w-full h-12 text-base" : "px-6 h-10"
+              }`}
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                  {mode === "add" ? "Creating..." : "Updating..."}
+                </>
+              ) : (
+                `${mode === "add" ? "Create" : "Update"} Admin`
+              )}
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -56,6 +56,11 @@ export function ComboboxSelectMajor({
         status: StatusEnum.ACTIVE,
       });
 
+      if (!result) {
+        console.error("No data returned from getAllMajorService");
+        return;
+      }
+
       if (newPage === 1) {
         setData(result.content);
       } else {
@@ -91,11 +96,6 @@ export function ComboboxSelectMajor({
     }
   }, [inView]);
 
-  // Check if the current selection exists in the loaded data
-  const isSelectedItemInList = dataSelect
-    ? data.some((item) => item.id === dataSelect.id)
-    : false;
-
   async function onChangeSearch(value: string) {
     setSearchTerm(value);
     onSearchClick(value);
@@ -107,9 +107,6 @@ export function ComboboxSelectMajor({
     }),
     [searchTerm]
   );
-
-  // Debug the dataSelect prop to make sure it's received correctly
-  console.log("dataSelect in ComboboxSelectMajor:", dataSelect);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -125,20 +122,30 @@ export function ComboboxSelectMajor({
           )}
           disabled={disabled}
         >
-          {/* Always show the name from the dataSelect prop if available */}
+          {/* Always show the name directly from dataSelect prop if available */}
           {dataSelect ? dataSelect.name : "Select a major..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full flex p-0">
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+        align="start"
+      >
         <Command>
           <CommandInput
             placeholder="Search major..."
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
-          <CommandList className="max-h-60 overflow-y-auto">
-            <CommandEmpty>No majors found.</CommandEmpty>
+          <CommandList
+            className="max-h-60 overflow-y-auto"
+            onWheel={(e) => {
+              e.stopPropagation();
+              const target = e.currentTarget;
+              target.scrollTop += e.deltaY;
+            }}
+          >
+            <CommandEmpty>No major found.</CommandEmpty>
             <CommandGroup>
               {data?.map((item, index) => (
                 <CommandItem

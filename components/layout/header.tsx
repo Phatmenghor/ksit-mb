@@ -150,7 +150,7 @@ export function Header() {
                 variant="ghost"
                 asChild
                 size="icon"
-                className="rounded-full hover:bg-none"
+                className="rounded-full hover:bg-none hover:cursor-pointer"
               >
                 <Avatar className="h-8 w-8 border-2">
                   <AvatarImage

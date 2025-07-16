@@ -121,8 +121,9 @@ export default function ResetPasswordModal({
                 <div className="flex justify-center items-center">
                   <div className="flex gap-4">
                     <DialogDescription className="text-yellow-600 text-sm">
-                      <div>Password will reset for: {userName || "User"}</div>
-                      <div>Password reset: 88889999</div>
+                      <span>Password will reset for: {userName || "User"}</span>
+                      <br />
+                      <span>Password reset: 88889999</span>
                     </DialogDescription>
                   </div>
                 </div>

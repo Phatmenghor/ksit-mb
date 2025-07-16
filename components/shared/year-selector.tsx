@@ -93,6 +93,16 @@ export function YearSelector({
     }
   };
 
+  // Handle mouse wheel scrolling
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const target = e.currentTarget;
+    target.scrollTop += e.deltaY;
+
+    // Trigger scroll handling for infinite scroll
+    handleScroll();
+  };
+
   // Handle direct input of a year
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -160,7 +170,7 @@ export function YearSelector({
               variant="outline"
               role="combobox"
               aria-expanded={isOpen}
-              className="w-full h-10 md:h-11 justify-between px-4 text-sm md:text-base"
+              className="w-full h-10 justify-between px-4 text-sm"
             >
               <div className="flex items-center space-x-2">
                 <img
@@ -184,8 +194,8 @@ export function YearSelector({
           </PopoverTrigger>
 
           <PopoverContent
-            className="w-fit min-w-[220px] max-w-xs p-0"
-            align="center"
+            className="w-[var(--radix-popover-trigger-width)] p-0"
+            align="start"
           >
             <div className="flex items-center px-2 py-2 gap-1 border-b">
               <Button
@@ -208,7 +218,7 @@ export function YearSelector({
                     setIsOpen(false);
                   }
                 }}
-                className="h-7 w-[60px] text-center text-sm"
+                className="h-7 flex-1 text-center text-sm"
               />
 
               <Button
@@ -225,6 +235,7 @@ export function YearSelector({
             <div
               ref={scrollRef}
               onScroll={handleScroll}
+              onWheel={handleWheel}
               className="max-h-52 overflow-y-auto"
             >
               <div className="grid grid-cols-3 gap-1 p-2">

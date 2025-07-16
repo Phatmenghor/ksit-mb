@@ -58,7 +58,7 @@ export function ComboboxSelectUser({
       });
 
       if (!result) {
-        console.error("No data returned from getAllStuffService");
+        console.error("No data returned from getAllStaffService");
         return;
       }
 
@@ -70,7 +70,7 @@ export function ComboboxSelectUser({
       setPage(result.pageNo);
       setLastPage(result.last);
     } catch (error) {
-      console.error("Error fetching departments:", error);
+      console.error("Error fetching users:", error);
     } finally {
       setLoading(false);
     }
@@ -124,7 +124,7 @@ export function ComboboxSelectUser({
           disabled={disabled}
         >
           {/* Always show the name directly from dataSelect prop if available */}
-          {dataSelect ? dataSelect.username : "Select a instructor..."}
+          {dataSelect ? dataSelect.username : "Select a user..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -134,12 +134,19 @@ export function ComboboxSelectUser({
       >
         <Command>
           <CommandInput
-            placeholder="Search instructor..."
+            placeholder="Search user..."
             value={searchTerm}
             onValueChange={onChangeSearch}
           />
-          <CommandList className="max-h-60 overflow-y-auto">
-            <CommandEmpty>No instructor found.</CommandEmpty>
+          <CommandList
+            className="max-h-60 overflow-y-auto"
+            onWheel={(e) => {
+              e.stopPropagation();
+              const target = e.currentTarget;
+              target.scrollTop += e.deltaY;
+            }}
+          >
+            <CommandEmpty>No user found.</CommandEmpty>
             <CommandGroup>
               {data?.map((item, index) => (
                 <CommandItem
